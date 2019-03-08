@@ -2,45 +2,20 @@ import pandas as pd
 import numpy as np
 
 import os.path
+from .base.abmodel import LearningModel
 
-class QLearningTable:
-    def __init__(self, actions, save_path, learning_rate=0.01, reward_decay=0.9, e_greedy=0.9):
-        self.actions = actions
+class QLearningTable(LearningModel):
+    def __init__(self, agent, save_path, learning_rate=0.01, reward_decay=0.9, e_greedy=0.9, name='QTable'):
+        super(QLearningTable, self).__init__(agent, save_path, name)
         self.lr = learning_rate
         self.gamma = reward_decay
         self.epsilon = e_greedy
         self.q_table = pd.DataFrame(columns=range(len(self.actions)), dtype=np.float64)     # Table columns are named by the indices of actions
-        self.disallowed_actions = {}    # Dictionary that maps observation -> invalid actions
+        self.disallowed_actions = {}                                                        # Dictionary that maps observation -> invalid actions
         self.save_path = save_path
+        self.load()
 
 
-    def choose_action(self, state, excluded_actions=[]):
-
-        state_str = str(state)
-
-        self.check_state_exist(state_str)
-
-        self.disallowed_actions[state_str] = excluded_actions
-
-        # Actions for the current state
-        state_actions = self.q_table.ix[state_str, :]
-
-        for excluded_action in excluded_actions:
-            del state_actions[np.argmax(excluded_action)]
-
-        if np.random.uniform() < self.epsilon:
-            ## Exploitation: choosing the best action
-
-            # Some actions have the same value
-            state_actions = state_actions.reindex(np.random.permutation(state_actions.index))
-            action_idx = state_actions.idxmax()
-        else:
-            # Exploration: Choosing a random action
-            action_idx = np.random.choice(state_actions.index)
-
-        return self.actions[action_idx]
-
-    
     def learn(self, s, a, r, s_, done):
         state = str(s)
         state_ = str(s_)
@@ -51,8 +26,8 @@ class QLearningTable:
         if state == state_:
             return
 
-        self.check_state_exist(state)
-        self.check_state_exist(state_)
+        self.check_state_exists(state)
+        self.check_state_exists(state_)
 
         a_idx = np.argmax(a)
 
@@ -78,9 +53,31 @@ class QLearningTable:
         self.q_table.ix[state, a] += self.lr * (q_target - q_predict)
 
 
-    def check_state_exist(self, state):
-        if state not in self.q_table.index:
-            self.q_table = self.q_table.append(pd.Series([0] * len(self.actions), index=self.q_table.columns, name=state))
+    def choose_action(self, state, excluded_actions=[]):
+
+        state_str = str(state)
+
+        self.check_state_exists(state_str)
+
+        self.disallowed_actions[state_str] = excluded_actions
+
+        # Actions for the current state
+        state_actions = self.q_table.ix[state_str, :]
+
+        for excluded_action in excluded_actions:
+            del state_actions[np.argmax(excluded_action)]
+
+        if np.random.uniform() < self.epsilon:
+            ## Exploitation: choosing the best action
+
+            # Some actions have the same value
+            state_actions = state_actions.reindex(np.random.permutation(state_actions.index))
+            action_idx = state_actions.idxmax()
+        else:
+            # Exploration: Choosing a random action
+            action_idx = np.random.choice(state_actions.index)
+
+        return self.actions[action_idx]
 
 
     def load(self):
@@ -90,4 +87,9 @@ class QLearningTable:
 
     def save(self):
         self.q_table.to_pickle(self.save_path + '.gz', 'gzip')
+
+
+    def check_state_exists(self, state):
+        if state not in self.q_table.index:
+            self.q_table = self.q_table.append(pd.Series([0] * len(self.actions), index=self.q_table.columns, name=state))
 

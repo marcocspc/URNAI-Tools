@@ -1,6 +1,21 @@
 import random
 from pysc2.lib import actions, features
 
+
+'''
+An action set defines all actions an agent can use. In the case of StarCraft 2 using PySC2, some actions require extra
+processing to work, so it's up to the developper to come up with a way to make them work.
+
+Even though this is not called action_wrapper, this actually acts as a wrapper
+
+e.g: select_point is a function implemented in PySC2 that requires some extra arguments to work, like which point to select.
+Using the action_set we can define a way to select which point select_point will use.
+Following this example, we could implement a select_random_unit function which processes a random unit from the observation
+and returns the corresponding PySC2 call to select_point that would select this processed unit.
+
+'''
+
+## TODO: Move constants to a separate file, so they can be imported and used by other modules
 ## Defining constants for action ids, so our agent can check if an action is valid
 _NO_OP = actions.FUNCTIONS.no_op.id
 _SELECT_POINT = actions.FUNCTIONS.select_point.id
@@ -20,9 +35,9 @@ _PLAYER_HOSTILE = 4
 _ARMY_SUPPLY = 5
 
 _TERRAN_COMMANDCENTER = 18
-_TERRAN_SCV = 45
 _TERRAN_SUPPLY_DEPOT = 19
 _TERRAN_BARRACKS = 21
+_TERRAN_SCV = 45
 _NEUTRAL_MINERAL_FIELD = 341
 
 _NOT_QUEUED = [0]
