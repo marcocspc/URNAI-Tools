@@ -10,7 +10,7 @@ class QLearningTable(LearningModel):
         self.lr = learning_rate
         self.gamma = reward_decay
         self.epsilon = e_greedy
-        self.q_table = pd.DataFrame(columns=range(len(self.actions)), dtype=np.float64)     # Table columns are named by the indices of actions
+        self.q_table = pd.DataFrame(columns=range(self.action_size), dtype=np.float64)      # Table columns are named by the indices of actions
         self.disallowed_actions = {}                                                        # Dictionary that maps observation -> invalid actions
         self.save_path = save_path
         self.load()
@@ -53,7 +53,7 @@ class QLearningTable(LearningModel):
         self.q_table.ix[state, a] += self.lr * (q_target - q_predict)
 
 
-    def choose_action(self, state, excluded_actions=[]):
+    def choose_action(self, state, excluded_actions=[], predict=False):
 
         state_str = str(state)
 
@@ -67,14 +67,14 @@ class QLearningTable(LearningModel):
         for excluded_action in excluded_actions:
             del state_actions[np.argmax(excluded_action)]
 
-        if np.random.uniform() < self.epsilon:
+        if np.random.uniform() < self.epsilon or predict == True:
             ## Exploitation: choosing the best action
 
             # Some actions have the same value
             state_actions = state_actions.reindex(np.random.permutation(state_actions.index))
             action_idx = state_actions.idxmax()
         else:
-            # Exploration: Choosing a random action
+            ## Exploration: Choosing a random action
             action_idx = np.random.choice(state_actions.index)
 
         return self.actions[action_idx]

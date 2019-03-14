@@ -111,7 +111,7 @@ class DQNetwork(LearningModel):
 
 
     # EPSILON GREEDY STRATEGY
-    def choose_action(self, state, excluded_actions=[]):
+    def choose_action(self, state, excluded_actions=[], predict=False):
         self.decay_step += 1
 
         expl_expt_tradeoff = np.random.rand()
@@ -119,8 +119,7 @@ class DQNetwork(LearningModel):
         explore_probability = explore_stop + (explore_start - explore_stop) * np.exp(-decay_rate * self.decay_step)
 
         # TODO: Exclude actions
-        #possible_actions = [action for action in self.actions if action not in excluded_actions]
-        if explore_probability > expl_expt_tradeoff:
+        if explore_probability > expl_expt_tradeoff and predict == False:
             action = random.choice(self.actions)
         else:
             q_values = self.sess.run(self.output,

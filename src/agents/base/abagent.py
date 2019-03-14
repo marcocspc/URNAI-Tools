@@ -12,6 +12,10 @@ class Agent(ABC):
         pass
 
     @abstractmethod
+    def get_reward(self, obs):
+        pass
+
+    @abstractmethod
     def get_state_dim(self):
         pass
 

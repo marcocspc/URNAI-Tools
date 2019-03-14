@@ -35,6 +35,13 @@ class TerranAgentSparse(SC2Agent):
         self.cc_x = None
         
 
+    def get_reward(self, obs):
+        # 1 = win, -1 = loss, 0 = draw
+        reward = obs.reward
+
+        return reward
+
+
     def build_state(self, obs):
         unit_type = obs.observation.feature_screen[_UNIT_TYPE]
         cc_y, cc_x = (unit_type == _TERRAN_COMMANDCENTER).nonzero()
@@ -99,8 +106,7 @@ class TerranAgentSparse(SC2Agent):
         super(TerranAgentSparse, self).step(obs)
 
         if obs.last():
-            # 1 = win, -1 = loss, 0 = draw
-            reward = obs.reward
+            reward = self.get_reward(obs)
 
             # Applying the reward to our q-learning table
             self.model.learn(self.previous_state,

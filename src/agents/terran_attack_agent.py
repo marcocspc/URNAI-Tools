@@ -52,6 +52,22 @@ class TerranAgent(SC2Agent):
         self.previous_state = None
 
 
+    def get_reward(self, obs):
+        # Getting values from the cumulative score system
+        killed_unit_score = obs.observation.score_cumulative[5]
+        killed_building_score = obs.observation.score_cumulative[6]
+        
+        reward = 0
+
+        if killed_unit_score > self.previous_killed_unit_score:
+            reward += KILL_UNIT_REWARD
+
+        if killed_building_score > self.previous_killed_building_score:
+            reward += KILL_BUILDING_REWARD
+        
+        return reward
+
+
     def build_state(self, obs):
         ## Defining our state and calculating the reward
         unit_type = obs.observation.feature_screen[_UNIT_TYPE]
@@ -68,10 +84,6 @@ class TerranAgent(SC2Agent):
         supply_limit = obs.observation.player[4]
         # The army supply
         army_supply = obs.observation.player[5]
-
-        # Getting values from the cumulative score system
-        killed_unit_score = obs.observation.score_cumulative[5]
-        killed_building_score = obs.observation.score_cumulative[6]
 
         # Defining our state, considering our enemies' positions.
         current_state = np.zeros(20)
@@ -121,20 +133,10 @@ class TerranAgent(SC2Agent):
         if self.action_wrapper.is_action_done():
             ## Building our agent's state
             current_state = self.build_state(obs)
-
-            # Getting values from the cumulative score system
-            killed_unit_score = obs.observation.score_cumulative[5]
-            killed_building_score = obs.observation.score_cumulative[6]
             
             # If it's not the first step, we can learn
             if self.previous_action is not None:
-                reward = 0
-
-                if killed_unit_score > self.previous_killed_unit_score:
-                    reward += KILL_UNIT_REWARD
-
-                if killed_building_score > self.previous_killed_building_score:
-                    reward += KILL_BUILDING_REWARD
+                reward = self.get_reward(obs)
 
                 self.model.learn(self.previous_state, self.previous_action, reward, current_state, done=False)
 
@@ -144,6 +146,10 @@ class TerranAgent(SC2Agent):
             # Selects an action by passing the current state as a string. Our dataframe is indexed by strings.
             # We only select an action when move_number == 0, and we keep it until move_number == 2
             rl_action = self.model.choose_action(current_state, excluded_actions)
+
+            # Getting values from the cumulative score system
+            killed_unit_score = obs.observation.score_cumulative[5]
+            killed_building_score = obs.observation.score_cumulative[6]
 
             # Saving the score system's current values
             self.previous_killed_unit_score = killed_unit_score
