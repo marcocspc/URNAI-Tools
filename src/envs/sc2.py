@@ -15,7 +15,7 @@ ACTIONS_MINIGAMES, ACTIONS_MINIGAMES_ALL, ACTIONS_ALL = 'minigames', 'minigames_
 class SC2Env(Env):
     def __init__(
         self,
-        map_name='MoveToBeacon',
+        map_name='Simple64',
         players=None,
         render=False,
         reset_done=True,
@@ -78,35 +78,76 @@ class SC2Env(Env):
 
     
     def step(self, action):
-        try:
-            i = 1
-            #obs, reward, done = self.env_instance.step(action)#self.obs_wrapper(self.env_instance.step(action))
-        except protocol.ConnectionError:
-            self.restart()
-            return self.reset(), 0, 1
-
-        #if done and self.reset_done:
-        #    obs = self.reset()
-
+        '''
+        Takes the given action and executes it on the environment, returning an observation.
+        '''
         return self.env_instance.step(action) #obs, reward, done
 
 
     def reset(self):
-        # try:
-        #     obs, reward, done = self.env_instance.reset() #self.obs_wrapper(self.env_instance.reset())
-        # except protocol.ConnectionError:
-        #     self.restart()
-        #     return self.reset()
-
-        return self.env_instance.reset()#obs
+        '''
+        Resets the environment. This method returns an observation.
+        '''
+        return self.env_instance.reset()
 
     
-    def stop(self):
+    def close(self):
         self.env_instance.close()
 
     
     def restart(self):
-        self.stop()
+        self.close()
         self.reset()
+
+    
+    def train(self, agent):
+        episode = 0
+        while episode < self.num_episodes:
+            self.start()
+
+            # Setting up the agent
+            agent.setup(self.env_instance.observation_spec(), self.env_instance.action_spec())
+
+            # Resetting the environment and the agent.
+            timesteps = self.reset()
+            agent.reset()
+
+            # While the game has not reached an end point, keep playing.
+            while True:
+                current_action = [agent.step(timesteps[0])]
+
+                if timesteps[0].last():
+                    break
+
+                timesteps = self.env_instance.step(current_action)
+
+            agent.model.save()
+                
+            episode += 1
+
+    
+    def play(self, agent, num_matches):
+        for match in range(num_matches):
+            self.start()
+
+            # Setting up the agent
+            agent.setup(self.env_instance.observation_spec(), self.env_instance.action_spec())
+
+            # Resetting the environment and the agent.
+            timesteps = self.reset()
+            agent.reset()
+
+            # While the game has not reached an end point, keep playing.
+            while True:
+                current_action = [agent.step(timesteps[0])]
+
+                if timesteps[0].last():
+                    break
+
+                timesteps = self.env_instance.step(current_action)
+
+            agent.model.save()
+                
+            episode += 1
 
         

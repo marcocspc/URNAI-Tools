@@ -1,2 +1,0 @@
-model_checkpoint_path: "terran_dql_model.ckpt"
-all_model_checkpoint_paths: "terran_dql_model.ckpt"

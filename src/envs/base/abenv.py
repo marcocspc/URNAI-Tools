@@ -9,11 +9,11 @@ class Env(ABC):
     should still be used as a wrapper (eg. implementing an environment for openAI gym).
     '''
 
-    def __init__(self, _id: str, render=False, reset_done=True, max_ep_len=None):
+    def __init__(self, _id: str, render=False, reset_done=True, num_episodes=None):
         self.id = _id
         self.render = render
         self.reset_done = reset_done
-        self.max_ep_len = max_ep_len if max_ep_len else float('inf')
+        self.num_episodes = num_episodes if num_episodes else float('inf')
 
     
     # -> Type: ...
@@ -31,3 +31,12 @@ class Env(ABC):
 
     @abstractmethod
     def stop(self) -> None: ...
+
+    @abstractmethod
+    def train(self, agent):
+        pass
+
+    @abstractmethod
+    def play(self, agent, num_matches):
+        pass
+    

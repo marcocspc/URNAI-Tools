@@ -109,9 +109,7 @@ class TerranAgentSparse(SC2Agent):
             reward = self.get_reward(obs)
 
             # Applying the reward to our q-learning table
-            self.model.learn(self.previous_state,
-                                self.previous_action, reward, None, done=True)
-            self.model.save()
+            self.model.learn(self.previous_state, self.previous_action, reward, None, done=True)
 
             # Resetting the agent to start a new episode
             self.previous_action = None

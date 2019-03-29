@@ -24,11 +24,6 @@ _TERRAN_SCV = 45
 
 
 class SC2Wrapper(ActionWrapper):
-    """
-    ActionWrapper works as an extra abstraction layer used by the agent to select actions. This means the agent doesn't select actions from action_set,
-    but from ActionWrapper. This class is responsible to telling the agents which actions it can use and which ones are excluded from selection. It can
-    also force the agent to use certain actions by combining them into multiple steps
-    """
 
     def __init__(self):
         self.move_number = 0
@@ -49,6 +44,7 @@ class SC2Wrapper(ActionWrapper):
                     self.smart_actions.append(ACTION_ATTACK + '_' + str(mm_x - 16) + '_' + str(mm_y - 16))
    
         self.encoded_actions = one_hot_encode_smart_actions(self.smart_actions)
+        self.action_space_dim = len(self.get_actions())
 
 
     def is_action_done(self):
@@ -64,7 +60,7 @@ class SC2Wrapper(ActionWrapper):
 
 
     def get_action_space_dim(self):
-        return len(self.get_actions())
+        return self.action_space_dim
 
     
     def splitAction(self, smart_action):

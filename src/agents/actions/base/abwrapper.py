@@ -1,6 +1,12 @@
 from abc import ABC, abstractmethod
 
+
 class ActionWrapper(ABC):
+    """
+    ActionWrapper works as an extra abstraction layer used by the agent to select actions. This means the agent doesn't select actions from action_set,
+    but from ActionWrapper. This class is responsible to telling the agents which actions it can use and which ones are excluded from selection. It can
+    also force the agent to use certain actions by combining them into multiple steps
+    """
 
     @abstractmethod
     def __init__(self):

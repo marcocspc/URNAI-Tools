@@ -125,10 +125,6 @@ class TerranAgent(SC2Agent):
             self.base_top_left = 1 if player_y.any() and player_y.mean() <= 31 else 0
 
 
-        if obs.last():
-            self.model.save()
-
-
         # Taking the first step for a smart action
         if self.action_wrapper.is_action_done():
             ## Building our agent's state

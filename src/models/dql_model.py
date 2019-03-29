@@ -42,19 +42,19 @@ class DQNetwork(LearningModel):
             self.target_Q = tf.placeholder(tf.float32, [None], name='target')
 
             self.fc1 = tf.layers.dense(inputs=self.inputs_,
-                                       units=512,
+                                       units=50,
                                        activation=tf.nn.elu,
                                        kernel_initializer=tf.contrib.layers.xavier_initializer(),
                                        name='fc1')
 
             self.fc2 = tf.layers.dense(inputs=self.fc1,
-                                       units=256,
+                                       units=50,
                                        activation=tf.nn.elu,
                                        kernel_initializer=tf.contrib.layers.xavier_initializer(),
                                        name='fc2')
 
             self.fc3 = tf.layers.dense(inputs=self.fc2,
-                                       units=128,
+                                       units=50,
                                        activation=tf.nn.elu,
                                        kernel_initializer=tf.contrib.layers.xavier_initializer(),
                                        name='fc3')
@@ -85,7 +85,7 @@ class DQNetwork(LearningModel):
         if str(s) == str(s_):
             return
 
-        if done == False:
+        if not done:
             Qs_next_state = self.sess.run(self.output,
                                           feed_dict={self.inputs_: s_.reshape((1, *s_.shape))})
 
@@ -111,7 +111,7 @@ class DQNetwork(LearningModel):
 
 
     # EPSILON GREEDY STRATEGY
-    def choose_action(self, state, excluded_actions=[], predict=False):
+    def choose_action(self, state, excluded_actions=[], is_playing=False):
         self.decay_step += 1
 
         expl_expt_tradeoff = np.random.rand()
@@ -119,11 +119,10 @@ class DQNetwork(LearningModel):
         explore_probability = explore_stop + (explore_start - explore_stop) * np.exp(-decay_rate * self.decay_step)
 
         # TODO: Exclude actions
-        if explore_probability > expl_expt_tradeoff and predict == False:
+        if explore_probability > expl_expt_tradeoff and not is_playing:
             action = random.choice(self.actions)
         else:
-            q_values = self.sess.run(self.output,
-                                     feed_dict={self.inputs_: state.reshape((1, *state.shape))})
+            q_values = self.sess.run(self.output, feed_dict={self.inputs_: state.reshape((1, *state.shape))})
 
             action_idx = np.argmax(q_values)
             action = self.actions[int(action_idx)]
@@ -134,5 +133,4 @@ class DQNetwork(LearningModel):
         self.saver.save(self.sess, self.save_path)
 
     def load(self):
-        if os.path.isfile(self.save_path):
-            self.saver.restore(self.sess, self.save_path)
+        self.saver.restore(self.sess, self.save_path)
