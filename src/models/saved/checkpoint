@@ -1,2 +1,2 @@
-model_checkpoint_path: "frozenlake_dql_working"
-all_model_checkpoint_paths: "frozenlake_dql_working"
+model_checkpoint_path: "terran_sparse_dql"
+all_model_checkpoint_paths: "terran_sparse_dql"

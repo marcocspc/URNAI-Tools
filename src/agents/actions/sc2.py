@@ -50,7 +50,7 @@ def no_op():
 
 
 def select_random_unit(obs):
-    unit_type = obs.observation.feature_screen[_UNIT_TYPE]
+    unit_type = obs.feature_screen[_UNIT_TYPE]
     unit_y, unit_x = (unit_type == _TERRAN_SCV).nonzero()
 
     if unit_y.any():
@@ -63,7 +63,7 @@ def select_random_unit(obs):
 
 
 def select_all_barracks(obs):
-    unit_type = obs.observation.feature_screen[_UNIT_TYPE]
+    unit_type = obs.feature_screen[_UNIT_TYPE]
     barracks_y, barracks_x = (unit_type == _TERRAN_BARRACKS).nonzero()
 
     if barracks_y.any():
@@ -76,38 +76,38 @@ def select_all_barracks(obs):
 
 
 def select_army(obs):
-    if _SELECT_ARMY in obs.observation.available_actions:
+    if _SELECT_ARMY in obs.available_actions:
         return actions.FUNCTIONS.select_army(_NOT_QUEUED)
     return actions.FUNCTIONS.no_op()
 
 
 def build_supply_depot(obs, target):
-    if _BUILD_SUPPLY_DEPOT in obs.observation.available_actions:
+    if _BUILD_SUPPLY_DEPOT in obs.available_actions:
         return actions.FUNCTIONS.Build_SupplyDepot_screen(_NOT_QUEUED, target)
     return actions.FUNCTIONS.no_op()
 
 
 def build_barracks(obs, target):
-    if _BUILD_BARRACKS in obs.observation.available_actions:
+    if _BUILD_BARRACKS in obs.available_actions:
         return actions.FUNCTIONS.Build_Barracks_screen(_NOT_QUEUED, target)
     return actions.FUNCTIONS.no_op()
 
 
 def train_marine(obs):
-    if _TRAIN_MARINE in obs.observation.available_actions:
+    if _TRAIN_MARINE in obs.available_actions:
         return actions.FUNCTIONS.Train_Marine_quick(_QUEUED)
     return actions.FUNCTIONS.no_op()
 
 
 def attack_target_point(obs, target):
-    if _ATTACK_MINIMAP in obs.observation.available_actions:
+    if _ATTACK_MINIMAP in obs.available_actions:
         return actions.FUNCTIONS.Attack_minimap(_NOT_QUEUED, target)
     return actions.FUNCTIONS.no_op()
 
 
 def harvest_point(obs):
-    if _HARVEST_GATHER in obs.observation.available_actions:
-        unit_type = obs.observation.feature_screen[_UNIT_TYPE]
+    if _HARVEST_GATHER in obs.available_actions:
+        unit_type = obs.feature_screen[_UNIT_TYPE]
         unit_y, unit_x = (unit_type == _NEUTRAL_MINERAL_FIELD).nonzero()
 
         if unit_y.any():

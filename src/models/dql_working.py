@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import random
-import os.path
+import os
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 
@@ -106,7 +106,15 @@ class DQNWorking(LearningModel):
 
 
     def save(self):
+        print()
+        print("> Saving the model!")
+        print()
         self.saver.save(self.sess, self.save_path)
 
     def load(self):
-        self.saver.restore(self.sess, self.save_path)
+        exists = os.path.isfile(self.save_path + '.meta')
+        if exists:
+            print()
+            print("> Loading saved model!")
+            print()
+            self.saver.restore(self.sess, self.save_path)

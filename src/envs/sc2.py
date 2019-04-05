@@ -19,19 +19,18 @@ class SC2Env(Env):
         players=None,
         render=False,
         reset_done=True,
-        max_ep_len=None,
+        num_episodes=None,
         spatial_dim=16,
         step_mul=8,
         game_steps_per_ep=0,
         obs_features=None,
         action_ids=ACTIONS_ALL    # action_ids is passed to the constructor as a key for the actions that the agent can use, but is converted to a list of IDs for these actions
     ):
-        super().__init__(map_name, render, reset_done, max_ep_len)
+        super().__init__(map_name, render, reset_done, num_episodes)
 
         self.step_mul = step_mul
         self.game_steps_per_ep = game_steps_per_ep
         self.spatial_dim = spatial_dim
-        self.env_instance = None
         self.players = players
 
         ## TODO: Get action_ids from the currently used wrapper. It's used by the ActionWrapper to return available actions and might help in performance.
@@ -78,17 +77,14 @@ class SC2Env(Env):
 
     
     def step(self, action):
-        '''
-        Takes the given action and executes it on the environment, returning an observation.
-        '''
-        return self.env_instance.step(action) #obs, reward, done
+        timestep = self.env_instance.step(action)
+        return self.parse_timestep(timestep)    #obs, reward, done
 
 
     def reset(self):
-        '''
-        Resets the environment. This method returns an observation.
-        '''
-        return self.env_instance.reset()
+        timestep = self.env_instance.reset()
+        obs, reward, done = self.parse_timestep(timestep)
+        return obs
 
     
     def close(self):
@@ -100,54 +96,12 @@ class SC2Env(Env):
         self.reset()
 
     
-    def train(self, agent):
-        episode = 0
-        while episode < self.num_episodes:
-            self.start()
+    def parse_timestep(self, timestep):
+        '''
+        Returns a [Observation, Reward, Done] tuple parsed from a given timestep.
+        '''
+        ts = timestep[0]
+        obs, reward, done = ts.observation, ts.reward, ts.step_type == StepType.LAST
 
-            # Setting up the agent
-            agent.setup(self.env_instance.observation_spec(), self.env_instance.action_spec())
-
-            # Resetting the environment and the agent.
-            timesteps = self.reset()
-            agent.reset()
-
-            # While the game has not reached an end point, keep playing.
-            while True:
-                current_action = [agent.step(timesteps[0])]
-
-                if timesteps[0].last():
-                    break
-
-                timesteps = self.env_instance.step(current_action)
-
-            agent.model.save()
-                
-            episode += 1
-
-    
-    def play(self, agent, num_matches):
-        for match in range(num_matches):
-            self.start()
-
-            # Setting up the agent
-            agent.setup(self.env_instance.observation_spec(), self.env_instance.action_spec())
-
-            # Resetting the environment and the agent.
-            timesteps = self.reset()
-            agent.reset()
-
-            # While the game has not reached an end point, keep playing.
-            while True:
-                current_action = [agent.step(timesteps[0])]
-
-                if timesteps[0].last():
-                    break
-
-                timesteps = self.env_instance.step(current_action)
-
-            agent.model.save()
-                
-            episode += 1
-
+        return obs, reward, done
         

@@ -31,11 +31,9 @@ _NOT_QUEUED = [0]
 _QUEUED = [1]
 
 
-
 ## Defining our agent's rewards
 KILL_UNIT_REWARD = 0.2
 KILL_BUILDING_REWARD = 0.5
-
 
 
 # Defining our agent's class
@@ -52,10 +50,10 @@ class TerranAgent(SC2Agent):
         self.previous_state = None
 
 
-    def get_reward(self, obs):
+    def get_reward(self, obs, reward, done):
         # Getting values from the cumulative score system
-        killed_unit_score = obs.observation.score_cumulative[5]
-        killed_building_score = obs.observation.score_cumulative[6]
+        killed_unit_score = obs.score_cumulative[5]
+        killed_building_score = obs.score_cumulative[6]
         
         reward = 0
 
@@ -65,12 +63,19 @@ class TerranAgent(SC2Agent):
         if killed_building_score > self.previous_killed_building_score:
             reward += KILL_BUILDING_REWARD
         
+        # Saving the previous values for killed units and killed buildings.
+        self.previous_killed_unit_score = killed_unit_score
+        self.previous_killed_building_score = killed_building_score
+
         return reward
 
 
     def build_state(self, obs):
+        player_y, player_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
+        self.base_top_left = 1 if player_y.any() and player_y.mean() <= 31 else 0
+
         ## Defining our state and calculating the reward
-        unit_type = obs.observation.feature_screen[_UNIT_TYPE]
+        unit_type = obs.feature_screen[_UNIT_TYPE]
 
         # Whether or not our supply depot was built
         depot_y, depot_x = (unit_type == _TERRAN_SUPPLY_DEPOT).nonzero()
@@ -81,9 +86,9 @@ class TerranAgent(SC2Agent):
         barracks_count = 1 if barracks_y.any else 0
 
         # The supply limit
-        supply_limit = obs.observation.player[4]
+        supply_limit = obs.player[4]
         # The army supply
-        army_supply = obs.observation.player[5]
+        army_supply = obs.player[5]
 
         # Defining our state, considering our enemies' positions.
         current_state = np.zeros(20)
@@ -95,7 +100,7 @@ class TerranAgent(SC2Agent):
         # Insteading of making a vector for all coordnates on the map, we'll discretize our enemy space
         # and use a 16x16 grid to store enemy positions by marking a square as 1 if there's any enemy on it.
         hot_squares = np.zeros(16)
-        enemy_y, enemy_x = (obs.observation.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_HOSTILE).nonzero()
+        enemy_y, enemy_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_HOSTILE).nonzero()
         for i in range(0, len(enemy_y)):
             y = int(math.ceil((enemy_y[i] + 1) / 16))
             x = int(math.ceil((enemy_x[i] + 1) / 16))
@@ -116,14 +121,12 @@ class TerranAgent(SC2Agent):
         return [20]
 
 
-    def step(self, obs):
-        super(TerranAgent, self).step(obs)
+    def step(self, obs, reward, done):
+        super(TerranAgent, self).step(obs, reward, done)
 
-        if obs.first():
-            # Setting our base position
-            player_y, player_x = (obs.observation.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
-            self.base_top_left = 1 if player_y.any() and player_y.mean() <= 31 else 0
-
+        if done:
+            self.reset()
+            return actions.FUNCTIONS.no_op()
 
         # Taking the first step for a smart action
         if self.action_wrapper.is_action_done():
@@ -132,27 +135,13 @@ class TerranAgent(SC2Agent):
             
             # If it's not the first step, we can learn
             if self.previous_action is not None:
-                reward = self.get_reward(obs)
-
-                self.model.learn(self.previous_state, self.previous_action, reward, current_state, done=False)
+                reward = self.get_reward(obs, reward, done)
+                self.model.learn(self.previous_state, self.previous_action, reward, current_state, done)
 
 
             excluded_actions = self.action_wrapper.get_excluded_actions(obs)
-
-            # Selects an action by passing the current state as a string. Our dataframe is indexed by strings.
-            # We only select an action when move_number == 0, and we keep it until move_number == 2
             rl_action = self.model.choose_action(current_state, excluded_actions)
 
-            # Getting values from the cumulative score system
-            killed_unit_score = obs.observation.score_cumulative[5]
-            killed_building_score = obs.observation.score_cumulative[6]
-
-            # Saving the score system's current values
-            self.previous_killed_unit_score = killed_unit_score
-            self.previous_killed_building_score = killed_building_score
             self.previous_state = current_state
             self.previous_action = rl_action
-            x = 0
-            y = 0
-
-        return self.action_wrapper.get_action(self.previous_action, obs)
+        return [self.action_wrapper.get_action(self.previous_action, obs)]

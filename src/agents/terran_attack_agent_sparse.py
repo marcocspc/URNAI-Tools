@@ -33,17 +33,18 @@ class TerranAgentSparse(SC2Agent):
 
         self.cc_y = None
         self.cc_x = None
-        
 
-    def get_reward(self, obs):
-        # 1 = win, -1 = loss, 0 = draw
-        reward = obs.reward
 
+    def get_reward(self, obs, reward, done):
         return reward
 
 
     def build_state(self, obs):
-        unit_type = obs.observation.feature_screen[_UNIT_TYPE]
+        player_y, player_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
+        self.base_top_left = 1 if player_y.any() and player_y.mean() <= 31 else 0
+
+        # Setting up the player's base position
+        unit_type = obs.feature_screen[_UNIT_TYPE]
         cc_y, cc_x = (unit_type == _TERRAN_COMMANDCENTER).nonzero()
         cc_count = 1 if cc_y.any() else 0
 
@@ -60,13 +61,13 @@ class TerranAgentSparse(SC2Agent):
         new_state[0] = cc_count
         new_state[1] = supply_depot_count
         new_state[2] = barracks_count
-        new_state[3] = obs.observation.player[_ARMY_SUPPLY]
+        new_state[3] = obs.player[_ARMY_SUPPLY]
 
         # Dividing our minimap into a 4x4 grid of cells and marking cells as 1 if it
         # contains any friendly army units. If the base is at the bottom right, we invert the
         # quadrants so that it's seen from the perspective of a top-left base
         green_squares = np.zeros(4)
-        friendly_y, friendly_x = (obs.observation.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
+        friendly_y, friendly_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
 
         for i in range(0, len(friendly_y)):
             y = int(math.ceil((friendly_y[i] + 1) / 32))
@@ -82,7 +83,7 @@ class TerranAgentSparse(SC2Agent):
 
         # Adding enemy units locations to our state the same way we did with the friendly army.
         hot_squares = np.zeros(4)
-        enemy_y, enemy_x = (obs.observation.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_HOSTILE).nonzero()
+        enemy_y, enemy_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_HOSTILE).nonzero()
         for i in range(0, len(enemy_y)):
             y = int(math.ceil((enemy_y[i] + 1) / 32))
             x = int(math.ceil((enemy_x[i] + 1) / 32))
@@ -102,45 +103,30 @@ class TerranAgentSparse(SC2Agent):
         return _STATE_SIZE
 
 
-    def step(self, obs):
-        super(TerranAgentSparse, self).step(obs)
+    def step(self, obs, reward, done):
+        super(TerranAgentSparse, self).step(obs, reward, done)
 
-        if obs.last():
-            reward = self.get_reward(obs)
-
-            # Applying the reward to our q-learning table
-            self.model.learn(self.previous_state, self.previous_action, reward, None, done=True)
+        if done:
+            # Applying the reward to our model
+            reward = self.get_reward(obs, reward, done)
+            self.model.learn(self.previous_state, self.previous_action, reward, None, done)
 
             # Resetting the agent to start a new episode
-            self.previous_action = None
-            self.previous_state = None
-
-            self.action_wrapper.reset()
-
+            self.reset()
             return actions.FUNCTIONS.no_op()
 
-        unit_type = obs.observation.feature_screen[_UNIT_TYPE]
-
-        # If the current state is the first, variables for the player, command center and base positions are initialized
-        if obs.first():
-            player_y, player_x = (obs.observation.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
-            self.base_top_left = 1 if player_y.any() and player_y.mean() <= 31 else 0
-
-        # Taking the first step for a smart action
+        # Taking the first step of a smart action
         if self.action_wrapper.is_action_done():
             ## Building our agent's state
             current_state = self.build_state(obs)
 
             # If it's not the first step, we can learn
             if self.previous_action is not None:
-                self.model.learn(self.previous_state, self.previous_action, 0, current_state, done=False)
+                self.model.learn(self.previous_state, self.previous_action, 0, current_state, done)
 
             excluded_actions = self.action_wrapper.get_excluded_actions(obs)
-
-            # Selects an action by passing the current state as a string. Our dataframe is indexed by strings.
-            # We only select an action when move_number == 0, and we keep it until move_number == 2
             rl_action = self.model.choose_action(current_state, excluded_actions)
 
             self.previous_state = current_state
             self.previous_action = rl_action
-        return self.action_wrapper.get_action(self.previous_action, obs)
+        return [self.action_wrapper.get_action(self.previous_action, obs)]

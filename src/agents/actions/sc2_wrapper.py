@@ -74,7 +74,7 @@ class SC2Wrapper(ActionWrapper):
 
 
     def get_excluded_actions(self, obs):
-        unit_type = obs.observation.feature_screen[_UNIT_TYPE]
+        unit_type = obs.feature_screen[_UNIT_TYPE]
 
         depot_y, depot_x = (unit_type == _TERRAN_SUPPLY_DEPOT).nonzero()
         supply_depot_count = int(round(len(depot_y) / 69))
@@ -82,12 +82,12 @@ class SC2Wrapper(ActionWrapper):
         barracks_y, barracks_x = (unit_type == _TERRAN_BARRACKS).nonzero()
         barracks_count = int(round(len(barracks_y) / 137))
 
-        supply_used = obs.observation.player[3]
-        supply_limit = obs.observation.player[4]
+        supply_used = obs.player[3]
+        supply_limit = obs.player[4]
         supply_free = supply_limit - supply_used
 
-        army_supply = obs.observation.player[5]
-        worker_supply = obs.observation.player[6]
+        army_supply = obs.player[5]
+        worker_supply = obs.player[6]
 
         # Adding invalid actions to the list of excluded actions
         excluded_actions = []
@@ -116,8 +116,8 @@ class SC2Wrapper(ActionWrapper):
         
 
         # Initializing variables that are used to select the actions
-        unit_type = obs.observation.feature_screen[_UNIT_TYPE]
-        player_y, player_x = (obs.observation.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
+        unit_type = obs.feature_screen[_UNIT_TYPE]
+        player_y, player_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
         base_top_left = 1 if player_y.any() and player_y.mean() <= 31 else 0
         player_cc_y, player_cc_x = (unit_type == _TERRAN_COMMANDCENTER).nonzero()
 
@@ -142,7 +142,7 @@ class SC2Wrapper(ActionWrapper):
             # we use to build supply depots and barracks are hard coded.
             if smart_action == ACTION_BUILD_SUPPLY_DEPOT:
                 # Calculates the number of supply depots currently built
-                unit_type = obs.observation.feature_screen[_UNIT_TYPE]
+                unit_type = obs.feature_screen[_UNIT_TYPE]
                 depot_y, depot_x = (unit_type == _TERRAN_SUPPLY_DEPOT).nonzero()
                 supply_depot_count = int(round(len(depot_y) / 69))
 
@@ -158,7 +158,7 @@ class SC2Wrapper(ActionWrapper):
             # Commands the selected SCV to build barracks at a given location
             elif smart_action == ACTION_BUILD_BARRACKS:
                 # Calculates the number of barracks currently built
-                unit_type = obs.observation.feature_screen[_UNIT_TYPE]
+                unit_type = obs.feature_screen[_UNIT_TYPE]
                 barracks_y, barracks_x = (unit_type == _TERRAN_BARRACKS).nonzero()
                 barracks_count = int(round(len(barracks_y) / 137))
 
@@ -180,9 +180,9 @@ class SC2Wrapper(ActionWrapper):
                 do_it = True
                 
                 # Checks if any SCV is selected. If so, the agent doesn't attack.
-                if len(obs.observation.single_select) > 0 and obs.observation.single_select[0][0] == _TERRAN_SCV:
+                if len(obs.single_select) > 0 and obs.single_select[0][0] == _TERRAN_SCV:
                     do_it = False
-                if len(obs.observation.multi_select) > 0 and obs.observation.multi_select[0][0] == _TERRAN_SCV:
+                if len(obs.multi_select) > 0 and obs.multi_select[0][0] == _TERRAN_SCV:
                     do_it = False
                 if do_it:
                     x_offset = random.randint(-1, 1)

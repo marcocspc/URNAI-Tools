@@ -130,7 +130,15 @@ class DQNetwork(LearningModel):
         return action
 
     def save(self):
+        print()
+        print("> Saving the model!")
+        print()
         self.saver.save(self.sess, self.save_path)
 
     def load(self):
-        self.saver.restore(self.sess, self.save_path)
+        exists = os.path.isfile(self.save_path + '.meta')
+        if exists:
+            print()
+            print("> Loading saved model!")
+            print()
+            self.saver.restore(self.sess, self.save_path)
