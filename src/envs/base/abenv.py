@@ -8,11 +8,10 @@ class Env(ABC):
     the game. For cases where an environment for a game already exists, this class
     should still be used as a wrapper (e.g. implementing an environment for OpenAI gym).
     '''
-    def __init__(self, _id: str, render=False, reset_done=True, num_episodes=None):
+    def __init__(self, _id: str, render=False, reset_done=True):
         self.id = _id
         self.render = render
         self.reset_done = reset_done
-        self.num_episodes = num_episodes if num_episodes else float('inf')
         self.env_instance = None
 
     

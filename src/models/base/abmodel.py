@@ -16,8 +16,18 @@ class LearningModel(ABC):
     def learn(self, s, a, r, s_, done):
         pass
 
+    '''
+    Implements the exploration exploitation method for the model.
+    '''
     @abstractmethod
     def choose_action(self, state, excluded_actions=[], is_playing=False):
+        pass
+
+    '''
+    Given a State, returns the action with the highest Q-Value.
+    '''
+    @abstractmethod
+    def predict(self, state):
         pass
 
     @abstractmethod

@@ -17,9 +17,9 @@ _PLAYER_HOSTILE = 4
 _ARMY_SUPPLY = 5
 
 _TERRAN_COMMANDCENTER = 18
-_TERRAN_SCV = 45
 _TERRAN_SUPPLY_DEPOT = 19
 _TERRAN_BARRACKS = 21
+_TERRAN_SCV = 45
 _NEUTRAL_MINERAL_FIELD = 341
 
 
@@ -27,15 +27,14 @@ class TerranAgentSparse(SC2Agent):
     
     def __init__(self, action_wrapper):
         super(TerranAgentSparse, self).__init__(action_wrapper)
-        
-        self.previous_action = None
-        self.previous_state = None
 
         self.cc_y = None
         self.cc_x = None
 
 
     def get_reward(self, obs, reward, done):
+        if not done:
+            return 0
         return reward
 
 
@@ -101,32 +100,3 @@ class TerranAgentSparse(SC2Agent):
 
     def get_state_dim(self):
         return _STATE_SIZE
-
-
-    def step(self, obs, reward, done):
-        super(TerranAgentSparse, self).step(obs, reward, done)
-
-        if done:
-            # Applying the reward to our model
-            reward = self.get_reward(obs, reward, done)
-            self.model.learn(self.previous_state, self.previous_action, reward, None, done)
-
-            # Resetting the agent to start a new episode
-            self.reset()
-            return actions.FUNCTIONS.no_op()
-
-        # Taking the first step of a smart action
-        if self.action_wrapper.is_action_done():
-            ## Building our agent's state
-            current_state = self.build_state(obs)
-
-            # If it's not the first step, we can learn
-            if self.previous_action is not None:
-                self.model.learn(self.previous_state, self.previous_action, 0, current_state, done)
-
-            excluded_actions = self.action_wrapper.get_excluded_actions(obs)
-            rl_action = self.model.choose_action(current_state, excluded_actions)
-
-            self.previous_state = current_state
-            self.previous_action = rl_action
-        return [self.action_wrapper.get_action(self.previous_action, obs)]

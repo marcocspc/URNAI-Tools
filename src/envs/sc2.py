@@ -19,14 +19,13 @@ class SC2Env(Env):
         players=None,
         render=False,
         reset_done=True,
-        num_episodes=None,
         spatial_dim=16,
         step_mul=8,
         game_steps_per_ep=0,
         obs_features=None,
         action_ids=ACTIONS_ALL    # action_ids is passed to the constructor as a key for the actions that the agent can use, but is converted to a list of IDs for these actions
     ):
-        super().__init__(map_name, render, reset_done, num_episodes)
+        super().__init__(map_name, render, reset_done)
 
         self.step_mul = step_mul
         self.game_steps_per_ep = game_steps_per_ep

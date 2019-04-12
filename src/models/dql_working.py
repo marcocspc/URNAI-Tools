@@ -88,20 +88,15 @@ class DQNWorking(LearningModel):
         if explore_probability > expl_expt_tradeoff and not is_playing:
             action = random.choice(self.actions)
         else:
-            action = self.predict(state, excluded_actions)
+            action = self.predict(state)
 
         return action
 
 
-    def predict(self, state, excluded_actions=[]):
-        '''
-        Given a State, returns the action with the highest Q-Value.
-        '''
-
+    def predict(self, state):
         q_values = self.sess.run(self.output_layer, feed_dict={self.inputs_: state})
         action_idx = np.argmax(q_values)
         action = self.actions[int(action_idx)]
-
         return action
 
 

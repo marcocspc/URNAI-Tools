@@ -23,11 +23,6 @@ class SC2Agent(Agent):
         self.action_spec = env.env_instance.action_spec()
 
 
-    # def setup(self, obs_spec, action_spec):
-    #     self.obs_spec = obs_spec
-    #     self.action_spec = action_spec
-
-
     def reset(self):
         self.episodes += 1
         self.previous_action = None
@@ -35,16 +30,37 @@ class SC2Agent(Agent):
         self.action_wrapper.reset()
 
 
+    def learn(self, obs, reward, done):
+        current_state = self.build_state(obs)
+        if self.previous_state is not None:
+            reward = self.get_reward(obs, reward, done)
+            self.model.learn(self.previous_state, self.previous_action, reward, current_state, done)
+        self.previous_state = current_state
+
+
     def play(self, obs):
         if self.action_wrapper.is_action_done():
             current_state = self.build_state(obs)
-            predicted_action = self.model.choose_action(current_state, is_playing=True)
+            predicted_action = self.model.predict(current_state)
             self.previous_action = predicted_action
         return [self.action_wrapper.get_action(self.previous_action, obs)]
 
 
     def step(self, obs, reward, done):
-        super(SC2Agent, self).step(obs, reward, done)
         self.steps += 1
         self.reward += reward
-        return actions.FunctionCall(actions.FUNCTIONS.no_op.id, [])
+
+        if done:
+            self.reset()
+            return [actions.FUNCTIONS.no_op()]
+
+        # Taking the first step for a smart action
+        if self.action_wrapper.is_action_done():
+            ## Building our agent's state
+            current_state = self.build_state(obs)
+
+            excluded_actions = self.action_wrapper.get_excluded_actions(obs)
+            rl_action = self.model.choose_action(current_state, excluded_actions)
+
+            self.previous_action = rl_action
+        return [self.action_wrapper.get_action(self.previous_action, obs)]
