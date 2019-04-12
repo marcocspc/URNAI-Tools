@@ -56,7 +56,7 @@ class DQNWorking(LearningModel):
 
         current_q = 0
 
-        if s_ is None:
+        if done:
             current_q = r
         else:
             current_q = r + self.gamma * self.maxq(s_)

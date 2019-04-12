@@ -33,23 +33,19 @@ class DQNetwork(LearningModel):
             self.fc1 = tf.layers.dense(inputs=self.inputs_,
                                        units=50,
                                        activation=tf.nn.elu,
-                                       kernel_initializer=tf.contrib.layers.xavier_initializer(),
                                        name='fc1')
 
             self.fc2 = tf.layers.dense(inputs=self.fc1,
                                        units=50,
                                        activation=tf.nn.elu,
-                                       kernel_initializer=tf.contrib.layers.xavier_initializer(),
                                        name='fc2')
 
             self.fc3 = tf.layers.dense(inputs=self.fc2,
                                        units=50,
                                        activation=tf.nn.elu,
-                                       kernel_initializer=tf.contrib.layers.xavier_initializer(),
                                        name='fc3')
 
             self.output = tf.layers.dense(inputs=self.fc3,
-                                          kernel_initializer=tf.contrib.layers.xavier_initializer(),
                                           units=self.action_size,
                                           activation=None)
 

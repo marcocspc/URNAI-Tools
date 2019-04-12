@@ -111,8 +111,9 @@ class TerranAgent(SC2Agent):
             # Adds 4 to account for supply_depot_count, barracks_count, supply_limit and army_supply
             current_state[i + 4] = hot_squares[i]
         
+        current_state = np.expand_dims(current_state, axis=0)
         return current_state
 
 
     def get_state_dim(self):
-        return [20]
+        return 20

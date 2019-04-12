@@ -10,7 +10,7 @@ from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 
 class DQNKeras(LearningModel):
-    def __init__(self, agent, save_path, learning_rate=0.001, gamma=0.99, name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32):
+    def __init__(self, agent, save_path, learning_rate=0.001, gamma=0.95, name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32):
         super(DQNKeras, self).__init__(agent, save_path, name)
 
         self.learning_rate = learning_rate

@@ -6,7 +6,7 @@ from .base.sc2_abagent import SC2Agent
 from pysc2.lib import actions, features
 from pysc2.agents.base_agent import BaseAgent
 
-_STATE_SIZE = [12]
+_STATE_SIZE = 12
 
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 _UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
@@ -95,6 +95,7 @@ class TerranAgentSparse(SC2Agent):
         for i in range(0, 4):
             new_state[i + 8] = hot_squares[i]
 
+        new_state = np.expand_dims(new_state, axis=0)
         return new_state
 
 
