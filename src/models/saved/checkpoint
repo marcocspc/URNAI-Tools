@@ -1,2 +1,0 @@
-model_checkpoint_path: "frozenlake_dql_working"
-all_model_checkpoint_paths: "frozenlake_dql_working"

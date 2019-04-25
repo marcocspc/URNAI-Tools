@@ -1,0 +1,2 @@
+model_checkpoint_path: "flappybird_dql"
+all_model_checkpoint_paths: "flappybird_dql"
