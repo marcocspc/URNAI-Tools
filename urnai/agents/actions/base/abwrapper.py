@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-
+from utils.types import ActionIndex, List
 
 class ActionWrapper(ABC):
     """
@@ -31,16 +31,14 @@ class ActionWrapper(ABC):
     Returns the all the actions that the agent can choose from.
     '''
     @abstractmethod
-    def get_actions(self):
-        pass
+    def get_actions(self) -> List[ActionIndex]: ...
 
 
     '''
     Returns a subset of actions that can't be chosen by the agent.
     '''
     @abstractmethod
-    def get_excluded_actions(self, obs):
-        pass
+    def get_excluded_actions(self, obs) -> List[ActionIndex]: ...
 
 
     '''
@@ -48,7 +46,7 @@ class ActionWrapper(ABC):
     that can be used by the environment's step method.
     '''
     @abstractmethod
-    def get_action(self, action_idx, obs):
+    def get_action(self, action_idx: ActionIndex, obs):
         pass
 
 

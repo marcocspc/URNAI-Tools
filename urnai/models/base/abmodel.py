@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import State
+from utils.types import ActionIndex
 
 class LearningModel(ABC):
 
@@ -14,27 +15,28 @@ class LearningModel(ABC):
         self.state_size = state_builder.get_state_dim()
 
     @abstractmethod
-    def learn(self, s, a, r, s_, done):
-        pass
+    def learn(self, s, a, r, s_, done) -> None : ...
 
-    '''
-    Implements the exploration exploitation method for the model.
-    '''
-    @abstractmethod
-    def choose_action(self, state, excluded_actions=[]):
-        pass
-
-    '''
-    Given a State, returns the action with the highest Q-Value.
-    '''
-    @abstractmethod
-    def predict(self, state):
-        pass
 
     @abstractmethod
-    def save(self):
+    def choose_action(self, state, excluded_actions=[]) -> ActionIndex:
+        '''
+        Implements the exploration exploitation method for the model.
+        '''
         pass
 
+
     @abstractmethod
-    def load(self):
+    def predict(self, state) -> ActionIndex:
+        '''
+        Given a State, returns the index for the action with the highest Q-Value.
+        '''
         pass
+
+
+    @abstractmethod
+    def save(self) -> None : ...
+
+
+    @abstractmethod
+    def load(self) -> None: ...

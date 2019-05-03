@@ -33,10 +33,25 @@ class Agent(ABC):
             reward = self.get_reward(obs, reward, done)
             self.model.learn(self.previous_state, self.previous_action, reward, next_state, done)
 
+
+    '''
+    This method should:
+    1) Build a State using obs
+    2) Use the state that was built to get an ActionIndex from the Agent's model
+    3) Update self.previous_state with the current state and self.previous_action with the ActionIndex
+    4) Return an Action from the Agent's ActionWrapper by using the ActionIndex from step 2
+    '''
     @abstractmethod
     def step(self, obs, obs_reward, done):
         pass
 
+
+    '''
+    This method should:
+    1) Build a State using obs
+    2) Use the state that was built to get an ActionIndex from the Agent's model
+    3) Return an Action from the Agent's ActionWrapper by using the ActionIndex from step 2
+    '''
     @abstractmethod
     def play(self, obs):
         pass
