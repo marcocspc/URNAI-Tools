@@ -8,7 +8,8 @@ class GymWrapper(ActionWrapper):
 
     def __init__(self, env):
         self.move_number = 0
-        self.actions = [action_idx for action_idx in range(env.env_instance.action_space.n)]   
+        self.actions = [action_idx for action_idx in range(env.env_instance.action_space.n)]
+
 
 
     def is_action_done(self):

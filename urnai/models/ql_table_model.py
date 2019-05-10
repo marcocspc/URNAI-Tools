@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 
 import os.path
-from .base.abmodel import LearningModel
+from models.base.abmodel import LearningModel
+
 
 class QLearningTable(LearningModel):
     def __init__(self, agent, save_path, learning_rate=0.01, reward_decay=0.9, e_greedy=0.9, name='QTable'):
@@ -10,11 +11,11 @@ class QLearningTable(LearningModel):
         self.lr = learning_rate
         self.gamma = reward_decay
         self.epsilon = e_greedy
-        self.q_table = pd.DataFrame(columns=range(self.action_size), dtype=np.float64)      # Table columns are named by the indices of actions
-        self.disallowed_actions = {}                                                        # Dictionary that maps observation -> invalid actions
+        self.q_table = pd.DataFrame(columns=range(self.action_size),
+                                    dtype=np.float64)  # Table columns are named by the indices of actions
+        self.disallowed_actions = {}  # Dictionary that maps observation -> invalid actions
         self.save_path = save_path
         self.load()
-
 
     def learn(self, s, a, r, s_, done):
         state = str(s)
@@ -48,10 +49,9 @@ class QLearningTable(LearningModel):
             q_target = r + self.gamma * s_rewards.max()
         else:
             q_target = r
-        
+
         # Updating our reward
         self.q_table.ix[state, a] += self.lr * (q_target - q_predict)
-
 
     def choose_action(self, state, excluded_actions=[], predict=False):
 
@@ -79,17 +79,14 @@ class QLearningTable(LearningModel):
 
         return self.actions[action_idx]
 
-
     def load(self):
         if os.path.isfile(self.save_path + '.gz'):
             self.q_table = pd.read_pickle(self.save_path + '.gz', compression='gzip')
 
-
     def save(self):
         self.q_table.to_pickle(self.save_path + '.gz', 'gzip')
 
-
     def check_state_exists(self, state):
         if state not in self.q_table.index:
-            self.q_table = self.q_table.append(pd.Series([0] * len(self.actions), index=self.q_table.columns, name=state))
-
+            self.q_table = self.q_table.append(
+                pd.Series([0] * len(self.actions), index=self.q_table.columns, name=state))

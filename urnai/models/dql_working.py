@@ -11,8 +11,10 @@ explore_start = 1.0
 explore_stop = 0.01
 decay_rate = 0.0001
 
+
 class DQNWorking(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: State, save_path, learning_rate=0.0002, gamma=0.95, name='DQN'):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: State, save_path, learning_rate=0.0002, gamma=0.95,
+                 name='DQN'):
         super(DQNWorking, self).__init__(action_wrapper, state_builder, save_path, name)
 
         self.learning_rate = learning_rate
@@ -20,7 +22,7 @@ class DQNWorking(LearningModel):
         self.decay_step = 0
 
         tf.reset_default_graph()
-        
+
         # Initializing our TensorFlow session
         self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
 
@@ -29,18 +31,18 @@ class DQNWorking(LearningModel):
 
         # Defining the layers of our neural network
         self.fc1 = tf.layers.dense(inputs=self.inputs_,
-                                    units=50,
-                                    activation=tf.nn.relu,
-                                    name='fc1')
+                                   units=50,
+                                   activation=tf.nn.relu,
+                                   name='fc1')
 
         self.fc2 = tf.layers.dense(inputs=self.fc1,
-                                    units=50,
-                                    activation=tf.nn.relu,
-                                    name='fc2')
+                                   units=50,
+                                   activation=tf.nn.relu,
+                                   name='fc2')
 
         self.output_layer = tf.layers.dense(inputs=self.fc2,
-                                        units=self.action_size,
-                                        activation=None)
+                                            units=self.action_size,
+                                            activation=None)
 
         self.tf_qsa = tf.placeholder(shape=[None, self.action_size], dtype=tf.float32)
         self.loss = tf.losses.mean_squared_error(self.tf_qsa, self.output_layer)
@@ -51,7 +53,6 @@ class DQNWorking(LearningModel):
         self.saver = tf.train.Saver()
         self.load()
 
-
     def learn(self, s, a, r, s_, done):
         qsa_values = self.sess.run(self.output_layer, feed_dict={self.inputs_: s})
 
@@ -61,13 +62,12 @@ class DQNWorking(LearningModel):
             current_q = r
         else:
             current_q = r + self.gamma * self.maxq(s_)
-        
+
         qsa_values[0, a] = current_q
 
         self.sess.run(self.optimizer, feed_dict={self.inputs_: s, self.tf_qsa: qsa_values})
 
         qsa_values = self.sess.run(self.output_layer, feed_dict={self.inputs_: s})
-
 
     def maxq(self, state):
         values = self.sess.run(self.output_layer, feed_dict={self.inputs_: state})
@@ -76,7 +76,6 @@ class DQNWorking(LearningModel):
         mxq = values[0, index]
 
         return mxq
-
 
     def choose_action(self, state, excluded_actions=[]):
         self.decay_step += 1
@@ -93,13 +92,11 @@ class DQNWorking(LearningModel):
 
         return action
 
-
     def predict(self, state):
         q_values = self.sess.run(self.output_layer, feed_dict={self.inputs_: state})
         action_idx = np.argmax(q_values)
         action = self.actions[int(action_idx)]
         return action
-
 
     def save(self):
         print()

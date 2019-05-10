@@ -18,11 +18,11 @@ class FrozenLakeState(State):
 
 class PureState(State):
     def __init__(self, env: Env):
-        self.state_dim = env.env_instance.observation_space.shape[0]
+        self.state_dim = env.env_instance.observation_space.n
 
     def build_state(self, obs):
-        obs = obs.reshape(1, self.get_state_dim())
         return obs
 
     def get_state_dim(self):
         return self.state_dim
+
