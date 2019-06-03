@@ -41,7 +41,7 @@ python solve_cartpole.py
 
 ## Guide
 
-Follow these instructions to start developping stuff with our library.
+Follow these instructions to start developping new stuff using our library.
 
 ### Building an agent for a supported environment
 
@@ -56,6 +56,40 @@ To build a new model, you should check the readme in our [urnai.models](https://
 ### Integrating a new environment
 
 To integrate a new environment, you might want to check the readme in our [urnai.envs](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/envs) module.
+
+## Roadmap
+
+Here you'll find all the things that we plan to do in this project. **Bold** items are work in progress. Sections that are marked with an X are finished work. If an entire section of items is marked as finished, that means we don't plan to work on it anymore.
+
+* [ ] Documentation
+  * [ ] Codebase documentation/commenting
+  * [ ] **Using an existing environment**
+  * [ ] **Supporting a new environment**
+  * [ ] **Creating a new agent for a supported environment**
+  * [ ] **Creating a new agent for a new environment**
+  * [ ] **Creating an Action Wrapper**
+  * [ ] Statistics about solved problems
+* [ ] Support for new environments
+  * [ ] [Arcade Learning Environment](https://github.com/mgbellemare/Arcade-Learning-Environment)
+  * [ ] [Gym Retro](https://github.com/openai/retro)
+  * [ ] [**Vizdoom**](https://github.com/mwydmuch/ViZDoom)
+* [ ] More Deep RL algorithms
+  * [ ] **Policy Gradient**
+  * [ ] A3C
+  * [ ] Curiosity-Driven Learning
+  * [ ] Proximal Policy Optimization
+* [ ] Core codebase improvements
+  * [ ] Logger class for each game/environment
+* [ ] Solve more problems
+  * [X] Frozenlake
+  * [X] Cartpole-V2
+  * [X] Taxi-V2
+  * [ ] Flappy Bird
+  * [ ] StarCraft II - Simple 64 - Very Easy
+  
+  
+  
+
 
 ## Authors
 
