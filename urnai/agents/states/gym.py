@@ -16,13 +16,25 @@ class FrozenLakeState(State):
         return 16
 
 
-class PureState(State):
+class Game2048State(State):
     def __init__(self, env: Env):
-        self.state_dim = env.env_instance.observation_space.n
+        self.state_dim = env.env_instance.height*env.env_instance.width
 
     def build_state(self, obs):
+        obs = obs.reshape(1, self.get_state_dim())
         return obs
 
     def get_state_dim(self):
         return self.state_dim
 
+
+class PureState(State):
+    def __init__(self, env: Env):
+        self.state_dim = env.env_instance.observation_space.shape[0]
+
+    def build_state(self, obs):
+        obs = obs.reshape(1, self.get_state_dim())
+        return obs
+
+    def get_state_dim(self):
+        return self.state_dim

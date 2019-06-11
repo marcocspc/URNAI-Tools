@@ -1,2 +1,2 @@
-model_checkpoint_path: "flappybird_dql"
-all_model_checkpoint_paths: "flappybird_dql"
+model_checkpoint_path: "game2048_divReward_dqnworking_5050"
+all_model_checkpoint_paths: "game2048_divReward_dqnworking_5050"
