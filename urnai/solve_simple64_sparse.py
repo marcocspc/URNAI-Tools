@@ -6,7 +6,7 @@ from agents.sc2_agent import SC2Agent
 from agents.actions.sc2_wrapper import SC2Wrapper
 from agents.rewards.sc2 import SparseReward
 from agents.states.sc2 import Simple64State
-from models.dql_working import DQNWorking
+from models.dql_tf import DQLTF
 
 def main(unused_argv):
     trainer = Trainer()
@@ -18,7 +18,7 @@ def main(unused_argv):
 
         action_wrapper = SC2Wrapper()
         state_builder = Simple64State()
-        dq_network = DQNWorking(action_wrapper, state_builder, 'urnai/models/saved/terran_sparse_dql')
+        dq_network = DQLTF(action_wrapper, state_builder, 'urnai/models/saved/terran_sparse_dql')
 
         agent = SC2Agent(dq_network, SparseReward(), env)
 

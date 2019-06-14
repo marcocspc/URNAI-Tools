@@ -12,10 +12,9 @@ explore_stop = 0.01
 decay_rate = 0.0001
 
 
-class DQNWorking(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: State, save_path, learning_rate=0.0002, gamma=0.95,
-                 name='DQN'):
-        super(DQNWorking, self).__init__(action_wrapper, state_builder, save_path, name)
+class DQLTF(LearningModel):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: State, save_path, learning_rate=0.0002, gamma=0.95, name='DQN'):
+        super(DQLTF, self).__init__(action_wrapper, state_builder, save_path, name)
 
         self.learning_rate = learning_rate
         self.gamma = gamma
@@ -46,14 +45,14 @@ class DQNWorking(LearningModel):
 
         self.tf_qsa = tf.placeholder(shape=[None, self.action_size], dtype=tf.float32)
         self.loss = tf.losses.mean_squared_error(self.tf_qsa, self.output_layer)
-        self.optimizer = tf.train.AdamOptimizer().minimize(self.loss)
+        self.optimizer = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss)
 
         self.sess.run(tf.global_variables_initializer())
 
         self.saver = tf.train.Saver()
         self.load()
 
-    def learn(self, s, a, r, s_, done):
+    def learn(self, s, a, r, s_, done, is_last_step: bool):
         qsa_values = self.sess.run(self.output_layer, feed_dict={self.inputs_: s})
 
         current_q = 0

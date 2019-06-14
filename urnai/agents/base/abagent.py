@@ -27,11 +27,11 @@ class Agent(ABC):
         self.previous_state = None
         self.action_wrapper.reset()
 
-    def learn(self, obs, reward, done):
+    def learn(self, obs, reward, done, is_last_step: bool):
         if self.previous_state is not None:
             next_state = self.build_state(obs)
             reward = self.get_reward(obs, reward, done)
-            self.model.learn(self.previous_state, self.previous_action, reward, next_state, done)
+            self.model.learn(self.previous_state, self.previous_action, reward, next_state, done, is_last_step)
 
 
     '''

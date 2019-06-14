@@ -5,7 +5,7 @@ from agents.gym_agent import GymAgent
 from agents.actions.gym_wrapper import GymWrapper
 from agents.rewards.gym import FrozenlakeReward
 from agents.states.gym import FrozenLakeState
-from models.dql_working import DQNWorking
+from models.dql_tf import DQLTF
 
 def main(unused_argv):
     trainer = Trainer()
@@ -18,9 +18,8 @@ def main(unused_argv):
         state_builder = FrozenLakeState()
 
         # Initializing a Deep Q-Learning model using our agent
-        dq_network = DQNWorking(action_wrapper, state_builder, 'urnai/models/saved/frozenlake_dql_working')
+        dq_network = DQLTF(action_wrapper, state_builder, 'urnai/models/saved/frozenlake_dql_working')
 
-        # Initializing our FrozenLake agent
         agent = GymAgent(dq_network, FrozenlakeReward())
 
         # Using Trainer to train and play with our agent.

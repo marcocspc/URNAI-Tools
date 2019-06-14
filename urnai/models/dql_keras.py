@@ -39,16 +39,19 @@ class DQNKeras(LearningModel):
         return model
     
 
-    def learn(self, s, a, r, s_, done):
+    def learn(self, s, a, r, s_, done, is_last_step):
         self.record(s, a, r, s_, done)
 
-        if done:
-            self.replay()
+        self.replay()
+
+        # if is_last_step:
+        #     self.replay()
 
 
     def replay(self):
         if len(self.memory) >= self.batch_size:
             minibatch = random.sample(self.memory, self.batch_size)
+
             for s, a, r, s_, done in minibatch:
                 target = r
 

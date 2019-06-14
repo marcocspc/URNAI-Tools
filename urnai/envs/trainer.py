@@ -20,9 +20,6 @@ class Trainer():
             if episode >= num_episodes:
                 break
 
-            print("Episode: {}/{} | Avg. reward: {}".format(episode + 1, num_episodes, sum(rewards) / (episode + 1)),
-                  end="\r")
-
             env.start()
 
             # Reset the environment
@@ -35,23 +32,24 @@ class Trainer():
             victory = False
 
             for step in itertools.count():
-                if step == max_steps - 1:
-                    done = True
                 if step >= max_steps:
                     break
 
+                is_last_step = step == max_steps - 1
+
                 action = agent.step(obs, reward, done)
                 obs, reward, done = env.step(action)
-                agent.learn(obs, reward, done)
+                agent.learn(obs, reward, done, is_last_step)
 
                 ep_reward += reward
 
-                if done:
+                if done or is_last_step:
+                    print("Episode: {}/{} | Avg. reward: {}".format(episode + 1, num_episodes, sum(rewards) / (episode + 1)), end="\r")
                     victory = reward == 1
                     break
 
-            if episode % save_steps == 0:
-                # agent.model.save()
+            if episode > 0 and episode % save_steps == 0:
+                agent.model.save()
                 self.printPerformance(rewards, num_episodes, victory_percentage)
 
             rewards.append(ep_reward)
@@ -63,7 +61,7 @@ class Trainer():
             victory_percentage.append(sum(victories) / (episode + 1))
 
         # Saving the model when the training is ended
-        agent.model.save()
+        #agent.model.save()
 
         self.printPerformance(rewards, num_episodes, victory_percentage)
 

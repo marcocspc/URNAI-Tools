@@ -15,7 +15,7 @@ class LearningModel(ABC):
         self.state_size = state_builder.get_state_dim()
 
     @abstractmethod
-    def learn(self, s, a, r, s_, done) -> None : ...
+    def learn(self, s, a, r, s_, done, is_last_step: bool) -> None : ...
 
 
     @abstractmethod
