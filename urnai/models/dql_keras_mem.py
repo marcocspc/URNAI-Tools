@@ -25,10 +25,7 @@ from agents.states.abstate import State
 class DQNKerasMem(DQNKeras):
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: State, save_path, learning_rate=0.0002, gamma=0.95, name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32):
-        super(DQNKeras, self).__init__(action_wrapper, state_builder, save_path, name)
-
-        self.learning_rate = learning_rate
-        self.gamma = gamma
+        super(DQNKerasMem, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
 
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
@@ -51,7 +48,7 @@ class DQNKerasMem(DQNKeras):
         return model
 
     def learn(self, s, a, r, s_, done):
-        self.record(s, a, r, s_, done)
+        self.__record(s, a, r, s_, done)
         self.replay()
 
     def replay(self):

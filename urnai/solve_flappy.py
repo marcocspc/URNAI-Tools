@@ -1,7 +1,7 @@
 from absl import app
 from envs.ple import PLEEnv
 from envs.trainer import Trainer
-from agents.ple_agent import PLEAgent
+from agents.generic_agent import GenericAgent
 from agents.actions.ple_wrapper import PLEWrapper
 from agents.rewards.default import PureReward
 from agents.states.ple import FlappyBirdState
@@ -19,7 +19,7 @@ def main(unused_argv):
 
         dq_network = DQLTF(action_wrapper, state_builder, 'urnai/models/saved/flappybird_dql')
 
-        agent = PLEAgent(dq_network, PureReward())
+        agent = GenericAgent(dq_network, PureReward())
 
         # Using Trainer to train and play with our agent.
         trainer.train(env, agent, max_steps=1000, save_steps=1000)

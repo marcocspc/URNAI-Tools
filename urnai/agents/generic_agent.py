@@ -3,14 +3,14 @@ from models.base.abmodel import LearningModel
 from agents.rewards.abreward import RewardBase
 
 
-class GymAgent(Agent):
+class GenericAgent(Agent):
 
     def __init__(self, model: LearningModel, reward_builder: RewardBase):
-        super(GymAgent, self).__init__(model, reward_builder)
+        super(GenericAgent, self).__init__(model, reward_builder)
 
     def step(self, obs, obs_reward, done):
         if self.action_wrapper.is_action_done():
-            ## Building our agent's current state
+            # Builds current state (happens before executing the action on env)
             current_state = self.build_state(obs)
 
             # Gets an action from the model using the current state
@@ -20,7 +20,7 @@ class GymAgent(Agent):
             self.previous_action = current_action_idx
             self.previous_state = current_state
 
-        # Returns the decoded action
+        # Returns the decoded action from action_wrapper
         return self.action_wrapper.get_action(self.previous_action, obs)
 
     def play(self, obs):
@@ -28,5 +28,4 @@ class GymAgent(Agent):
             current_state = self.build_state(obs)
             predicted_action_idx = self.model.predict(current_state)
             self.previous_action = predicted_action_idx
-        # TODO: change predicted_action_idx
         return self.action_wrapper.get_action(predicted_action_idx, obs)

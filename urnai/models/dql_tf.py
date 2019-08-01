@@ -14,21 +14,19 @@ decay_rate = 0.0001
 
 class DQLTF(LearningModel):
     def __init__(self, action_wrapper: ActionWrapper, state_builder: State, save_path, learning_rate=0.0002, gamma=0.95, name='DQN'):
-        super(DQLTF, self).__init__(action_wrapper, state_builder, save_path, name)
+        super(DQLTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
 
-        self.learning_rate = learning_rate
-        self.gamma = gamma
         self.decay_step = 0
 
         tf.reset_default_graph()
 
-        # Initializing our TensorFlow session
+        # Initializing TensorFlow session
         self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
 
         self.inputs_ = tf.placeholder(dtype=tf.float32, shape=[None, self.state_size], name='inputs_')
         self.actions_ = tf.placeholder(dtype=tf.float32, shape=[None, self.action_size], name='actions_')
 
-        # Defining the layers of our neural network
+        # Defining the model's layers
         self.fc1 = tf.layers.dense(inputs=self.inputs_,
                                    units=50,
                                    activation=tf.nn.relu,
@@ -60,7 +58,7 @@ class DQLTF(LearningModel):
         if done:
             current_q = r
         else:
-            current_q = r + self.gamma * self.maxq(s_)
+            current_q = r + self.gamma * self.__maxq(s_)
 
         qsa_values[0, a] = current_q
 
@@ -68,7 +66,7 @@ class DQLTF(LearningModel):
 
         qsa_values = self.sess.run(self.output_layer, feed_dict={self.inputs_: s})
 
-    def maxq(self, state):
+    def __maxq(self, state):
         values = self.sess.run(self.output_layer, feed_dict={self.inputs_: state})
 
         index = np.argmax(values[0])

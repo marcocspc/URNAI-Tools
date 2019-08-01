@@ -9,14 +9,12 @@ class QLearning(LearningModel):
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: State, save_path: str, learning_rate=0.1,
                  gamma=0.95, epsilon=1, epsilon_min=0.01, epsilon_decay=0.996, name='Q-learning'):
-        super(QLearning, self).__init__(action_wrapper, state_builder, save_path, name)
-        self._setHyperParameters(learning_rate, gamma, epsilon, epsilon_min, epsilon_decay)
+        super(QLearning, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
+        self.__set_hyperparameters(learning_rate, gamma, epsilon, epsilon_min, epsilon_decay)
         self._q_table = pd.DataFrame(columns=range(self.action_size), dtype=np.float64)
 
 
-    def _setHyperParameters(self, learning_rate, gamma, epsilon, epsilon_min, epsilon_decay):
-        self._alpha = learning_rate
-        self._gamma = gamma
+    def __set_hyperparameters(self, learning_rate, gamma, epsilon, epsilon_min, epsilon_decay):
         self._epsilon = epsilon
         self._epsilon_min = epsilon_min
         self._epsilon_decay = epsilon_decay
@@ -26,26 +24,26 @@ class QLearning(LearningModel):
         current_state_str = str(current_state)
         next_state_str = str(next_state)
 
-        self.check_state_exists(current_state_str)
-        self.check_state_exists(next_state_str)
+        self.__check_state_exists(current_state_str)
+        self.__check_state_exists(next_state_str)
 
         old_value = self._q_table.loc[current_state_str, current_action]
         
         max_action = np.max(self._q_table.loc[next_state_str])
 
-        new_value = (1 - self._alpha) * old_value + self._alpha * (reward + self._gamma * max_action)
+        new_value = (1 - self.learning_rate) * old_value + self.learning_rate * (reward + self.gamma * max_action)
         self._q_table.loc[current_state_str, current_action] = new_value
 
         if done or is_last_step:
-            self._updateEpsilon()
+            self.__update_epsilon()
 
 
-    def check_state_exists(self, state_str):
+    def __check_state_exists(self, state_str):
         if state_str not in self._q_table.index:
             self._q_table.loc[state_str] = [0] * len(self.actions)
 
 
-    def _updateEpsilon(self):
+    def __update_epsilon(self):
         if self._epsilon > self._epsilon_min:
             self._epsilon *= self._epsilon_decay
 
@@ -58,12 +56,14 @@ class QLearning(LearningModel):
     def predict(self, state):
         state_str = str(state)
 
-        self.check_state_exists(state_str)
+        self.__check_state_exists(state_str)
 
         return self._q_table.loc[state_str, : ].idxmax()
 
     def save(self):
-        np.save(self.save_path, self._q_table)
+        # np.save('urnai/' + self.save_path, self._q_table)
+        return
 
     def load(self):
-        self._q_table = np.load(self.save_path)
+        # self._q_table = np.load('urnai/' + self.save_path)
+        return

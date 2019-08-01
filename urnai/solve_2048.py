@@ -1,7 +1,7 @@
 from absl import app
 from envs.gym_2048 import GymEnv2048
 from envs.trainer import Trainer
-from agents.gym_agent import GymAgent
+from agents.generic_agent import GenericAgent
 from agents.actions.gym_wrapper import GymWrapper
 from agents.rewards.gym import Game2048Reward
 from agents.states.gym import Game2048State
@@ -22,7 +22,7 @@ def main(unused_argv):
         #dq_network = DQNKeras(action_wrapper, state_builder, 'urnai/models/saved/game2048_divReward_dqnkeras_mem50000_1212', gamma=0.95, epsilon_decay=0.995, epsilon_min=0.1, batch_size=2)
         #dq_network = DQNKerasMem(action_wrapper, state_builder, 'urnai/models/saved/game2048_divReward_dqnkerasmem_1616', gamma=0.95, epsilon_decay=0.995, epsilon_min=0.1, batch_size=6)
         
-        agent = GymAgent(dq_network, Game2048Reward())
+        agent = GenericAgent(dq_network, Game2048Reward())
 
         # Using Trainer to train and play with our agent.
         trainer.train(env, agent, num_episodes=2010, max_steps=1000, save_steps=1000)

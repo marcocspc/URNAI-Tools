@@ -1,7 +1,8 @@
 from absl import app
 from envs.gym import GymEnv
 from envs.trainer import Trainer
-from agents.gym_agent import GymAgent
+from envs.trainer import TestParams
+from agents.generic_agent import GenericAgent
 from agents.actions.gym_wrapper import GymWrapper
 from agents.rewards.default import PureReward
 from agents.states.gym import PureState
@@ -19,10 +20,11 @@ def main(unused_argv):
 
         q_table = QLearning(action_wrapper, state_builder, save_path="models/saved/tax1-v2-Q-table")
 
-        agent = GymAgent(q_table, PureReward())
+        agent = GenericAgent(q_table, PureReward())
 
-        # Using Trainer to train and play with our agent.
-        trainer.train(env, agent, num_episodes=200, save_steps=100000, max_steps=200)
+        # Taxi-v2 is solved when the agent is able to get an avg. reward of at least 8 over 100 matches (optimum is 8.46)
+        test_params = TestParams(num_matches=100, steps_per_test=1000, max_steps=200)
+        trainer.train(env, agent, num_episodes=10000, save_steps=100000, max_steps=200, test_params=test_params)
         trainer.play(env, agent, num_matches=100, max_steps=200)
     except KeyboardInterrupt:
         pass

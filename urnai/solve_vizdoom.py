@@ -1,7 +1,7 @@
 from absl import app
 from envs.vizdoom import VizdoomEnv
 from envs.trainer import Trainer
-from agents.vizdoom_agent import VizdoomAgent
+from agents.generic_agent import GenericAgent
 from agents.actions.vizdoom_wrapper import VizdoomHealthGatheringWrapper
 from agents.rewards.vizdoom import VizDoomHealthGatheringReward  
 from agents.states.vizdoom import TFVizDoomHealthGatheringState
@@ -18,7 +18,7 @@ def main(unused_argv):
 
         model = DQLTF(action_wrapper, state_builder, '/Applications/')
 
-        agent = VizdoomAgent(model, VizDoomHealthGatheringReward())
+        agent = GenericAgent(model, VizDoomHealthGatheringReward())
 
         # Using Trainer to train and play with our agent.
         trainer.train(env, agent, num_episodes=10000, max_steps=2100, save_steps=100)

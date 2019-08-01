@@ -9,27 +9,23 @@ from agents.states.abstate import State
 
 class PolicyGradientTF(LearningModel):
     def __init__(self, action_wrapper: ActionWrapper, state_builder: State, save_path, learning_rate=0.01, gamma=0.95, name='PolicyGradient'):
-        super(PolicyGradientTF, self).__init__(action_wrapper, state_builder, save_path, name)
+        super(PolicyGradientTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
 
         # Initializing variables for the model's state, which must be reset every episode
         self.episode_states, self.episode_actions, self.episode_rewards = [], [], []  # Records all states, actions and rewards for an episode
-
-
-        self.learning_rate = learning_rate
-        self.gamma = gamma
-
+        
         tf.reset_default_graph()
 
-        # Initializing our TensorFlow session
+        # Initializing TensorFlow session
         self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
 
         self.inputs_ = tf.placeholder(dtype=tf.float32, shape=[None, self.state_size], name='inputs_')
 
-        # Placeholder used to output the probability distribution for our actions
+        # Placeholder used to output the probability distribution for the actions
         self.actions_ = tf.placeholder(dtype=tf.float32, shape=[None, self.action_size], name='actions_')
         self.discounted_episode_rewards_ = tf.placeholder(tf.float32, [None, ], name='discounted_episode_rewards')
 
-        # Defining the layers of our neural network
+        # Defining the layers of the neural network
         self.fc1 = tf.contrib.layers.fully_connected(inputs=self.inputs_,
                                                     num_outputs = 10,
                                                     activation_fn = tf.nn.relu,
@@ -67,7 +63,7 @@ class PolicyGradientTF(LearningModel):
         self.episode_rewards.append(r)
 
         if done or is_last_step:
-            discounted_episode_rewards = self.discount_and_normalize_rewards(self.episode_rewards)
+            discounted_episode_rewards = self.__discount_and_normalize_rewards(self.episode_rewards)
 
             # Calculating the loss and training our parameters using the current episode's outputs,
             # that is, feedforward, gradient and backpropagation steps.
@@ -80,7 +76,7 @@ class PolicyGradientTF(LearningModel):
             self.episode_states, self.episode_actions, self.episode_rewards = [], [], []
 
 
-    def discount_and_normalize_rewards(self, episode_rewards):
+    def __discount_and_normalize_rewards(self, episode_rewards):
         discounted_episode_rewards = np.asarray(np.zeros_like(self.episode_rewards))  # Empty numpy array with the same size of our rewards
         cumulative = 0.0
         

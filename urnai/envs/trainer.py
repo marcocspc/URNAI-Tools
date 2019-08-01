@@ -1,20 +1,24 @@
 import itertools
+from utils.logger import Logger
+
+class TestParams():
+    def __init__(self, num_matches, steps_per_test, max_steps=float('inf')):
+        self.num_matches = num_matches
+        self.test_steps = steps_per_test
+        self.max_steps = max_steps
+        self.current_ep_count = 0
+        self.logger = None
 
 
 class Trainer():
-
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
-    ## TODO: Remove reward and win rate counts from this loop. They should be env-dependant. Consider
-    ## creating a structure to allow developpers to choose which statistics they want to display while training.
-    def train(self, env, agent, num_episodes=float('inf'), max_steps=float('inf'), save_steps=1000):
-        # List of rewards
-        rewards = []
+    def train(self, env, agent, num_episodes=float('inf'), max_steps=float('inf'), save_steps=1000, enable_save=True, test_params: TestParams = None):
+        print("> Training")
 
-        # lista do numero de vitorias
-        victories = [0]
-        victory_percentage = [0]
+        logger = Logger(num_episodes)
 
-        print("Training...")
+        if test_params != None:
+            test_params.logger = logger
 
         for episode in itertools.count():
             if episode >= num_episodes:
@@ -24,7 +28,7 @@ class Trainer():
 
             # Reset the environment
             obs = env.reset()
-            reward = 0
+            step_reward = 0
             done = False
             agent.reset()
 
@@ -37,41 +41,38 @@ class Trainer():
 
                 is_last_step = step == max_steps - 1
 
-                action = agent.step(obs, reward, done)
-                obs, reward, done = env.step(action)
-                agent.learn(obs, reward, done, is_last_step)
+                action = agent.step(obs, step_reward, done)
+                obs, step_reward, done = env.step(action)
+                agent.learn(obs, step_reward, done, is_last_step)
 
-                ep_reward += reward
+                ep_reward += step_reward
 
                 if done or is_last_step:
-                    print("Episode: {}/{} | Avg. reward: {}".format(episode + 1, num_episodes, sum(rewards) / (episode + 1)), end="\r")
-                    victory = reward == 1
+                    victory = step_reward == 1
+                    logger.record_episode(ep_reward, victory, step + 1)
                     break
-
-            if episode > 0 and episode % save_steps == 0:
+                    
+            logger.log_ep_stats()
+            if enable_save and episode > 0 and episode % save_steps == 0:
                 agent.model.save()
-                self.printPerformance(rewards, num_episodes, victory_percentage)
 
-            rewards.append(ep_reward)
-
-            if victory:
-                victories.append(1)
-            else:
-                victories.append(0)
-            victory_percentage.append(sum(victories) / (episode + 1))
+            if test_params != None and episode % test_params.test_steps == 0:
+                test_params.current_ep_count = episode
+                self.play(env, agent, test_params.num_matches, test_params.max_steps, test_params)
 
         # Saving the model when the training is ended
-        #agent.model.save()
+        if enable_save:
+            agent.model.save()
+        logger.log_train_stats()
+        logger.plot_train_stats(agent)
 
-        self.printPerformance(rewards, num_episodes, victory_percentage)
 
-    def play(self, env, agent, num_matches, max_steps=float('inf')):
-        rewards = []
+    def play(self, env, agent, num_matches, max_steps=float('inf'), test_params=None):
+        print()
+        print()
+        print("> Playing")
 
-        victories = [0]
-        victory_percentage = [0]
-
-        print("Playing...")
+        logger = Logger(num_matches)
 
         for match in itertools.count():
             if match >= num_matches:
@@ -97,26 +98,18 @@ class Trainer():
                 obs, reward, done = env.step(action)
                 ep_reward += reward
 
+                is_last_step = step == max_steps - 1
                 # If done (if we're dead) : finish episode
-                if done:
+                if done or is_last_step:
                     victory = reward == 1
+                    logger.record_episode(ep_reward, victory, step + 1)
                     break
 
-            rewards.append(ep_reward)
+            logger.log_ep_stats()
 
-            if victory:
-                victories.append(1)
-            else:
-                victories.append(0)
-            victory_percentage.append(sum(victories) / (match + 1))
-
-            print("Match: {}/{} | Avg. reward: {}".format(match + 1, num_matches, sum(rewards) / (match + 1)), end="\r")
-
-        self.printPerformance(rewards, num_matches, victory_percentage)
-
-    def printPerformance(self, rewards, num_matches, victory_percentage):
-        print()
-        print("Matches ended!")
-        print("Average reward: " + str(sum(rewards) / num_matches))
-        print("Win rate: " + str(victory_percentage[-1]))
-        print()
+        if test_params != None:
+            test_params.logger.record_play_test(test_params.current_ep_count, logger.ep_rewards, logger.victories, num_matches)
+            print()
+        else:
+            # Only logs train stats if this is not a test, to avoid cluttering the interface with info
+            logger.log_train_stats()
