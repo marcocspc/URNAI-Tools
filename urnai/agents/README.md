@@ -15,7 +15,7 @@ First of all, before using an agent, you have to make that the environment you'r
 
 After choosing the StateBuilder, RewardBuilder, ActionWrapper and DRL model you're going to use, all you have to do is instantiate them and pass them to the agent's constructor.
 
-The following example is from our agent that solves Gym's Cartpole-V2:
+The following example is from our agent that solves Gym's Cartpole-v1:
 ```
 from agents.gym_agent import GymAgent
 from agents.actions.gym_wrapper import GymWrapper
