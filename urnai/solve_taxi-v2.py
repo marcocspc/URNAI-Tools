@@ -13,17 +13,17 @@ def main(unused_argv):
     trainer = Trainer()
 
     try:
-        env = GymEnv(_id="Taxi-v2")
+        env = GymEnv(id="Taxi-v2")
 
         action_wrapper = GymWrapper(env)
         state_builder = PureState(env)
 
-        q_table = QLearning(action_wrapper, state_builder, save_path="models/saved/tax1-v2-Q-table")
+        q_table = QLearning(action_wrapper, state_builder, save_path="models/saved/tax1-v2-Q-table", gamma=0.95, learning_rate=0.1)
 
         agent = GenericAgent(q_table, PureReward())
 
         # Taxi-v2 is solved when the agent is able to get an avg. reward of at least 8 over 100 matches (optimum is 8.46)
-        test_params = TestParams(num_matches=100, steps_per_test=1000, max_steps=200)
+        test_params = TestParams(num_matches=100, steps_per_test=1000, max_steps=200, reward_threshold=8.46)
         trainer.train(env, agent, num_episodes=10000, save_steps=100000, max_steps=200, test_params=test_params)
         trainer.play(env, agent, num_matches=100, max_steps=200)
     except KeyboardInterrupt:

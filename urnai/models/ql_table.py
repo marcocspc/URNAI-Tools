@@ -2,12 +2,12 @@ import numpy as np
 import pandas as pd
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
-from agents.states.abstate import State
+from agents.states.abstate import StateBuilder
 
 
 class QLearning(LearningModel):
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: State, save_path: str, learning_rate=0.1,
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path: str, learning_rate=0.1,
                  gamma=0.95, epsilon=1, epsilon_min=0.01, epsilon_decay=0.996, name='Q-learning'):
         super(QLearning, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
         self.__set_hyperparameters(learning_rate, gamma, epsilon, epsilon_min, epsilon_decay)

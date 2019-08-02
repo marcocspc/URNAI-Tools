@@ -1,9 +1,9 @@
 import warnings
 import numpy as np
-from .abstate import State
+from .abstate import StateBuilder
 from envs.base.abenv import Env
 
-class FrozenLakeState(State):
+class FrozenLakeState(StateBuilder):
     def build_state(self, obs):
         if obs != None:
             index = obs
@@ -17,7 +17,7 @@ class FrozenLakeState(State):
         return 16
 
 
-class Game2048State(State):
+class Game2048State(StateBuilder):
     def __init__(self, env: Env):
         self.state_dim = env.env_instance.height*env.env_instance.width
 
@@ -29,7 +29,7 @@ class Game2048State(State):
         return self.state_dim
 
 
-class PureState(State):
+class PureState(StateBuilder):
     def __init__(self, env: Env):
         self.state_dim = self.parse_dims(env.env_instance.observation_space)
 

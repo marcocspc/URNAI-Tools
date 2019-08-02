@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from models.base.abmodel import LearningModel
-from agents.rewards.abreward import RewardBase
+from agents.rewards.abreward import RewardBuilder
 
 class Agent(ABC):
     
-    def __init__(self, model: LearningModel, reward_builder: RewardBase):
+    def __init__(self, model: LearningModel, reward_builder: RewardBuilder):
         self.model = model
         self.action_wrapper = model.action_wrapper
         self.state_builder = model.state_builder

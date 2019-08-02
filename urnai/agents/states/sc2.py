@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from .abstate import State
+from .abstate import StateBuilder
 from pysc2.lib import actions, features
 
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
@@ -17,7 +17,7 @@ _TERRAN_BARRACKS = 21
 _TERRAN_SCV = 45
 _NEUTRAL_MINERAL_FIELD = 341
 
-class Simple64State(State):
+class Simple64State(StateBuilder):
 
     def __init__(self):
         self._state_size = 12
@@ -87,7 +87,7 @@ class Simple64State(State):
         return self._state_size
 
 
-class Simple64State_1(State):
+class Simple64State_1(StateBuilder):
     def build_state(self, obs):
         player_y, player_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
         self.base_top_left = 1 if player_y.any() and player_y.mean() <= 31 else 0

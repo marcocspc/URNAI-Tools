@@ -3,13 +3,13 @@ from pysc2.lib import actions, features
 from models.base.abmodel import LearningModel
 from .base.abagent import Agent
 from models.base.abmodel import LearningModel
-from agents.rewards.abreward import RewardBase
+from agents.rewards.abreward import RewardBuilder
 
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 _PLAYER_SELF = 1
 
 class SC2Agent(Agent):
-    def __init__(self, model: LearningModel, reward_builder: RewardBase, env):
+    def __init__(self, model: LearningModel, reward_builder: RewardBuilder, env):
         super(SC2Agent, self).__init__(model, reward_builder)
         self.setup(env)
         self.reward = 0

@@ -1,12 +1,12 @@
-from .abreward import RewardBase
+from .abreward import RewardBuilder
 import numpy
 
-class VizDoomDefaultReward(RewardBase):
+class VizDoomDefaultReward(RewardBuilder):
 
     def get_reward(self, obs, reward, done):
         return reward
 
-class VizDoomHealthGatheringReward(RewardBase):
+class VizDoomHealthGatheringReward(RewardBuilder):
 
     KILLCOUNT = 0
     ITEMCOUNT = 1
@@ -38,7 +38,7 @@ class VizDoomHealthGatheringReward(RewardBase):
         return r
 
 
-class VizDoom2CustomReward(RewardBase):
+class VizDoom2CustomReward(RewardBuilder):
 
     KILLCOUNT = 0
     ITEMCOUNT = 1

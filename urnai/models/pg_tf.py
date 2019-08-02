@@ -4,11 +4,11 @@ import random
 import os
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
-from agents.states.abstate import State
+from agents.states.abstate import StateBuilder
 
 
 class PolicyGradientTF(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: State, save_path, learning_rate=0.01, gamma=0.95, name='PolicyGradient'):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path, learning_rate=0.01, gamma=0.95, name='PolicyGradient'):
         super(PolicyGradientTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
 
         # Initializing variables for the model's state, which must be reset every episode

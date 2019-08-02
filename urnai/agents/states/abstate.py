@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from agents.actions.base.abwrapper import ActionWrapper
 from utils.types import *
 
-class State(ABC):
+class StateBuilder(ABC):
     '''
     Every Agent needs to own an instance of this base class in order to define its State. So every time we want to create a new agent,
     we should either use an existing State implementation or create a new one.

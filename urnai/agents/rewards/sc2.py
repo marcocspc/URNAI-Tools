@@ -1,9 +1,9 @@
 '''
 This file is a repository with reward classes for all StarCraft 2 games/minigames we've solved.
 '''
-from .abreward import RewardBase
+from .abreward import RewardBuilder
 
-class SparseReward(RewardBase):
+class SparseReward(RewardBuilder):
     def get_reward(self, obs, reward, done):
         '''
         Always returns 0, unless the game has ended.
@@ -13,7 +13,7 @@ class SparseReward(RewardBase):
         return reward
 
 
-class KilledUnitsReward(RewardBase):
+class KilledUnitsReward(RewardBuilder):
     def __init__(self):
         # Properties keep track of the change of values used in our reward system
         self._previous_killed_unit_score = 0

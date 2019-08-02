@@ -12,7 +12,7 @@ def main(unused_argv):
     trainer = Trainer()
 
     try:
-        env = GymEnv(_id="CartPole-v0")
+        env = GymEnv(id="CartPole-v0")
 
         action_wrapper = GymWrapper(env)
         state_builder = PureState(env)
@@ -22,8 +22,8 @@ def main(unused_argv):
         agent = GenericAgent(dq_network, PureReward())
 
         # Cartpole-v0 is solved when avg. reward over 100 episodes is greater than or equal to 195
-        test_params = TestParams(num_matches=100, steps_per_test=200, max_steps=1000)
-        trainer.train(env, agent, num_episodes=2000, max_steps=1000, save_steps=1000, test_params=test_params)
+        test_params = TestParams(num_matches=100, steps_per_test=200, max_steps=1000, reward_threshold=200)
+        trainer.train(env, agent, num_episodes=2000, max_steps=1000, save_steps=1000, test_params=test_params, enable_save=False)
         trainer.play(env, agent, num_matches=100, max_steps=1000)
     except KeyboardInterrupt:
         pass

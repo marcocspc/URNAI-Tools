@@ -132,7 +132,4 @@ RewardBuilder <|-- FrozenlakeReward
 RewardBuilder <|-- SC2Reward
 RewardBuilder *-- Agent
 
-' ApplicationUser <|-- Speaker
-' ApplicationUser <|-- Attendee
-' Speaker "1" *-- "*" Topic
 @enduml

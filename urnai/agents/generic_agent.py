@@ -1,11 +1,11 @@
 from agents.base.abagent import Agent
 from models.base.abmodel import LearningModel
-from agents.rewards.abreward import RewardBase
+from agents.rewards.abreward import RewardBuilder
 
 
 class GenericAgent(Agent):
 
-    def __init__(self, model: LearningModel, reward_builder: RewardBase):
+    def __init__(self, model: LearningModel, reward_builder: RewardBuilder):
         super(GenericAgent, self).__init__(model, reward_builder)
 
     def step(self, obs, obs_reward, done):

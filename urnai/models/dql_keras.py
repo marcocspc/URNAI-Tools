@@ -8,11 +8,11 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
-from agents.states.abstate import State
+from agents.states.abstate import StateBuilder
 
 class DQNKeras(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: State, save_path, learning_rate=0.001, gamma=0.95,
-                    name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path, learning_rate=0.001, gamma=0.95,
+                    name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32, memory_size=50000):
         super(DQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
 
         self.epsilon = epsilon
@@ -22,7 +22,7 @@ class DQNKeras(LearningModel):
         self.batch_size = batch_size
 
         self.model = self.__build_model()
-        self.memory = deque(maxlen=50000)
+        self.memory = deque(maxlen=memory_size)
         self.load()
 
 

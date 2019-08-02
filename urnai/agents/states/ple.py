@@ -1,9 +1,9 @@
 import copy
 import numpy as np
-from .abstate import State
+from .abstate import StateBuilder
 from envs.base.abenv import Env
 
-class FlappyBirdState(State):
+class FlappyBirdState(StateBuilder):
 
     def __init__(self):
         self.range_per_feature = {

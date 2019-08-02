@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from agents.actions.base.abwrapper import ActionWrapper
-from agents.states.abstate import State
+from agents.states.abstate import StateBuilder
 from utils.types import ActionIndex
 
 class LearningModel(ABC):
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: State, gamma, learning_rate, save_path, name=None):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, save_path, name=None):
         self.gamma = gamma
         self.learning_rate = learning_rate
         self.save_path = save_path

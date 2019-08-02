@@ -12,7 +12,7 @@ def main(unused_argv):
     trainer = Trainer()
 
     try:
-        env = GymEnv(_id="FrozenLakeNotSlippery-v0")
+        env = GymEnv(id="FrozenLakeNotSlippery-v0")
 
         action_wrapper = GymWrapper(env)
         state_builder = FrozenLakeState()
@@ -22,8 +22,8 @@ def main(unused_argv):
         agent = GenericAgent(dq_network, FrozenlakeReward())
 
         # FrozenLake is solved when the agent is able to reach the end of the maze 100% of the times
-        test_params = TestParams(num_matches=100, steps_per_test=200, max_steps=20)
-        trainer.train(env, agent, num_episodes=2000, max_steps=20, save_steps=1000, test_params=test_params)
+        test_params = TestParams(num_matches=100, steps_per_test=200, max_steps=20, reward_threshold=1)
+        trainer.train(env, agent, num_episodes=2000, max_steps=20, save_steps=1000, test_params=test_params, enable_save=False)
         trainer.play(env, agent, num_matches=100, max_steps=20)
     except KeyboardInterrupt:
         pass

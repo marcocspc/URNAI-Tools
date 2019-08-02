@@ -20,11 +20,11 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 from .dql_keras import DQNKeras
 from agents.actions.base.abwrapper import ActionWrapper
-from agents.states.abstate import State
+from agents.states.abstate import StateBuilder
 
 class DQNKerasMem(DQNKeras):
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: State, save_path, learning_rate=0.0002, gamma=0.95, name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path, learning_rate=0.0002, gamma=0.95, name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32):
         super(DQNKerasMem, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
 
         self.epsilon = epsilon

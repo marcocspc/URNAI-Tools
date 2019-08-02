@@ -2,8 +2,8 @@ import gym
 from .base.abenv import Env
 
 class GymEnv(Env):
-    def __init__(self, _id, render=False, reset_done=True, num_steps=100):
-        super().__init__(_id, render, reset_done)
+    def __init__(self, id, render=False, reset_done=True, num_steps=100):
+        super().__init__(id, render, reset_done)
         self.num_steps = num_steps
 
         self.start()

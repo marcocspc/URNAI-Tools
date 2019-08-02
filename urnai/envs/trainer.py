@@ -1,20 +1,23 @@
 import itertools
+import time
 from utils.logger import Logger
 
 class TestParams():
-    def __init__(self, num_matches, steps_per_test, max_steps=float('inf')):
+    def __init__(self, num_matches, steps_per_test, max_steps=float('inf'), reward_threshold=None):
         self.num_matches = num_matches
         self.test_steps = steps_per_test
         self.max_steps = max_steps
         self.current_ep_count = 0
         self.logger = None
+        self.reward_threshold = reward_threshold
 
 
 class Trainer():
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
-    def train(self, env, agent, num_episodes=float('inf'), max_steps=float('inf'), save_steps=1000, enable_save=True, test_params: TestParams = None):
+    def train(self, env, agent, num_episodes=float('inf'), max_steps=float('inf'), save_steps=1000, enable_save=False, test_params: TestParams = None):
+        start_time = time.time()
+        
         print("> Training")
-
         logger = Logger(num_episodes)
 
         if test_params != None:
@@ -60,6 +63,15 @@ class Trainer():
                 test_params.current_ep_count = episode
                 self.play(env, agent, test_params.num_matches, test_params.max_steps, test_params)
 
+                # Stops training if reward threshold was reached in play testing
+                if test_params.reward_threshold != None and test_params.reward_threshold <= test_params.logger.play_rewards_avg[-1]:
+                    print("> Reward threshold was reached!")
+                    print("> Stopping training")
+                    break
+
+        end_time = time.time()
+        print("\n> Training duration: {} seconds".format(end_time - start_time))
+
         # Saving the model when the training is ended
         if enable_save:
             agent.model.save()
@@ -68,9 +80,7 @@ class Trainer():
 
 
     def play(self, env, agent, num_matches, max_steps=float('inf'), test_params=None):
-        print()
-        print()
-        print("> Playing")
+        print("\n\n> Playing")
 
         logger = Logger(num_matches)
 
