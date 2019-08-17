@@ -14,7 +14,7 @@ class TestParams():
 
 class Trainer():
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
-    def train(self, env, agent, num_episodes=float('inf'), max_steps=float('inf'), save_steps=1000, enable_save=False, test_params: TestParams = None):
+    def train(self, env, agent, num_episodes=float('inf'), max_steps=float('inf'), save_steps=1000, enable_save=False, test_params: TestParams = None, reward_from_builder = False):
         start_time = time.time()
         
         print("> Training")
@@ -47,6 +47,9 @@ class Trainer():
                 action = agent.step(obs, step_reward, done)
                 obs, step_reward, done = env.step(action)
                 agent.learn(obs, step_reward, done, is_last_step)
+
+                if reward_from_builder:
+                    step_reward = agent.get_reward(obs, step_reward, done)
 
                 ep_reward += step_reward
 

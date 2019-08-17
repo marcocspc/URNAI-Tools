@@ -2,15 +2,19 @@ import random
 import numpy as np
 from .base.abwrapper import ActionWrapper
 from agents.actions.sc2 import *
+import agents.actions.sc2 as sc2     # importing our action set file so that we can use its constants
 from utils.agent_utils import one_hot_encode, transformDistance, transformLocation
-from pysc2.lib import features
+from pysc2.lib import features, units
 
 
 ## Defining action constants. These are names of the actions our agent will try to use.
+## These are used merely to facilitate checking which actions are being called during code debugging
 ACTION_DO_NOTHING = 'donothing'                 # The agent does nothing for 3 steps
-ACTION_BUILD_SUPPLY_DEPOT = 'buildsupplydepot'  # Selects SCV > builds supply depot > send SCV to harvest minerals
+ACTION_BUILD_SUPPLY_DEPOT = 'buildsupplydepot'  # Selects SCV > builds supply depot > sends SCV to harvest minerals
 ACTION_BUILD_BARRACKS = 'buildbarracks'         # Selects SCV > builds barracks > sends SCV to harvest minerals
+ACTION_BUILD_REFINERY = 'buildrefinery'         # Selects SCV > finds closest vespene geyser and builds a refinery > sends SCV to harvest minerals
 ACTION_BUILD_MARINE = 'buildmarine'             # Selects all barracks > trains marines > nothing
+ACTION_TRAIN_SCV = 'trainscv'                   # Selects a command center > trains an scv > nothing
 ACTION_ATTACK = 'attack'                        # Selects army > attacks coordinates > nothing
 
 _UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
@@ -39,7 +43,9 @@ class SC2Wrapper(ActionWrapper):
             ACTION_DO_NOTHING,
             ACTION_BUILD_SUPPLY_DEPOT,
             ACTION_BUILD_BARRACKS,
-            ACTION_BUILD_MARINE
+            ACTION_BUILD_REFINERY,
+            ACTION_BUILD_MARINE,
+            ACTION_TRAIN_SCV
         ]
 
         '''
@@ -93,38 +99,39 @@ class SC2Wrapper(ActionWrapper):
 
 
     def get_excluded_actions(self, obs):
-        unit_type = obs.feature_screen[_UNIT_TYPE]
+        supply_depot_count = get_units_amount(obs, units.Terran.SupplyDepot)
 
-        depot_y, depot_x = (unit_type == _TERRAN_SUPPLY_DEPOT).nonzero()
-        supply_depot_count = int(round(len(depot_y) / 69))
+        barracks_count = get_units_amount(obs, units.Terran.Barracks)
 
-        barracks_y, barracks_x = (unit_type == _TERRAN_BARRACKS).nonzero()
-        barracks_count = int(round(len(barracks_y) / 137))
+        # Counts the amount of scvs currently on map
+        scv_count = get_units_amount(obs, units.Terran.SCV)
 
-        supply_used = obs.player[3]
-        supply_limit = obs.player[4]
-        supply_free = supply_limit - supply_used
-
+        #supply_used = obs.player[3]
+        #supply_limit = obs.player[4]
+        supply_free = get_free_supply(obs)
         army_supply = obs.player[5]
         worker_supply = obs.player[6]
 
         # Adding invalid actions to the list of excluded actions
         excluded_actions = []
         # If the supply depot limit of 2 was reached, removes the ability to build it.
-        if supply_depot_count == 2 or worker_supply == 0:
+        if supply_depot_count == 4 or worker_supply == 0:
             excluded_actions.append(self.action_indices[1])
-        # If we have no supply depots or we have 2 barracks, we remove the ability to build it.
+        # If we have no supply depots or we have 2 barracks, we remove the ability to build barracks.
         if supply_depot_count == 0 or barracks_count == 2 or worker_supply == 0:
             excluded_actions.append(self.action_indices[2])
         # If we don't have any barracks or have reached supply limit, remove the ability to train marines
         if supply_free == 0 or barracks_count == 0:
-            excluded_actions.append(self.action_indices[3])
+            excluded_actions.append(self.action_indices[4])
+        # If we have reached supply limit or amount of SCVs equal to 16, remove the ability to train SCVs
+        if supply_free == 0 or scv_count >= 16:
+            excluded_actions.append(self.action_indices[5])
         # If we have no marines, we remove attack actions
         if army_supply == 0:
-            excluded_actions.append(self.action_indices[4])
-            excluded_actions.append(self.action_indices[5])
             excluded_actions.append(self.action_indices[6])
             excluded_actions.append(self.action_indices[7])
+            excluded_actions.append(self.action_indices[8])
+            excluded_actions.append(self.action_indices[9])
         
         return excluded_actions
 
@@ -138,71 +145,103 @@ class SC2Wrapper(ActionWrapper):
         unit_type = obs.feature_screen[_UNIT_TYPE]
         player_y, player_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
         base_top_left = 1 if player_y.any() and player_y.mean() <= 31 else 0
-        player_cc_y, player_cc_x = (unit_type == _TERRAN_COMMANDCENTER).nonzero()
+
+        command_centers = get_units_by_type(obs, units.Terran.CommandCenter)
+        if len(command_centers) > 0:
+            player_cc = random.choice(command_centers)
+        else:
+            player_cc = None
 
         if self.move_number == 0:
             self.move_number += 1
 
             # Selects a random SCV, this is the first step to building a supply depot or barracks
-            if named_action == ACTION_BUILD_BARRACKS or named_action == ACTION_BUILD_SUPPLY_DEPOT:
-                return select_random_unit(obs)
+            if named_action == ACTION_BUILD_BARRACKS  \
+            or named_action == ACTION_BUILD_SUPPLY_DEPOT \
+            or named_action == ACTION_BUILD_REFINERY:
+                return select_random_scv(obs)
 
             # Selects all barracks on the screen simultaneously
             elif named_action == ACTION_BUILD_MARINE:
                 return select_all_barracks(obs)
 
+            # Selects a Command Center
+            elif named_action == ACTION_TRAIN_SCV:
+                return select_command_center(obs)
+
+            # Selects all army units
             elif named_action == ACTION_ATTACK:
                 return select_army(obs)
 
         elif self.move_number == 1:
             self.move_number += 1
 
-            # Commands the SCV to build the depot at a given location. The place
-            # we use to build supply depots and barracks are hard coded.
+            # Commands the SCV to build the depot at a given location.
             if named_action == ACTION_BUILD_SUPPLY_DEPOT:
                 # Calculates the number of supply depots currently built
-                unit_type = obs.feature_screen[_UNIT_TYPE]
-                depot_y, depot_x = (unit_type == _TERRAN_SUPPLY_DEPOT).nonzero()
-                supply_depot_count = int(round(len(depot_y) / 69))
+                supply_depot_count = get_units_amount(obs, units.Terran.SupplyDepot)
+                supply_free = get_free_supply(obs)
 
-                if supply_depot_count < 2:
-                    if player_cc_y.any():
+                if supply_depot_count < 7 and supply_free < 6:
+                    if get_units_amount(obs, units.Terran.CommandCenter) > 0:
                         # Builds supply depots at a fixed location
                         if supply_depot_count == 0:
-                            target = transformDistance(round(player_cc_x.mean()), -35, round(player_cc_y.mean()), 0, base_top_left)
+                            target = transformDistance(player_cc.x, -35, player_cc.y , 0, base_top_left)
                         elif supply_depot_count == 1:
-                            target = transformDistance(round(player_cc_x.mean()), -25, round(player_cc_y.mean()), -25, base_top_left)
+                            target = transformDistance(player_cc.x, -25, player_cc.y, -25, base_top_left)
+                        else:
+                            # If two or more depots have been built, choose a random location to build more
+                            x = random.randint(0,83)
+                            y = random.randint(0,83)
+                            target = [x, y]
                         return build_supply_depot(obs, target) 
 
             # Commands the selected SCV to build barracks at a given location
             elif named_action == ACTION_BUILD_BARRACKS:
                 # Calculates the number of barracks currently built
-                unit_type = obs.feature_screen[_UNIT_TYPE]
-                barracks_y, barracks_x = (unit_type == _TERRAN_BARRACKS).nonzero()
-                barracks_count = int(round(len(barracks_y) / 137))
+                barracks_count = get_units_amount(obs, units.Terran.Barracks)
 
-                if barracks_count < 2:
-                    if player_cc_y.any():
-                        # Builds barracks at a fixed location.
+                if barracks_count < 2:                    
+                    if get_units_amount(obs, units.Terran.CommandCenter) > 0:
+                        # Builds barracks at a fixed location (currently only two).
                         if barracks_count == 0:
-                            target = transformDistance(round(player_cc_x.mean()), 15, round(player_cc_y.mean()), -9, base_top_left)
+                            target = transformDistance(player_cc.x, 15, player_cc.y, -9, base_top_left)
                         elif barracks_count == 1:
-                            target = transformDistance(round(player_cc_x.mean()), 15, round(player_cc_y.mean()), 12, base_top_left)
+                            target = transformDistance(player_cc.x, 15, player_cc.y, 12, base_top_left)
                         return build_barracks(obs, target)
+
+            # Commands the selected SCV to build a refinery at one of the two refineries near the command center
+            elif named_action == ACTION_BUILD_REFINERY:
+                if get_units_amount(obs, units.Terran.Refinery) < 2:
+                    vespene_geysers = get_units_by_type(obs, units.Neutral.VespeneGeyser)
+                    
+                    if len(vespene_geysers) > 0:
+                        vespene_geyser = random.choice(vespene_geysers)
+
+                        build_refinery(obs, (vespene_geyser.x, vespene_geyser.y))
+
 
             # Tells the barracks to train a marine
             elif named_action == ACTION_BUILD_MARINE:
                 return train_marine(obs)
+
+            # Tells the Command Center to train an SCV
+            elif named_action == ACTION_TRAIN_SCV:
+                if get_units_amount(obs, units.Terran.CommandCenter) > 0:
+                    if player_cc.assigned_harvesters < player_cc.ideal_harvesters:
+                        return train_scv(obs)
             
             # Tells the agent to attack a location on the map
             elif named_action == ACTION_ATTACK:
                 do_it = True
                 
                 # Checks if any SCV is selected. If so, the agent doesn't attack.
-                if len(obs.single_select) > 0 and obs.single_select[0][0] == _TERRAN_SCV:
-                    do_it = False
-                if len(obs.multi_select) > 0 and obs.multi_select[0][0] == _TERRAN_SCV:
-                    do_it = False
+                scvs = get_units_by_type(obs, units.Terran.SCV)
+                for scv in scvs:
+                    if scv.is_selected:
+                        do_it = False
+                        break
+
                 if do_it:
                     x_offset = random.randint(-1, 1)
                     y_offset = random.randint(-1, 1)
@@ -213,7 +252,9 @@ class SC2Wrapper(ActionWrapper):
             self.move_number = 0
 
             # Sends the SCV back to a mineral patch after it finished building.
-            if named_action == ACTION_BUILD_BARRACKS or named_action == ACTION_BUILD_SUPPLY_DEPOT:
+            if named_action == ACTION_BUILD_BARRACKS \
+            or named_action == ACTION_BUILD_SUPPLY_DEPOT \
+            or named_action == ACTION_BUILD_REFINERY:
                 return harvest_point(obs)
 
         return no_op()

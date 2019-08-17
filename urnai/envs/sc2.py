@@ -65,12 +65,14 @@ class SC2Env(Env):
                 visualize=self.render,
                 players=self.players,
                 agent_interface_format=[
-                    features.parse_agent_interface_format(
-                        feature_screen=84,#self.spatial_dim,
-                        feature_minimap=64,#self.spatial_dim,
-                        use_feature_units=True,
-                        rgb_screen=None,
-                        rgb_minimap=None
+                    features.AgentInterfaceFormat(
+                        feature_dimensions=features.Dimensions(screen=84, minimap=64),
+                        use_feature_units=True
+                        #feature_screen=84,#self.spatial_dim,
+                        #feature_minimap=64, #self.spatial_dim,
+                        #use_feature_units=True,
+                        #rgb_screen=None,
+                        #rgb_minimap=None
                     )
                 ],
                 step_mul=self.step_mul,
