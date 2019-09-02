@@ -28,6 +28,7 @@ class Game2048Reward(RewardBuilder):
             else:
                 return 0
         else:
+            # TO DO: Return negative if game lost
             return self.div_reward(obs, reward, done)
 
     # divided reward is calculated based on the standard reward from the game minus the amount of spaces (16 for a 4x4 grid) divided by the amount of empty spaces plus 1

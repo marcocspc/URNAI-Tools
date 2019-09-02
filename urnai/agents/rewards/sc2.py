@@ -19,8 +19,8 @@ class KilledUnitsReward(RewardBuilder):
         self._previous_killed_unit_score = 0
         self._previous_killed_building_score = 0
 
-        self._kill_unit_reward = 0.2
-        self._kill_building_reward = 0.5
+        self._kill_unit_reward = 1
+        self._kill_building_reward = 2
 
     # When the episode is over, the values we use to compute our reward should be reset.
     def reset(self):
@@ -32,13 +32,13 @@ class KilledUnitsReward(RewardBuilder):
         current_killed_unit_score = obs.score_cumulative[5]
         current_killed_building_score = obs.score_cumulative[6]
 
-        reward = 0
+        new_reward = 0
 
         if current_killed_unit_score > self._previous_killed_unit_score:
-            reward += self._kill_unit_reward
+            new_reward += self._kill_unit_reward
 
         if current_killed_building_score > self._previous_killed_building_score:
-            reward += self._kill_building_reward
+            new_reward += self._kill_building_reward
 
         # Saving the previous values for killed units and killed buildings.
         self._previous_killed_unit_score = current_killed_unit_score
@@ -47,4 +47,4 @@ class KilledUnitsReward(RewardBuilder):
         if done:
             self.reset()
 
-        return reward
+        return new_reward

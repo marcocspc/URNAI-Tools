@@ -31,7 +31,12 @@ class PolicyGradientTF(LearningModel):
                                                     activation_fn = tf.nn.relu,
                                                     weights_initializer = tf.contrib.layers.xavier_initializer())
 
-        self.fc2 = tf.contrib.layers.fully_connected(inputs=self.fc1,
+        self.fc1_1 = tf.contrib.layers.fully_connected(inputs=self.fc1,
+                                                    num_outputs = 10,
+                                                    activation_fn = tf.nn.relu,
+                                                    weights_initializer = tf.contrib.layers.xavier_initializer())
+
+        self.fc2 = tf.contrib.layers.fully_connected(inputs=self.fc1_1,
                                                     num_outputs = self.action_size,
                                                     activation_fn = tf.nn.relu,
                                                     weights_initializer = tf.contrib.layers.xavier_initializer())

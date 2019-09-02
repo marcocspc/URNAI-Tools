@@ -13,7 +13,7 @@ def main(unused_argv):
 
     try:
         ## Initializing our StarCraft 2 environment
-        players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
+        players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.medium)]
         env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=16)
         
         action_wrapper = SC2Wrapper()
@@ -23,7 +23,7 @@ def main(unused_argv):
         ## Terran agent with a Deep Q-Learning model
         agent = SC2Agent(dq_network, KilledUnitsReward(), env)
 
-        trainer.train(env, agent, num_episodes=20, save_steps=1, enable_save=False, reward_from_builder=True) #reward from builder
+        trainer.train(env, agent, num_episodes=20, save_steps=1, enable_save=False, reward_from_builder=True)
         trainer.play(env, agent, num_matches=2)
     except KeyboardInterrupt:
         pass

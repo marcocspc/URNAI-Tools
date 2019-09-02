@@ -21,6 +21,21 @@ You might need to install some of those depending on the environments you're goi
 - [OpenAI Gym](https://github.com/openai/gym)
 - [PyGame Learning Environment](https://github.com/ntasfi/PyGame-Learning-Environment)
 
+Be aware that the PySC2 version being used by our library was installed from the "dev" branch. To download the dev branch from PySC2's github you should:
+
+1. Locally clone their repository:
+```
+git clone https://github.com/deepmind/pysc2.git
+```
+2. Switch to the dev branch:
+```
+git checkout -t origin/dev
+```
+3. Install PySC2 from there:
+```
+pip install -e . --force-reinstall
+```
+
 ### Installing
 
 Run these commands on the terminal to install URNAI Tools on your computer.

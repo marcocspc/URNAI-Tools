@@ -1,7 +1,8 @@
 import math
 import numpy as np
 from .abstate import StateBuilder
-from pysc2.lib import actions, features
+from pysc2.lib import actions, features, units
+from agents.actions.sc2 import * 
 
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 _UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
@@ -89,19 +90,16 @@ class Simple64State(StateBuilder):
 
 class Simple64State_1(StateBuilder):
     def build_state(self, obs):
-        player_y, player_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
-        self.base_top_left = 1 if player_y.any() and player_y.mean() <= 31 else 0
-
-        ## Defining our state and calculating the reward
-        unit_type = obs.feature_screen[_UNIT_TYPE]
+        
+        if obs.game_loop[0] == 0:
+            command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
+            self.base_top_left = (command_center.x < 32)
 
         # Whether or not our supply depot was built
-        depot_y, depot_x = (unit_type == _TERRAN_SUPPLY_DEPOT).nonzero()
-        supply_depot_count = 1 if depot_y.any() else 0
+        supply_depot_count = 1 if get_units_amount(obs, units.Terran.SupplyDepot) > 0 else 0
 
         # Whether or not our barracks were built
-        barracks_y, barracks_x = (unit_type == _TERRAN_BARRACKS).nonzero()
-        barracks_count = 1 if barracks_y.any else 0
+        barracks_count = 1 if get_units_amount(obs, units.Terran.Barracks) else 0
 
         # The supply limit
         supply_limit = obs.player[4]
@@ -118,10 +116,11 @@ class Simple64State_1(StateBuilder):
         # Insteading of making a vector for all coordnates on the map, we'll discretize our enemy space
         # and use a 16x16 grid to store enemy positions by marking a square as 1 if there's any enemy on it.
         hot_squares = np.zeros(16)
-        enemy_y, enemy_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_HOSTILE).nonzero()
-        for i in range(0, len(enemy_y)):
-            y = int(math.ceil((enemy_y[i] + 1) / 16))
-            x = int(math.ceil((enemy_x[i] + 1) / 16))
+        enemy_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.ENEMY]
+        
+        for i in range(0, len(enemy_units)):
+            y = int(math.ceil((enemy_units[i].x + 1) / 16))
+            x = int(math.ceil((enemy_units[i].y + 1) / 16))
 
             hot_squares[((y - 1) * 4) + (x - 1)] = 1
 

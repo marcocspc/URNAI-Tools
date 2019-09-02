@@ -57,12 +57,12 @@ class Trainer():
                     victory = step_reward == 1
                     logger.record_episode(ep_reward, victory, step + 1)
                     break
-                    
+            
             logger.log_ep_stats()
             if enable_save and episode > 0 and episode % save_steps == 0:
                 agent.model.save()
 
-            if test_params != None and episode % test_params.test_steps == 0:
+            if test_params != None and episode % test_params.test_steps == 0 and episode != 0:
                 test_params.current_ep_count = episode
                 self.play(env, agent, test_params.num_matches, test_params.max_steps, test_params)
 
