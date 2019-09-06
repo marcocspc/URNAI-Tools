@@ -14,7 +14,7 @@ def main(unused_argv):
     try:
         ## Initializing our StarCraft 2 environment
         players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.medium)]
-        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=16)
+        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=8)
         
         action_wrapper = SC2Wrapper()
         state_builder = Simple64State_1()

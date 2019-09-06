@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from pysc2.lib import actions, features, units
 from pysc2.env import sc2_env
 
@@ -16,16 +17,29 @@ and returns the corresponding PySC2 call to select_point that would select this 
 
 ## TODO: Move constants to a separate file, so they can be imported and used by other modules
 ## Defining constants for action ids, so our agent can check if an action is valid
-_NO_OP = actions.RAW_FUNCTIONS.no_op
+_NO_OP = actions.FUNCTIONS.no_op
 
 _HARVEST_GATHER = actions.FUNCTIONS.Harvest_Gather_screen.id
 
 _BUILD_SUPPLY_DEPOT = actions.RAW_FUNCTIONS.Build_SupplyDepot_pt
-_BUILD_BARRACKS = actions.RAW_FUNCTIONS.Build_Barracks_pt
 _BUILD_REFINERY = actions.RAW_FUNCTIONS.Build_Refinery_pt
+_BUILD_ENGINEERINGBAY = actions.RAW_FUNCTIONS.Build_EngineeringBay_pt
+_BUILD_ARMORY = actions.RAW_FUNCTIONS.Build_Armory_pt
+_BUILD_MISSILETURRET = actions.RAW_FUNCTIONS.Build_MissileTurret_pt
+_BUILD_BUNKER = actions.RAW_FUNCTIONS.Build_Bunker_pt
+_BUILD_FUSIONCORE = actions.RAW_FUNCTIONS.Build_FusionCore_pt
+_BUILD_GHOSTACADEMY = actions.RAW_FUNCTIONS.Build_GhostAcademy_pt
+_BUILD_BARRACKS = actions.RAW_FUNCTIONS.Build_Barracks_pt
+_BUILD_FACTORY = actions.RAW_FUNCTIONS.Build_Factory_pt
+_BUILD_STARPORT = actions.RAW_FUNCTIONS.Build_Starport_pt
+_BUILD_TECHLAB_BARRACKS = actions.RAW_FUNCTIONS.Build_TechLab_Barracks_quick
+_BUILD_TECHLAB_FACTORY = actions.RAW_FUNCTIONS.Build_TechLab_Factory_quick
+_BUILD_TECHLAB_STARPORT = actions.RAW_FUNCTIONS.Build_TechLab_Starport_quick
+_BUILD_REACTOR_BARRACKS = actions.RAW_FUNCTIONS.Build_Reactor_Barracks_quick
+_BUILD_REACTOR_FACTORY = actions.RAW_FUNCTIONS.Build_Reactor_Factory_quick
+_BUILD_REACTOR_STARPORT = actions.RAW_FUNCTIONS.Build_Reactor_Starport_quick
 
 _ATTACK_MINIMAP = actions.FUNCTIONS.Attack_minimap.id
-
 
 _TRAIN_SCV = actions.RAW_FUNCTIONS.Train_SCV_quick
 _TRAIN_MARINE = actions.RAW_FUNCTIONS.Train_Marine_quick
@@ -50,11 +64,14 @@ _ZERG = sc2_env.Race.zerg
 
 
 def no_op():
-    return actions.FUNCTIONS.no_op()
+    return actions.RAW_FUNCTIONS.no_op()
 
 
 def select_random_unit_by_type(obs, unit_type):
     units = get_my_units_by_type(obs, unit_type)
+
+    if len(units) == 2:
+        test = 1
 
     if len(units) > 0:
         random_unit = random.choice(units)
@@ -71,7 +88,7 @@ def select_idle_worker(obs, player_race):
 
     if len(workers) > 0:
         for worker in workers:
-            if worker.order_length == 0: # check if worker is idle
+            if worker.order_length == 0: # checking if worker is idle
                 return worker
     return _NO_UNITS
 
@@ -79,7 +96,7 @@ def select_idle_worker(obs, player_race):
 
 # Convert to raw obs
 def select_point(select_type, target):
-    if check_target_validity(target):
+    if is_valid_target(target):
         return actions.FUNCTIONS.select_point(select_type, target)
     return no_op()
 
@@ -88,19 +105,26 @@ def select_army(obs):
     return actions.FUNCTIONS.select_army(_NOT_QUEUED)
 
 
-def build_structure_by_type(obs, action_id, target):
+def build_structure_by_type(obs, action_id, target=None):
     worker = select_random_unit_by_type(obs, units.Terran.SCV)
     if worker != _NO_UNITS:
-        # worker_tag = worker.tag
-        if check_target_validity(target):
-            return action_id("now", worker.tag, target), worker
-    return no_op()
+        if " raw_cmd " in str(action_id.function_type):                 # Checking if the build action is of type RAW_CMD
+            return action_id("now", target.tag), _NO_UNITS              # RAW_CMD actions only need a [0]queue and [1]unit_tags and doesn't use a worker (i think)
+        
+        elif " raw_cmd_pt " in str(action_id.function_type):            # Checking if the build action is of type RAW_CMD_PT
+            if is_valid_target(target):                
+                return action_id("now", worker.tag, target), worker     # RAW_CMD_PT actions need a [0]queue, [1]unit_tags and [2]world_point
+
+        elif " raw_cmd_unit " in str(action_id.function_type):          # Checking if the build action is of type RAW_CMD_UNIT
+            return action_id("now", worker.tag, target.tag), worker     # RAW_CMD_PT actions need a [0]queue, [1]unit_tags and [2]unit_tags
+    return _NO_OP(), _NO_UNITS
 
 # Convert to raw obs
 def train_marine(obs):
-    if _TRAIN_MARINE in obs.available_actions:
-        return actions.FUNCTIONS.Train_Marine_quick(_QUEUED)
-    return no_op()
+    barracks = get_my_units_by_type(obs, units.Terran.Barracks)
+    if len(barracks) > 0:
+        return _TRAIN_MARINE("now", barracks.tag)
+    return _NO_OP()
 
 # TO DO: Check if we can train units using list of structures (get_my_units_by_type)
 # or if we need to specify a single structure
@@ -108,29 +132,53 @@ def train_scv(obs):
     command_centers = get_my_units_by_type(obs, units.Terran.CommandCenter)
     if len(command_centers) > 0:
         return actions.RAW_FUNCTIONS.Train_SCV_quick("now", command_centers)
-    return no_op()
+    return _NO_OP()
 
 # Convert to raw obs
 def attack_target_point(obs, target):
     if _ATTACK_MINIMAP in obs.available_actions:
-        if check_target_validity(target):
+        if is_valid_target(target):
             return actions.FUNCTIONS.Attack_minimap(_NOT_QUEUED, target)
     return no_op()
 
-# Convert to raw obs
-def harvest_point(obs, worker):
+
+def harvest_gather_minerals(obs, worker):
     if worker != _NO_UNITS:
         mineral_fields = get_neutral_units_by_type(obs, units.Neutral.MineralField)
-
         if len(mineral_fields) > 0:
-            mineral_field = random.choice(mineral_fields)
-            target = [mineral_field.x, mineral_field.y]
-            return actions.RAW_FUNCTIONS.Harvest_Gather_SCV_pt("queued", mineral_field.tag, target)
-    return no_op()
+            command_centers = get_my_units_by_type(obs, units.Terran.CommandCenter)
+            # Checks for every mineral field if it is closer than 10 units of distance from a command center, if so, sends our worker there to harvest
+            if len(command_centers) > 0:
+                for mineral_field in mineral_fields:
+                    target = [mineral_field.x, mineral_field.y]
+                    distances = get_distances(obs, command_centers, target)
+                    if distances[np.argmin(distances)] < 10:
+                        return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, mineral_field.tag)
+    return _NO_OP()
 
 
-#The following methods are used to aid in various mechanical operations the agent has to perform,
-#such as: getting all units from a certain type, counting the amount of free supply, etc
+def harvest_gather_gas(obs, worker):
+    if worker != _NO_UNITS:
+        refineries = get_my_units_by_type(obs, units.Terran.Refinery)
+        if len(refineries) > 0:
+            # Checks for refinery field if it is closer than 10 units of distance to our selected worker, if so, sends our worker there to harvest
+            for refinery in refineries:
+                target = [refinery.x, refinery.y]
+                pos_worker = [worker.x, worker.y]
+                if get_euclidean_distance(pos_worker, target) < 10:
+                    return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, refinery.tag)
+    return _NO_OP()
+
+def harvest_return(obs, worker):
+    if worker != _NO_UNITS:
+        return actions.RAW_FUNCTIONS.Harvest_Return_quick("queued", worker.tag)
+    return _NO_OP()
+
+
+'''
+The following methods are used to aid in various mechanical operations the agent has to perform,
+such as: getting all units from a certain type, counting the amount of free supply, etc
+'''
 
 def get_my_units_by_type(obs, unit_type):
     return [unit for unit in obs.raw_units 
@@ -149,7 +197,7 @@ def get_units_amount(obs, unit_type):
     return len(get_my_units_by_type(obs, unit_type))
 
 # TO DO: Find a more general way of checking whether the target is at a valid screen point
-def check_target_validity(target):
+def is_valid_target(target):
     if 0 <= target[0] <= 63 and 0<= target[1] <= 63:
         return True
     return False
@@ -159,7 +207,15 @@ def building_exists(obs, unit_type):
         return True
     return False
 
+def get_distances(obs, units, xy):
+    units_xy = [(unit.x, unit.y) for unit in units]
+    return np.linalg.norm(np.array(units_xy) - np.array(xy), axis=1)
+
+def get_euclidean_distance(unit_xy, xy):
+    return np.linalg.norm(np.array(unit_xy) - np.array(xy))
+
 # TO DO: Implement these methods to facilitate checks and overall code reuse
+# check_unit_validity (should check if the object im receiving is a proper unit from pysc2)
 # already_pending()
 # can_afford()
 # building_exists()

@@ -60,6 +60,7 @@ class SC2Env(Env):
             # Lazy loading pysc2 env
             from pysc2.env import sc2_env
 
+
             self.env_instance = sc2_env.SC2Env(
                 map_name=self.id,
                 visualize=self.render,
@@ -69,11 +70,9 @@ class SC2Env(Env):
                         action_space=actions.ActionSpace.RAW,
                         use_raw_units=True,
                         raw_resolution=64,
-                        #use_feature_units=True,
-                        #feature_screen=84,#self.spatial_dim,
-                        #feature_minimap=64, #self.spatial_dim,                
-                        #rgb_screen=None,
-                        #rgb_minimap=None
+                        use_feature_units=True,
+                        # rgb_dimensions=features.Dimensions(screen=84, minimap=64),
+                        feature_dimensions=features.Dimensions(screen=64, minimap=64),
                     )
                 ],
                 step_mul=self.step_mul,
