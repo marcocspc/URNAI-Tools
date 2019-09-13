@@ -11,8 +11,9 @@ from pysc2.env import sc2_env
 
 ## Defining action constants. These are names of the actions our agent will try to use.
 ## These are used merely to facilitate checking which actions are being called during code debugging
-ACTION_DO_NOTHING = 'donothing'                             # The agent does nothing for 3 steps
+ACTION_DO_NOTHING = 'donothing'                             # The agent does nothing
 
+ACTION_BUILD_COMMAND_CENTER = 'buildcommandcenter'
 ACTION_BUILD_SUPPLY_DEPOT = 'buildsupplydepot'              # Selects SCV > builds supply depot > sends SCV to harvest minerals
 ACTION_BUILD_REFINERY = 'buildrefinery'                     # Selects SCV > finds closest vespene geyser and builds a refinery > sends SCV to harvest minerals
 ACTION_BUILD_ENGINEERINGBAY = 'buildengineeringbay'
@@ -36,7 +37,8 @@ ACTION_TRAIN_SCV = 'trainscv'                               # Selects all comman
 
 ACTION_ATTACK = 'attack'                                    # Selects army > attacks coordinates > nothing
 ACTION_HARVEST_MINERALS_IDLE = 'harvestmineralsidle'        # Selects random idle scv > sends him to harvest minerals
-ACTION_HARVEST_GAS_NOT_IDLE = 'harvestgasnotidle'
+ACTION_HARVEST_MINERALS_FROM_GAS = 'harvestmineralsfromgas'
+ACTION_HARVEST_GAS_FROM_MINERALS = 'harvestgasfromminerals'
 
 
 _UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
@@ -54,6 +56,7 @@ class SC2Wrapper(ActionWrapper):
     def __init__(self):
         self.move_number = 0
         self.last_worker = sc2._NO_UNITS
+        self.base_top_left = True
 
         '''
         We're defining names for our actions for two reasons:
@@ -65,28 +68,30 @@ class SC2Wrapper(ActionWrapper):
         self.named_actions = [
             ACTION_DO_NOTHING,
 
+            ACTION_BUILD_COMMAND_CENTER,
             ACTION_BUILD_SUPPLY_DEPOT,
-            # ACTION_BUILD_REFINERY,
-            # ACTION_BUILD_ENGINEERINGBAY,
-            # ACTION_BUILD_ARMORY,
-            # ACTION_BUILD_MISSILETURRET,
-            # ACTION_BUILD_BUNKER,
-            # ACTION_BUILD_FUSIONCORE,
-            # ACTION_BUILD_GHOSTACADEMY,
+            ACTION_BUILD_REFINERY,
+            ACTION_BUILD_ENGINEERINGBAY,
+            ACTION_BUILD_ARMORY,
+            ACTION_BUILD_MISSILETURRET,
+            ACTION_BUILD_BUNKER,
+            ACTION_BUILD_FUSIONCORE,
+            ACTION_BUILD_GHOSTACADEMY,
             ACTION_BUILD_BARRACKS,
-            # ACTION_BUILD_FACTORY,
-            # ACTION_BUILD_STARPORT,
-            # ACTION_BUILD_TECHLAB_BARRACKS,
-            # ACTION_BUILD_TECHLAB_FACTORY,
-            # ACTION_BUILD_TECHLAB_STARPORT,
-            # ACTION_BUILD_REACTOR_BARRACKS,
-            # ACTION_BUILD_REACTOR_FACTORY,
-            # ACTION_BUILD_REACTOR_STARPORT,
+            ACTION_BUILD_FACTORY,
+            ACTION_BUILD_STARPORT,
+            ACTION_BUILD_TECHLAB_BARRACKS,
+            ACTION_BUILD_TECHLAB_FACTORY,
+            ACTION_BUILD_TECHLAB_STARPORT,
+            ACTION_BUILD_REACTOR_BARRACKS,
+            ACTION_BUILD_REACTOR_FACTORY,
+            ACTION_BUILD_REACTOR_STARPORT,
 
             ACTION_TRAIN_MARINE,
             ACTION_TRAIN_SCV,
             ACTION_HARVEST_MINERALS_IDLE,
-            ACTION_HARVEST_GAS_NOT_IDLE,
+            ACTION_HARVEST_MINERALS_FROM_GAS,
+            ACTION_HARVEST_GAS_FROM_MINERALS,
         ]
 
         '''
@@ -182,12 +187,32 @@ class SC2Wrapper(ActionWrapper):
     def get_action(self, action_idx, obs):
         named_action = self.named_actions[action_idx]
         named_action, x, y = self.split_action(named_action)
+
+        if obs.game_loop[0] == 0:
+            command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
+            self.base_top_left = (command_center.x < 32)
         
         '''LIST OF ACTIONS THE AGENT IS ABLE TO CHOOSE FROM:'''
 
+        # BUILD COMMAND CENTER
+        if named_action == ACTION_BUILD_COMMAND_CENTER:
+            if get_units_amount(obs, units.Terran.CommandCenter) < 2:
+                if self.move_number == 0:
+                    self.move_number += 1
+                    x = random.randint(0,63)
+                    y = random.randint(0,63)
+                    target = [x, y]
+                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_COMMAND_CENTER, target)
+                    return action
+                if self.move_number == 1:
+                    self.move_number +=1
+                    return harvest_gather_minerals_quick(obs, self.last_worker)
+                if self.move_number == 2:
+                    self.move_number = 0
+
         # BUILD SUPPLY DEPOT
         if named_action == ACTION_BUILD_SUPPLY_DEPOT:
-            if get_units_amount(obs, units.Terran.SupplyDepot) < 5:
+            if get_units_amount(obs, units.Terran.SupplyDepot) < 8:
                 if self.move_number == 0:
                     self.move_number += 1
                     x = random.randint(0,63)
@@ -197,7 +222,7 @@ class SC2Wrapper(ActionWrapper):
                     return action
                 if self.move_number == 1:
                     self.move_number +=1
-                    return harvest_gather_minerals(obs, self.last_worker)
+                    return harvest_gather_minerals_quick(obs, self.last_worker)
                 if self.move_number == 2:
                     self.move_number = 0
 
@@ -206,13 +231,14 @@ class SC2Wrapper(ActionWrapper):
             if get_units_amount(obs, units.Terran.Refinery) < 8:
                 if self.move_number == 0:
                     self.move_number += 1
-                    geysers = get_neutral_units_by_type(obs, units.Neutral.VespeneGeyser)
-                    geyser = random.choice(geysers)
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_REFINERY, geyser)
+                    # Using our get_exploitable_geyser function defined int actions\sc2.py to choose an available Vespene Geyser to build our refinery
+                    chosen_geyser = get_exploitable_geyser(obs, sc2_env.Race.terran)
+                    # Building a refinery in the chosen geyser
+                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_REFINERY, chosen_geyser)
                     return action
                 if self.move_number == 1:
                     self.move_number +=1
-                    return harvest_gather_minerals(obs, self.last_worker)
+                    return harvest_gather_minerals_quick(obs, self.last_worker)
                 if self.move_number == 2:
                     self.move_number = 0
 
@@ -228,7 +254,7 @@ class SC2Wrapper(ActionWrapper):
                     return action
                 if self.move_number == 1:
                     self.move_number +=1
-                    return harvest_gather_minerals(obs, self.last_worker)
+                    return harvest_gather_minerals_quick(obs, self.last_worker)
                 if self.move_number == 2:
                     self.move_number = 0
 
@@ -244,7 +270,7 @@ class SC2Wrapper(ActionWrapper):
                     return action
                 if self.move_number == 1:
                     self.move_number +=1
-                    return harvest_gather_minerals(obs, self.last_worker)
+                    return harvest_gather_minerals_quick(obs, self.last_worker)
                 if self.move_number == 2:
                     self.move_number = 0
 
@@ -260,7 +286,7 @@ class SC2Wrapper(ActionWrapper):
                     return action
                 if self.move_number == 1:
                     self.move_number +=1
-                    return harvest_gather_minerals(obs, self.last_worker)
+                    return harvest_gather_minerals_quick(obs, self.last_worker)
                 if self.move_number == 2:
                     self.move_number = 0
 
@@ -276,7 +302,7 @@ class SC2Wrapper(ActionWrapper):
                     return action
                 if self.move_number == 1:
                     self.move_number +=1
-                    return harvest_gather_minerals(obs, self.last_worker)
+                    return harvest_gather_minerals_quick(obs, self.last_worker)
                 if self.move_number == 2:
                     self.move_number = 0
 
@@ -292,7 +318,7 @@ class SC2Wrapper(ActionWrapper):
                     return action
                 if self.move_number == 1:
                     self.move_number +=1
-                    return harvest_gather_minerals(obs, self.last_worker)
+                    return harvest_gather_minerals_quick(obs, self.last_worker)
                 if self.move_number == 2:
                     self.move_number = 0
 
@@ -308,7 +334,7 @@ class SC2Wrapper(ActionWrapper):
                     return action
                 if self.move_number == 1:
                     self.move_number +=1
-                    return harvest_gather_minerals(obs, self.last_worker)
+                    return harvest_gather_minerals_quick(obs, self.last_worker)
                 if self.move_number == 2:
                     self.move_number = 0
 
@@ -324,7 +350,7 @@ class SC2Wrapper(ActionWrapper):
                     return action
                 if self.move_number == 1:
                     self.move_number +=1
-                    return harvest_gather_minerals(obs, self.last_worker)
+                    return harvest_gather_minerals_quick(obs, self.last_worker)
                 if self.move_number == 2:
                     self.move_number = 0
 
@@ -340,7 +366,7 @@ class SC2Wrapper(ActionWrapper):
                     return action
                 if self.move_number == 1:
                     self.move_number +=1
-                    return harvest_gather_minerals(obs, self.last_worker)
+                    return harvest_gather_minerals_quick(obs, self.last_worker)
                 if self.move_number == 2:
                     self.move_number = 0
 
@@ -356,7 +382,7 @@ class SC2Wrapper(ActionWrapper):
                     return action
                 if self.move_number == 1:
                     self.move_number +=1
-                    return harvest_gather_minerals(obs, self.last_worker)
+                    return harvest_gather_minerals_quick(obs, self.last_worker)
                 if self.move_number == 2:
                     self.move_number = 0
 
@@ -373,7 +399,7 @@ class SC2Wrapper(ActionWrapper):
                 return no_op()
             if self.move_number == 1:
                 self.move_number +=1
-                return harvest_gather_minerals(obs, self.last_worker)
+                return harvest_gather_minerals_quick(obs, self.last_worker)
             if self.move_number == 2:
                 self.move_number = 0
 
@@ -390,7 +416,7 @@ class SC2Wrapper(ActionWrapper):
                 return no_op()
             if self.move_number == 1:
                 self.move_number +=1
-                return harvest_gather_minerals(obs, self.last_worker)
+                return harvest_gather_minerals_quick(obs, self.last_worker)
             if self.move_number == 2:
                 self.move_number = 0
 
@@ -407,7 +433,7 @@ class SC2Wrapper(ActionWrapper):
                 return no_op()
             if self.move_number == 1:
                 self.move_number +=1
-                return harvest_gather_minerals(obs, self.last_worker)
+                return harvest_gather_minerals_quick(obs, self.last_worker)
             if self.move_number == 2:
                 self.move_number = 0
 
@@ -424,7 +450,7 @@ class SC2Wrapper(ActionWrapper):
                 return no_op()
             if self.move_number == 1:
                 self.move_number +=1
-                return harvest_gather_minerals(obs, self.last_worker)
+                return harvest_gather_minerals_quick(obs, self.last_worker)
             if self.move_number == 2:
                 self.move_number = 0
 
@@ -441,7 +467,7 @@ class SC2Wrapper(ActionWrapper):
                 return no_op()
             if self.move_number == 1:
                 self.move_number +=1
-                return harvest_gather_minerals(obs, self.last_worker)
+                return harvest_gather_minerals_quick(obs, self.last_worker)
             if self.move_number == 2:
                 self.move_number = 0
 
@@ -458,7 +484,7 @@ class SC2Wrapper(ActionWrapper):
                 return no_op()
             if self.move_number == 1:
                 self.move_number +=1
-                return harvest_gather_minerals(obs, self.last_worker)
+                return harvest_gather_minerals_quick(obs, self.last_worker)
             if self.move_number == 2:
                 self.move_number = 0
                 
@@ -466,18 +492,47 @@ class SC2Wrapper(ActionWrapper):
         # HARVEST MINERALS WITH IDLE WORKER
         if named_action == ACTION_HARVEST_MINERALS_IDLE:
             idle_worker = select_idle_worker(obs, sc2_env.Race.terran)
-            return harvest_gather_minerals(obs, idle_worker)
+            if idle_worker != sc2._NO_UNITS:
+                if building_exists(obs, units.Terran.CommandCenter):
+                    ccs = get_my_units_by_type(obs, units.Terran.CommandCenter)
+                    for cc in ccs:
+                        if get_euclidean_distance([idle_worker.x, idle_worker.y], [cc.x, cc.y]) < 10:
+                            return harvest_gather_minerals(obs, idle_worker, cc)
+            return no_op()
 
         # TO DO: Create a harvest minerals with worker from refinery line so the bot can juggle workers from mineral lines to gas back and forth
 
+        # HARVEST MINERALS WITH WORKER FROM GAS LINE
+        if named_action == ACTION_HARVEST_MINERALS_FROM_GAS:
+            if building_exists(obs, units.Terran.CommandCenter):
+                ccs = get_my_units_by_type(obs, units.Terran.CommandCenter)
+                for cc in ccs:
+                    # Check if command center is not full of workers yet
+                    if cc.assigned_harvesters < cc.ideal_harvesters:
+                        workers = get_my_units_by_type(obs, units.Terran.SCV)
+                        for worker in workers:
+                            if get_euclidean_distance([worker.x, worker.y], [cc.x, cc.y]) < 10:
+                                # Checking if worker is harvesting, if so, send him to harvest gas
+                                if worker.order_id_0 == 362 or worker.order_id_0 == 359:
+                                    return harvest_gather_minerals(obs, worker, cc)
+            return no_op()
+
         # HARVEST GAS WITH WORKER FROM MINERAL LINE
-        if named_action == ACTION_HARVEST_GAS_NOT_IDLE:
-            if building_exists(obs, units.Terran.Refinery):
-                workers = get_my_units_by_type(obs, units.Terran.SCV)
-                for worker in workers:
-                    # Checking if worker is harvesting minerals, if so, send him to harvest gas instead
-                    if worker.order_id_0 == 362 or worker.order_id_0 == 359:
-                        return harvest_gather_gas(obs, worker)
+        if named_action == ACTION_HARVEST_GAS_FROM_MINERALS:
+            if building_exists(obs, units.Terran.CommandCenter):
+                if building_exists(obs, units.Terran.Refinery):
+                    refineries = get_my_units_by_type(obs, units.Terran.Refinery)
+                    # Going through all refineries
+                    for refinery in refineries:
+                        # Checking if refinery is not full of workers yet
+                        if refinery.assigned_harvesters < refinery.ideal_harvesters:
+                            workers = get_my_units_by_type(obs, units.Terran.SCV)
+                            for worker in workers:
+                                # Checking if worker is close by to the refinery
+                                if get_euclidean_distance([worker.x, worker.y], [refinery.x, refinery.y]) < 10:
+                                    # Checking if worker is harvesting, if so, send him to harvest gas
+                                    if worker.order_id_0 == 362 or worker.order_id_0 == 359:
+                                        return harvest_gather_gas(obs, worker, refinery)
             return no_op()
 
         # TRAIN SCV
@@ -485,114 +540,18 @@ class SC2Wrapper(ActionWrapper):
             return train_scv(obs)
 
         # TRAIN MARINE
-        # if named_action == ACTION_TRAIN_MARINE:
-        #     return train_marine(obs)
+        if named_action == ACTION_TRAIN_MARINE:
+            return train_marine(obs)
 
-        
-
-        # if self.move_number == 0:
-        #     self.move_number += 1
-
-        #     # Selects a random SCV, this is the first step to building a supply depot or barracks
-        #     if named_action == ACTION_BUILD_BARRACKS  \
-        #     or named_action == ACTION_BUILD_SUPPLY_DEPOT \
-        #     or named_action == ACTION_BUILD_REFINERY:
-        #         return select_random_unit_by_type(obs, units.Terran.SCV)
-
-        #     # Selects all barracks on the screen simultaneously
-        #     elif named_action == ACTION_BUILD_MARINE:
-        #         return select_all_units_by_type(obs, units.Terran.Barracks)
-
-        #     # Selects a Command Center
-        #     elif named_action == ACTION_TRAIN_SCV:
-        #         return select_all_units_by_type(obs, units.Terran.CommandCenter)
-
-        #     # Selects all army units
-        #     elif named_action == ACTION_ATTACK:
-        #         return select_army(obs)
-
-        # elif self.move_number == 1:
-        #     self.move_number += 1
-
-        #     # Commands the SCV to build the depot at a given location.
-        #     if named_action == ACTION_BUILD_SUPPLY_DEPOT:
-        #         # Calculates the number of supply depots currently built
-        #         supply_depot_count = get_units_amount(obs, units.Terran.SupplyDepot)
-        #         supply_free = get_free_supply(obs)
-
-        #         if supply_depot_count < 7 and supply_free < 6:
-        #             if get_units_amount(obs, units.Terran.CommandCenter) > 0:
-        #                 # Builds supply depots at a fixed location
-        #                 if supply_depot_count == 0:
-        #                     target = transformDistance(player_cc.x, -35, player_cc.y , 0, base_top_left)
-        #                 elif supply_depot_count == 1:
-        #                     target = transformDistance(player_cc.x, -25, player_cc.y, -25, base_top_left)
-        #                 else:
-        #                     # If two or more depots have been built, choose a random location to build more
-        #                     x = random.randint(0,83)
-        #                     y = random.randint(0,83)
-        #                     target = [x, y]
-        #                 return build_structure_by_type(obs, sc2._BUILD_SUPPLY_DEPOT, target) 
-
-        #     # Commands the selected SCV to build barracks at a given location
-        #     elif named_action == ACTION_BUILD_BARRACKS:
-        #         # Calculates the number of barracks currently built
-        #         barracks_count = get_units_amount(obs, units.Terran.Barracks)
-
-        #         if barracks_count < 2:                    
-        #             if get_units_amount(obs, units.Terran.CommandCenter) > 0:
-        #                 # Builds barracks at a fixed location (currently only two).
-        #                 if barracks_count == 0:
-        #                     target = transformDistance(player_cc.x, 15, player_cc.y, -9, base_top_left)
-        #                 elif barracks_count == 1:
-        #                     target = transformDistance(player_cc.x, 15, player_cc.y, 12, base_top_left)
-        #                 return build_barracks(obs, target)
-
-        #     # Commands the selected SCV to build a refinery at one of the two refineries near the command center
-        #     elif named_action == ACTION_BUILD_REFINERY:
-        #         if get_units_amount(obs, units.Terran.Refinery) < 2:
-        #             vespene_geysers = get_neutral_units_by_type(obs, units.Neutral.VespeneGeyser)
-                    
-        #             if len(vespene_geysers) > 0:
-        #                 vespene_geyser = random.choice(vespene_geysers)
-
-        #                 build_refinery(obs, (vespene_geyser.x, vespene_geyser.y))
-
-
-        #     # Tells the barracks to train a marine
-        #     elif named_action == ACTION_BUILD_MARINE:
-        #         return train_marine(obs)
-
-        #     # Tells the Command Center to train an SCV
-        #     elif named_action == ACTION_TRAIN_SCV:
-        #         if get_units_amount(obs, units.Terran.CommandCenter) > 0:
-        #             if player_cc.assigned_harvesters < player_cc.ideal_harvesters:
-        #                 return train_scv(obs)
-            
-        #     # Tells the agent to attack a location on the map
-        #     elif named_action == ACTION_ATTACK:
-        #         do_it = True
-                
-        #         # Checks if any SCV is selected. If so, the agent doesn't attack.
-        #         scvs = get_my_units_by_type(obs, units.Terran.SCV)
-        #         for scv in scvs:
-        #             if scv.is_selected:
-        #                 do_it = False
-        #                 break
-
-        #         if do_it:
-        #             x_offset = random.randint(-1, 1)
-        #             y_offset = random.randint(-1, 1)
-        #             target = transformLocation(int(x) + (x_offset * 8), int(y) + (y_offset * 8), base_top_left)
-        #             return attack_target_point(obs, target)
-
-        # elif self.move_number == 2:
-        #     self.move_number = 0
-
-        #     # Sends the SCV back to a mineral patch after it finished building.
-        #     if named_action == ACTION_BUILD_BARRACKS \
-        #     or named_action == ACTION_BUILD_SUPPLY_DEPOT \
-        #     or named_action == ACTION_BUILD_REFINERY:
-        #         return harvest_point(obs)
+        # ATTACK ACTIONS
+        if named_action == ACTION_ATTACK:
+            attack_xy = (38, 44) if self.base_top_left else (19, 23)
+            x_offset = random.randint(-4, 4)
+            y_offset = random.randint(-4, 4)
+            marines = get_my_units_by_type(obs, units.Terran.Marine)
+            if len(marines) > 0:
+                target = [attack_xy[0] + x_offset, attack_xy[1] + y_offset]
+                return attack_target_point(obs, marines, target)
+            return no_op()
 
         return no_op()
