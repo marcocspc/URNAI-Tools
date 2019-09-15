@@ -5,6 +5,10 @@ import sys
 
 class MiniRTSEnv(Env):
 
+    #TODO: add enemy AI to environment, check: 
+    #https://github.com/facebookresearch/ELF/blob/master/train_minirts.sh and
+    #https://github.com/facebookresearch/ELF/blob/master/eval_minirts.sh and
+    #https://github.com/facebookresearch/ELF/blob/master/eval.py
     #TODO: TEST THIS!!!!!
 
     def __init__(self, minirts_path = expanduser("~") + "/ELF/rts/game_MC/game.py"):
