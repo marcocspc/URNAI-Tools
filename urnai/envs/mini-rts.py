@@ -9,9 +9,10 @@ class MiniRTSEnv(Env):
     #https://github.com/facebookresearch/ELF/blob/master/train_minirts.sh and
     #https://github.com/facebookresearch/ELF/blob/master/eval_minirts.sh and
     #https://github.com/facebookresearch/ELF/blob/master/eval.py
+    #TODO: add option to render env or not
     #TODO: TEST THIS!!!!!
 
-    def __init__(self, minirts_path = expanduser("~") + "/ELF/rts/game_MC/game.py"):
+    def __init__(self, minirts_path = expanduser("~") + "/ELF/rts/game_MC/game.py", render = False, enemyAI = True):
         '''
             Initizalize attributes
         '''
@@ -25,7 +26,7 @@ class MiniRTSEnv(Env):
         self.rts = game.initialize()
 
         self.observation = None
-        self.actoraction = None
+        self.actor_action = None
         self.done = True
         self.chosen_action = self._act_callback
 
@@ -44,10 +45,10 @@ class MiniRTSEnv(Env):
             Executes action and return observation, done
         '''
 
-        self.chosen_action = action
+        self.actor_action = action
         self.rts.Run()
 
-        return self.observation(),self.done
+        return self.observation,self.done
 
     def close(self):
         '''
@@ -64,7 +65,7 @@ class MiniRTSEnv(Env):
 
         self.close()
         self.observation = None
-        self.actoraction = None
+        self.actor_action = None
         self.start()
 
         return self.observation
@@ -75,7 +76,7 @@ class MiniRTSEnv(Env):
 
     def _act_callback(self, batch):
         self.observation = batch
-        return self.actoraction
+        return self.actor_action
 
 
 
