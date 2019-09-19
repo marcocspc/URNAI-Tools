@@ -32,10 +32,22 @@ ACTION_BUILD_REACTOR_BARRACKS = 'buildreactorbarracks'
 ACTION_BUILD_REACTOR_FACTORY = 'buildreactorfactory'
 ACTION_BUILD_REACTOR_STARPORT = 'buildreactorstarport'
 
-ACTION_TRAIN_MARINE = 'trainmarine'                         # Selects all barracks > trains marines > nothing
-ACTION_TRAIN_SCV = 'trainscv'                               # Selects all command center > trains an scv > nothing
+ACTION_RESEARCH_STIMPACK = 'researchstimpack'
+ACTION_RESEARCH_COMBATSHIELD = 'researchcombatshield'
+ACTION_RESEARCH_CONCUSSIVESHELL = 'researchconcussiveshell'
 
-ACTION_ATTACK = 'attack'                                    # Selects army > attacks coordinates > nothing
+ACTION_EFFECT_STIMPACK = 'effectstimpack'
+
+ACTION_TRAIN_SCV = 'trainscv'                               # Selects all command center > trains an scv > nothing
+ACTION_TRAIN_MARINE = 'trainmarine'                         # Selects all barracks > trains marines > nothing
+ACTION_TRAIN_MARAUDER = 'trainmarauder'
+
+ACTION_ATTACK_ENEMY_BASE = 'attackenemybase'                                    # Selects army > attacks coordinates > nothing
+ACTION_ATTACK_ENEMY_SECOND_BASE = 'attackenemysecondbase'
+ACTION_ATTACK_MY_BASE = 'attackmybase'
+ACTION_ATTACK_MY_SECOND_BASE = 'attackmysecondbase'
+
+
 ACTION_HARVEST_MINERALS_IDLE = 'harvestmineralsidle'        # Selects random idle scv > sends him to harvest minerals
 ACTION_HARVEST_MINERALS_FROM_GAS = 'harvestmineralsfromgas'
 ACTION_HARVEST_GAS_FROM_MINERALS = 'harvestgasfromminerals'
@@ -68,30 +80,43 @@ class SC2Wrapper(ActionWrapper):
         self.named_actions = [
             ACTION_DO_NOTHING,
 
-            ACTION_BUILD_COMMAND_CENTER,
+            # ACTION_BUILD_COMMAND_CENTER,
             ACTION_BUILD_SUPPLY_DEPOT,
             ACTION_BUILD_REFINERY,
-            ACTION_BUILD_ENGINEERINGBAY,
-            ACTION_BUILD_ARMORY,
-            ACTION_BUILD_MISSILETURRET,
-            ACTION_BUILD_BUNKER,
-            ACTION_BUILD_FUSIONCORE,
-            ACTION_BUILD_GHOSTACADEMY,
+            # ACTION_BUILD_ENGINEERINGBAY,
+            # ACTION_BUILD_ARMORY,
+            # ACTION_BUILD_MISSILETURRET,
+            # ACTION_BUILD_BUNKER,
+            # ACTION_BUILD_FUSIONCORE,
+            # ACTION_BUILD_GHOSTACADEMY,
             ACTION_BUILD_BARRACKS,
-            ACTION_BUILD_FACTORY,
-            ACTION_BUILD_STARPORT,
+            # ACTION_BUILD_FACTORY,
+            # ACTION_BUILD_STARPORT,
             ACTION_BUILD_TECHLAB_BARRACKS,
-            ACTION_BUILD_TECHLAB_FACTORY,
-            ACTION_BUILD_TECHLAB_STARPORT,
-            ACTION_BUILD_REACTOR_BARRACKS,
-            ACTION_BUILD_REACTOR_FACTORY,
-            ACTION_BUILD_REACTOR_STARPORT,
+            # ACTION_BUILD_TECHLAB_FACTORY,
+            # ACTION_BUILD_TECHLAB_STARPORT,
+            # ACTION_BUILD_REACTOR_BARRACKS,
+            # ACTION_BUILD_REACTOR_FACTORY,
+            # ACTION_BUILD_REACTOR_STARPORT,
 
-            ACTION_TRAIN_MARINE,
+            # ACTION_RESEARCH_STIMPACK,
+            ACTION_RESEARCH_COMBATSHIELD,
+            ACTION_RESEARCH_CONCUSSIVESHELL,
+
+            ACTION_EFFECT_STIMPACK,
+
             ACTION_TRAIN_SCV,
+            ACTION_TRAIN_MARINE,
+            ACTION_TRAIN_MARAUDER,
+
             ACTION_HARVEST_MINERALS_IDLE,
             ACTION_HARVEST_MINERALS_FROM_GAS,
             ACTION_HARVEST_GAS_FROM_MINERALS,
+
+            ACTION_ATTACK_ENEMY_BASE,
+            ACTION_ATTACK_ENEMY_SECOND_BASE,
+            ACTION_ATTACK_MY_BASE,
+            ACTION_ATTACK_MY_SECOND_BASE,
         ]
 
         '''
@@ -100,10 +125,10 @@ class SC2Wrapper(ActionWrapper):
         ACTION_ATTACK_x_y. When this actions is selected, we parse this string to retrieve this coordinate info
         and pass it as a parameter to the actual PySC2 action.
         '''
-        for mm_x in range(0, 64):
-            for mm_y in range(0, 64):
-                if (mm_x + 1) % 32 == 0 and (mm_y + 1) % 32 == 0:
-                    self.named_actions.append(ACTION_ATTACK + '_' + str(mm_x - 16) + '_' + str(mm_y - 16))
+        # for mm_x in range(0, 64):
+        #     for mm_y in range(0, 64):
+        #         if (mm_x + 1) % 32 == 0 and (mm_y + 1) % 32 == 0:
+        #             self.named_actions.append(ACTION_ATTACK + '_' + str(mm_x - 16) + '_' + str(mm_y - 16))
    
         '''
         In URNAI, the models can only return action indices. This index is passed by the agent to an ActionWrapper like this
@@ -212,7 +237,7 @@ class SC2Wrapper(ActionWrapper):
 
         # BUILD SUPPLY DEPOT
         if named_action == ACTION_BUILD_SUPPLY_DEPOT:
-            if get_units_amount(obs, units.Terran.SupplyDepot) < 8:
+            if get_units_amount(obs, units.Terran.SupplyDepot) < 10:
                 if self.move_number == 0:
                     self.move_number += 1
                     x = random.randint(0,63)
@@ -535,23 +560,112 @@ class SC2Wrapper(ActionWrapper):
                                         return harvest_gather_gas(obs, worker, refinery)
             return no_op()
 
+        # RESEARCH STIMPACK
+        if named_action == ACTION_RESEARCH_STIMPACK:
+            if building_exists(obs, units.Terran.BarracksTechLab):
+                b_techlabs = get_my_units_by_type(obs, units.Terran.BarracksTechLab)
+                b_techlab = random.choice(b_techlabs)
+                if(b_techlab.order_progress_0 == 0):
+                    return research_upgrade(obs, sc2._RESEARCH_TERRAN_STIMPACK, b_techlab)
+            return no_op()
+
+        # RESEARCH COMBATSHIELD
+        if named_action == ACTION_RESEARCH_COMBATSHIELD:
+            if building_exists(obs, units.Terran.BarracksTechLab):
+                b_techlabs = get_my_units_by_type(obs, units.Terran.BarracksTechLab)
+                b_techlab = random.choice(b_techlabs)
+                if(b_techlab.order_progress_0 == 0):
+                    return research_upgrade(obs, sc2._RESEARCH_TERRAN_COMBATSHIELD, b_techlab)
+            return no_op()
+
+        # RESEARCH CONCUSSIVESHELL
+        if named_action == ACTION_RESEARCH_CONCUSSIVESHELL:
+            if building_exists(obs, units.Terran.BarracksTechLab):
+                b_techlabs = get_my_units_by_type(obs, units.Terran.BarracksTechLab)
+                b_techlab = random.choice(b_techlabs)
+                if(b_techlab.order_progress_0 == 0):
+                    return research_upgrade(obs, sc2._RESEARCH_TERRAN_CONCUSSIVESHELL, b_techlab)
+            return no_op()
+
+        # EFFECT STIMPACK
+        if named_action == ACTION_EFFECT_STIMPACK:
+            marines = get_my_units_by_type(obs, units.Terran.Marine)
+            if building_exists(obs, units.Terran.BarracksTechLab):
+                if len(marines) > 0:
+                    return effect_units(obs, sc2._EFFECT_STIMPACK, marines)
+            return no_op()
+
         # TRAIN SCV
         if named_action == ACTION_TRAIN_SCV:
-            return train_scv(obs)
+            return train_unit(obs, sc2._TRAIN_SCV, units.Terran.CommandCenter)
 
         # TRAIN MARINE
         if named_action == ACTION_TRAIN_MARINE:
-            return train_marine(obs)
+            return train_unit(obs, sc2._TRAIN_MARINE, units.Terran.Barracks)
 
-        # ATTACK ACTIONS
-        if named_action == ACTION_ATTACK:
+        # TRAIN MARAUDER
+        if named_action == ACTION_TRAIN_MARAUDER:
+            return train_unit(obs, sc2._TRAIN_MARAUDER, units.Terran.Barracks)
+
+        # ATTACK ENEMY BASE
+        if named_action == ACTION_ATTACK_ENEMY_BASE:
             attack_xy = (38, 44) if self.base_top_left else (19, 23)
             x_offset = random.randint(-4, 4)
             y_offset = random.randint(-4, 4)
+            army = []
             marines = get_my_units_by_type(obs, units.Terran.Marine)
-            if len(marines) > 0:
+            marauders = get_my_units_by_type(obs, units.Terran.Marauder)
+            army.extend(marines)
+            army.extend(marauders)
+            if len(army) > 0:
                 target = [attack_xy[0] + x_offset, attack_xy[1] + y_offset]
-                return attack_target_point(obs, marines, target)
+                return attack_target_point(obs, army, target)
             return no_op()
+
+        # ATTACK ENEMY SECOND BASE
+        if named_action == ACTION_ATTACK_ENEMY_SECOND_BASE:
+            attack_xy = (19, 44) if self.base_top_left else (38, 23)
+            x_offset = random.randint(-4, 4)
+            y_offset = random.randint(-4, 4)
+            army = []
+            marines = get_my_units_by_type(obs, units.Terran.Marine)
+            marauders = get_my_units_by_type(obs, units.Terran.Marauder)
+            army.extend(marines)
+            army.extend(marauders)
+            if len(army) > 0:
+                target = [attack_xy[0] + x_offset, attack_xy[1] + y_offset]
+                return attack_target_point(obs, army, target)
+            return no_op()
+
+        # ATTACK MY BASE
+        if named_action == ACTION_ATTACK_MY_BASE:
+            attack_xy = (19, 23) if self.base_top_left else (38, 44)
+            x_offset = random.randint(-4, 4)
+            y_offset = random.randint(-4, 4)
+            army = []
+            marines = get_my_units_by_type(obs, units.Terran.Marine)
+            marauders = get_my_units_by_type(obs, units.Terran.Marauder)
+            army.extend(marines)
+            army.extend(marauders)
+            if len(army) > 0:
+                target = [attack_xy[0] + x_offset, attack_xy[1] + y_offset]
+                return attack_target_point(obs, army, target)
+            return no_op()
+
+        # ATTACK MY SECOND BASE
+        if named_action == ACTION_ATTACK_MY_SECOND_BASE:
+            attack_xy = (38, 23) if self.base_top_left else (19, 44)
+            x_offset = random.randint(-4, 4)
+            y_offset = random.randint(-4, 4)
+            army = []
+            marines = get_my_units_by_type(obs, units.Terran.Marine)
+            marauders = get_my_units_by_type(obs, units.Terran.Marauder)
+            army.extend(marines)
+            army.extend(marauders)
+            if len(army) > 0:
+                target = [attack_xy[0] + x_offset, attack_xy[1] + y_offset]
+                return attack_target_point(obs, army, target)
+            return no_op()
+
 
         return no_op()

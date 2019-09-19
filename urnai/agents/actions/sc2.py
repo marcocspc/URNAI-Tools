@@ -19,8 +19,6 @@ and returns the corresponding PySC2 call to select_point that would select this 
 ## Defining constants for action ids, so our agent can check if an action is valid
 _NO_OP = actions.FUNCTIONS.no_op
 
-_HARVEST_GATHER = actions.FUNCTIONS.Harvest_Gather_screen.id
-
 _BUILD_COMMAND_CENTER = actions.RAW_FUNCTIONS.Build_CommandCenter_pt
 _BUILD_SUPPLY_DEPOT = actions.RAW_FUNCTIONS.Build_SupplyDepot_pt
 _BUILD_REFINERY = actions.RAW_FUNCTIONS.Build_Refinery_pt
@@ -40,24 +38,41 @@ _BUILD_REACTOR_BARRACKS = actions.RAW_FUNCTIONS.Build_Reactor_Barracks_quick
 _BUILD_REACTOR_FACTORY = actions.RAW_FUNCTIONS.Build_Reactor_Factory_quick
 _BUILD_REACTOR_STARPORT = actions.RAW_FUNCTIONS.Build_Reactor_Starport_quick
 
-_ATTACK_MINIMAP = actions.FUNCTIONS.Attack_minimap.id
+_RESEARCH_TERRAN_INF_WEAPONS = actions.RAW_FUNCTIONS.Research_TerranInfantryWeapons_quick
+_RESEARCH_TERRAN_INF_ARMOR = actions.RAW_FUNCTIONS.Research_TerranInfantryArmor_quick
+_RESEARCH_TERRAN_SHIPS_WEAPONS = actions.RAW_FUNCTIONS.Research_TerranShipWeapons_quick
+_RESEARCH_TERRAN_VEHIC_WEAPONS = actions.RAW_FUNCTIONS.Research_TerranVehicleWeapons_quick
+_RESEARCH_TERRAN_SHIPVEHIC_PLATES = actions.RAW_FUNCTIONS.Research_TerranVehicleAndShipPlating_quick
+_RESEARCH_TERRAN_STRUCTURE_ARMOR = actions.RAW_FUNCTIONS.Research_TerranStructureArmorUpgrade_quick
+
+'''BARRACK RESEARCH'''
+_RESEARCH_TERRAN_STIMPACK = actions.RAW_FUNCTIONS.Research_Stimpack_quick
+_RESEARCH_TERRAN_COMBATSHIELD = actions.RAW_FUNCTIONS.Research_CombatShield_quick
+_RESEARCH_TERRAN_CONCUSSIVESHELL = actions.RAW_FUNCTIONS.Research_ConcussiveShells_quick
+
+'''FACTORY RESEARCH'''
+_RESEARCH_TERRAN_INFERNALPREIGNITER = actions.RAW_FUNCTIONS.Research_InfernalPreigniter_quick
+_RESEARCH_TERRAN_DRILLING_CLAWS = actions.RAW_FUNCTIONS.Research_DrillingClaws_quick
+# check if these two following research options are actually from the factory building
+_RESEARCH_TERRAN_CYCLONE_LOCKONDMG = actions.RAW_FUNCTIONS.Research_CycloneLockOnDamage_quick
+_RESEARCH_TERRAN_CYCLONE_RAPIDFIRE = actions.RAW_FUNCTIONS.Research_CycloneRapidFireLaunchers_quick
+
+'''STARPORT RESEARCH'''
+_RESEARCH_TERRAN_HIGHCAPACITYFUEL = actions.RAW_FUNCTIONS.Research_HighCapacityFuelTanks_quick
+_RESEARCH_TERRAN_CORVIDREACTOR = actions.RAW_FUNCTIONS.Research_RavenCorvidReactor_quick
+_RESEARCH_TERRAN_BANSHEECLOACK = actions.RAW_FUNCTIONS.Research_BansheeCloakingField_quick
+_RESEARCH_TERRAN_BANSHEEHYPERFLIGHT = actions.RAW_FUNCTIONS.Research_BansheeHyperflightRotors_quick
+_RESEARCH_TERRAN_ADVANCEDBALLISTICS = actions.RAW_FUNCTIONS.Research_AdvancedBallistics_quick
 
 _TRAIN_SCV = actions.RAW_FUNCTIONS.Train_SCV_quick
 _TRAIN_MARINE = actions.RAW_FUNCTIONS.Train_Marine_quick
+_TRAIN_MARAUDER = actions.RAW_FUNCTIONS.Train_Marauder_quick
+
+'''Unit Effects'''
+_EFFECT_STIMPACK = actions.RAW_FUNCTIONS.Effect_Stim_quick
 
 
-_PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
-_UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
-_PLAYER_ID = features.SCREEN_FEATURES.player_id.index
-
-_PLAYER_SELF = 1
-_PLAYER_HOSTILE = 4
-_ARMY_SUPPLY = 5
-
-_NOT_QUEUED = [0]
-_QUEUED = [1]
-_SELECT_ALL = [2]
-
+'''CONSTANTS USED TO DO GENERAL CHECKS'''
 _NO_UNITS = "no_units"
 _TERRAN = sc2_env.Race.terran
 _PROTOSS = sc2_env.Race.protoss
@@ -93,14 +108,8 @@ def select_idle_worker(obs, player_race):
 # TO DO: Implement a select_closest_unit_by_type (useful to select workers closest to building target)
 
 # Convert to raw obs
-def select_point(select_type, target):
-    if is_valid_target(target):
-        return actions.FUNCTIONS.select_point(select_type, target)
-    return no_op()
-
-# Convert to raw obs
 def select_army(obs):
-    return actions.FUNCTIONS.select_army(_NOT_QUEUED)
+    return actions.FUNCTIONS.select_army("now")
 
 
 def build_structure_by_type(obs, action_id, target=None):
@@ -117,29 +126,33 @@ def build_structure_by_type(obs, action_id, target=None):
             return action_id("now", worker.tag, target.tag), worker     # RAW_CMD_UNIT actions need a [0]queue, [1]unit_tags and [2]unit_tags
     return _NO_OP(), _NO_UNITS
 
-# Convert to raw obs
-def train_marine(obs):
-    barracks = get_my_units_by_type(obs, units.Terran.Barracks)
-    if len(barracks) > 0:
-        for barrack in barracks:
-            if barrack.build_progress == 100 and barrack.order_progress_0 == 0:
-                return actions.RAW_FUNCTIONS.Train_Marine_quick("now", barrack.tag)
+
+def research_upgrade(obs, action_id, target):
+    if target != _NO_UNITS:
+        return action_id("now", target.tag)
     return _NO_OP()
 
-# TO DO: Check if we can train units using list of structures (get_my_units_by_type)
-# or if we need to specify a single structure
-def train_scv(obs):
-    command_centers = get_my_units_by_type(obs, units.Terran.CommandCenter)
-    if len(command_centers) > 0:
-        for command_center in command_centers:
-            if command_center.build_progress == 100 and command_center.order_progress_0 == 0:
-                return actions.RAW_FUNCTIONS.Train_SCV_quick("now", command_center.tag)
+
+def effect_units(obs, action_id, units):
+    if units != _NO_UNITS:
+        for unit in units:
+            return action_id("now", unit.tag)
     return _NO_OP()
 
-# Convert to raw obs
+
+def train_unit(obs, action_id, building_type):
+    buildings = get_my_units_by_type(obs, building_type)
+    if len(buildings) > 0:
+        for building in buildings:
+            if building.build_progress == 100 and building.order_progress_0 == 0:
+                return action_id("now", building.tag)
+    return _NO_OP()
+
+
 def attack_target_point(obs, units, target):
     if units != _NO_UNITS:
-        return actions.RAW_FUNCTIONS.Attack_pt("now", units, target)
+        for unit in units:
+            return actions.RAW_FUNCTIONS.Attack_pt("now", unit.tag, target)
     return no_op()
 
 
