@@ -127,9 +127,12 @@ def build_structure_by_type(obs, action_id, target=None):
     return _NO_OP(), _NO_UNITS
 
 
-def research_upgrade(obs, action_id, target):
-    if target != _NO_UNITS:
-        return action_id("now", target.tag)
+def research_upgrade(obs, action_id, building_type):
+    if building_exists(obs, building_type):
+        buildings = get_my_units_by_type(obs, building_type)
+        for building in buildings:
+            if building.build_progress == 100 and building.order_progress_0 == 0:
+                return action_id("now", building.tag)
     return _NO_OP()
 
 
@@ -254,7 +257,11 @@ def get_distances(obs, units, xy):
 def get_euclidean_distance(unit_xy, xy):
     return np.linalg.norm(np.array(unit_xy) - np.array(xy))
 
-# TO DO: Implement these methods to facilitate checks and overall code reuse
+# TO DO: Implement the following methods to facilitate checks and overall code reuse:
+
+# Create a "get my units by types" where we pass instead of a single type an array of unit types and the return is an array of those units from the chosen types:
+# possible function prototype: get_my_units_by_types(obs, unit_types) (maybe we can just reuse the get_my_units_by_type function and create a verification if unit_type is a single type or array of types)
+
 # check_unit_validity (should check if the object im receiving is a proper unit from pysc2)
 # already_pending()
 # can_afford()

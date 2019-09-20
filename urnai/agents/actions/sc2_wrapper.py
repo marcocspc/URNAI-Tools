@@ -562,37 +562,26 @@ class SC2Wrapper(ActionWrapper):
 
         # RESEARCH STIMPACK
         if named_action == ACTION_RESEARCH_STIMPACK:
-            if building_exists(obs, units.Terran.BarracksTechLab):
-                b_techlabs = get_my_units_by_type(obs, units.Terran.BarracksTechLab)
-                b_techlab = random.choice(b_techlabs)
-                if(b_techlab.order_progress_0 == 0):
-                    return research_upgrade(obs, sc2._RESEARCH_TERRAN_STIMPACK, b_techlab)
-            return no_op()
+            return research_upgrade(obs, sc2._RESEARCH_TERRAN_STIMPACK, units.Terran.BarracksTechLab)
 
         # RESEARCH COMBATSHIELD
         if named_action == ACTION_RESEARCH_COMBATSHIELD:
-            if building_exists(obs, units.Terran.BarracksTechLab):
-                b_techlabs = get_my_units_by_type(obs, units.Terran.BarracksTechLab)
-                b_techlab = random.choice(b_techlabs)
-                if(b_techlab.order_progress_0 == 0):
-                    return research_upgrade(obs, sc2._RESEARCH_TERRAN_COMBATSHIELD, b_techlab)
-            return no_op()
+            return research_upgrade(obs, sc2._RESEARCH_TERRAN_COMBATSHIELD, units.Terran.BarracksTechLab)
 
         # RESEARCH CONCUSSIVESHELL
         if named_action == ACTION_RESEARCH_CONCUSSIVESHELL:
-            if building_exists(obs, units.Terran.BarracksTechLab):
-                b_techlabs = get_my_units_by_type(obs, units.Terran.BarracksTechLab)
-                b_techlab = random.choice(b_techlabs)
-                if(b_techlab.order_progress_0 == 0):
-                    return research_upgrade(obs, sc2._RESEARCH_TERRAN_CONCUSSIVESHELL, b_techlab)
-            return no_op()
+            return research_upgrade(obs, sc2._RESEARCH_TERRAN_CONCUSSIVESHELL, units.Terran.BarracksTechLab)
 
         # EFFECT STIMPACK
         if named_action == ACTION_EFFECT_STIMPACK:
+            army = []
             marines = get_my_units_by_type(obs, units.Terran.Marine)
+            marauders = get_my_units_by_type(obs, units.Terran.Marauder)
+            army.extend(marines)
+            army.extend(marauders)
             if building_exists(obs, units.Terran.BarracksTechLab):
-                if len(marines) > 0:
-                    return effect_units(obs, sc2._EFFECT_STIMPACK, marines)
+                if len(army) > 0:
+                    return effect_units(obs, sc2._EFFECT_STIMPACK, army)
             return no_op()
 
         # TRAIN SCV
