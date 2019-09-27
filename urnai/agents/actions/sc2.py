@@ -38,12 +38,20 @@ _BUILD_REACTOR_BARRACKS = actions.RAW_FUNCTIONS.Build_Reactor_Barracks_quick
 _BUILD_REACTOR_FACTORY = actions.RAW_FUNCTIONS.Build_Reactor_Factory_quick
 _BUILD_REACTOR_STARPORT = actions.RAW_FUNCTIONS.Build_Reactor_Starport_quick
 
+'''ENGINEERING BAY RESEARCH'''
 _RESEARCH_TERRAN_INF_WEAPONS = actions.RAW_FUNCTIONS.Research_TerranInfantryWeapons_quick
 _RESEARCH_TERRAN_INF_ARMOR = actions.RAW_FUNCTIONS.Research_TerranInfantryArmor_quick
+_RESEARCH_TERRAN_HISEC_AUTOTRACKING = actions.RAW_FUNCTIONS.Research_HiSecAutoTracking_quick
+_RESEARCH_TERRAN_NEOSTEEL_FRAME = actions.RAW_FUNCTIONS.Research_NeosteelFrame_quick
+_RESEARCH_TERRAN_STRUCTURE_ARMOR = actions.RAW_FUNCTIONS.Research_TerranStructureArmorUpgrade_quick
+
+'''ARMORY RESEARCH'''
 _RESEARCH_TERRAN_SHIPS_WEAPONS = actions.RAW_FUNCTIONS.Research_TerranShipWeapons_quick
 _RESEARCH_TERRAN_VEHIC_WEAPONS = actions.RAW_FUNCTIONS.Research_TerranVehicleWeapons_quick
 _RESEARCH_TERRAN_SHIPVEHIC_PLATES = actions.RAW_FUNCTIONS.Research_TerranVehicleAndShipPlating_quick
-_RESEARCH_TERRAN_STRUCTURE_ARMOR = actions.RAW_FUNCTIONS.Research_TerranStructureArmorUpgrade_quick
+
+'''GHOST ACADEMY RESEARCH'''
+_RESEARCH_TERRAN_GHOST_CLOAK = actions.RAW_FUNCTIONS.Research_PersonalCloaking_quick
 
 '''BARRACK RESEARCH'''
 _RESEARCH_TERRAN_STIMPACK = actions.RAW_FUNCTIONS.Research_Stimpack_quick
@@ -51,7 +59,7 @@ _RESEARCH_TERRAN_COMBATSHIELD = actions.RAW_FUNCTIONS.Research_CombatShield_quic
 _RESEARCH_TERRAN_CONCUSSIVESHELL = actions.RAW_FUNCTIONS.Research_ConcussiveShells_quick
 
 '''FACTORY RESEARCH'''
-_RESEARCH_TERRAN_INFERNALPREIGNITER = actions.RAW_FUNCTIONS.Research_InfernalPreigniter_quick
+_RESEARCH_TERRAN_INFERNAL_PREIGNITER = actions.RAW_FUNCTIONS.Research_InfernalPreigniter_quick
 _RESEARCH_TERRAN_DRILLING_CLAWS = actions.RAW_FUNCTIONS.Research_DrillingClaws_quick
 # check if these two following research options are actually from the factory building
 _RESEARCH_TERRAN_CYCLONE_LOCKONDMG = actions.RAW_FUNCTIONS.Research_CycloneLockOnDamage_quick
@@ -60,15 +68,33 @@ _RESEARCH_TERRAN_CYCLONE_RAPIDFIRE = actions.RAW_FUNCTIONS.Research_CycloneRapid
 '''STARPORT RESEARCH'''
 _RESEARCH_TERRAN_HIGHCAPACITYFUEL = actions.RAW_FUNCTIONS.Research_HighCapacityFuelTanks_quick
 _RESEARCH_TERRAN_CORVIDREACTOR = actions.RAW_FUNCTIONS.Research_RavenCorvidReactor_quick
-_RESEARCH_TERRAN_BANSHEECLOACK = actions.RAW_FUNCTIONS.Research_BansheeCloakingField_quick
+_RESEARCH_TERRAN_BANSHEECLOAK = actions.RAW_FUNCTIONS.Research_BansheeCloakingField_quick
 _RESEARCH_TERRAN_BANSHEEHYPERFLIGHT = actions.RAW_FUNCTIONS.Research_BansheeHyperflightRotors_quick
 _RESEARCH_TERRAN_ADVANCEDBALLISTICS = actions.RAW_FUNCTIONS.Research_AdvancedBallistics_quick
 
+'''FUSION CORE RESEARCH'''
+_RESEARCH_TERRAN_BATTLECRUISER_WEAPONREFIT = actions.RAW_FUNCTIONS.Research_BattlecruiserWeaponRefit_quick
+
+'''TRAINING ACTIONS'''
 _TRAIN_SCV = actions.RAW_FUNCTIONS.Train_SCV_quick
 _TRAIN_MARINE = actions.RAW_FUNCTIONS.Train_Marine_quick
 _TRAIN_MARAUDER = actions.RAW_FUNCTIONS.Train_Marauder_quick
+_TRAIN_REAPER = actions.RAW_FUNCTIONS.Train_Reaper_quick
+_TRAIN_GHOST = actions.RAW_FUNCTIONS.Train_Ghost_quick
+_TRAIN_HELLION = actions.RAW_FUNCTIONS.Train_Hellion_quick
+_TRAIN_HELLBAT = actions.RAW_FUNCTIONS.Train_Hellbat_quick
+_TRAIN_SIEGETANK = actions.RAW_FUNCTIONS.Train_SiegeTank_quick
+_TRAIN_CYCLONE = actions.RAW_FUNCTIONS.Train_Cyclone_quick
+_TRAIN_WIDOWMINE = actions.RAW_FUNCTIONS.Train_WidowMine_quick
+_TRAIN_THOR = actions.RAW_FUNCTIONS.Train_Thor_quick
+_TRAIN_VIKING = actions.RAW_FUNCTIONS.Train_VikingFighter_quick
+_TRAIN_MEDIVAC = actions.RAW_FUNCTIONS.Train_Medivac_quick
+_TRAIN_LIBERATOR = actions.RAW_FUNCTIONS.Train_Liberator_quick
+_TRAIN_RAVEN = actions.RAW_FUNCTIONS.Train_Raven_quick
+_TRAIN_BANSHEE = actions.RAW_FUNCTIONS.Train_Banshee_quick
+_TRAIN_BATTLECRUISER = actions.RAW_FUNCTIONS.Train_Battlecruiser_quick
 
-'''Unit Effects'''
+'''UNIT EFFECTS'''
 _EFFECT_STIMPACK = actions.RAW_FUNCTIONS.Effect_Stim_quick
 
 
@@ -107,11 +133,6 @@ def select_idle_worker(obs, player_race):
 
 # TO DO: Implement a select_closest_unit_by_type (useful to select workers closest to building target)
 
-# Convert to raw obs
-def select_army(obs):
-    return actions.FUNCTIONS.select_army("now")
-
-
 def build_structure_by_type(obs, action_id, target=None):
     worker = select_random_unit_by_type(obs, units.Terran.SCV)
     if worker != _NO_UNITS and target != _NO_UNITS:
@@ -148,14 +169,20 @@ def train_unit(obs, action_id, building_type):
     if len(buildings) > 0:
         for building in buildings:
             if building.build_progress == 100 and building.order_progress_0 == 0:
-                return action_id("now", building.tag)
+                if building.assigned_harvesters <= building.ideal_harvesters:
+                    return action_id("now", building.tag)
     return _NO_OP()
 
 
 def attack_target_point(obs, units, target):
     if units != _NO_UNITS:
-        for unit in units:
-            return actions.RAW_FUNCTIONS.Attack_pt("now", unit.tag, target)
+        distances = get_distances(obs, units, target)
+        unit_index = np.argmax(distances)
+        unit = units[unit_index]
+        units.pop(unit_index)
+        if len(units) == 0:
+            units = _NO_UNITS
+        return actions.RAW_FUNCTIONS.Attack_pt("now", unit.tag, target), units
     return no_op()
 
 
@@ -268,3 +295,32 @@ def get_euclidean_distance(unit_xy, xy):
 # building_exists()
 # redistribute_workers()
 
+def select_army(obs, player_race):
+    army = []
+    if player_race == _PROTOSS:
+        army.extend(get_my_units_by_type(obs, units.Protoss.Zealot))
+    elif player_race == _TERRAN:
+        army.extend(get_my_units_by_type(obs, units.Terran.Marine))
+        army.extend(get_my_units_by_type(obs, units.Terran.Marauder))
+        army.extend(get_my_units_by_type(obs, units.Terran.Reaper))
+        army.extend(get_my_units_by_type(obs, units.Terran.Ghost))
+        army.extend(get_my_units_by_type(obs, units.Terran.Hellion))
+        army.extend(get_my_units_by_type(obs, units.Terran.Hellbat))
+        army.extend(get_my_units_by_type(obs, units.Terran.SiegeTank))
+        army.extend(get_my_units_by_type(obs, units.Terran.Cyclone))
+        army.extend(get_my_units_by_type(obs, units.Terran.WidowMine))
+        army.extend(get_my_units_by_type(obs, units.Terran.Thor))
+        army.extend(get_my_units_by_type(obs, units.Terran.ThorHighImpactMode))
+        army.extend(get_my_units_by_type(obs, units.Terran.VikingAssault))
+        army.extend(get_my_units_by_type(obs, units.Terran.VikingFighter))
+        army.extend(get_my_units_by_type(obs, units.Terran.Medivac))
+        army.extend(get_my_units_by_type(obs, units.Terran.Liberator))
+        army.extend(get_my_units_by_type(obs, units.Terran.LiberatorAG))
+        army.extend(get_my_units_by_type(obs, units.Terran.Raven))
+        army.extend(get_my_units_by_type(obs, units.Terran.Banshee))
+        army.extend(get_my_units_by_type(obs, units.Terran.Battlecruiser))
+    elif player_race == _ZERG:
+        army.extend(get_my_units_by_type(obs, units.Zerg.Zergling))
+    if len(army) == 0:
+        army = _NO_UNITS
+    return army
