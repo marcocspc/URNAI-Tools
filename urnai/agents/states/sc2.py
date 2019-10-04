@@ -24,64 +24,12 @@ class Simple64State(StateBuilder):
         self._state_size = 12
 
     def build_state(self, obs):
-        player_y, player_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
-        self.base_top_left = 1 if player_y.any() and player_y.mean() <= 31 else 0
+        if obs.game_loop[0] == 0:
+            command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
+            self.base_top_left = (command_center.x < 32)
 
-        # Setting up the player's base position
-        unit_type = obs.feature_screen[_UNIT_TYPE]
-        cc_y, cc_x = (unit_type == _TERRAN_COMMANDCENTER).nonzero()
-        cc_count = 1 if cc_y.any() else 0
-
-        depot_y, depot_x = (unit_type == _TERRAN_SUPPLY_DEPOT).nonzero()
-        supply_depot_count = int(round(len(depot_y) / 69))
-
-        barracks_y, barracks_x = (unit_type == _TERRAN_BARRACKS).nonzero()
-        barracks_count = int(round(len(barracks_y) / 137))
-
-        # Defining our state:
-        ## cc_count, supply_depot_count, barracks_count, player.army_supply
-        # Enemies positions (4), Friendly army positions (4)
-        new_state = np.zeros(self._state_size)
-        new_state[0] = cc_count
-        new_state[1] = supply_depot_count
-        new_state[2] = barracks_count
-        new_state[3] = obs.player[_ARMY_SUPPLY]
-
-        # Dividing our minimap into a 4x4 grid of cells and marking cells as 1 if it
-        # contains any friendly army units. If the base is at the bottom right, we invert the
-        # quadrants so that it's seen from the perspective of a top-left base
-        green_squares = np.zeros(4)
-        friendly_y, friendly_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_SELF).nonzero()
-
-        for i in range(0, len(friendly_y)):
-            y = int(math.ceil((friendly_y[i] + 1) / 32))
-            x = int(math.ceil((friendly_x[i] + 1) / 32))
-
-            green_squares[((y - 1) * 2) + (x - 1)] = 1
-
-        if not self.base_top_left:
-            green_squares = green_squares[::-1]
-
-        for i in range(0, 4):
-            new_state[i + 4] = green_squares[i]
-
-        # Adding enemy units locations to our state the same way we did with the friendly army.
-        hot_squares = np.zeros(4)
-        enemy_y, enemy_x = (obs.feature_minimap[_PLAYER_RELATIVE] == _PLAYER_HOSTILE).nonzero()
-        for i in range(0, len(enemy_y)):
-            y = int(math.ceil((enemy_y[i] + 1) / 32))
-            x = int(math.ceil((enemy_x[i] + 1) / 32))
-
-            hot_squares[((y - 1) * 2) + (x - 1)] = 1
-
-        if not self.base_top_left:
-            hot_squares = hot_squares[::-1]
-
-        for i in range(0, 4):
-            new_state[i + 8] = hot_squares[i]
-
-        new_state = np.expand_dims(new_state, axis=0)
-        return new_state
+        self._state_size = len(obs)
+        return obs
 
 
     def get_state_dim(self):
@@ -96,22 +44,29 @@ class Simple64State_1(StateBuilder):
             self.base_top_left = (command_center.x < 32)
 
         # Whether or not our supply depot was built
-        supply_depot_count = 1 if get_units_amount(obs, units.Terran.SupplyDepot) > 0 else 0
+        supply_depot_count = get_units_amount(obs, units.Terran.SupplyDepot)
 
         # Whether or not our barracks were built
-        barracks_count = 1 if get_units_amount(obs, units.Terran.Barracks) else 0
+        barracks_count = get_units_amount(obs, units.Terran.Barracks)
+
+        army_count = len(select_army(obs, sc2_env.Race.terran))
 
         # The supply limit
         supply_limit = obs.player[4]
         # The army supply
-        army_supply = obs.player[5]
+        supply_army = obs.player[5]
+        # Free supply
+        supply_free = get_free_supply(obs)
 
         # Defining our state, considering our enemies' positions.
-        current_state = np.zeros(20)
+        current_state = np.zeros(22)
         current_state[0] = supply_depot_count
         current_state[1] = barracks_count
         current_state[2] = supply_limit
-        current_state[3] = army_supply
+        current_state[3] = supply_army
+        current_state[4] = supply_free
+        current_state[5] = army_count
+        
 
         # Insteading of making a vector for all coordnates on the map, we'll discretize our enemy space
         # and use a 16x16 grid to store enemy positions by marking a square as 1 if there's any enemy on it.
@@ -129,11 +84,11 @@ class Simple64State_1(StateBuilder):
 
         for i in range(0, 16):
             # Adds 4 to account for supply_depot_count, barracks_count, supply_limit and army_supply
-            current_state[i + 4] = hot_squares[i]
+            current_state[i + 6] = hot_squares[i]
         
         current_state = np.expand_dims(current_state, axis=0)
         return current_state
 
 
     def get_state_dim(self):
-        return 20
+        return 22

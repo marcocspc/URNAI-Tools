@@ -25,6 +25,7 @@ _BUILD_REFINERY = actions.RAW_FUNCTIONS.Build_Refinery_pt
 _BUILD_ENGINEERINGBAY = actions.RAW_FUNCTIONS.Build_EngineeringBay_pt
 _BUILD_ARMORY = actions.RAW_FUNCTIONS.Build_Armory_pt
 _BUILD_MISSILETURRET = actions.RAW_FUNCTIONS.Build_MissileTurret_pt
+_BUILD_SENSORTOWER = actions.RAW_FUNCTIONS.Build_SensorTower_pt
 _BUILD_BUNKER = actions.RAW_FUNCTIONS.Build_Bunker_pt
 _BUILD_FUSIONCORE = actions.RAW_FUNCTIONS.Build_FusionCore_pt
 _BUILD_GHOSTACADEMY = actions.RAW_FUNCTIONS.Build_GhostAcademy_pt
@@ -324,3 +325,54 @@ def select_army(obs, player_race):
     if len(army) == 0:
         army = _NO_UNITS
     return army
+
+def build_structure_raw(obs, building_type, building_action, move_number, last_worker, max_amount = 999):
+    if get_units_amount(obs, building_type) < max_amount:
+        if move_number == 0:
+            move_number += 1
+
+            buildings = get_my_units_by_type(obs, building_type)
+            if len(buildings) > 0:
+                target = random.choice(buildings)
+                action, last_worker = build_structure_by_type(obs, building_action, target)
+                return action, last_worker, move_number
+
+        if move_number == 1:
+            move_number +=1
+            return harvest_gather_minerals_quick(obs, last_worker), last_worker, move_number
+        if move_number == 2:
+            move_number = 0
+    return _NO_OP(), last_worker, move_number
+
+def build_structure_raw_pt(obs, building_type, building_action, move_number, last_worker, base_top_left, max_amount = 999):
+    ybrange=0 if base_top_left else 32
+    ytrange=32 if base_top_left else 63
+        
+    if get_units_amount(obs, building_type) < max_amount:
+        if move_number == 0:
+            move_number += 1
+            x = random.randint(0,63)
+            y = random.randint(ybrange, ytrange)
+            target = [x, y]
+            action, last_worker = build_structure_by_type(obs, building_action, target)
+            return action, last_worker, move_number
+        if move_number == 1:
+            move_number +=1
+            return harvest_gather_minerals_quick(obs, last_worker), last_worker, move_number
+        if move_number == 2:
+            move_number = 0
+    return _NO_OP(), last_worker, move_number
+
+def build_gas_structure_raw_unit(obs, building_type, building_action, player_race, move_number, last_worker, max_amount = 999):        
+    if get_units_amount(obs, building_type) < max_amount:
+        if move_number == 0:
+            move_number += 1
+            chosen_geyser = get_exploitable_geyser(obs, player_race)
+            action, last_worker = build_structure_by_type(obs, building_action, chosen_geyser)
+            return action, last_worker, move_number
+        if move_number == 1:
+            move_number +=1
+            return harvest_gather_minerals_quick(obs, last_worker), last_worker, move_number
+        if move_number == 2:
+            move_number = 0
+    return _NO_OP(), last_worker, move_number

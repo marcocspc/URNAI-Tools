@@ -7,6 +7,7 @@ from agents.sc2_agent import SC2Agent
 from agents.actions.sc2_wrapper import SC2Wrapper
 from agents.rewards.sc2 import KilledUnitsReward
 from agents.states.sc2 import Simple64State_1
+from agents.states.sc2 import Simple64State
 from models.dql_tf import DQLTF
 
 def main(unused_argv):

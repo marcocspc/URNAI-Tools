@@ -19,6 +19,7 @@ ACTION_BUILD_REFINERY = 'buildrefinery'                     # Selects SCV > find
 ACTION_BUILD_ENGINEERINGBAY = 'buildengineeringbay'
 ACTION_BUILD_ARMORY = 'buildarmory'
 ACTION_BUILD_MISSILETURRET = 'buildmissileturret'
+ACTION_BUILD_SENSORTOWER = 'buildsensortower'
 ACTION_BUILD_BUNKER = 'buildbunker'
 ACTION_BUILD_FUSIONCORE = 'buildfusioncore'
 ACTION_BUILD_GHOSTACADEMY = 'buildghostacademy'
@@ -127,31 +128,32 @@ class SC2Wrapper(ActionWrapper):
             ACTION_BUILD_REFINERY,
             ACTION_BUILD_ENGINEERINGBAY,
             ACTION_BUILD_ARMORY,
-            #ACTION_BUILD_MISSILETURRET,
-            #ACTION_BUILD_BUNKER,
-            #ACTION_BUILD_FUSIONCORE,
-            #ACTION_BUILD_GHOSTACADEMY,
+            # ACTION_BUILD_MISSILETURRET,
+            # ACTION_BUILD_SENSORTOWER,
+            # ACTION_BUILD_BUNKER,
+            # ACTION_BUILD_FUSIONCORE,
+            # ACTION_BUILD_GHOSTACADEMY,
             ACTION_BUILD_BARRACKS,
             ACTION_BUILD_FACTORY,
-            ACTION_BUILD_STARPORT,
+            # ACTION_BUILD_STARPORT,
             ACTION_BUILD_TECHLAB_BARRACKS,
             ACTION_BUILD_TECHLAB_FACTORY,
-            ACTION_BUILD_TECHLAB_STARPORT,
-            #ACTION_BUILD_REACTOR_BARRACKS,
-            #ACTION_BUILD_REACTOR_FACTORY,
-            #ACTION_BUILD_REACTOR_STARPORT,
+            # ACTION_BUILD_TECHLAB_STARPORT,
+            # ACTION_BUILD_REACTOR_BARRACKS,
+            # ACTION_BUILD_REACTOR_FACTORY,
+            # ACTION_BUILD_REACTOR_STARPORT,
 
             # ENGINEERING BAY RESEARCH
-            ACTION_RESEARCH_INF_WEAPONS,
-            ACTION_RESEARCH_INF_ARMOR,
+            # ACTION_RESEARCH_INF_WEAPONS,
+            # ACTION_RESEARCH_INF_ARMOR,
             # ACTION_RESEARCH_HISEC_AUTOTRACKING,
             # ACTION_RESEARCH_NEOSTEEL_FRAME,
             # ACTION_RESEARCH_STRUCTURE_ARMOR,
             
             # ARMORY RESEARCH
-            ACTION_RESEARCH_SHIPS_WEAPONS,
-            ACTION_RESEARCH_VEHIC_WEAPONS,
-            ACTION_RESEARCH_SHIPVEHIC_PLATES,
+            # ACTION_RESEARCH_SHIPS_WEAPONS,
+            # ACTION_RESEARCH_VEHIC_WEAPONS,
+            # ACTION_RESEARCH_SHIPVEHIC_PLATES,
 
             # GHOST ACADEMY RESEARCH
             # ACTION_RESEARCH_GHOST_CLOAK,
@@ -164,8 +166,8 @@ class SC2Wrapper(ActionWrapper):
             # FACTORY RESEARCH
             # ACTION_RESEARCH_INFERNAL_PREIGNITER,
             # ACTION_RESEARCH_DRILLING_CLAWS,
-            ACTION_RESEARCH_CYCLONE_LOCKONDMG,
-            ACTION_RESEARCH_CYCLONE_RAPIDFIRE,
+            # ACTION_RESEARCH_CYCLONE_LOCKONDMG,
+            # ACTION_RESEARCH_CYCLONE_RAPIDFIRE,
 
             # STARPORT RESEARCH
             # ACTION_RESEARCH_HIGHCAPACITYFUEL,
@@ -180,16 +182,19 @@ class SC2Wrapper(ActionWrapper):
             # ACTION_EFFECT_STIMPACK,
 
             ACTION_TRAIN_SCV,
+
             ACTION_TRAIN_MARINE,
             ACTION_TRAIN_MARAUDER,
             # ACTION_TRAIN_REAPER,
             # ACTION_TRAIN_GHOST,
+
             # ACTION_TRAIN_HELLION,
             # ACTION_TRAIN_HELLBAT,
             ACTION_TRAIN_SIEGETANK,
             ACTION_TRAIN_CYCLONE,
             # ACTION_TRAIN_WIDOWMINE,
             # ACTION_TRAIN_THOR,
+
             ACTION_TRAIN_VIKING,
             ACTION_TRAIN_MEDIVAC,
             # ACTION_TRAIN_LIBERATOR,
@@ -259,42 +264,63 @@ class SC2Wrapper(ActionWrapper):
 
 
     def get_excluded_actions(self, obs):
-        # supply_depot_count = get_units_amount(obs, units.Terran.SupplyDepot)
 
-        # barracks_count = get_units_amount(obs, units.Terran.Barracks)
-
-        # # Counts the amount of scvs currently on map
-        # scv_count = get_units_amount(obs, units.Terran.SCV)
-
-        # #supply_used = obs.player[3]
-        # #supply_limit = obs.player[4]
-        # supply_free = get_free_supply(obs)
-        # army_supply = obs.player[5]
-        # worker_supply = obs.player[6]
-
-        # # Adding invalid actions to the list of excluded actions
-        # excluded_actions = []
-        # # If the supply depot limit of 2 was reached, removes the ability to build it.
-        # if supply_depot_count == 4 or worker_supply == 0:
-        #     excluded_actions.append(self.action_indices[1])
-        # # If we have no supply depots or we have 2 barracks, we remove the ability to build barracks.
-        # if supply_depot_count == 0 or barracks_count == 2 or worker_supply == 0:
-        #     excluded_actions.append(self.action_indices[2])
-        # # If we don't have any barracks or have reached supply limit, remove the ability to train marines
-        # if supply_free == 0 or barracks_count == 0:
-        #     excluded_actions.append(self.action_indices[4])
-        # # If we have reached supply limit or amount of SCVs equal to 16, remove the ability to train SCVs
-        # if supply_free == 0 or scv_count >= 16:
-        #     excluded_actions.append(self.action_indices[5])
-        # # If we have no marines, we remove attack actions
-        # if army_supply == 0:
-        #     excluded_actions.append(self.action_indices[6])
-        #     excluded_actions.append(self.action_indices[7])
-        #     excluded_actions.append(self.action_indices[8])
-        #     excluded_actions.append(self.action_indices[9])
-        
         excluded_actions = []
 
+        if not building_exists(obs, units.Terran.SupplyDepot):
+            # Building actions dependent on a supply depot
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_BARRACKS)])
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FACTORY)])
+            #excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_BUNKER)])
+            #excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_GHOSTACADEMY)])
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_ARMORY)])
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_STARPORT)])
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FUSIONCORE)])
+
+        if not building_exists(obs, units.Terran.Barracks):
+            # Building actions dependent on a barracks
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FACTORY)])
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_BUNKER)])
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_GHOSTACADEMY)])
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_ARMORY)])
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_STARPORT)])
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FUSIONCORE)])
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_TECHLAB_BARRACKS)]
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_REACTOR_BARRACKS)])
+            # Training actions dependent on a barracks
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_TRAIN_MARINE)])
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_TRAIN_MARAUDER)])
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_TRAIN_REAPER)])
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_TRAIN_GHOST)])
+            # Research actions dependent on a barracks
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_RESEARCH_STIMPACK)])
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_RESEARCH_COMBATSHIELD)])
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_RESEARCH_CONCUSSIVESHELL)])
+
+
+        if not building_exists(obs, units.Terran.Factory):
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_ARMORY)])
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_STARPORT)])
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FUSIONCORE)])
+        
+        if not building_exists(obs, units.Terran.CommandCenter):
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_ENGINEERINGBAY)])
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_MISSILETURRET)])
+
+        # if not building_exists(obs, units.Terran.EngineeringBay):
+            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_MISSILETURRET)])
+
+        if obs.player.food_army == 0:
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_ATTACK_ENEMY_BASE)])
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_ATTACK_ENEMY_SECOND_BASE)])
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_ATTACK_MY_BASE)])
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_ATTACK_MY_SECOND_BASE)])
+
+        if get_units_amount(obs, units.Terran.SCV) == 0:
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_HARVEST_MINERALS_FROM_GAS)])
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_HARVEST_GAS_FROM_MINERALS)])
+            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_HARVEST_MINERALS_IDLE)])
+        
         return excluded_actions
 
 
@@ -308,8 +334,6 @@ class SC2Wrapper(ActionWrapper):
         if obs.game_loop[0] == 0:
             command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
             self.base_top_left = (command_center.x < 32)
-        
-        '''LIST OF ACTIONS THE AGENT IS ABLE TO CHOOSE FROM:'''
 
         if self.base_top_left:
             ybrange = 0
@@ -318,299 +342,102 @@ class SC2Wrapper(ActionWrapper):
             ybrange = 32
             ytrange = 63
 
+        '''LIST OF ACTIONS THE AGENT IS ABLE TO CHOOSE FROM:'''
+
         # BUILD COMMAND CENTER
         if named_action == ACTION_BUILD_COMMAND_CENTER:
-            if get_units_amount(obs, units.Terran.CommandCenter) < 2:
-                if self.move_number == 0:
-                    self.move_number += 1
-                    x = random.randint(0,63)
-                    y = random.randint(ybrange, ytrange)
-                    target = [x, y]
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_COMMAND_CENTER, target)
-                    return action
-                if self.move_number == 1:
-                    self.move_number +=1
-                    return harvest_gather_minerals_quick(obs, self.last_worker)
-                if self.move_number == 2:
-                    self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.CommandCenter, sc2._BUILD_COMMAND_CENTER, self.move_number, self.last_worker, self.base_top_left, max_amount = 2)
+            return action
 
         # BUILD SUPPLY DEPOT
         if named_action == ACTION_BUILD_SUPPLY_DEPOT:
-            if get_units_amount(obs, units.Terran.SupplyDepot) < 10:
-                if self.move_number == 0:
-                    self.move_number += 1
-                    x = random.randint(0,63)
-                    y = random.randint(ybrange, ytrange)
-                    target = [x, y]
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_SUPPLY_DEPOT, target)
-                    return action
-                if self.move_number == 1:
-                    self.move_number +=1
-                    return harvest_gather_minerals_quick(obs, self.last_worker)
-                if self.move_number == 2:
-                    self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.SupplyDepot, sc2._BUILD_SUPPLY_DEPOT, self.move_number,self.last_worker, self.base_top_left, max_amount = 8)
+            return action
 
         # BUILD REFINERY
         if named_action == ACTION_BUILD_REFINERY:
-            if get_units_amount(obs, units.Terran.Refinery) < 8:
-                if self.move_number == 0:
-                    self.move_number += 1
-                    # Using our get_exploitable_geyser function defined int actions\sc2.py to choose an available Vespene Geyser to build our refinery
-                    chosen_geyser = get_exploitable_geyser(obs, sc2_env.Race.terran)
-                    # Building a refinery in the chosen geyser
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_REFINERY, chosen_geyser)
-                    return action
-                if self.move_number == 1:
-                    self.move_number +=1
-                    return harvest_gather_minerals_quick(obs, self.last_worker)
-                if self.move_number == 2:
-                    self.move_number = 0
+            action, self.last_worker, self.move_number = build_gas_structure_raw_unit(obs, units.Terran.Refinery, sc2._BUILD_REFINERY, sc2_env.Race.terran, self.move_number, self.last_worker)        
+            return action
 
         # BUILD ENGINEERINGBAY
         if named_action == ACTION_BUILD_ENGINEERINGBAY:
-            if get_units_amount(obs, units.Terran.EngineeringBay) < 1:
-                if self.move_number == 0:
-                    self.move_number += 1
-                    x = random.randint(0,63)
-                    y = random.randint(ybrange, ytrange)
-                    target = [x, y]
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_ENGINEERINGBAY, target)
-                    return action
-                if self.move_number == 1:
-                    self.move_number +=1
-                    return harvest_gather_minerals_quick(obs, self.last_worker)
-                if self.move_number == 2:
-                    self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.EngineeringBay, sc2._BUILD_ENGINEERINGBAY, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+            return action
 
         # BUILD ARMORY
         if named_action == ACTION_BUILD_ARMORY:
-            if get_units_amount(obs, units.Terran.Armory) < 1:
-                if self.move_number == 0:
-                    self.move_number += 1
-                    x = random.randint(0,63)
-                    y = random.randint(ybrange, ytrange)
-                    target = [x, y]
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_ARMORY, target)
-                    return action
-                if self.move_number == 1:
-                    self.move_number +=1
-                    return harvest_gather_minerals_quick(obs, self.last_worker)
-                if self.move_number == 2:
-                    self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Armory, sc2._BUILD_ARMORY, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+            return action
 
         # BUILD MISSILE TURRET
         if named_action == ACTION_BUILD_MISSILETURRET:
-            if get_units_amount(obs, units.Terran.MissileTurret) < 1:
-                if self.move_number == 0:
-                    self.move_number += 1
-                    x = random.randint(0,63)
-                    y = random.randint(ybrange, ytrange)
-                    target = [x, y]
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_MISSILETURRET, target)
-                    return action
-                if self.move_number == 1:
-                    self.move_number +=1
-                    return harvest_gather_minerals_quick(obs, self.last_worker)
-                if self.move_number == 2:
-                    self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.MissileTurret, sc2._BUILD_MISSILETURRET, self.move_number, self.last_worker, self.base_top_left, max_amount = 8)
+            return action
+
+        # BUILD SENSOR TOWER
+        if named_action == ACTION_BUILD_SENSORTOWER:
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.SensorTower, sc2._BUILD_SENSORTOWER, self.move_number, self.last_worker, self.base_top_left, max_amount = 3)
+            return action
 
         # BUILD BUNKER
         if named_action == ACTION_BUILD_BUNKER:
-            if get_units_amount(obs, units.Terran.Bunker) < 1:
-                if self.move_number == 0:
-                    self.move_number += 1
-                    x = random.randint(0,63)
-                    y = random.randint(ybrange, ytrange)
-                    target = [x, y]
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_BUNKER, target)
-                    return action
-                if self.move_number == 1:
-                    self.move_number +=1
-                    return harvest_gather_minerals_quick(obs, self.last_worker)
-                if self.move_number == 2:
-                    self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Bunker, sc2._BUILD_BUNKER, self.move_number, self.last_worker, self.base_top_left, max_amount = 5)
+            return action
 
         # BUILD FUSIONCORE
         if named_action == ACTION_BUILD_FUSIONCORE:
-            if get_units_amount(obs, units.Terran.FusionCore) < 1:
-                if self.move_number == 0:
-                    self.move_number += 1
-                    x = random.randint(0,63)
-                    y = random.randint(ybrange, ytrange)
-                    target = [x, y]
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_FUSIONCORE, target)
-                    return action
-                if self.move_number == 1:
-                    self.move_number +=1
-                    return harvest_gather_minerals_quick(obs, self.last_worker)
-                if self.move_number == 2:
-                    self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.FusionCore, sc2._BUILD_FUSIONCORE, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+            return action
 
         # BUILD GHOSTACADEMY
         if named_action == ACTION_BUILD_GHOSTACADEMY:
-            if get_units_amount(obs, units.Terran.GhostAcademy) < 1:
-                if self.move_number == 0:
-                    self.move_number += 1
-                    x = random.randint(0,63)
-                    y = random.randint(ybrange, ytrange)
-                    target = [x, y]
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_GHOSTACADEMY, target)
-                    return action
-                if self.move_number == 1:
-                    self.move_number +=1
-                    return harvest_gather_minerals_quick(obs, self.last_worker)
-                if self.move_number == 2:
-                    self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.GhostAcademy, sc2._BUILD_GHOSTACADEMY, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+            return action
 
         # BUILD BARRACKS
         if named_action == ACTION_BUILD_BARRACKS:
-            if get_units_amount(obs, units.Terran.Barracks) < 3:
-                if self.move_number == 0:
-                    self.move_number += 1
-                    x = random.randint(0,63)
-                    y = random.randint(ybrange, ytrange)
-                    target = [x, y]
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_BARRACKS, target)
-                    return action
-                if self.move_number == 1:
-                    self.move_number +=1
-                    return harvest_gather_minerals_quick(obs, self.last_worker)
-                if self.move_number == 2:
-                    self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Barracks, sc2._BUILD_BARRACKS, self.move_number, self.last_worker, self.base_top_left, max_amount = 3)
+            return action
 
         # BUILD FACTORY
         if named_action == ACTION_BUILD_FACTORY:
-            if get_units_amount(obs, units.Terran.Factory) < 2:
-                if self.move_number == 0:
-                    self.move_number += 1
-                    x = random.randint(0,63)
-                    y = random.randint(ybrange, ytrange)
-                    target = [x, y]
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_FACTORY, target)
-                    return action
-                if self.move_number == 1:
-                    self.move_number +=1
-                    return harvest_gather_minerals_quick(obs, self.last_worker)
-                if self.move_number == 2:
-                    self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Factory, sc2._BUILD_FACTORY, self.move_number, self.last_worker, self.base_top_left, max_amount = 2)
+            return action
 
         # BUILD STARPORT
         if named_action == ACTION_BUILD_STARPORT:
-            if get_units_amount(obs, units.Terran.Starport) < 2:
-                if self.move_number == 0:
-                    self.move_number += 1
-                    x = random.randint(0,63)
-                    y = random.randint(ybrange, ytrange)
-                    target = [x, y]
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_STARPORT, target)
-                    return action
-                if self.move_number == 1:
-                    self.move_number +=1
-                    return harvest_gather_minerals_quick(obs, self.last_worker)
-                if self.move_number == 2:
-                    self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Starport, sc2._BUILD_STARPORT, self.move_number, self.last_worker, self.base_top_left, max_amount = 2)
+            return action
 
         # BUILD TECHLAB BARRACKS
         if named_action == ACTION_BUILD_TECHLAB_BARRACKS:
-            if self.move_number == 0:
-                self.move_number += 1
-
-                barracks = get_my_units_by_type(obs, units.Terran.Barracks)
-                if len(barracks) > 0:
-                    target = random.choice(barracks)
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_TECHLAB_BARRACKS, target)
-                    return action
-                return no_op()
-            if self.move_number == 1:
-                self.move_number +=1
-                return harvest_gather_minerals_quick(obs, self.last_worker)
-            if self.move_number == 2:
-                self.move_number = 0
-
+            action, self.last_worker, self.move_number = build_structure_raw(obs, units.Terran.Barracks, sc2._BUILD_TECHLAB_BARRACKS, self.move_number, self.last_worker)
+            return action
+            
         # BUILD TECHLAB FACTORY
         if named_action == ACTION_BUILD_TECHLAB_FACTORY:
-            if self.move_number == 0:
-                self.move_number += 1
-
-                factories = get_my_units_by_type(obs, units.Terran.Factory)
-                if len(factories) > 0:
-                    target = random.choice(factories)
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_TECHLAB_FACTORY, target)
-                    return action
-                return no_op()
-            if self.move_number == 1:
-                self.move_number +=1
-                return harvest_gather_minerals_quick(obs, self.last_worker)
-            if self.move_number == 2:
-                self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw(obs, units.Terran.Factory, sc2._BUILD_TECHLAB_FACTORY, self.move_number, self.last_worker)
+            return action
 
         # BUILD TECHLAB STARPORT
         if named_action == ACTION_BUILD_TECHLAB_STARPORT:
-            if self.move_number == 0:
-                self.move_number += 1
-
-                starports = get_my_units_by_type(obs, units.Terran.Starport)
-                if len(starports) > 0:
-                    target = random.choice(starports)
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_TECHLAB_STARPORT, target)
-                    return action
-                return no_op()
-            if self.move_number == 1:
-                self.move_number +=1
-                return harvest_gather_minerals_quick(obs, self.last_worker)
-            if self.move_number == 2:
-                self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw(obs, units.Terran.Starport, sc2._BUILD_TECHLAB_STARPORT, self.move_number, self.last_worker)
+            return action
 
         # BUILD REACTOR BARRACKS
         if named_action == ACTION_BUILD_REACTOR_BARRACKS:
-            if self.move_number == 0:
-                self.move_number += 1
-
-                barracks = get_my_units_by_type(obs, units.Terran.Barracks)
-                if len(barracks) > 0:
-                    target = random.choice(barracks)
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_REACTOR_BARRACKS, target)
-                    return action
-                return no_op()
-            if self.move_number == 1:
-                self.move_number +=1
-                return harvest_gather_minerals_quick(obs, self.last_worker)
-            if self.move_number == 2:
-                self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw(obs, units.Terran.Barracks, sc2._BUILD_REACTOR_BARRACKS, self.move_number, self.last_worker)
+            return action
 
         # BUILD REACTOR FACTORY
         if named_action == ACTION_BUILD_REACTOR_FACTORY:
-            if self.move_number == 0:
-                self.move_number += 1
-
-                factories = get_my_units_by_type(obs, units.Terran.Factory)
-                if len(factories) > 0:
-                    target = random.choice(factories)
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_REACTOR_FACTORY, target)
-                    return action
-                return no_op()
-            if self.move_number == 1:
-                self.move_number +=1
-                return harvest_gather_minerals_quick(obs, self.last_worker)
-            if self.move_number == 2:
-                self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw(obs, units.Terran.Factory, sc2._BUILD_REACTOR_FACTORY, self.move_number, self.last_worker)
+            return action
 
         # BUILD REACTOR STARPORT
         if named_action == ACTION_BUILD_REACTOR_STARPORT:
-            if self.move_number == 0:
-                self.move_number += 1
-
-                starports = get_my_units_by_type(obs, units.Terran.Starport)
-                if len(starports) > 0:
-                    target = random.choice(starports)
-                    action, self.last_worker = build_structure_by_type(obs, sc2._BUILD_REACTOR_STARPORT, target)
-                    return action
-                return no_op()
-            if self.move_number == 1:
-                self.move_number +=1
-                return harvest_gather_minerals_quick(obs, self.last_worker)
-            if self.move_number == 2:
-                self.move_number = 0
+            action, self.last_worker, self.move_number = build_structure_raw(obs, units.Terran.Starport, sc2._BUILD_REACTOR_STARPORT, self.move_number, self.last_worker)
+            return action
                 
 
         # HARVEST MINERALS WITH IDLE WORKER
