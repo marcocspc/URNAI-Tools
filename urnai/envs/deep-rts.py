@@ -2,6 +2,7 @@ from pyDeepRTS import Game
 from .base.abenv import Env
 import os
 
+#TODO: add a way to view game main window if render = True
 #TODO: add enemy AI
 
 class DeepRTSEnv(Env):
