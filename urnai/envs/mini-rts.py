@@ -13,6 +13,9 @@ class MiniRTSEnv():
     #TODO: TEST THIS!!!!!
 
     def __init__(self, elf_path = expanduser("~") + "/ELF", enemyAI = True, ai_fskip = 50, model_fskip = 50, gpu = False, num_games = 1, max_ticks = 1000):
+
+        raise Exception("Mini-RTS is not working yet. Game freezes. Until we work around it, this is exception is raised.")
+
         '''
             Initizalize attributes
 
