@@ -123,25 +123,25 @@ class SC2Wrapper(ActionWrapper):
         self.named_actions = [
             ACTION_DO_NOTHING,
 
-            # ACTION_BUILD_COMMAND_CENTER,
+            ACTION_BUILD_COMMAND_CENTER,
             ACTION_BUILD_SUPPLY_DEPOT,
             ACTION_BUILD_REFINERY,
             ACTION_BUILD_ENGINEERINGBAY,
             ACTION_BUILD_ARMORY,
-            # ACTION_BUILD_MISSILETURRET,
-            # ACTION_BUILD_SENSORTOWER,
-            # ACTION_BUILD_BUNKER,
-            # ACTION_BUILD_FUSIONCORE,
-            # ACTION_BUILD_GHOSTACADEMY,
+            ACTION_BUILD_MISSILETURRET,
+            ACTION_BUILD_SENSORTOWER,
+            ACTION_BUILD_BUNKER,
+            ACTION_BUILD_FUSIONCORE,
+            ACTION_BUILD_GHOSTACADEMY,
             ACTION_BUILD_BARRACKS,
             ACTION_BUILD_FACTORY,
-            # ACTION_BUILD_STARPORT,
+            ACTION_BUILD_STARPORT,
             ACTION_BUILD_TECHLAB_BARRACKS,
             ACTION_BUILD_TECHLAB_FACTORY,
-            # ACTION_BUILD_TECHLAB_STARPORT,
-            # ACTION_BUILD_REACTOR_BARRACKS,
-            # ACTION_BUILD_REACTOR_FACTORY,
-            # ACTION_BUILD_REACTOR_STARPORT,
+            ACTION_BUILD_TECHLAB_STARPORT,
+            ACTION_BUILD_REACTOR_BARRACKS,
+            ACTION_BUILD_REACTOR_FACTORY,
+            ACTION_BUILD_REACTOR_STARPORT,
 
             # ENGINEERING BAY RESEARCH
             # ACTION_RESEARCH_INF_WEAPONS,
@@ -267,59 +267,144 @@ class SC2Wrapper(ActionWrapper):
 
         excluded_actions = []
 
-        if not building_exists(obs, units.Terran.SupplyDepot):
-            # Building actions dependent on a supply depot
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_BARRACKS)])
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FACTORY)])
-            #excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_BUNKER)])
-            #excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_GHOSTACADEMY)])
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_ARMORY)])
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_STARPORT)])
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FUSIONCORE)])
+        excluded_actions = self.named_actions.copy()
 
-        if not building_exists(obs, units.Terran.Barracks):
-            # Building actions dependent on a barracks
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FACTORY)])
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_BUNKER)])
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_GHOSTACADEMY)])
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_ARMORY)])
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_STARPORT)])
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FUSIONCORE)])
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_TECHLAB_BARRACKS)]
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_REACTOR_BARRACKS)])
-            # Training actions dependent on a barracks
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_TRAIN_MARINE)])
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_TRAIN_MARAUDER)])
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_TRAIN_REAPER)])
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_TRAIN_GHOST)])
-            # Research actions dependent on a barracks
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_RESEARCH_STIMPACK)])
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_RESEARCH_COMBATSHIELD)])
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_RESEARCH_CONCUSSIVESHELL)])
+        # ACTION_BUILD_COMMAND_CENTER CHECK
+        if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 400:
+            excluded_actions.remove(ACTION_BUILD_COMMAND_CENTER)
+        # ACTION_BUILD_SUPPLY_DEPOT CHECK
+        if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 100:
+            excluded_actions.remove(ACTION_BUILD_SUPPLY_DEPOT)
+        # ACTION_BUILD_REFINERY CHECK
+        if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 75:
+            excluded_actions.remove(ACTION_BUILD_REFINERY)
+
+        # ACTIONS DEPENDENT ON A SUPPLY DEPOT
+        if building_exists(obs, units.Terran.SupplyDepot):
+            # ACTION_BUILD_BARRACKS CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 150:
+                excluded_actions.remove(ACTION_BUILD_BARRACKS)
+
+        # ACTIONS DEPENDENT ON A BARRACKS
+        if building_exists(obs, units.Terran.Barracks):
+            # ACTION_BUILD_BUNKER CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 100:
+                excluded_actions.remove(ACTION_BUILD_BUNKER)
+            '''# ACTION_BUILD_ORBITAL_COMMAND CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 550:
+                excluded_actions.remove(ACTION_BUILD_ORBITAL_COMMAND)'''
+            # ACTION_BUILD_FACTORY CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 150 and obs.player.vespene > 100:
+                excluded_actions.remove(ACTION_BUILD_FACTORY)
+            # ACTION_BUILD_GHOSTACADEMY CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 150 and obs.player.vespene > 50:
+                excluded_actions.remove(ACTION_BUILD_GHOSTACADEMY)
+            # ACTION_BUILD_TECHLAB_BARRACKS CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 50 and obs.player.vespene > 25:
+                excluded_actions.remove(ACTION_BUILD_TECHLAB_BARRACKS)
+            # ACTION_BUILD_REACTOR_BARRACKS CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 50 and obs.player.vespene > 50:
+                excluded_actions.remove(ACTION_BUILD_REACTOR_BARRACKS)
+
+        # ACTIONS DEPENDENT ON A FACTORY
+        if building_exists(obs, units.Terran.Factory):
+            # ACTION_BUILD_ARMORY CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 150 and obs.player.vespene > 100:
+                excluded_actions.remove(ACTION_BUILD_ARMORY)
+            # ACTION_BUILD_STARPORT CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 150 and obs.player.vespene > 100:
+                excluded_actions.remove(ACTION_BUILD_STARPORT)
+            # ACTION_BUILD_TECHLAB_FACTORY CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 50 and obs.player.vespene > 25:
+                excluded_actions.remove(ACTION_BUILD_TECHLAB_FACTORY)
+            # ACTION_BUILD_REACTOR_FACTORY CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 50 and obs.player.vespene > 50:
+                excluded_actions.remove(ACTION_BUILD_REACTOR_FACTORY)
+
+        if building_exists(obs, units.Terran.Starport):
+            # ACTION_BUILD_FUSIONCORE CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 150 and obs.player.vespene > 150:
+                excluded_actions.remove(ACTION_BUILD_FUSIONCORE)
+            # ACTION_BUILD_TECHLAB_STARPORT CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 50 and obs.player.vespene > 25:
+                excluded_actions.remove(ACTION_BUILD_TECHLAB_STARPORT)
+            # ACTION_BUILD_REACTOR_STARPORT CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 50 and obs.player.vespene > 50:
+                excluded_actions.remove(ACTION_BUILD_REACTOR_STARPORT)
+                
+        if building_exists(obs, units.Terran.CommandCenter) or \
+            building_exists(obs, units.Terran.PlanetaryFortress) or \
+            building_exists(obs, units.Terran.OrbitalCommand):
+
+            # ACTION_BUILD_ENGINEERINGBAY CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 125:
+                excluded_actions.remove(ACTION_BUILD_ENGINEERINGBAY)
+
+        if building_exists(obs, units.Terran.EngineeringBay):
+            '''# ACTION_BUILD_ORBITAL_COMMAND CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 550 and obs.player.vespene > 150:
+                excluded_actions.remove(ACTION_BUILD_ORBITAL_COMMAND)'''
+            # ACTION_BUILD_SENSORTOWER CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 125:
+                excluded_actions.remove(ACTION_BUILD_SENSORTOWER)
+            # ACTION_BUILD_MISSILETURRET CHECK
+            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 100:
+                excluded_actions.remove(ACTION_BUILD_MISSILETURRET)
 
 
-        if not building_exists(obs, units.Terran.Factory):
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_ARMORY)])
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_STARPORT)])
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FUSIONCORE)])
+        # if not building_exists(obs, units.Terran.SupplyDepot):
+        #     # Building actions dependent on a supply depot
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_BARRACKS)])
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FACTORY)])
+        #     #excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_BUNKER)])
+        #     #excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_GHOSTACADEMY)])
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_ARMORY)])
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_STARPORT)])
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FUSIONCORE)])
+
+        # if not building_exists(obs, units.Terran.Barracks):
+        #     # Building actions dependent on a barracks
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FACTORY)])
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_BUNKER)])
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_GHOSTACADEMY)])
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_ARMORY)])
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_STARPORT)])
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FUSIONCORE)])
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_TECHLAB_BARRACKS)]
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_REACTOR_BARRACKS)])
+        #     # Training actions dependent on a barracks
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_TRAIN_MARINE)])
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_TRAIN_MARAUDER)])
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_TRAIN_REAPER)])
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_TRAIN_GHOST)])
+        #     # Research actions dependent on a barracks
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_RESEARCH_STIMPACK)])
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_RESEARCH_COMBATSHIELD)])
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_RESEARCH_CONCUSSIVESHELL)])
+
+
+        # if not building_exists(obs, units.Terran.Factory):
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_ARMORY)])
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_STARPORT)])
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_FUSIONCORE)])
         
-        if not building_exists(obs, units.Terran.CommandCenter):
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_ENGINEERINGBAY)])
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_MISSILETURRET)])
+        # if not building_exists(obs, units.Terran.CommandCenter):
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_ENGINEERINGBAY)])
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_MISSILETURRET)])
 
-        # if not building_exists(obs, units.Terran.EngineeringBay):
-            # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_MISSILETURRET)])
+        # # if not building_exists(obs, units.Terran.EngineeringBay):
+        #     # excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_BUILD_MISSILETURRET)])
 
-        if obs.player.food_army == 0:
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_ATTACK_ENEMY_BASE)])
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_ATTACK_ENEMY_SECOND_BASE)])
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_ATTACK_MY_BASE)])
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_ATTACK_MY_SECOND_BASE)])
+        # if obs.player.food_army == 0:
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_ATTACK_ENEMY_BASE)])
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_ATTACK_ENEMY_SECOND_BASE)])
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_ATTACK_MY_BASE)])
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_ATTACK_MY_SECOND_BASE)])
 
-        if get_units_amount(obs, units.Terran.SCV) == 0:
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_HARVEST_MINERALS_FROM_GAS)])
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_HARVEST_GAS_FROM_MINERALS)])
-            excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_HARVEST_MINERALS_IDLE)])
+        # if get_units_amount(obs, units.Terran.SCV) == 0:
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_HARVEST_MINERALS_FROM_GAS)])
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_HARVEST_GAS_FROM_MINERALS)])
+        #     excluded_actions.append(self.action_indices[self.named_actions.index(ACTION_HARVEST_MINERALS_IDLE)])
         
         return excluded_actions
 
