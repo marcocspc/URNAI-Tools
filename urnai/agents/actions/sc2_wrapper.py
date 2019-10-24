@@ -107,11 +107,23 @@ _TERRAN_SCV = 45
 class SC2Wrapper(ActionWrapper):
 
     def __init__(self):
-        self.move_number = 0
-        self.last_worker = sc2._NO_UNITS
-        self.units_to_attack = sc2._NO_UNITS
-        self.last_attack_action = 0
-        self.base_top_left = True
+        self.move_number = 0                            # Variable used to sequentially execute different parts of code inside a function without having to worry about returns
+                                                        # For an example on how self.move_number works check out build_structure_raw{actions\sc2.py}
+
+        self.last_worker = sc2._NO_UNITS                # self.last_worker is used to issue commands to the last worker used in the previous action
+                                                        # For example, to queue the action of harvesting minerals after the worker was sent to build a structure
+
+        self.units_to_attack = sc2._NO_UNITS            # self.units_to_attack is used as a memory of units that are being used by an attack action, once an attack is issued this variable
+                                                        # will be filled with all available army units and the furthest away from the target will be removed from the array and sent to attack.
+                                                        # Once the array is empty the attack action has finished (all army units have been sent to the same attack point)
+
+        self.last_attack_action = ACTION_DO_NOTHING     # self.last_attack_action stores the last attack action used, so that every game step if there's still troops in units_to_attack
+                                                        # we can go back to the same attack action until all units have been issued the command to attack the same point
+        
+        self.units_to_effect = sc2._NO_UNITS            # self.units_to_effect and self.last_effect_action serve a very similar purpuse as self.units_to_attack and self.last_attack_action
+        self.last_effect_action = ACTION_DO_NOTHING     # both of these variables will be used to effect a group of units with an ability, for example effecting all marines with stimpack
+        
+        self.base_top_left = True                       # Variable used to verify if the initial players base is on the top left or bottom right part of the map (used mainly for internal calculations)
 
         '''
         We're defining names for our actions for two reasons:
@@ -144,42 +156,42 @@ class SC2Wrapper(ActionWrapper):
             ACTION_BUILD_REACTOR_STARPORT,
 
             # ENGINEERING BAY RESEARCH
-            # ACTION_RESEARCH_INF_WEAPONS,
-            # ACTION_RESEARCH_INF_ARMOR,
-            # ACTION_RESEARCH_HISEC_AUTOTRACKING,
-            # ACTION_RESEARCH_NEOSTEEL_FRAME,
-            # ACTION_RESEARCH_STRUCTURE_ARMOR,
+            ACTION_RESEARCH_INF_WEAPONS,
+            ACTION_RESEARCH_INF_ARMOR,
+            ACTION_RESEARCH_HISEC_AUTOTRACKING,
+            ACTION_RESEARCH_NEOSTEEL_FRAME,
+            ACTION_RESEARCH_STRUCTURE_ARMOR,
             
             # ARMORY RESEARCH
-            # ACTION_RESEARCH_SHIPS_WEAPONS,
-            # ACTION_RESEARCH_VEHIC_WEAPONS,
-            # ACTION_RESEARCH_SHIPVEHIC_PLATES,
+            ACTION_RESEARCH_SHIPS_WEAPONS,
+            ACTION_RESEARCH_VEHIC_WEAPONS,
+            ACTION_RESEARCH_SHIPVEHIC_PLATES,
 
             # GHOST ACADEMY RESEARCH
-            # ACTION_RESEARCH_GHOST_CLOAK,
+            ACTION_RESEARCH_GHOST_CLOAK,
 
             # BARRACKS RESEARCH
-            # ACTION_RESEARCH_STIMPACK,
-            # ACTION_RESEARCH_COMBATSHIELD,
-            # ACTION_RESEARCH_CONCUSSIVESHELL,
+            ACTION_RESEARCH_STIMPACK,
+            ACTION_RESEARCH_COMBATSHIELD,
+            ACTION_RESEARCH_CONCUSSIVESHELL,
 
             # FACTORY RESEARCH
-            # ACTION_RESEARCH_INFERNAL_PREIGNITER,
-            # ACTION_RESEARCH_DRILLING_CLAWS,
-            # ACTION_RESEARCH_CYCLONE_LOCKONDMG,
-            # ACTION_RESEARCH_CYCLONE_RAPIDFIRE,
+            ACTION_RESEARCH_INFERNAL_PREIGNITER,
+            ACTION_RESEARCH_DRILLING_CLAWS,
+            ACTION_RESEARCH_CYCLONE_LOCKONDMG,
+            ACTION_RESEARCH_CYCLONE_RAPIDFIRE,
 
             # STARPORT RESEARCH
-            # ACTION_RESEARCH_HIGHCAPACITYFUEL,
-            # ACTION_RESEARCH_CORVIDREACTOR,
-            # ACTION_RESEARCH_BANSHEECLOAK,
-            # ACTION_RESEARCH_BANSHEEHYPERFLIGHT,
-            # ACTION_RESEARCH_ADVANCEDBALLISTICS,
+            ACTION_RESEARCH_HIGHCAPACITYFUEL,
+            ACTION_RESEARCH_CORVIDREACTOR,
+            ACTION_RESEARCH_BANSHEECLOAK,
+            ACTION_RESEARCH_BANSHEEHYPERFLIGHT,
+            ACTION_RESEARCH_ADVANCEDBALLISTICS,
 
             # FUSION CORE RESEARCH
-            # ACTION_RESEARCH_BATTLECRUISER_WEAPONREFIT,
+            ACTION_RESEARCH_BATTLECRUISER_WEAPONREFIT,
 
-            # ACTION_EFFECT_STIMPACK,
+            ACTION_EFFECT_STIMPACK,
 
             ACTION_TRAIN_SCV,
 
@@ -201,7 +213,6 @@ class SC2Wrapper(ActionWrapper):
             ACTION_TRAIN_RAVEN,
             ACTION_TRAIN_BANSHEE,
             ACTION_TRAIN_BATTLECRUISER,
-
 
             ACTION_HARVEST_MINERALS_IDLE,
             ACTION_HARVEST_MINERALS_FROM_GAS,
@@ -269,208 +280,303 @@ class SC2Wrapper(ActionWrapper):
 
         excluded_actions = self.named_actions.copy()
 
-        if building_exists(obs, units.Terran.SCV):
-            excluded_actions.remove(ACTION_HARVEST_MINERALS_IDLE)
+        minerals = obs.player.minerals
+        vespene = obs.player.vespene
+        freesupply = get_free_supply(obs)
+
+        has_scv = building_exists(obs, units.Terran.SCV)
+        has_army = select_army(obs, sc2_env.Race.terran) != sc2._NO_UNITS
+        has_supplydepot = building_exists(obs, units.Terran.SupplyDepot) or building_exists(obs, units.Terran.SupplyDepotLowered)
+        has_barracks = building_exists(obs, units.Terran.Barracks)
+        has_barracks_techlab = building_exists(obs, units.Terran.BarracksTechLab)
+        has_ghostacademy = building_exists(obs, units.Terran.GhostAcademy)
+        has_factory = building_exists(obs, units.Terran.Factory)
+        has_factory_techlab = building_exists(obs, units.Terran.FactoryTechLab)
+        has_armory = building_exists(obs, units.Terran.Armory)
+        has_starport = building_exists(obs, units.Terran.Starport)
+        has_starport_techlab = building_exists(obs, units.Terran.StarportTechLab)
+        has_fusioncore = building_exists(obs, units.Terran.FusionCore)
+        has_ccs = building_exists(obs, units.Terran.CommandCenter) or building_exists(obs, units.Terran.PlanetaryFortress) or building_exists(obs, units.Terran.OrbitalCommand)
+        has_engineeringbay = building_exists(obs, units.Terran.EngineeringBay)
+
+
+        if has_scv:
+            if obs.player.idle_worker_count != 0:
+                excluded_actions.remove(ACTION_HARVEST_MINERALS_IDLE)     
+            
             excluded_actions.remove(ACTION_HARVEST_MINERALS_FROM_GAS)
             excluded_actions.remove(ACTION_HARVEST_GAS_FROM_MINERALS)
 
             # ACTION_BUILD_COMMAND_CENTER CHECK
-            if obs.player.minerals > 400:
+            if minerals > 400:
                 excluded_actions.remove(ACTION_BUILD_COMMAND_CENTER)
             # ACTION_BUILD_SUPPLY_DEPOT CHECK
-            if obs.player.minerals > 100:
+            if minerals > 100:
                 excluded_actions.remove(ACTION_BUILD_SUPPLY_DEPOT)
             # ACTION_BUILD_REFINERY CHECK
-            if obs.player.minerals > 75:
+            if minerals > 75:
                 excluded_actions.remove(ACTION_BUILD_REFINERY)
 
-        if self.units_to_attack != sc2._NO_UNITS:
-            excluded_actions.remove(ACTION_ATTACK_ENEMY_BASE)
-            excluded_actions.remove(ACTION_ATTACK_ENEMY_SECOND_BASE)
-            excluded_actions.remove(ACTION_ATTACK_MY_BASE)
-            excluded_actions.remove(ACTION_ATTACK_MY_SECOND_BASE)
-        elif select_army(obs, sc2_env.Race.terran) != sc2._NO_UNITS:
+        if has_army:
             excluded_actions.remove(ACTION_ATTACK_ENEMY_BASE)
             excluded_actions.remove(ACTION_ATTACK_ENEMY_SECOND_BASE)
             excluded_actions.remove(ACTION_ATTACK_MY_BASE)
             excluded_actions.remove(ACTION_ATTACK_MY_SECOND_BASE)
 
         # ACTIONS DEPENDENT ON A SUPPLY DEPOT
-        if building_exists(obs, units.Terran.SupplyDepot):
+        if has_supplydepot:
             # ACTION_BUILD_BARRACKS CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 150:
+            if has_scv and minerals > 150:
                 excluded_actions.remove(ACTION_BUILD_BARRACKS)
 
         # ACTIONS DEPENDENT ON A BARRACKS
-        if building_exists(obs, units.Terran.Barracks):
+        if has_barracks:
             # ACTION_BUILD_BUNKER CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 100:
+            if has_scv and minerals > 100:
                 excluded_actions.remove(ACTION_BUILD_BUNKER)
             '''# ACTION_BUILD_ORBITAL_COMMAND CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 550:
+            if has_scv and minerals > 550:
                 excluded_actions.remove(ACTION_BUILD_ORBITAL_COMMAND)'''
             # ACTION_BUILD_FACTORY CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 150 and obs.player.vespene > 100:
+            if has_scv and minerals > 150 and vespene > 100:
                 excluded_actions.remove(ACTION_BUILD_FACTORY)
             # ACTION_BUILD_GHOSTACADEMY CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 150 and obs.player.vespene > 50:
+            if has_scv and minerals > 150 and vespene > 50:
                 excluded_actions.remove(ACTION_BUILD_GHOSTACADEMY)
             # ACTION_BUILD_TECHLAB_BARRACKS CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 50 and obs.player.vespene > 25:
+            if has_scv and minerals > 50 and vespene > 25:
                 excluded_actions.remove(ACTION_BUILD_TECHLAB_BARRACKS)
             # ACTION_BUILD_REACTOR_BARRACKS CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 50 and obs.player.vespene > 50:
+            if has_scv and minerals > 50 and vespene > 50:
                 excluded_actions.remove(ACTION_BUILD_REACTOR_BARRACKS)
 
             # ACTION_TRAIN_MARINE 
-            if obs.player.minerals > 50 and \
-                get_free_supply(obs) > 1:
+            if minerals > 50 and get_free_supply(obs) > 1:
                 excluded_actions.remove(ACTION_TRAIN_MARINE)
 
             # ACTION_TRAIN_MARAUDER 
-            if building_exists(obs, units.Terran.BarracksTechLab) and \
-                obs.player.minerals > 100 and \
-                obs.player.vespene > 25 and \
-                get_free_supply(obs) > 2:
+            if has_barracks_techlab and \
+                minerals > 100 and \
+                vespene > 25 and \
+                freesupply > 2:
                 excluded_actions.remove(ACTION_TRAIN_MARAUDER)
 
             # ACTION_TRAIN_REAPER 
-            if obs.player.minerals > 50 and \
-                obs.player.vespene > 50 and \
-                get_free_supply(obs) > 1:
+            if minerals > 50 and \
+                vespene > 50 and \
+                freesupply > 1:
                 excluded_actions.remove(ACTION_TRAIN_REAPER)
 
             # ACTION_TRAIN_GHOST 
-            if  building_exists(obs, units.Terran.BarracksTechLab) and \
-                building_exists(obs, units.Terran.GhostAcademy) and \
-                obs.player.minerals > 150 and \
-                obs.player.vespene > 125 and \
-                get_free_supply(obs) > 2:
+            if  has_barracks_techlab and \
+                has_ghostacademy and \
+                minerals > 150 and \
+                vespene > 125 and \
+                freesupply > 2:
                 excluded_actions.remove(ACTION_TRAIN_GHOST)
 
+            # RESEARCH ACTIONS DEPENDENT ON A BARRACKS TECHLAB
+            if has_barracks_techlab:
+              # ACTION_RESEARCH_STIMPACK
+              if minerals > 100 and \
+                  vespene > 100:
+                  excluded_actions.remove(ACTION_RESEARCH_STIMPACK)
+              # ACTION_RESEARCH_COMBATSHIELD
+              if minerals > 100 and \
+                  vespene > 100:
+                  excluded_actions.remove(ACTION_RESEARCH_COMBATSHIELD)
+              # ACTION_RESEARCH_COMBATSHIELD
+              if minerals > 50 and \
+                  vespene > 50:
+                  excluded_actions.remove(ACTION_RESEARCH_CONCUSSIVESHELL)
+
         # ACTIONS DEPENDENT ON A FACTORY
-        if building_exists(obs, units.Terran.Factory):
+        if has_factory:
             # ACTION_BUILD_ARMORY CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 150 and obs.player.vespene > 100:
+            if has_scv and minerals > 150 and vespene > 100:
                 excluded_actions.remove(ACTION_BUILD_ARMORY)
             # ACTION_BUILD_STARPORT CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 150 and obs.player.vespene > 100:
+            if has_scv and minerals > 150 and vespene > 100:
                 excluded_actions.remove(ACTION_BUILD_STARPORT)
             # ACTION_BUILD_TECHLAB_FACTORY CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 50 and obs.player.vespene > 25:
+            if has_scv and minerals > 50 and vespene > 25:
                 excluded_actions.remove(ACTION_BUILD_TECHLAB_FACTORY)
             # ACTION_BUILD_REACTOR_FACTORY CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 50 and obs.player.vespene > 50:
+            if has_scv and minerals > 50 and vespene > 50:
                 excluded_actions.remove(ACTION_BUILD_REACTOR_FACTORY)
 
             # ACTION_TRAIN_HELLION 
-            if  obs.player.minerals > 100 and \
-                get_free_supply(obs) > 2:
+            if  minerals > 100 and \
+                freesupply > 2:
                 excluded_actions.remove(ACTION_TRAIN_HELLION)
 
             # ACTION_TRAIN_HELLBAT 
-            if  building_exists(obs, units.Terran.Armory) and \
-                obs.player.minerals > 100 and \
-                get_free_supply(obs) > 2:
+            if  has_armory and \
+                minerals > 100 and \
+                freesupply > 2:
                 excluded_actions.remove(ACTION_TRAIN_HELLBAT)
 
             # ACTION_TRAIN_SIEGETANK 
-            if  building_exists(obs, units.Terran.FactoryTechLab) and \
-                obs.player.minerals > 150 and \
-                obs.player.vespene > 125 and \
-                get_free_supply(obs) > 3:
+            if  has_factory_techlab and \
+                minerals > 150 and \
+                vespene > 125 and \
+                freesupply > 3:
                 excluded_actions.remove(ACTION_TRAIN_SIEGETANK)
 
             # ACTION_TRAIN_CYCLONE 
-            if  building_exists(obs, units.Terran.FactoryTechLab) and \
-                obs.player.minerals > 150 and \
-                obs.player.vespene > 100 and \
-                get_free_supply(obs) > 3:
+            if  has_factory_techlab and \
+                minerals > 150 and \
+                vespene > 100 and \
+                freesupply > 3:
                 excluded_actions.remove(ACTION_TRAIN_CYCLONE)
 
             # ACTION_TRAIN_WIDOWMINE 
-            if  obs.player.minerals > 75 and \
-                obs.player.vespene > 25 and \
-                get_free_supply(obs) > 2:
+            if  minerals > 75 and \
+                vespene > 25 and \
+                freesupply > 2:
                 excluded_actions.remove(ACTION_TRAIN_WIDOWMINE)
 
             # ACTION_TRAIN_THOR 
-            if  building_exists(obs, units.Terran.FactoryTechLab) and \
-                building_exists(obs, units.Terran.Armory) and \
-                obs.player.minerals > 300 and \
-                obs.player.vespene > 200 and \
-                get_free_supply(obs) > 6:
+            if  has_factory_techlab and \
+                has_armory and \
+                minerals > 300 and \
+                vespene > 200 and \
+                freesupply > 6:
                 excluded_actions.remove(ACTION_TRAIN_THOR)
 
-        if building_exists(obs, units.Terran.Starport):
+            # RESEARCH ACTIONS DEPENDENT ON A FACTORY TECHLAB
+            if has_factory_techlab:
+                ACTION_RESEARCH_INFERNAL_PREIGNITER
+                if minerals > 150 and \
+                    vespene > 150:
+                    excluded_actions.remove(ACTION_RESEARCH_INFERNAL_PREIGNITER)
+                # ACTION_RESEARCH_DRILLING_CLAWS
+                if minerals > 75 and \
+                    vespene > 75:
+                    excluded_actions.remove(ACTION_RESEARCH_DRILLING_CLAWS)
+                # ACTION_RESEARCH_CYCLONE_LOCKONDMG
+                if minerals > 100 and \
+                    vespene > 100:
+                    excluded_actions.remove(ACTION_RESEARCH_CYCLONE_LOCKONDMG)
+                # ACTION_RESEARCH_CYCLONE_RAPIDFIRE
+                if minerals > 75 and \
+                    vespene > 75:
+                    excluded_actions.remove(ACTION_RESEARCH_CYCLONE_RAPIDFIRE)
+
+
+        if has_starport:
             # ACTION_BUILD_FUSIONCORE CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 150 and obs.player.vespene > 150:
+            if has_scv and minerals > 150 and vespene > 150:
                 excluded_actions.remove(ACTION_BUILD_FUSIONCORE)
             # ACTION_BUILD_TECHLAB_STARPORT CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 50 and obs.player.vespene > 25:
+            if has_scv and minerals > 50 and vespene > 25:
                 excluded_actions.remove(ACTION_BUILD_TECHLAB_STARPORT)
             # ACTION_BUILD_REACTOR_STARPORT CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 50 and obs.player.vespene > 50:
+            if has_scv and minerals > 50 and vespene > 50:
                 excluded_actions.remove(ACTION_BUILD_REACTOR_STARPORT)
 
             # ACTION_TRAIN_VIKING 
-            if  obs.player.minerals > 150 and \
-                obs.player.vespene > 75 and \
-                get_free_supply(obs) > 2:
+            if  minerals > 150 and \
+                vespene > 75 and \
+                freesupply > 2:
                 excluded_actions.remove(ACTION_TRAIN_VIKING)
 
             # ACTION_TRAIN_MEDIVAC 
-            if  obs.player.minerals > 100 and \
-                obs.player.vespene > 100 and \
-                get_free_supply(obs) > 2:
+            if  minerals > 100 and \
+                vespene > 100 and \
+                freesupply > 2:
                 excluded_actions.remove(ACTION_TRAIN_MEDIVAC)
 
             # ACTION_TRAIN_LIBERATOR 
-            if  obs.player.minerals > 150 and \
-                obs.player.vespene > 150 and \
-                get_free_supply(obs) > 3:
+            if  minerals > 150 and \
+                vespene > 150 and \
+                freesupply > 3:
                 excluded_actions.remove(ACTION_TRAIN_LIBERATOR)
 
             # ACTION_TRAIN_RAVEN 
-            if  building_exists(obs, units.Terran.FactoryTechLab) and \
-                obs.player.minerals > 100 and \
-                obs.player.vespene > 200 and \
-                get_free_supply(obs) > 2:
+            if  has_starport_techlab and \
+                minerals > 100 and \
+                vespene > 200 and \
+                freesupply > 2:
                 excluded_actions.remove(ACTION_TRAIN_RAVEN)
 
             # ACTION_TRAIN_BANSHEE 
-            if  building_exists(obs, units.Terran.FactoryTechLab) and \
-                obs.player.minerals > 150 and \
-                obs.player.vespene > 100 and \
-                get_free_supply(obs) > 3:
+            if  has_starport_techlab and \
+                minerals > 150 and \
+                vespene > 100 and \
+                freesupply > 3:
                 excluded_actions.remove(ACTION_TRAIN_BANSHEE)
 
             # ACTION_TRAIN_BATTLECRUISER 
-            if  building_exists(obs, units.Terran.FactoryTechLab) and \
-                building_exists(obs, units.Terran.FusionCore) and \
-                obs.player.minerals > 400 and \
-                obs.player.vespene > 300 and \
-                get_free_supply(obs) > 6:
+            if  has_starport_techlab and \
+                has_fusioncore and \
+                minerals > 400 and \
+                vespene > 300 and \
+                freesupply > 6:
                 excluded_actions.remove(ACTION_TRAIN_BATTLECRUISER)
-                
-        if building_exists(obs, units.Terran.CommandCenter) or \
-            building_exists(obs, units.Terran.PlanetaryFortress) or \
-            building_exists(obs, units.Terran.OrbitalCommand):
 
-            # ACTION_BUILD_ENGINEERINGBAY CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 125:
+            # RESEARCH ACTIONS DEPENDENT ON A STARPORT TECHLAB
+            if has_starport_techlab:
+                ACTION_RESEARCH_HIGHCAPACITYFUEL
+                if minerals > 100 and \
+                    vespene > 100:
+                    excluded_actions.remove(ACTION_RESEARCH_HIGHCAPACITYFUEL)
+                # ACTION_RESEARCH_CORVIDREACTOR
+                if minerals > 150 and \
+                    vespene > 150:
+                    excluded_actions.remove(ACTION_RESEARCH_CORVIDREACTOR)
+                # ACTION_RESEARCH_BANSHEECLOAK
+                if minerals > 100 and \
+                    vespene > 100:
+                    excluded_actions.remove(ACTION_RESEARCH_BANSHEECLOAK)
+                # ACTION_RESEARCH_BANSHEEHYPERFLIGHT
+                if minerals > 150 and \
+                    vespene > 150:
+                    excluded_actions.remove(ACTION_RESEARCH_BANSHEEHYPERFLIGHT)
+                # ACTION_RESEARCH_ADVANCEDBALLISTICS
+                if minerals > 150 and \
+                    vespene > 150:
+                    excluded_actions.remove(ACTION_RESEARCH_ADVANCEDBALLISTICS)
+
+        if has_armory:
+            if minerals > 100 and \
+                vespene > 100:
+                excluded_actions.remove(ACTION_RESEARCH_SHIPS_WEAPONS)
+                excluded_actions.remove(ACTION_RESEARCH_VEHIC_WEAPONS)
+                excluded_actions.remove(ACTION_RESEARCH_SHIPVEHIC_PLATES)
+        
+        if has_ghostacademy and \
+            minerals > 150 and \
+            vespene > 150:
+            excluded_actions.remove(ACTION_RESEARCH_GHOST_CLOAK)
+
+        if has_fusioncore and \
+            minerals > 150 and \
+            vespene > 150:
+            excluded_actions.remove(ACTION_RESEARCH_BATTLECRUISER_WEAPONREFIT)
+        
+
+        if has_ccs:
+           # ACTION_BUILD_ENGINEERINGBAY CHECK
+            if has_scv and minerals > 125:
                 excluded_actions.remove(ACTION_BUILD_ENGINEERINGBAY)
 
-        if building_exists(obs, units.Terran.EngineeringBay):
-            '''# ACTION_BUILD_ORBITAL_COMMAND CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 550 and obs.player.vespene > 150:
-                excluded_actions.remove(ACTION_BUILD_ORBITAL_COMMAND)'''
-            # ACTION_BUILD_SENSORTOWER CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 125:
-                excluded_actions.remove(ACTION_BUILD_SENSORTOWER)
-            # ACTION_BUILD_MISSILETURRET CHECK
-            if building_exists(obs, units.Terran.SCV) and obs.player.minerals > 100:
-                excluded_actions.remove(ACTION_BUILD_MISSILETURRET)
+        if has_engineeringbay:
+            if has_scv:
+                # if minerals > 550 and vespene > 150:
+                    # excluded_actions.remove(ACTION_BUILD_ORBITAL_COMMAND)
+                if minerals > 125:
+                    excluded_actions.remove(ACTION_BUILD_SENSORTOWER)
+                if minerals > 125:
+                    excluded_actions.remove(ACTION_BUILD_MISSILETURRET)
+
+            if minerals > 100 and vespene > 100:
+                excluded_actions.remove(ACTION_RESEARCH_INF_WEAPONS)
+                excluded_actions.remove(ACTION_RESEARCH_INF_ARMOR)
+                excluded_actions.remove(ACTION_RESEARCH_HISEC_AUTOTRACKING)
+                excluded_actions.remove(ACTION_RESEARCH_NEOSTEEL_FRAME)
+            if minerals > 150 and vespene > 150:
+                excluded_actions.remove(ACTION_RESEARCH_STRUCTURE_ARMOR)
 
 
         return excluded_actions

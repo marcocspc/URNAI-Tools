@@ -21,15 +21,52 @@ _NEUTRAL_MINERAL_FIELD = 341
 class Simple64State(StateBuilder):
 
     def __init__(self):
-        self._state_size = 12
+        #self._state_size = 22
+        self._state_size = 8214
 
     def build_state(self, obs):
         if obs.game_loop[0] == 0:
             command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
             self.base_top_left = (command_center.x < 32)
 
-        self._state_size = len(obs)
-        return obs
+        new_state = []
+        new_state.append(obs.player.minerals)
+        new_state.append(obs.player.vespene)
+        new_state.append(obs.player.food_cap)
+        new_state.append(obs.player.food_used)
+        new_state.append(obs.player.food_army)
+        new_state.append(obs.player.food_workers)
+        new_state.append(obs.player.food_cap - obs.player.food_used)
+        new_state.append(obs.player.army_count)
+        new_state.append(obs.player.idle_worker_count)
+        new_state.append(get_units_amount(obs, units.Terran.CommandCenter)+
+                        get_units_amount(obs, units.Terran.OrbitalCommand)+
+                        get_units_amount(obs, units.Terran.PlanetaryFortress))
+        new_state.append(get_units_amount(obs, units.Terran.SupplyDepot))
+        new_state.append(get_units_amount(obs, units.Terran.Refinery))
+        new_state.append(get_units_amount(obs, units.Terran.EngineeringBay))
+        new_state.append(get_units_amount(obs, units.Terran.Armory))
+        new_state.append(get_units_amount(obs, units.Terran.MissileTurret))
+        new_state.append(get_units_amount(obs, units.Terran.SensorTower))
+        new_state.append(get_units_amount(obs, units.Terran.Bunker))
+        new_state.append(get_units_amount(obs, units.Terran.FusionCore))
+        new_state.append(get_units_amount(obs, units.Terran.GhostAcademy))
+        new_state.append(get_units_amount(obs, units.Terran.Barracks))
+        new_state.append(get_units_amount(obs, units.Terran.Factory))
+        new_state.append(get_units_amount(obs, units.Terran.Starport))
+
+
+        #for minimap in obs.feature_minimap:
+        #    new_state.extend(minimap.flatten())
+
+
+        #minimap1 = obs.feature_minimap[0]
+        new_state.extend(obs.feature_minimap[2].flatten())      # Feature layer of creep in the minimap (generally will be quite empty, especially on games without zergs hehe)
+        new_state.extend(obs.feature_minimap[4].flatten())      # Feature layer of all visible units on the minimap
+        final_state = np.array(new_state)
+        final_state = np.expand_dims(final_state, axis=0)
+
+        return final_state
 
 
     def get_state_dim(self):

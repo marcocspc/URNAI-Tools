@@ -161,7 +161,8 @@ def research_upgrade(obs, action_id, building_type):
 def effect_units(obs, action_id, units):
     if units != _NO_UNITS:
         for unit in units:
-            return action_id("now", unit.tag)
+            units.pop(0)
+            return action_id("now", unit.tag), units
     return _NO_OP()
 
 
