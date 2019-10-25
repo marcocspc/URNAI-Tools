@@ -56,11 +56,6 @@ class Simple64State(StateBuilder):
         new_state.append(get_units_amount(obs, units.Terran.Starport))
 
 
-        #for minimap in obs.feature_minimap:
-        #    new_state.extend(minimap.flatten())
-
-
-        #minimap1 = obs.feature_minimap[0]
         new_state.extend(obs.feature_minimap[2].flatten())      # Feature layer of creep in the minimap (generally will be quite empty, especially on games without zergs hehe)
         new_state.extend(obs.feature_minimap[4].flatten())      # Feature layer of all visible units on the minimap
         final_state = np.array(new_state)
