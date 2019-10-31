@@ -25,8 +25,8 @@ def main(unused_argv):
         ## Terran agent with a Deep Q-Learning model
         agent = SC2Agent(dq_network, GeneralReward(), env)
 
-        test_params = TestParams(num_matches=1, steps_per_test=5, max_steps=5000, reward_threshold=100000)
-        trainer.train(env, agent, num_episodes=25, save_steps=1, enable_save=True, reward_from_builder=True, test_params=test_params)
+        test_params = TestParams(num_matches=1, steps_per_test=5, max_steps=5000, reward_threshold=1000)
+        trainer.train(env, agent, num_episodes=50, save_steps=1, enable_save=True, reward_from_builder=True, test_params=test_params)
         trainer.play(env, agent, num_matches=5)
     except KeyboardInterrupt:
         pass

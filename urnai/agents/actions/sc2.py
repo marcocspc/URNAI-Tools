@@ -364,6 +364,31 @@ def build_structure_raw_pt(obs, building_type, building_action, move_number, las
             move_number = 0
     return _NO_OP(), last_worker, move_number
 
+def build_structure_raw_pt2(obs, building_type, building_action, move_number, last_worker, base_top_left, max_amount = 999, targets = []):
+    ybrange=0 if base_top_left else 32
+    ytrange=32 if base_top_left else 63
+
+    building_amount = get_units_amount(obs, building_type)
+    if len(targets) == 0 or building_amount >= len(targets):
+        target = [random.randint(0,63), random.randint(ybrange, ytrange)]
+    else:
+        target = targets[building_amount]
+        if not base_top_left: target = (63-target[0]-5, 63-target[1]+5)
+        # target[0] = 63-target[0] if not base_top_left else target[0]
+        # target[1] = 63-target[1] if not base_top_left else target[1]
+        
+    if building_amount < max_amount:
+        if move_number == 0:
+            move_number += 1
+            action, last_worker = build_structure_by_type(obs, building_action, target)
+            return action, last_worker, move_number
+        if move_number == 1:
+            move_number +=1
+            return harvest_gather_minerals_quick(obs, last_worker), last_worker, move_number
+        if move_number == 2:
+            move_number = 0
+    return _NO_OP(), last_worker, move_number
+
 def build_gas_structure_raw_unit(obs, building_type, building_action, player_race, move_number, last_worker, max_amount = 999):        
     if get_units_amount(obs, building_type) < max_amount:
         if move_number == 0:

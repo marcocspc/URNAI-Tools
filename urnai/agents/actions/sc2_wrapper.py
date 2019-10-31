@@ -300,6 +300,8 @@ class SC2Wrapper(ActionWrapper):
         has_engineeringbay = building_exists(obs, units.Terran.EngineeringBay)
 
 
+        excluded_actions.remove(ACTION_DO_NOTHING)
+
         if has_scv:
             if obs.player.idle_worker_count != 0:
                 excluded_actions.remove(ACTION_HARVEST_MINERALS_IDLE)     
@@ -609,7 +611,10 @@ class SC2Wrapper(ActionWrapper):
 
         # BUILD SUPPLY DEPOT
         if named_action == ACTION_BUILD_SUPPLY_DEPOT:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.SupplyDepot, sc2._BUILD_SUPPLY_DEPOT, self.move_number,self.last_worker, self.base_top_left, max_amount = 8)
+            targets = [[21, 26], [23, 26], [25, 26]]
+            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.SupplyDepot, 
+                                                        sc2._BUILD_SUPPLY_DEPOT, self.move_number,self.last_worker, 
+                                                        self.base_top_left, max_amount = 4, targets = targets)
             return action
 
         # BUILD REFINERY
@@ -619,7 +624,10 @@ class SC2Wrapper(ActionWrapper):
 
         # BUILD ENGINEERINGBAY
         if named_action == ACTION_BUILD_ENGINEERINGBAY:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.EngineeringBay, sc2._BUILD_ENGINEERINGBAY, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+            targets = [[18,28]]
+            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.EngineeringBay, 
+                                                        sc2._BUILD_ENGINEERINGBAY, self.move_number, self.last_worker, 
+                                                        self.base_top_left, max_amount = 1, targets=targets)
             return action
 
         # BUILD ARMORY
@@ -654,7 +662,10 @@ class SC2Wrapper(ActionWrapper):
 
         # BUILD BARRACKS
         if named_action == ACTION_BUILD_BARRACKS:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Barracks, sc2._BUILD_BARRACKS, self.move_number, self.last_worker, self.base_top_left, max_amount = 3)
+            targets = [[25, 18], [35, 18]]
+            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.Barracks, 
+                                                        sc2._BUILD_BARRACKS, self.move_number, self.last_worker, 
+                                                        self.base_top_left, max_amount = 3, targets=targets)
             return action
 
         # BUILD FACTORY

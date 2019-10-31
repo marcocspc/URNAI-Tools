@@ -15,34 +15,39 @@ class SparseReward(RewardBuilder):
 class GeneralReward(RewardBuilder):
     def __init__(self):
         self.our_reward = 0
-        self.last_own_units_score = 0
-        self.last_own_structures_score = 0
+        #self.last_own_units_score = 0
+        #self.last_own_structures_score = 0
         self.last_killed_units_score = 0
         self.last_killed_structures_score = 0
-        self.last_mineral_rate = 0
-        self.last_vespene_rate = 0
+        #self.last_mineral_rate = 0
+        #self.last_vespene_rate = 0
 
     def get_reward(self, obs, reward, done):
-        currentscore = 0
-        currentscore += self.last_own_units_score - obs.score_cumulative.total_value_units
-        currentscore += self.last_own_structures_score - obs.score_cumulative.total_value_structures
+        currentscore = -1
+        #currentscore += self.last_own_units_score - obs.score_cumulative.total_value_units
+        #currentscore += self.last_own_structures_score - obs.score_cumulative.total_value_structures
         currentscore += obs.score_cumulative.killed_value_units - self.last_killed_units_score
         currentscore += obs.score_cumulative.killed_value_structures - self.last_killed_structures_score
-        currentscore += self.last_mineral_rate - obs.score_cumulative.collection_rate_minerals
-        currentscore += self.last_mineral_rate - obs.score_cumulative.collection_rate_vespene
+        #currentscore += self.last_mineral_rate - obs.score_cumulative.collection_rate_minerals
+        #currentscore += self.last_vespene_rate - obs.score_cumulative.collection_rate_vespene
 
-        self.last_own_units_score = obs.score_cumulative.total_value_units
-        self.last_own_structures_score = obs.score_cumulative.total_value_structures
+        #self.last_own_units_score = obs.score_cumulative.total_value_units
+        #self.last_own_structures_score = obs.score_cumulative.total_value_structures
         self.last_killed_units_score = obs.score_cumulative.killed_value_units
         self.last_killed_structures_score = obs.score_cumulative.killed_value_structures
-        self.last_mineral_rate = obs.score_cumulative.collection_rate_minerals
-        self.last_vespene_rate = obs.score_cumulative.collection_rate_vespene
+        #self.last_mineral_rate = obs.score_cumulative.collection_rate_minerals
+        #self.last_vespene_rate = obs.score_cumulative.collection_rate_vespene
 
-        if currentscore != 0:
-            self.our_reward = currentscore
-            return currentscore
-        return self.our_reward
-        
+        if not done:
+            if currentscore != -1:
+                self.our_reward = currentscore
+                return currentscore
+            elif currentscore == -1:
+                currentscore = self.our_reward
+                self.our_reward = 0
+                return currentscore
+            return self.our_reward
+        return reward*1000
         
 
 class KilledUnitsReward(RewardBuilder):

@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import scipy.misc
 from .abstate import StateBuilder
 from pysc2.lib import actions, features, units
 from agents.actions.sc2 import * 
@@ -22,7 +23,7 @@ class Simple64State(StateBuilder):
 
     def __init__(self):
         #self._state_size = 22
-        self._state_size = 8214
+        self._state_size = 4118
 
     def build_state(self, obs):
         if obs.game_loop[0] == 0:
@@ -55,9 +56,11 @@ class Simple64State(StateBuilder):
         new_state.append(get_units_amount(obs, units.Terran.Factory))
         new_state.append(get_units_amount(obs, units.Terran.Starport))
 
-
-        new_state.extend(obs.feature_minimap[2].flatten())      # Feature layer of creep in the minimap (generally will be quite empty, especially on games without zergs hehe)
-        new_state.extend(obs.feature_minimap[4].flatten())      # Feature layer of all visible units on the minimap
+        m1 = obs.feature_minimap[2]     # Feature layer of creep in the minimap (generally will be quite empty, especially on games without zergs hehe)
+        m2 = obs.feature_minimap[4]     # Feature layer of all visible units on the minimap
+        combined_minimap = m1+m2
+        #TO DO: LOWER MATRIX RESOLUTION skimage.transform.resize(combined_minimap, (16, 16))
+        new_state.extend(combined_minimap.flatten())   
         final_state = np.array(new_state)
         final_state = np.expand_dims(final_state, axis=0)
 
