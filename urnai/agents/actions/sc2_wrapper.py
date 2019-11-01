@@ -286,6 +286,7 @@ class SC2Wrapper(ActionWrapper):
 
         has_scv = building_exists(obs, units.Terran.SCV)
         has_army = select_army(obs, sc2_env.Race.terran) != sc2._NO_UNITS
+        has_marinemarauder = building_exists(obs, units.Terran.Marine) or building_exists(obs, units.Terran.Marauder)
         has_supplydepot = building_exists(obs, units.Terran.SupplyDepot) or building_exists(obs, units.Terran.SupplyDepotLowered)
         has_barracks = building_exists(obs, units.Terran.Barracks)
         has_barracks_techlab = building_exists(obs, units.Terran.BarracksTechLab)
@@ -580,6 +581,9 @@ class SC2Wrapper(ActionWrapper):
             if minerals > 150 and vespene > 150:
                 excluded_actions.remove(ACTION_RESEARCH_STRUCTURE_ARMOR)
 
+        if has_marinemarauder:
+            excluded_actions.remove(ACTION_EFFECT_STIMPACK)
+
 
         return excluded_actions
 
@@ -590,6 +594,9 @@ class SC2Wrapper(ActionWrapper):
 
         if self.units_to_attack != sc2._NO_UNITS:
             named_action = self.last_attack_action
+
+        if self.units_to_effect != sc2._NO_UNITS:
+            named_action = self.units_to_effect
 
         if obs.game_loop[0] == 0:
             command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
@@ -662,7 +669,7 @@ class SC2Wrapper(ActionWrapper):
 
         # BUILD BARRACKS
         if named_action == ACTION_BUILD_BARRACKS:
-            targets = [[25, 18], [35, 18]]
+            targets = [[25, 18], [25, 22]]
             action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.Barracks, 
                                                         sc2._BUILD_BARRACKS, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount = 3, targets=targets)
@@ -845,19 +852,6 @@ class SC2Wrapper(ActionWrapper):
             return research_upgrade(obs, sc2._RESEARCH_TERRAN_ADVANCEDBALLISTICS, units.Terran.StarportTechLab)
 
 
-
-        # EFFECT STIMPACK
-        if named_action == ACTION_EFFECT_STIMPACK:
-            army = []
-            marines = get_my_units_by_type(obs, units.Terran.Marine)
-            marauders = get_my_units_by_type(obs, units.Terran.Marauder)
-            army.extend(marines)
-            army.extend(marauders)
-            if building_exists(obs, units.Terran.BarracksTechLab):
-                if len(army) > 0:
-                    return effect_units(obs, sc2._EFFECT_STIMPACK, army)
-            return no_op()
-
         # TRAIN SCV
         if named_action == ACTION_TRAIN_SCV:
             return train_unit(obs, sc2._TRAIN_SCV, units.Terran.CommandCenter)
@@ -930,6 +924,24 @@ class SC2Wrapper(ActionWrapper):
             return train_unit(obs, sc2._TRAIN_BATTLECRUISER, units.Terran.Starport)
                 
         
+        # EFFECT STIMPACK
+        if named_action == ACTION_EFFECT_STIMPACK:
+            if self.units_to_effect == sc2._NO_UNITS:
+                army = []
+                marines = get_my_units_by_type(obs, units.Terran.Marine)
+                marauders = get_my_units_by_type(obs, units.Terran.Marauder)
+                army.extend(marines)
+                army.extend(marauders)
+                if len(army) == 0:
+                    army = sc2._NO_UNITS
+            else:
+                army = self.units_to_effect
+
+            if army != sc2._NO_UNITS:
+                action, self.units_to_effect = effect_units(obs, sc2._EFFECT_STIMPACK, army)
+                self.last_effect_action = ACTION_EFFECT_STIMPACK
+                return action
+            return no_op()
 
         # ATTACK ENEMY BASE
         if named_action == ACTION_ATTACK_ENEMY_BASE:
@@ -949,7 +961,7 @@ class SC2Wrapper(ActionWrapper):
 
         # ATTACK ENEMY SECOND BASE
         if named_action == ACTION_ATTACK_ENEMY_SECOND_BASE:
-            attack_xy = (19, 44) if self.base_top_left else (38, 23)
+            attack_xy = (18, 42) if self.base_top_left else (40, 26)
             x_offset = random.randint(-4, 4)
             y_offset = random.randint(-4, 4)
             if self.units_to_attack == sc2._NO_UNITS:
@@ -965,7 +977,7 @@ class SC2Wrapper(ActionWrapper):
 
         # ATTACK MY BASE
         if named_action == ACTION_ATTACK_MY_BASE:
-            attack_xy = (19, 23) if self.base_top_left else (38, 44)
+            attack_xy = (18, 23) if self.base_top_left else (40, 45)
             x_offset = random.randint(-4, 4)
             y_offset = random.randint(-4, 4)
             if self.units_to_attack == sc2._NO_UNITS:
@@ -981,7 +993,7 @@ class SC2Wrapper(ActionWrapper):
 
         # ATTACK MY SECOND BASE
         if named_action == ACTION_ATTACK_MY_SECOND_BASE:
-            attack_xy = (38, 23) if self.base_top_left else (19, 44)
+            attack_xy = (38, 23) if self.base_top_left else (20, 45)
             x_offset = random.randint(-4, 4)
             y_offset = random.randint(-4, 4)
             if self.units_to_attack == sc2._NO_UNITS:

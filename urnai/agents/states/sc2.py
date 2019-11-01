@@ -23,7 +23,7 @@ class Simple64State(StateBuilder):
 
     def __init__(self):
         #self._state_size = 22
-        self._state_size = 4118
+        self._state_size = 278
 
     def build_state(self, obs):
         if obs.game_loop[0] == 0:
@@ -59,8 +59,11 @@ class Simple64State(StateBuilder):
         m1 = obs.feature_minimap[2]     # Feature layer of creep in the minimap (generally will be quite empty, especially on games without zergs hehe)
         m2 = obs.feature_minimap[4]     # Feature layer of all visible units on the minimap
         combined_minimap = m1+m2
-        #TO DO: LOWER MATRIX RESOLUTION skimage.transform.resize(combined_minimap, (16, 16))
-        new_state.extend(combined_minimap.flatten())   
+        combined_minimap = np.array(combined_minimap)
+        # Lowering the featuremap's resolution
+        lowered_minimap = lower_featuremap_resolution(combined_minimap, 4)      #featuremap and reduction facotor, if rf = 4 a 64x64 map will be transformed into a 16x16 map
+
+        new_state.extend(lowered_minimap.flatten())   
         final_state = np.array(new_state)
         final_state = np.expand_dims(final_state, axis=0)
 

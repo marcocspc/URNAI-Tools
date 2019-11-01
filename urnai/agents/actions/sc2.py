@@ -160,10 +160,12 @@ def research_upgrade(obs, action_id, building_type):
 
 def effect_units(obs, action_id, units):
     if units != _NO_UNITS:
-        for unit in units:
-            units.pop(0)
-            return action_id("now", unit.tag), units
-    return _NO_OP()
+        unit = units[0]
+        units.pop(0)
+        if len(units) == 0:
+            units = _NO_UNITS
+        return action_id("now", unit.tag), units
+    return no_op()
 
 
 def train_unit(obs, action_id, building_type):
@@ -374,8 +376,6 @@ def build_structure_raw_pt2(obs, building_type, building_action, move_number, la
     else:
         target = targets[building_amount]
         if not base_top_left: target = (63-target[0]-5, 63-target[1]+5)
-        # target[0] = 63-target[0] if not base_top_left else target[0]
-        # target[1] = 63-target[1] if not base_top_left else target[1]
         
     if building_amount < max_amount:
         if move_number == 0:
@@ -402,3 +402,17 @@ def build_gas_structure_raw_unit(obs, building_type, building_action, player_rac
         if move_number == 2:
             move_number = 0
     return _NO_OP(), last_worker, move_number
+
+# Reduces a matrix "resolution" by a reduction factor. If we have a 64x64 matrix and rf=4 the map will be reduced to 16x16 in which
+# every new element of the matrix is an average from 4x4=16 elements from the original matrix
+def lower_featuremap_resolution(map, rf):   #rf = reduction_factor
+    N, M = map.shape
+    N = N//rf
+    M = M//rf
+
+    reduced_map = np.empty((N, M))
+    for i in range(N):
+        for j in range(M):
+            reduced_map[i,j] = (map[rf*i:rf*i+rf, rf*j:rf*j+rf].sum())/(rf*rf)
+
+    return reduced_map

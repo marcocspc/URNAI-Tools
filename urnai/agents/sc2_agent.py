@@ -43,15 +43,14 @@ class SC2Agent(Agent):
 
             self.previous_action = predicted_action_idx
             self.previous_state = current_state
-            selected_action = [self.action_wrapper.get_action(self.previous_action, obs)]
 
-            try:
-                action_id = selected_action[0].function
-            except KeyError:
-                raise ValueError("Invalid function structure. Function name: %s." % selected_action[0])
+        selected_action = [self.action_wrapper.get_action(self.previous_action, obs)]
 
-
-        return [self.action_wrapper.get_action(self.previous_action, obs)]
+        try:
+            action_id = selected_action[0].function
+        except:
+            print("Action Error: Invalid function structure. Function name: %s." % selected_action[0])
+        return selected_action
 
     def play(self, obs):
         if self.action_wrapper.is_action_done():
