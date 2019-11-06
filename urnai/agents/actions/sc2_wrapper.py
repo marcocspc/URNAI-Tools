@@ -354,7 +354,8 @@ class SC2Wrapper(ActionWrapper):
                 excluded_actions.remove(ACTION_BUILD_REACTOR_BARRACKS)
 
             # ACTION_TRAIN_MARINE 
-            if minerals > 50 and get_free_supply(obs) > 1:
+            if minerals > 50 :
+            #and get_free_supply(obs) > 1:
                 excluded_actions.remove(ACTION_TRAIN_MARINE)
 
             # ACTION_TRAIN_MARAUDER 
@@ -560,7 +561,9 @@ class SC2Wrapper(ActionWrapper):
         
 
         if has_ccs:
-           # ACTION_BUILD_ENGINEERINGBAY CHECK
+            excluded_actions.remove(ACTION_TRAIN_SCV)
+
+            # ACTION_BUILD_ENGINEERINGBAY CHECK
             if has_scv and minerals > 125:
                 excluded_actions.remove(ACTION_BUILD_ENGINEERINGBAY)
 
@@ -584,8 +587,12 @@ class SC2Wrapper(ActionWrapper):
         if has_marinemarauder:
             excluded_actions.remove(ACTION_EFFECT_STIMPACK)
 
+        id_excluded_actions = []
 
-        return excluded_actions
+        for item in excluded_actions:
+            id_excluded_actions.append(self.named_actions.index(item))
+
+        return id_excluded_actions
 
 
     def get_action(self, action_idx, obs):
@@ -596,7 +603,7 @@ class SC2Wrapper(ActionWrapper):
             named_action = self.last_attack_action
 
         if self.units_to_effect != sc2._NO_UNITS:
-            named_action = self.units_to_effect
+            named_action = self.last_effect_action
 
         if obs.game_loop[0] == 0:
             command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]

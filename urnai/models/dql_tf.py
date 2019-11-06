@@ -81,17 +81,28 @@ class DQLTF(LearningModel):
 
         explore_probability = explore_stop + (explore_start - explore_stop) * np.exp(-decay_rate * self.decay_step)
 
-        # TODO: Exclude actions
         if explore_probability > expl_expt_tradeoff:
-            action = random.choice(self.actions)
+            random_action = random.choice(self.actions)
+
+            # Removing excluded actions
+            while random_action in excluded_actions:
+                random_action = random.choice(self.actions)
+            action = random_action
         else:
-            action = self.predict(state)
+            action = self.predict(state, excluded_actions)
 
         return action
 
-    def predict(self, state):
+    def predict(self, state, excluded_actions=[]):
         q_values = self.sess.run(self.output_layer, feed_dict={self.inputs_: state})
         action_idx = np.argmax(q_values)
+
+        # Removing excluded actions
+        # This is possibly badly optimized, eventually look back into this
+        while action_idx in excluded_actions:
+            q_values = np.delete(q_values, action_idx)
+            action_idx = np.argmax(q_values)
+        
         action = self.actions[int(action_idx)]
         return action
 

@@ -29,7 +29,7 @@ class LearningModel(ABC):
 
 
     @abstractmethod
-    def predict(self, state) -> ActionIndex:
+    def predict(self, state, excluded_actions=[]) -> ActionIndex:
         '''
         Given a State, returns the index for the action with the highest Q-Value.
         '''
