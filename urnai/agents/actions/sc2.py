@@ -99,6 +99,10 @@ _TRAIN_BATTLECRUISER = actions.RAW_FUNCTIONS.Train_Battlecruiser_quick
 _EFFECT_STIMPACK = actions.RAW_FUNCTIONS.Effect_Stim_quick
 
 
+# PROTOSS ACTIONS
+
+_BUILD_PYLON = actions.RAW_FUNCTIONS.Build_Pylon_pt
+
 '''CONSTANTS USED TO DO GENERAL CHECKS'''
 _NO_UNITS = "no_units"
 _TERRAN = sc2_env.Race.terran

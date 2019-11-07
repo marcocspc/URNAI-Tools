@@ -4,6 +4,7 @@ from models.base.abmodel import LearningModel
 from .base.abagent import Agent
 from models.base.abmodel import LearningModel
 from agents.rewards.abreward import RewardBuilder
+from utils import error
 
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 _PLAYER_SELF = 1
@@ -49,7 +50,7 @@ class SC2Agent(Agent):
         try:
             action_id = selected_action[0].function
         except:
-            print("Action Error: Invalid function structure. Function name: %s." % selected_action[0])
+            raise ActionError("Invalid function structure. Function name: %s." % selected_action[0])
         return selected_action
 
     def play(self, obs):

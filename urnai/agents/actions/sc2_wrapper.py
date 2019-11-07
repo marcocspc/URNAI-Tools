@@ -11,7 +11,6 @@ from pysc2.env import sc2_env
 
 ## Defining action constants. These are names of the actions our agent will try to use.
 ## These are used merely to facilitate checking which actions are being called during code debugging
-ACTION_DO_NOTHING = 'donothing'                             # The agent does nothing
 
 ACTION_BUILD_COMMAND_CENTER = 'buildcommandcenter'
 ACTION_BUILD_SUPPLY_DEPOT = 'buildsupplydepot'              # Selects SCV > builds supply depot > sends SCV to harvest minerals
@@ -82,26 +81,20 @@ ACTION_TRAIN_RAVEN = 'trainraven'
 ACTION_TRAIN_BANSHEE = 'trainbanshee'
 ACTION_TRAIN_BATTLECRUISER = 'trainbattlecruiser'
 
+# Protoss Actions
+ACTION_BUILD_PYLON = 'buildpylon'
+
+# General Actions used by any race
+ACTION_DO_NOTHING = 'donothing'                             # The agent does nothing
 
 ACTION_ATTACK_ENEMY_BASE = 'attackenemybase'                                    # Selects army > attacks coordinates > nothing
 ACTION_ATTACK_ENEMY_SECOND_BASE = 'attackenemysecondbase'
 ACTION_ATTACK_MY_BASE = 'attackmybase'
 ACTION_ATTACK_MY_SECOND_BASE = 'attackmysecondbase'
 
-
 ACTION_HARVEST_MINERALS_IDLE = 'harvestmineralsidle'        # Selects random idle scv > sends him to harvest minerals
 ACTION_HARVEST_MINERALS_FROM_GAS = 'harvestmineralsfromgas'
 ACTION_HARVEST_GAS_FROM_MINERALS = 'harvestgasfromminerals'
-
-
-_UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
-_PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
-
-_PLAYER_SELF = 1
-_TERRAN_COMMANDCENTER = 18
-_TERRAN_SUPPLY_DEPOT = 19
-_TERRAN_BARRACKS = 21
-_TERRAN_SCV = 45
 
 
 class SC2Wrapper(ActionWrapper):
@@ -132,6 +125,75 @@ class SC2Wrapper(ActionWrapper):
          
         2) Readability: Using names instead of literal numbers makes it easier to tell which action is which.
         '''
+        self.named_actions = [
+            ACTION_DO_NOTHING,
+
+            ACTION_HARVEST_MINERALS_IDLE,
+            ACTION_HARVEST_MINERALS_FROM_GAS,
+            ACTION_HARVEST_GAS_FROM_MINERALS,
+
+            ACTION_ATTACK_ENEMY_BASE,
+            ACTION_ATTACK_ENEMY_SECOND_BASE,
+            ACTION_ATTACK_MY_BASE,
+            ACTION_ATTACK_MY_SECOND_BASE,
+        ]
+
+        '''
+        We're splitting the minimap into a 4x4 grid because the marine's effective range is able to cover
+        the entire map from just this number of cells. For each (x, y) grid cell, we're defining an action called
+        ACTION_ATTACK_x_y. When this actions is selected, we parse this string to retrieve this coordinate info
+        and pass it as a parameter to the actual PySC2 action.
+        '''
+        # for mm_x in range(0, 64):
+        #     for mm_y in range(0, 64):
+        #         if (mm_x + 1) % 32 == 0 and (mm_y + 1) % 32 == 0:
+        #             self.named_actions.append(ACTION_ATTACK + '_' + str(mm_x - 16) + '_' + str(mm_y - 16))
+   
+        '''
+        In URNAI, the models can only return action indices. This index is passed by the agent to an ActionWrapper like this
+        so that it decides what to do with the current action. For a complicated game like StarCraft 2 we can't just return an action,
+        because most of them require extra parameters. So the get_action action of this wrapper is responsible for:
+        1) Receiving an action index from the agent
+        2) Selecting a named_action from the actions by using this index.
+        3) Returning the PySC2 action that is equivalent to this named_action
+
+        EX: 
+        0) Agent receives action index 3 from its model
+        1) Agent calls action_wrapper.get_action(3)
+        2) get_action selects ACTION_BUILD_BARRACKS from its set of named actions
+        3) get_action returns select_random_scv()
+        '''
+        self.action_indices = [idx for idx in range(len(self.named_actions))]
+
+    def is_action_done(self):
+        return self.move_number == 0
+    
+    def reset(self):
+        self.move_number = 0
+
+    def get_actions(self):
+        return self.action_indices
+    
+    def split_action(self, smart_action):
+        '''Breaks out (x, y) coordinates from a named action, if there are any.'''
+        x = 0
+        y = 0
+        if '_' in smart_action:
+            smart_action, x, y = smart_action.split('_')
+
+        return (smart_action, x, y)
+
+    def get_excluded_actions(self, obs):
+        return []
+
+    def get_action(self, action_idx, obs):
+        pass
+
+
+class TerranWrapper(SC2Wrapper):
+    def __init__(self):
+        SC2Wrapper.__init__(self)       # Imports self variables from SC2Wrapper
+
         self.named_actions = [
             ACTION_DO_NOTHING,
 
@@ -223,56 +285,7 @@ class SC2Wrapper(ActionWrapper):
             ACTION_ATTACK_MY_BASE,
             ACTION_ATTACK_MY_SECOND_BASE,
         ]
-
-        '''
-        We're splitting the minimap into a 4x4 grid because the marine's effective range is able to cover
-        the entire map from just this number of cells. For each (x, y) grid cell, we're defining an action called
-        ACTION_ATTACK_x_y. When this actions is selected, we parse this string to retrieve this coordinate info
-        and pass it as a parameter to the actual PySC2 action.
-        '''
-        # for mm_x in range(0, 64):
-        #     for mm_y in range(0, 64):
-        #         if (mm_x + 1) % 32 == 0 and (mm_y + 1) % 32 == 0:
-        #             self.named_actions.append(ACTION_ATTACK + '_' + str(mm_x - 16) + '_' + str(mm_y - 16))
-   
-        '''
-        In URNAI, the models can only return action indices. This index is passed by the agent to an ActionWrapper like this
-        so that it decides what to do with the current action. For a complicated game like StarCraft 2 we can't just return an action,
-        because most of them require extra parameters. So the get_action action of this wrapper is responsible for:
-        1) Receiving an action index from the agent
-        2) Selecting a named_action from the actions by using this index.
-        3) Returning the PySC2 action that is equivalent to this named_action
-
-        EX: 
-        0) Agent receives action index 3 from its model
-        1) Agent calls action_wrapper.get_action(3)
-        2) get_action selects ACTION_BUILD_BARRACKS from its set of named actions
-        3) get_action returns select_random_scv()
-        '''
         self.action_indices = [idx for idx in range(len(self.named_actions))]
-
-
-    def is_action_done(self):
-        return self.move_number == 0
-
-    
-    def reset(self):
-        self.move_number = 0
-
-
-    def get_actions(self):
-        return self.action_indices
-
-    
-    def split_action(self, smart_action):
-        '''Breaks out (x, y) coordinates from a named action, if there are any.'''
-        x = 0
-        y = 0
-        if '_' in smart_action:
-            smart_action, x, y = smart_action.split('_')
-
-        return (smart_action, x, y)
-
 
     def get_excluded_actions(self, obs):
 
@@ -594,10 +607,9 @@ class SC2Wrapper(ActionWrapper):
 
         return id_excluded_actions
 
-
     def get_action(self, action_idx, obs):
         named_action = self.named_actions[action_idx]
-        named_action, x, y = self.split_action(named_action)
+        #named_action, x, y = self.split_action(named_action)
 
         if self.units_to_attack != sc2._NO_UNITS:
             named_action = self.last_attack_action
@@ -1014,5 +1026,48 @@ class SC2Wrapper(ActionWrapper):
                 return action
             return no_op()
 
+
+        return no_op()
+
+
+class ProtossWrapper(SC2Wrapper):
+    def __init__(self):
+        SC2Wrapper.__init__(self)       # Imports self variables from SC2Wrapper
+
+        self.named_actions = [
+            ACTION_DO_NOTHING,
+
+            ACTION_HARVEST_MINERALS_IDLE,
+            ACTION_HARVEST_MINERALS_FROM_GAS,
+            ACTION_HARVEST_GAS_FROM_MINERALS,
+
+            ACTION_ATTACK_ENEMY_BASE,
+            ACTION_ATTACK_ENEMY_SECOND_BASE,
+            ACTION_ATTACK_MY_BASE,
+            ACTION_ATTACK_MY_SECOND_BASE,
+
+            ACTION_BUILD_PYLON
+        ]
+        self.action_indices = [idx for idx in range(len(self.named_actions))]
+
+    def get_action(self, action_idx, obs):
+        named_action = self.named_actions[action_idx]
+        #named_action, x, y = self.split_action(named_action)
+
+        if self.units_to_attack != sc2._NO_UNITS:
+            named_action = self.last_attack_action
+
+        if self.units_to_effect != sc2._NO_UNITS:
+            named_action = self.last_effect_action
+
+        if obs.game_loop[0] == 0:
+            command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
+            self.base_top_left = (command_center.x < 32)
+
+        
+        if named_action == ACTION_BUILD_PYLON:
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Protoss.Pylon, sc2._BUILD_PYLON, sc2_env.Race.protoss, self.move_number, self.last_worker)
+            return action
+        
 
         return no_op()

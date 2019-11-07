@@ -4,7 +4,7 @@ from envs.sc2 import SC2Env
 from envs.trainer import Trainer
 from envs.trainer import TestParams
 from agents.sc2_agent import SC2Agent
-from agents.actions.sc2_wrapper import SC2Wrapper
+from agents.actions.sc2_wrapper import SC2Wrapper, TerranWrapper, ProtossWrapper
 from agents.rewards.sc2 import KilledUnitsReward, GeneralReward
 from agents.states.sc2 import Simple64State_1
 from agents.states.sc2 import Simple64State
@@ -15,10 +15,10 @@ def main(unused_argv):
 
     try:
         ## Initializing our StarCraft 2 environment
-        players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
-        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=16)
+        players = [sc2_env.Agent(sc2_env.Race.protoss), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
+        env = SC2Env(map_name="Simple64", players=players, render=True, step_mul=16)
         
-        action_wrapper = SC2Wrapper()
+        action_wrapper = ProtossWrapper()
         state_builder = Simple64State()
         dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, save_path='urnai/models/saved/terran_dql')
 
