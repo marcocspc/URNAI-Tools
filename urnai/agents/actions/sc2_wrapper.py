@@ -1061,12 +1061,12 @@ class ProtossWrapper(SC2Wrapper):
             named_action = self.last_effect_action
 
         if obs.game_loop[0] == 0:
-            command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
-            self.base_top_left = (command_center.x < 32)
+            nexus = get_my_units_by_type(obs, units.Protoss.Nexus)[0]
+            self.base_top_left = (nexus.x < 32)
 
         
         if named_action == ACTION_BUILD_PYLON:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Protoss.Pylon, sc2._BUILD_PYLON, sc2_env.Race.protoss, self.move_number, self.last_worker)
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Protoss.Pylon, sc2._BUILD_PYLON, self.move_number, self.last_worker, self.base_top_left)
             return action
         
 

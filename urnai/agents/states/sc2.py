@@ -3,7 +3,8 @@ import numpy as np
 import scipy.misc
 from .abstate import StateBuilder
 from pysc2.lib import actions, features, units
-from agents.actions.sc2 import * 
+from agents.actions.sc2 import *
+from pysc2.env import sc2_env
 
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 _UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
@@ -24,11 +25,25 @@ class Simple64State(StateBuilder):
     def __init__(self):
         #self._state_size = 22
         self._state_size = 278
+        self.player_race = 0
 
     def build_state(self, obs):
         if obs.game_loop[0] == 0:
-            command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
-            self.base_top_left = (command_center.x < 32)
+
+            commandcenter = get_my_units_by_type(obs, units.Terran.CommandCenter)
+            nexus = get_my_units_by_type(obs, units.Protoss.Nexus)
+            hatchery = get_my_units_by_type(obs, units.Zerg.Hatchery)
+            if len(commandcenter)>0: 
+                townhall = commandcenter[0]
+                self.player_race = sc2_env.Race.terran
+            if len(nexus)>0:
+                townhall = nexus[0]
+                self.player_race = sc2_env.Race.protoss
+            if len(hatchery)>0:
+                townhall = hatchery[0]
+                self.player_race = sc2_env.Race.zerg
+
+            self.base_top_left = (townhall.x < 32)
 
         new_state = []
         new_state.append(obs.player.minerals)
@@ -40,21 +55,42 @@ class Simple64State(StateBuilder):
         new_state.append(obs.player.food_cap - obs.player.food_used)
         new_state.append(obs.player.army_count)
         new_state.append(obs.player.idle_worker_count)
-        new_state.append(get_units_amount(obs, units.Terran.CommandCenter)+
-                        get_units_amount(obs, units.Terran.OrbitalCommand)+
-                        get_units_amount(obs, units.Terran.PlanetaryFortress))
-        new_state.append(get_units_amount(obs, units.Terran.SupplyDepot))
-        new_state.append(get_units_amount(obs, units.Terran.Refinery))
-        new_state.append(get_units_amount(obs, units.Terran.EngineeringBay))
-        new_state.append(get_units_amount(obs, units.Terran.Armory))
-        new_state.append(get_units_amount(obs, units.Terran.MissileTurret))
-        new_state.append(get_units_amount(obs, units.Terran.SensorTower))
-        new_state.append(get_units_amount(obs, units.Terran.Bunker))
-        new_state.append(get_units_amount(obs, units.Terran.FusionCore))
-        new_state.append(get_units_amount(obs, units.Terran.GhostAcademy))
-        new_state.append(get_units_amount(obs, units.Terran.Barracks))
-        new_state.append(get_units_amount(obs, units.Terran.Factory))
-        new_state.append(get_units_amount(obs, units.Terran.Starport))
+
+        if self.player_race == sc2_env.Race.terran:
+            new_state.append(get_units_amount(obs, units.Terran.CommandCenter)+
+                            get_units_amount(obs, units.Terran.OrbitalCommand)+
+                            get_units_amount(obs, units.Terran.PlanetaryFortress))
+            new_state.append(get_units_amount(obs, units.Terran.SupplyDepot))
+            new_state.append(get_units_amount(obs, units.Terran.Refinery))
+            new_state.append(get_units_amount(obs, units.Terran.EngineeringBay))
+            new_state.append(get_units_amount(obs, units.Terran.Armory))
+            new_state.append(get_units_amount(obs, units.Terran.MissileTurret))
+            new_state.append(get_units_amount(obs, units.Terran.SensorTower))
+            new_state.append(get_units_amount(obs, units.Terran.Bunker))
+            new_state.append(get_units_amount(obs, units.Terran.FusionCore))
+            new_state.append(get_units_amount(obs, units.Terran.GhostAcademy))
+            new_state.append(get_units_amount(obs, units.Terran.Barracks))
+            new_state.append(get_units_amount(obs, units.Terran.Factory))
+            new_state.append(get_units_amount(obs, units.Terran.Starport))
+
+        elif self.player_race == sc2_env.Race.protoss:
+            new_state.append(get_units_amount(obs, units.Protoss.Nexus))
+            new_state.append(get_units_amount(obs, units.Protoss.Pylon))
+            new_state.append(get_units_amount(obs, units.Protoss.Assimilator))
+            new_state.append(get_units_amount(obs, units.Protoss.Forge))
+            new_state.append(get_units_amount(obs, units.Protoss.Gateway))
+            new_state.append(get_units_amount(obs, units.Protoss.CyberneticsCore))
+            new_state.append(get_units_amount(obs, units.Protoss.PhotonCannon))
+            new_state.append(get_units_amount(obs, units.Protoss.RoboticsFacility))
+            new_state.append(get_units_amount(obs, units.Protoss.Stargate))
+            new_state.append(get_units_amount(obs, units.Protoss.TwilightCouncil))
+            new_state.append(get_units_amount(obs, units.Protoss.RoboticsBay))
+            new_state.append(get_units_amount(obs, units.Protoss.TemplarArchive))
+            new_state.append(get_units_amount(obs, units.Protoss.DarkShrine))
+
+        # TO DO: Append observations for zergs
+        #elif self.player_race == sc2_env.Race.zerg:
+
 
         m1 = obs.feature_minimap[2]     # Feature layer of creep in the minimap (generally will be quite empty, especially on games without zergs hehe)
         m2 = obs.feature_minimap[4]     # Feature layer of all visible units on the minimap
