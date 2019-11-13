@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import scipy.misc
+from matplotlib import pyplot as plt
 from .abstate import StateBuilder
 from pysc2.lib import actions, features, units
 from agents.actions.sc2 import *
@@ -24,7 +25,9 @@ class Simple64State(StateBuilder):
 
     def __init__(self):
         #self._state_size = 22
-        self._state_size = 278
+        #self._state_size = 278
+        #self._state_size = 1046
+        self._state_size = 4118
         self.player_race = 0
 
     def build_state(self, obs):
@@ -91,13 +94,30 @@ class Simple64State(StateBuilder):
         # TO DO: Append observations for zergs
         #elif self.player_race == sc2_env.Race.zerg:
 
-
+        m0 = obs.feature_minimap[0]
         m1 = obs.feature_minimap[2]     # Feature layer of creep in the minimap (generally will be quite empty, especially on games without zergs hehe)
-        m2 = obs.feature_minimap[4]     # Feature layer of all visible units on the minimap
-        combined_minimap = m1+m2
+        m1[m1 == 1] = 8                 # Transforming creep info from 1 to 8 in the map (makes it more visible)
+        m2 = obs.feature_minimap[4]     # Feature layer of all visible units (neutral, friendly and enemy) on the minimap
+        m2[m2 == 1] = 64                # Transforming own units from 1 to 64 for visibility
+        m2[m2 == 3] = 32                # Transforming enemy units from 3 to 64 for visibility
+        #m2[m2 == 2] = 32                
+        
+        combined_minimap = np.where(m2 != 0, m2, m1)
+        combined_minimap = np.where(combined_minimap != 0, combined_minimap, m0)
+        #combined_minimap = m0+m1+m2
         combined_minimap = np.array(combined_minimap)
+
         # Lowering the featuremap's resolution
-        lowered_minimap = lower_featuremap_resolution(combined_minimap, 4)      #featuremap and reduction facotor, if rf = 4 a 64x64 map will be transformed into a 16x16 map
+        lowered_minimap = lower_featuremap_resolution(combined_minimap, 1)      #featuremap and reduction factor, if rf = 4 a 64x64 map will be transformed into a 16x16 map
+        
+        # Rotating observation depending on Agent's location on the map so that we get a consistent observation
+        if not self.base_top_left: 
+            lowered_minimap = np.rot90(lowered_minimap, 2)
+        
+        if (obs.game_loop[0]/16)%200 == 0:
+            # Displaying Agent's vision
+            plt.imshow(lowered_minimap, interpolation='nearest')
+            plt.show()
 
         new_state.extend(lowered_minimap.flatten())   
         final_state = np.array(new_state)
