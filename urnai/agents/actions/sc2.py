@@ -1,5 +1,6 @@
 import random
 import numpy as np
+from collections import Counter
 from pysc2.lib import actions, features, units
 from pysc2.env import sc2_env
 
@@ -122,7 +123,7 @@ def select_random_unit_by_type(obs, unit_type):
         return random_unit
     return _NO_UNITS
 
-def select_idle_worker(obs, player_race):
+def get_idle_worker(obs, player_race):
     if player_race == _PROTOSS:
         workers = get_my_units_by_type(obs, units.Protoss.Probe)
     elif player_race == _TERRAN:
@@ -134,6 +135,41 @@ def select_idle_worker(obs, player_race):
         for worker in workers:
             if worker.order_length == 0: # checking if worker is idle
                 return worker
+    return _NO_UNITS
+
+def get_all_idle_workers(obs, player_race):
+    if player_race == _PROTOSS:
+        workers = get_my_units_by_type(obs, units.Protoss.Probe)
+    elif player_race == _TERRAN:
+        workers = get_my_units_by_type(obs, units.Terran.SCV)
+    elif player_race == _ZERG:
+        workers = get_my_units_by_type(obs, units.Zerg.Drone)
+
+    idle_workers = []
+
+    if len(workers) > 0:
+        for worker in workers:
+            if worker.order_length == 0: # checking if worker is idle
+                idle_workers.append(worker)
+        return idle_workers
+    return _NO_UNITS
+
+def get_closest_unit(obs, target_xy, unit_type = _NO_UNITS, units_list = _NO_UNITS):
+    if unit_type != _NO_UNITS:
+        units = get_my_units_by_type(obs, unit_type)
+        if len(units) > 0:
+            distances = get_distances(obs, units, target_xy)
+            min_dist_index = np.argmin(distances)
+            unit = units[min_dist_index]
+            return unit
+
+    elif units_list != _NO_UNITS:
+        if len(units_list) == 0:
+            units_list = [units_list]
+        distances = get_distances(obs, units_list, target_xy)
+        min_dist_index = np.argmin(distances)
+        unit = units_list[min_dist_index]
+        return unit
     return _NO_UNITS
 
 # TO DO: Implement a select_closest_unit_by_type (useful to select workers closest to building target)
@@ -201,34 +237,76 @@ def attack_target_point(obs, units, target):
 
 
 def harvest_gather_minerals_quick(obs, worker, player_race):
-
-    if player_race == _TERRAN: townhall = get_my_units_by_type(obs, units.Terran.CommandCenter)
-    if player_race == _PROTOSS: townhall = get_my_units_by_type(obs, units.Protoss.Nexus)
-    if player_race == _ZERG: townhall = get_my_units_by_type(obs, units.Zerg.Hatchery)
+    if player_race == _TERRAN: 
+        townhalls = get_my_units_by_type(obs, units.Terran.CommandCenter)
+        townhalls.extend(get_my_units_by_type(obs, units.Terran.PlanetaryFortress))
+        townhalls.extend(get_my_units_by_type(obs, units.Terran.OrbitalCommand))
+    if player_race == _PROTOSS: townhalls = get_my_units_by_type(obs, units.Protoss.Nexus)
+    if player_race == _ZERG: townhalls = get_my_units_by_type(obs, units.Zerg.Hatchery)
 
     if worker != _NO_UNITS:
         mineral_fields = get_neutral_units_by_type(obs, units.Neutral.MineralField)
         if len(mineral_fields) > 0:
-            # Checks for every mineral field if it is closer than 10 units of distance from a command center, if so, sends our worker there to harvest
-            if len(townhall) > 0:
-                for mineral_field in mineral_fields:
-                    target = [mineral_field.x, mineral_field.y]
-                    distances = get_distances(obs, townhall, target)
-                    if distances[np.argmin(distances)] < 10:
-                        return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, mineral_field.tag)
+            # Checks every townhall if it is able to receive workers. If it is, searches for mineral fields closer than 10 units of distance.
+            # If we find one, send the worker to gather minerals there.
+            if len(townhalls) > 0:
+                for townhall in townhalls:
+                    if townhall.assigned_harvesters < townhall.ideal_harvesters:
+                        for mineral_field in mineral_fields:
+                            target = [mineral_field.x, mineral_field.y]
+                            distances = get_distances(obs, townhalls, target)
+                            if distances[np.argmin(distances)] < 10:
+                                return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, mineral_field.tag)
 
     return _NO_OP()
 
 
-def harvest_gather_minerals(obs, worker, command_center):
-    if worker != _NO_UNITS:
-        mineral_fields = get_neutral_units_by_type(obs, units.Neutral.MineralField)
-        if len(mineral_fields) > 0:
-            target = [command_center.x, command_center.y]
-            distances = get_distances(obs, mineral_fields, target)
-            idx_argmin = np.argmin(distances)
-            if distances[idx_argmin] < 10:
-                return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, mineral_fields[idx_argmin].tag)
+# def harvest_gather_minerals(obs, worker, command_center, player_race):
+#     if player_race == _TERRAN: 
+#         townhalls = get_my_units_by_type(obs, units.Terran.CommandCenter)
+#         townhalls.extend(get_my_units_by_type(obs, units.Terran.PlanetaryFortress))
+#         townhalls.extend(get_my_units_by_type(obs, units.Terran.OrbitalCommand))
+#     if player_race == _PROTOSS: townhalls = get_my_units_by_type(obs, units.Protoss.Nexus)
+#     if player_race == _ZERG: townhalls = get_my_units_by_type(obs, units.Zerg.Hatchery)
+
+#     if worker != _NO_UNITS:
+#         mineral_fields = get_neutral_units_by_type(obs, units.Neutral.MineralField)
+#         if len(mineral_fields) > 0:
+#             target = [command_center.x, command_center.y]
+#             distances = get_distances(obs, mineral_fields, target)
+#             idx_argmin = np.argmin(distances)
+#             if distances[idx_argmin] < 10:
+#                 return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, mineral_fields[idx_argmin].tag)
+
+#     return _NO_OP()
+
+def harvest_gather_minerals(obs, player_race, idle_workers=False):
+    if player_race == _TERRAN: 
+        townhalls = get_my_units_by_type(obs, units.Terran.CommandCenter)
+        townhalls.extend(get_my_units_by_type(obs, units.Terran.PlanetaryFortress))
+        townhalls.extend(get_my_units_by_type(obs, units.Terran.OrbitalCommand))
+    if player_race == _PROTOSS: townhalls = get_my_units_by_type(obs, units.Protoss.Nexus)
+    if player_race == _ZERG: townhalls = get_my_units_by_type(obs, units.Zerg.Hatchery)
+
+    mineral_fields = get_neutral_units_by_type(obs, units.Neutral.MineralField)
+    if len(mineral_fields) > 0:
+        # Checks every townhall if it is able to receive workers. If it is, searches for mineral fields closer than 10 units of distance.
+        # If we find one, send the worker to gather minerals there.
+        if len(townhalls) > 0:
+            for townhall in townhalls:
+                if townhall.assigned_harvesters < townhall.ideal_harvesters:
+                    target = [townhall.x, townhall.y]
+                    if idle_workers:
+                        worker = get_closest_unit(obs, target, units_list=idle_workers)
+                    else:
+                        worker = get_closest_unit(obs, target, unit_type=units.Terran.SCV)
+                    if worker.order_id_0 == 362 or worker.order_id_0 == 359 or worker.order_length == 0:
+                        for townhall in townhalls:
+                            if townhall.assigned_harvesters < townhall.ideal_harvesters:
+                                target = [townhall.x, townhall.y]
+                                distances = get_distances(obs, mineral_fields, target)
+                                closest_mineral = mineral_fields[np.argmin(distances)]
+                                return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, closest_mineral.tag)
 
     return _NO_OP()
 
@@ -439,7 +517,10 @@ def lower_featuremap_resolution(map, rf):   #rf = reduction_factor
     reduced_map = np.empty((N, M))
     for i in range(N):
         for j in range(M):
-            reduced_map[i,j] = (map[rf*i:rf*i+rf, rf*j:rf*j+rf].sum())#/(rf*rf)
+            #reduction_array = map[rf*i:rf*i+rf, rf*j:rf*j+rf].flatten()
+            #reduced_map[i,j]  = Counter(reduction_array).most_common(1)[0][0]
+            
+            reduced_map[i,j] = (map[rf*i:rf*i+rf, rf*j:rf*j+rf].sum())/(rf*rf)
 
     return reduced_map
 

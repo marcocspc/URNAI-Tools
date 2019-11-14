@@ -1,33 +1,20 @@
 import math
 import numpy as np
 import scipy.misc
+from matplotlib import colors
 from matplotlib import pyplot as plt
 from .abstate import StateBuilder
 from pysc2.lib import actions, features, units
 from agents.actions.sc2 import *
 from pysc2.env import sc2_env
 
-_PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
-_UNIT_TYPE = features.SCREEN_FEATURES.unit_type.index
-_PLAYER_ID = features.SCREEN_FEATURES.player_id.index
-
-_PLAYER_SELF = 1
-_PLAYER_HOSTILE = 4
-_ARMY_SUPPLY = 5
-
-_TERRAN_COMMANDCENTER = 18
-_TERRAN_SUPPLY_DEPOT = 19
-_TERRAN_BARRACKS = 21
-_TERRAN_SCV = 45
-_NEUTRAL_MINERAL_FIELD = 341
 
 class Simple64State(StateBuilder):
 
     def __init__(self):
-        #self._state_size = 22
-        #self._state_size = 278
-        #self._state_size = 1046
-        self._state_size = 4118
+        self.reduction_factor = 4
+
+        self._state_size = 22 + (64/self.reduction_factor)**2
         self.player_race = 0
 
     def build_state(self, obs):
@@ -94,30 +81,35 @@ class Simple64State(StateBuilder):
         # TO DO: Append observations for zergs
         #elif self.player_race == sc2_env.Race.zerg:
 
-        m0 = obs.feature_minimap[0]
+        m0 = obs.feature_minimap[0]     # Feature layer of the map's terrain (elevation and shape)
+        m0 = m0/10
         m1 = obs.feature_minimap[2]     # Feature layer of creep in the minimap (generally will be quite empty, especially on games without zergs hehe)
-        m1[m1 == 1] = 8                 # Transforming creep info from 1 to 8 in the map (makes it more visible)
+        m1[m1 == 1] = 16                # Transforming creep info from 1 to 8 in the map (makes it more visible)
         m2 = obs.feature_minimap[4]     # Feature layer of all visible units (neutral, friendly and enemy) on the minimap
-        m2[m2 == 1] = 64                # Transforming own units from 1 to 64 for visibility
-        m2[m2 == 3] = 32                # Transforming enemy units from 3 to 64 for visibility
-        #m2[m2 == 2] = 32                
+        m2[m2 == 1] = 128               # Transforming own units from 1 to 64 for visibility
+        m2[m2 == 3] = 64                # Transforming enemy units from 3 to 32 for visibility
+        m2[m2 == 2] = 64
+        m2[m2 == 16] = 32               # Transforming mineral fields and geysers from 16 to 32 for visibility               
         
-        combined_minimap = np.where(m2 != 0, m2, m1)
-        combined_minimap = np.where(combined_minimap != 0, combined_minimap, m0)
-        #combined_minimap = m0+m1+m2
-        combined_minimap = np.array(combined_minimap)
+        combined_minimap = np.where(m2 != 0, m2, m1)                                    # Overlaying the m2(units) map over the m1(creep) map
+        combined_minimap = np.where(combined_minimap != 0, combined_minimap, m0)        # Overlaying the combined m1 and m2 map over the m0(terrain) map
+        # combined_minimap = m0+m1+m2
+        combined_minimap = np.array(combined_minimap)                                   # Tranforming combined_minimap into a np array so tensor flow can interpret it
+        combined_minimap = combined_minimap/combined_minimap.max()                      # Normalizing between 0 and 1
 
         # Lowering the featuremap's resolution
-        lowered_minimap = lower_featuremap_resolution(combined_minimap, 1)      #featuremap and reduction factor, if rf = 4 a 64x64 map will be transformed into a 16x16 map
+        lowered_minimap = lower_featuremap_resolution(combined_minimap, self.reduction_factor)      #featuremap and reduction factor, if rf = 4 a 64x64 map will be transformed into a 16x16 map
         
-        # Rotating observation depending on Agent's location on the map so that we get a consistent observation
+        # Rotating observation depending on Agent's location on the map so that we get a consistent, generalized, observation
         if not self.base_top_left: 
             lowered_minimap = np.rot90(lowered_minimap, 2)
         
-        if (obs.game_loop[0]/16)%200 == 0:
-            # Displaying Agent's vision
-            plt.imshow(lowered_minimap, interpolation='nearest')
-            plt.show()
+        # Displaying the agent's vision in a heatmap using matplotlib every 200 steps (just for debug purpuses, probably will be removed later)
+        # if (obs.game_loop[0]/16)%200 == 0:
+        #     # Displaying Agent's vision
+        #     #norm = colors.Normalize()
+        #     plt.imshow(lowered_minimap, interpolation='nearest')
+        #     plt.show()
 
         new_state.extend(lowered_minimap.flatten())   
         final_state = np.array(new_state)

@@ -50,7 +50,7 @@ class SC2Agent(Agent):
         try:
             action_id = selected_action[0].function
         except:
-            raise ActionError("Invalid function structure. Function name: %s." % selected_action[0])
+            raise error.ActionError("Invalid function structure. Function name: %s." % selected_action[0])
         return selected_action
 
     def play(self, obs):
