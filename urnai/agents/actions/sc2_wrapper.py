@@ -91,6 +91,7 @@ ACTION_ATTACK_ENEMY_BASE = 'attackenemybase'                                    
 ACTION_ATTACK_ENEMY_SECOND_BASE = 'attackenemysecondbase'
 ACTION_ATTACK_MY_BASE = 'attackmybase'
 ACTION_ATTACK_MY_SECOND_BASE = 'attackmysecondbase'
+ACTION_ATTACK_DISTRIBUTE_ARMY = 'attackdistributearmy'
 
 ACTION_HARVEST_MINERALS_IDLE = 'harvestmineralsidle'        # Selects random idle scv > sends him to harvest minerals
 ACTION_HARVEST_MINERALS_FROM_GAS = 'harvestmineralsfromgas'
@@ -118,6 +119,9 @@ class SC2Wrapper(ActionWrapper):
         
         self.base_top_left = True                       # Variable used to verify if the initial players base is on the top left or bottom right part of the map (used mainly for internal calculations)
 
+        self.my_base_xy = [19, 23]
+        self.my_second_base_xy = [38, 20]
+
         '''
         We're defining names for our actions for two reasons:
         1) Abstraction: By defining names for our actions as strings we can pour in extra info. EX: The ACTION_ATTACK_x_y action contains
@@ -136,6 +140,7 @@ class SC2Wrapper(ActionWrapper):
             ACTION_ATTACK_ENEMY_SECOND_BASE,
             ACTION_ATTACK_MY_BASE,
             ACTION_ATTACK_MY_SECOND_BASE,
+            ACTION_ATTACK_DISTRIBUTE_ARMY,
         ]
 
         '''
@@ -284,6 +289,7 @@ class TerranWrapper(SC2Wrapper):
             ACTION_ATTACK_ENEMY_SECOND_BASE,
             ACTION_ATTACK_MY_BASE,
             ACTION_ATTACK_MY_SECOND_BASE,
+            ACTION_ATTACK_DISTRIBUTE_ARMY,
         ]
         self.action_indices = [idx for idx in range(len(self.named_actions))]
 
@@ -338,6 +344,7 @@ class TerranWrapper(SC2Wrapper):
             excluded_actions.remove(ACTION_ATTACK_ENEMY_SECOND_BASE)
             excluded_actions.remove(ACTION_ATTACK_MY_BASE)
             excluded_actions.remove(ACTION_ATTACK_MY_SECOND_BASE)
+            excluded_actions.remove(ACTION_ATTACK_DISTRIBUTE_ARMY)
 
         # ACTIONS DEPENDENT ON A SUPPLY DEPOT
         if has_supplydepot:
@@ -621,18 +628,18 @@ class TerranWrapper(SC2Wrapper):
             command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
             self.base_top_left = (command_center.x < 32)
 
-        if self.base_top_left:
-            ybrange = 0
-            ytrange = 32
-        else:
-            ybrange = 32
-            ytrange = 63
+        # if self.base_top_left:
+        #     ybrange = 0
+        #     ytrange = 32
+        # else:
+        #     ybrange = 32
+        #     ytrange = 63
 
         '''LIST OF ACTIONS THE AGENT IS ABLE TO CHOOSE FROM:'''
 
         # BUILD COMMAND CENTER
         if named_action == ACTION_BUILD_COMMAND_CENTER:
-            targets = [[50, 15]]
+            targets = [[18, 15], [36, 20]]
             action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.CommandCenter, 
                                                         sc2._BUILD_COMMAND_CENTER, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount=2, targets=targets)
@@ -691,7 +698,7 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD BARRACKS
         if named_action == ACTION_BUILD_BARRACKS:
-            targets = [[25, 18], [25, 22]]
+            targets = [[25, 18], [25, 22], [35, 28]]
             action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.Barracks, 
                                                         sc2._BUILD_BARRACKS, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount = 3, targets=targets)
@@ -991,49 +998,15 @@ class TerranWrapper(SC2Wrapper):
                 return action
             return no_op()
 
-        # ATTACK ENEMY BASE
-        if named_action == ACTION_ATTACK_ENEMY_BASE:
-            attack_xy = (38, 44) if self.base_top_left else (19, 23)
-            x_offset = random.randint(-6, 6)
-            y_offset = random.randint(-6, 6)
-            if self.units_to_attack == sc2._NO_UNITS:
-                army = select_army(obs, sc2_env.Race.terran)
-            else:
-                army = self.units_to_attack
-            if army != sc2._NO_UNITS:
-                target = [attack_xy[0] + x_offset, attack_xy[1] + y_offset]
-                action, self.units_to_attack = attack_target_point(obs, army, target)
-                self.last_attack_action = ACTION_ATTACK_ENEMY_BASE
-                return action
-            return no_op()
-
-        # ATTACK ENEMY SECOND BASE
-        if named_action == ACTION_ATTACK_ENEMY_SECOND_BASE:
-            attack_xy = (18, 42) if self.base_top_left else (40, 26)
-            x_offset = random.randint(-6, 6)
-            y_offset = random.randint(-6, 6)
-            if self.units_to_attack == sc2._NO_UNITS:
-                army = select_army(obs, sc2_env.Race.terran)
-            else:
-                army = self.units_to_attack
-            if army != sc2._NO_UNITS:
-                target = [attack_xy[0] + x_offset, attack_xy[1] + y_offset]
-                action, self.units_to_attack = attack_target_point(obs, army, target)
-                self.last_attack_action = ACTION_ATTACK_ENEMY_SECOND_BASE
-                return action
-            return no_op()
-
         # ATTACK MY BASE
         if named_action == ACTION_ATTACK_MY_BASE:
-            attack_xy = (18, 23) if self.base_top_left else (40, 45)
-            x_offset = random.randint(-6, 6)
-            y_offset = random.randint(-6, 6)
+            target=self.my_base_xy
+            if not self.base_top_left: target = (63-target[0]-5, 63-target[1]+5)
             if self.units_to_attack == sc2._NO_UNITS:
                 army = select_army(obs, sc2_env.Race.terran)
             else:
                 army = self.units_to_attack
             if army != sc2._NO_UNITS:
-                target = [attack_xy[0] + x_offset, attack_xy[1] + y_offset]
                 action, self.units_to_attack = attack_target_point(obs, army, target)
                 self.last_attack_action = ACTION_ATTACK_MY_BASE
                 return action
@@ -1041,17 +1014,57 @@ class TerranWrapper(SC2Wrapper):
 
         # ATTACK MY SECOND BASE
         if named_action == ACTION_ATTACK_MY_SECOND_BASE:
-            attack_xy = (38, 23) if self.base_top_left else (20, 45)
-            x_offset = random.randint(-6, 6)
-            y_offset = random.randint(-6, 6)
+            target=self.my_second_base_xy
+            if not self.base_top_left: target = (63-target[0]-5, 63-target[1]+5)
             if self.units_to_attack == sc2._NO_UNITS:
                 army = select_army(obs, sc2_env.Race.terran)
             else:
                 army = self.units_to_attack
             if army != sc2._NO_UNITS:
-                target = [attack_xy[0] + x_offset, attack_xy[1] + y_offset]
                 action, self.units_to_attack = attack_target_point(obs, army, target)
                 self.last_attack_action = ACTION_ATTACK_MY_SECOND_BASE
+                return action
+            return no_op()
+
+        # ATTACK ENEMY BASE
+        if named_action == ACTION_ATTACK_ENEMY_BASE:
+            # Using our base as a reference for coordinate transformation to find the enemy's first base location
+            target=(63-self.my_base_xy[0]-5, 63-self.my_base_xy[1]+5)
+            if not self.base_top_left: target = (63-target[0]-5, 63-target[1]+5)
+            if self.units_to_attack == sc2._NO_UNITS:
+                army = select_army(obs, sc2_env.Race.terran)
+            else:
+                army = self.units_to_attack
+            if army != sc2._NO_UNITS:
+                action, self.units_to_attack = attack_target_point(obs, army, target)
+                self.last_attack_action = ACTION_ATTACK_ENEMY_BASE
+                return action
+            return no_op()
+
+        # ATTACK ENEMY SECOND BASE
+        if named_action == ACTION_ATTACK_ENEMY_SECOND_BASE:
+            # Using our second base as a reference for coordinate transformation to find the enemy's second base location
+            target=(63-self.my_second_base_xy[0]-5, 63-self.my_second_base_xy[1]+5)
+            if not self.base_top_left: target = (63-target[0]-5, 63-target[1]+5)
+            if self.units_to_attack == sc2._NO_UNITS:
+                army = select_army(obs, sc2_env.Race.terran)
+            else:
+                army = self.units_to_attack
+            if army != sc2._NO_UNITS:
+                action, self.units_to_attack = attack_target_point(obs, army, target)
+                self.last_attack_action = ACTION_ATTACK_ENEMY_SECOND_BASE
+                return action
+            return no_op()
+
+        # ATTACK DISTRIBUTE ARMY
+        if named_action == ACTION_ATTACK_DISTRIBUTE_ARMY:
+            if self.units_to_attack == sc2._NO_UNITS:
+                army = select_army(obs, sc2_env.Race.terran)
+            else:
+                army = self.units_to_attack
+            if army != sc2._NO_UNITS:
+                action, self.units_to_attack = attack_distribute_army(obs, army)
+                self.last_attack_action = ACTION_ATTACK_DISTRIBUTE_ARMY
                 return action
             return no_op()
 

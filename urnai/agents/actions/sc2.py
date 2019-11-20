@@ -172,8 +172,6 @@ def get_closest_unit(obs, target_xy, unit_type = _NO_UNITS, units_list = _NO_UNI
         return unit
     return _NO_UNITS
 
-# TO DO: Implement a select_closest_unit_by_type (useful to select workers closest to building target)
-
 def build_structure_by_type(obs, action_id, player_race, target=None):
     if player_race == _TERRAN:
         worker = select_random_unit_by_type(obs, units.Terran.SCV)
@@ -235,6 +233,18 @@ def attack_target_point(obs, units, target):
         return actions.RAW_FUNCTIONS.Attack_pt("now", unit.tag, target), units
     return no_op()
 
+def attack_distribute_army(obs, units):
+    if units != _NO_UNITS:
+        unit = units[0]
+        x_offset = random.randint(-8, 8)
+        y_offset = random.randint(-8, 8)
+        target = [unit.x + x_offset, unit.y + y_offset]
+        units.pop(0)
+        if len(units) == 0:
+            units = _NO_UNITS
+        return actions.RAW_FUNCTIONS.Attack_pt("now", unit.tag, target), units
+    return no_op()
+
 
 def harvest_gather_minerals_quick(obs, worker, player_race):
     if player_race == _TERRAN: 
@@ -247,16 +257,20 @@ def harvest_gather_minerals_quick(obs, worker, player_race):
     if worker != _NO_UNITS:
         mineral_fields = get_neutral_units_by_type(obs, units.Neutral.MineralField)
         if len(mineral_fields) > 0:
-            # Checks every townhall if it is able to receive workers. If it is, searches for mineral fields closer than 10 units of distance.
+            # Checks every townhall if it is able to receive workers. If it is, searches for the closest mineral field
             # If we find one, send the worker to gather minerals there.
             if len(townhalls) > 0:
                 for townhall in townhalls:
                     if townhall.assigned_harvesters < townhall.ideal_harvesters:
-                        for mineral_field in mineral_fields:
-                            target = [mineral_field.x, mineral_field.y]
-                            distances = get_distances(obs, townhalls, target)
-                            if distances[np.argmin(distances)] < 10:
-                                return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, mineral_field.tag)
+                        target = [townhall.x, townhall.y]
+                        distances = get_distances(obs, mineral_fields, target)
+                        closest_mineral = mineral_fields[np.argmin(distances)]
+                        return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, closest_mineral.tag)
+                        # for mineral_field in mineral_fields:
+                        #     target = [mineral_field.x, mineral_field.y]
+                        #     distances = get_distances(obs, townhalls, target)
+                        #     if distances[np.argmin(distances)] < 10:
+                        #         return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, mineral_field.tag)
 
     return _NO_OP()
 
@@ -316,11 +330,99 @@ def harvest_gather_gas(obs, worker, refinery):
         return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, refinery.tag)
     return _NO_OP()
 
+
 def harvest_return(obs, worker):
     if worker != _NO_UNITS:
         return actions.RAW_FUNCTIONS.Harvest_Return_quick("queued", worker.tag)
     return _NO_OP()
 
+
+def build_structure_raw(obs, building_type, building_action, move_number, last_worker, max_amount = 999):
+
+    player_race = get_unit_race(building_type)
+
+    if get_units_amount(obs, building_type) < max_amount:
+        if move_number == 0:
+            move_number += 1
+
+            buildings = get_my_units_by_type(obs, building_type)
+            if len(buildings) > 0:
+                target = random.choice(buildings)
+                action, last_worker = build_structure_by_type(obs, building_action, player_race, target)
+                return action, last_worker, move_number
+
+        if move_number == 1:
+            move_number +=1
+            return harvest_gather_minerals_quick(obs, last_worker, player_race), last_worker, move_number
+        if move_number == 2:
+            move_number = 0
+    return _NO_OP(), last_worker, move_number
+
+
+def build_structure_raw_pt(obs, building_type, building_action, move_number, last_worker, base_top_left, max_amount = 999):
+    ybrange=0 if base_top_left else 32
+    ytrange=32 if base_top_left else 63
+
+    player_race = get_unit_race(building_type)
+        
+    if get_units_amount(obs, building_type) < max_amount:
+        if move_number == 0:
+            move_number += 1
+            x = random.randint(0,63)
+            y = random.randint(ybrange, ytrange)
+            target = [x, y]
+            action, last_worker = build_structure_by_type(obs, building_action, player_race, target)
+            return action, last_worker, move_number
+        if move_number == 1:
+            move_number +=1
+            return harvest_gather_minerals_quick(obs, last_worker, player_race), last_worker, move_number
+        if move_number == 2:
+            move_number = 0
+    return _NO_OP(), last_worker, move_number
+
+
+def build_structure_raw_pt2(obs, building_type, building_action, move_number, last_worker, base_top_left, max_amount = 999, targets = []):
+    ybrange=0 if base_top_left else 32
+    ytrange=32 if base_top_left else 63
+
+    player_race = get_unit_race(building_type)
+
+    building_amount = get_units_amount(obs, building_type)
+    if len(targets) == 0 or building_amount >= len(targets):
+        target = [random.randint(0,63), random.randint(ybrange, ytrange)]
+    else:
+        target = targets[building_amount]
+        if not base_top_left: target = (63-target[0]-5, 63-target[1]+5)
+        
+    if building_amount < max_amount:
+        if move_number == 0:
+            move_number += 1
+            action, last_worker = build_structure_by_type(obs, building_action, player_race, target)
+            return action, last_worker, move_number
+        if move_number == 1:
+            move_number +=1
+            return harvest_gather_minerals_quick(obs, last_worker, player_race), last_worker, move_number
+        if move_number == 2:
+            move_number = 0
+    return _NO_OP(), last_worker, move_number
+
+
+def build_gas_structure_raw_unit(obs, building_type, building_action, player_race, move_number, last_worker, max_amount = 999):  
+
+    player_race = get_unit_race(building_type)
+
+    if get_units_amount(obs, building_type) < max_amount:
+        if move_number == 0:
+            move_number += 1
+            chosen_geyser = get_exploitable_geyser(obs, player_race)
+            action, last_worker = build_structure_by_type(obs, building_action, player_race, chosen_geyser)
+            return action, last_worker, move_number
+        if move_number == 1:
+            move_number +=1
+            return harvest_gather_minerals_quick(obs, last_worker, player_race), last_worker, move_number
+        if move_number == 2:
+            move_number = 0
+    return _NO_OP(), last_worker, move_number
 
 '''
 The following methods are used to aid in various mechanical operations the agent has to perform,
@@ -386,10 +488,6 @@ def get_euclidean_distance(unit_xy, xy):
 # possible function prototype: get_my_units_by_types(obs, unit_types) (maybe we can just reuse the get_my_units_by_type function and create a verification if unit_type is a single type or array of types)
 
 # check_unit_validity (should check if the object im receiving is a proper unit from pysc2)
-# already_pending()
-# can_afford()
-# building_exists()
-# redistribute_workers()
 
 def select_army(obs, player_race):
     army = []
@@ -420,90 +518,6 @@ def select_army(obs, player_race):
     if len(army) == 0:
         army = _NO_UNITS
     return army
-
-def build_structure_raw(obs, building_type, building_action, move_number, last_worker, max_amount = 999):
-
-    player_race = get_unit_race(building_type)
-
-    if get_units_amount(obs, building_type) < max_amount:
-        if move_number == 0:
-            move_number += 1
-
-            buildings = get_my_units_by_type(obs, building_type)
-            if len(buildings) > 0:
-                target = random.choice(buildings)
-                action, last_worker = build_structure_by_type(obs, building_action, player_race, target)
-                return action, last_worker, move_number
-
-        if move_number == 1:
-            move_number +=1
-            return harvest_gather_minerals_quick(obs, last_worker, player_race), last_worker, move_number
-        if move_number == 2:
-            move_number = 0
-    return _NO_OP(), last_worker, move_number
-
-def build_structure_raw_pt(obs, building_type, building_action, move_number, last_worker, base_top_left, max_amount = 999):
-    ybrange=0 if base_top_left else 32
-    ytrange=32 if base_top_left else 63
-
-    player_race = get_unit_race(building_type)
-        
-    if get_units_amount(obs, building_type) < max_amount:
-        if move_number == 0:
-            move_number += 1
-            x = random.randint(0,63)
-            y = random.randint(ybrange, ytrange)
-            target = [x, y]
-            action, last_worker = build_structure_by_type(obs, building_action, player_race, target)
-            return action, last_worker, move_number
-        if move_number == 1:
-            move_number +=1
-            return harvest_gather_minerals_quick(obs, last_worker, player_race), last_worker, move_number
-        if move_number == 2:
-            move_number = 0
-    return _NO_OP(), last_worker, move_number
-
-def build_structure_raw_pt2(obs, building_type, building_action, move_number, last_worker, base_top_left, max_amount = 999, targets = []):
-    ybrange=0 if base_top_left else 32
-    ytrange=32 if base_top_left else 63
-
-    player_race = get_unit_race(building_type)
-
-    building_amount = get_units_amount(obs, building_type)
-    if len(targets) == 0 or building_amount >= len(targets):
-        target = [random.randint(0,63), random.randint(ybrange, ytrange)]
-    else:
-        target = targets[building_amount]
-        if not base_top_left: target = (63-target[0]-5, 63-target[1]+5)
-        
-    if building_amount < max_amount:
-        if move_number == 0:
-            move_number += 1
-            action, last_worker = build_structure_by_type(obs, building_action, player_race, target)
-            return action, last_worker, move_number
-        if move_number == 1:
-            move_number +=1
-            return harvest_gather_minerals_quick(obs, last_worker, player_race), last_worker, move_number
-        if move_number == 2:
-            move_number = 0
-    return _NO_OP(), last_worker, move_number
-
-def build_gas_structure_raw_unit(obs, building_type, building_action, player_race, move_number, last_worker, max_amount = 999):  
-
-    player_race = get_unit_race(building_type)
-
-    if get_units_amount(obs, building_type) < max_amount:
-        if move_number == 0:
-            move_number += 1
-            chosen_geyser = get_exploitable_geyser(obs, player_race)
-            action, last_worker = build_structure_by_type(obs, building_action, player_race, chosen_geyser)
-            return action, last_worker, move_number
-        if move_number == 1:
-            move_number +=1
-            return harvest_gather_minerals_quick(obs, last_worker, player_race), last_worker, move_number
-        if move_number == 2:
-            move_number = 0
-    return _NO_OP(), last_worker, move_number
 
 # Reduces a matrix "resolution" by a reduction factor. If we have a 64x64 matrix and rf=4 the map will be reduced to 16x16 in which
 # every new element of the matrix is an average from 4x4=16 elements from the original matrix
