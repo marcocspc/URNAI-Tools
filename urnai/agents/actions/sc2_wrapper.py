@@ -120,7 +120,7 @@ class SC2Wrapper(ActionWrapper):
         self.base_top_left = True                       # Variable used to verify if the initial players base is on the top left or bottom right part of the map (used mainly for internal calculations)
 
         self.my_base_xy = [19, 23]
-        self.my_second_base_xy = [38, 20]
+        self.my_second_base_xy = [41, 21]
 
         '''
         We're defining names for our actions for two reasons:
@@ -639,7 +639,7 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD COMMAND CENTER
         if named_action == ACTION_BUILD_COMMAND_CENTER:
-            targets = [[18, 15], [36, 20]]
+            targets = [[18, 15], [41, 21]]
             action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.CommandCenter, 
                                                         sc2._BUILD_COMMAND_CENTER, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount=2, targets=targets)
@@ -647,7 +647,8 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD SUPPLY DEPOT
         if named_action == ACTION_BUILD_SUPPLY_DEPOT:
-            targets = [[21, 26], [23, 26], [25, 26], [22,28], [24,28]]
+            targets = [[21, 25], [23, 25], [25, 25], [22,26], [24,26], [26,26], [26.7,26]]
+            # targets = [[21, 26], [22, 27], [23, 28], [22,24], [24,25], [25,26]]
             action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.SupplyDepot, 
                                                         sc2._BUILD_SUPPLY_DEPOT, self.move_number,self.last_worker, 
                                                         self.base_top_left, max_amount=8, targets=targets)
@@ -668,7 +669,10 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD ARMORY
         if named_action == ACTION_BUILD_ARMORY:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Armory, sc2._BUILD_ARMORY, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+            targets = [[20,29]]
+            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.Armory, 
+                                                        sc2._BUILD_ARMORY, self.move_number, self.last_worker, 
+                                                        self.base_top_left, max_amount = 1, targets=targets)
             return action
 
         # BUILD MISSILE TURRET
@@ -688,17 +692,23 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD FUSIONCORE
         if named_action == ACTION_BUILD_FUSIONCORE:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.FusionCore, sc2._BUILD_FUSIONCORE, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+            targets = [[38, 23]]
+            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.FusionCore, 
+                                                        sc2._BUILD_FUSIONCORE, self.move_number, self.last_worker, 
+                                                        self.base_top_left, max_amount = 1, targets=targets)
             return action
 
         # BUILD GHOSTACADEMY
         if named_action == ACTION_BUILD_GHOSTACADEMY:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.GhostAcademy, sc2._BUILD_GHOSTACADEMY, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+            targets = [[36, 23]]
+            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.GhostAcademy, 
+                                                        sc2._BUILD_GHOSTACADEMY, self.move_number, self.last_worker, 
+                                                        self.base_top_left, max_amount = 1, targets=targets)
             return action
 
         # BUILD BARRACKS
         if named_action == ACTION_BUILD_BARRACKS:
-            targets = [[25, 18], [25, 22], [35, 28]]
+            targets = [[25, 18], [25, 22], [28, 24]]
             action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.Barracks, 
                                                         sc2._BUILD_BARRACKS, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount = 3, targets=targets)
@@ -706,12 +716,18 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD FACTORY
         if named_action == ACTION_BUILD_FACTORY:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Factory, sc2._BUILD_FACTORY, self.move_number, self.last_worker, self.base_top_left, max_amount = 2)
+            targets = [[39, 26], [43, 26]]
+            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.Factory, 
+                                                        sc2._BUILD_FACTORY, self.move_number, self.last_worker, 
+                                                        self.base_top_left, max_amount = 2, targets=targets)
             return action
 
         # BUILD STARPORT
         if named_action == ACTION_BUILD_STARPORT:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Starport, sc2._BUILD_STARPORT, self.move_number, self.last_worker, self.base_top_left, max_amount = 2)
+            targets = [[37, 29], [41, 29]]
+            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.Starport, 
+                                                        sc2._BUILD_STARPORT, self.move_number, self.last_worker, 
+                                                        self.base_top_left, max_amount = 2, targets=targets)
             return action
 
         # BUILD TECHLAB BARRACKS

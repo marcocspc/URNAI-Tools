@@ -34,8 +34,6 @@ class Simple64State(StateBuilder):
                 self.player_race = sc2_env.Race.zerg
 
             self.base_top_left = (townhall.x < 32)
-            print(townhall.x)
-            print(townhall.y)
 
         new_state = []
         new_state.append(obs.player.minerals)
