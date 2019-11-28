@@ -49,8 +49,8 @@ class DeepRTSEnv(Env):
                 gui_config = self.gui_config,
                 terminal_signal = False
             )
-            game.set_max_fps(self.max_fps)
-            game.set_max_ups(self.max_ups)
+            self.game.set_max_fps(self.max_fps)
+            self.game.set_max_ups(self.max_ups)
         else:
             raise Exception("Directory 'assets' not found. Please obtain it using:\n\n" +
                     "git clone https://github.com/cair/deep-rts.git")
