@@ -21,6 +21,8 @@ for ep in range(episodes):
         print("Current state: ")
         print(state)
 
+        print("FPS: " + str(drts.game.getFPS()))
+
         if done:
             break
 
