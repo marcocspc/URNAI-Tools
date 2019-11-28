@@ -68,7 +68,11 @@ class DeepRTSEnv(Env):
         player = self.game.players[0]
 
         #make player do that action
-        player.do_action(action)
+        #actions are values between 1 and 16
+        #but in general models give values between
+        #0 and 15, so that's why action value
+        #is action + 1
+        player.do_action(action + 1)
 
         #update game state
         for i in range(self.updates_per_action):
