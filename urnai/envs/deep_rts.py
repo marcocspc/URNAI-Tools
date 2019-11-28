@@ -26,6 +26,8 @@ class DeepRTSEnv(Env):
         self.updates_per_action = updates_per_action
         self.flatten_state = flatten_state
         self.number_of_players = number_of_players
+        self.max_fps = max_fps
+        self.max_ups = max_ups
 
         if (os.path.isdir('./assets')):
             self.gui_config = Config(
