@@ -25,6 +25,7 @@ class DeepRTSEnv(Env):
         self.play_audio = play_audio
         self.updates_per_action = updates_per_action
         self.flatten_state = flatten_state
+        self.number_of_players = number_of_players
 
         if (os.path.isdir('./assets')):
             self.gui_config = Config(
