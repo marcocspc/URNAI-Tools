@@ -13,7 +13,7 @@ class DeepRTSEnv(Env):
     '''
        DeepRTS.python.Config Defaults: https://github.com/cair/deep-rts/blob/master/DeepRTS/python/_py_config.py
        DeepRTS.Engine.Config.defaults() : https://github.com/cair/deep-rts/blob/master/src/Config.h
-
+       Possible actions: https://github.com/cair/deep-rts/blob/master/src/Constants.h
     '''
     
     def __init__(self, map = Config.Map.TEN, render = False, 
