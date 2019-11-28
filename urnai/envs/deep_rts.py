@@ -29,33 +29,29 @@ class DeepRTSEnv(Env):
         self.max_fps = max_fps
         self.max_ups = max_ups
 
-        if (os.path.isdir('./assets')):
-            self.gui_config = Config(
-                render=self.render,
-                view=self.render,
-                inputs=False,
-                caption=False,
-                unit_health=True,
-                unit_outline=True,
-                unit_animation=True,
-                audio=self.play_audio,
-                audio_volume=50
-            )
+        self.gui_config = Config(
+            render=self.render,
+            view=self.render,
+            inputs=False,
+            caption=False,
+            unit_health=True,
+            unit_outline=True,
+            unit_animation=True,
+            audio=self.play_audio,
+            audio_volume=50
+        )
 
-            self.engine_config = Engine.Config.defaults()
+        self.engine_config = Engine.Config.defaults()
 
-            self.game = Game(
-                self.map,
-                n_players = self.number_of_players,
-                engine_config = self.engine_config,
-                gui_config = self.gui_config,
-                terminal_signal = False
-            )
-            self.game.set_max_fps(self.max_fps)
-            self.game.set_max_ups(self.max_ups)
-        else:
-            raise Exception("Directory 'assets' not found. Please obtain it using:\n\n" +
-                    "git clone https://github.com/cair/deep-rts.git")
+        self.game = Game(
+            self.map,
+            n_players = self.number_of_players,
+            engine_config = self.engine_config,
+            gui_config = self.gui_config,
+            terminal_signal = False
+        )
+        self.game.set_max_fps(self.max_fps)
+        self.game.set_max_ups(self.max_ups)
 
     def start(self):
         #Set done
