@@ -4,6 +4,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
 from envs.deep_rts import DeepRTSEnv
+import random
 
 episodes = 100
 steps = 100
