@@ -27,7 +27,7 @@ class DeepRTSEnv(Env):
         self.flatten_state = flatten_state
 
         if (os.path.isdir('./assets')):
-            self.gui_config = python.Config(
+            self.gui_config = Config(
                 render=self.render,
                 view=self.render,
                 inputs=False,
