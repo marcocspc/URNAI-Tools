@@ -30,7 +30,7 @@ class DeepRTSEnv(Env):
         self.max_ups = max_ups
 
         self.gui_config = Config(
-            render=self.render,
+            render=True,
             view=self.render,
             inputs=False,
             caption=False,

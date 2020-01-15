@@ -1,4 +1,6 @@
 import tensorflow as tf
+from tensorflow.python.framework import ops
+from tensorflow.compat.v1 import Session,ConfigProto,placeholder,layers,train,global_variables_initializer
 import numpy as np
 import random
 import os
@@ -18,36 +20,38 @@ class DQLTF(LearningModel):
 
         self.decay_step = 0
 
-        tf.reset_default_graph()
+        ops.reset_default_graph()
+
+        tf.compat.v1.disable_eager_execution()
 
         # Initializing TensorFlow session
-        self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+        self.sess = Session(config=ConfigProto(allow_soft_placement=True))
 
-        self.inputs_ = tf.placeholder(dtype=tf.float32, shape=[None, self.state_size], name='inputs_')
-        self.actions_ = tf.placeholder(dtype=tf.float32, shape=[None, self.action_size], name='actions_')
+        self.inputs_ = placeholder(dtype=tf.float32, shape=[None, self.state_size], name='inputs_')
+        self.actions_ = placeholder(dtype=tf.float32, shape=[None, self.action_size], name='actions_')
 
         # Defining the model's layers
-        self.fc1 = tf.layers.dense(inputs=self.inputs_,
+        self.fc1 = layers.dense(inputs=self.inputs_,
                                    units=50,
                                    activation=tf.nn.relu,
                                    name='fc1')
 
-        self.fc2 = tf.layers.dense(inputs=self.fc1,
+        self.fc2 = layers.dense(inputs=self.fc1,
                                    units=50,
                                    activation=tf.nn.relu,
                                    name='fc2')
 
-        self.output_layer = tf.layers.dense(inputs=self.fc2,
+        self.output_layer = layers.dense(inputs=self.fc2,
                                             units=self.action_size,
                                             activation=None)
 
-        self.tf_qsa = tf.placeholder(shape=[None, self.action_size], dtype=tf.float32)
+        self.tf_qsa = placeholder(shape=[None, self.action_size], dtype=tf.float32)
         self.loss = tf.losses.mean_squared_error(self.tf_qsa, self.output_layer)
-        self.optimizer = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss)
+        self.optimizer = train.AdamOptimizer(self.learning_rate).minimize(self.loss)
 
-        self.sess.run(tf.global_variables_initializer())
+        self.sess.run(global_variables_initializer())
 
-        self.saver = tf.train.Saver()
+        self.saver = train.Saver()
         self.load()
 
     def learn(self, s, a, r, s_, done, is_last_step: bool):

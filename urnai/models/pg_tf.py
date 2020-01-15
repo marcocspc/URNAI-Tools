@@ -1,4 +1,6 @@
 import tensorflow as tf
+from tensorflow.python.framework import ops
+from tensorflow.compat.v1 import Session,ConfigProto,placeholder,layers,train,global_variables_initializer
 import numpy as np
 import random
 import os
@@ -13,17 +15,19 @@ class PolicyGradientTF(LearningModel):
 
         # Initializing variables for the model's state, which must be reset every episode
         self.episode_states, self.episode_actions, self.episode_rewards = [], [], []  # Records all states, actions and rewards for an episode
+
+        tf.compat.v1.disable_eager_execution()
         
-        tf.reset_default_graph()
+        ops.reset_default_graph()
 
         # Initializing TensorFlow session
-        self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+        self.sess = Session(config=ConfigProto(allow_soft_placement=True))
 
-        self.inputs_ = tf.placeholder(dtype=tf.float32, shape=[None, self.state_size], name='inputs_')
+        self.inputs_ = placeholder(dtype=tf.float32, shape=[None, self.state_size], name='inputs_')
 
         # Placeholder used to output the probability distribution for the actions
-        self.actions_ = tf.placeholder(dtype=tf.float32, shape=[None, self.action_size], name='actions_')
-        self.discounted_episode_rewards_ = tf.placeholder(tf.float32, [None, ], name='discounted_episode_rewards')
+        self.actions_ = placeholder(dtype=tf.float32, shape=[None, self.action_size], name='actions_')
+        self.discounted_episode_rewards_ = placeholder(tf.float32, [None, ], name='discounted_episode_rewards')
 
         # Defining the layers of the neural network
         self.fc1 = tf.contrib.layers.fully_connected(inputs=self.inputs_,
@@ -51,11 +55,11 @@ class PolicyGradientTF(LearningModel):
 
         self.neg_log_prob = tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.fc3, labels=self.actions_)
         self.loss = tf.reduce_mean(self.neg_log_prob * self.discounted_episode_rewards_)
-        self.optimizer = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss)
+        self.optimizer = train.AdamOptimizer(self.learning_rate).minimize(self.loss)
 
-        self.sess.run(tf.global_variables_initializer())
+        self.sess.run(global_variables_initializer())
 
-        self.saver = tf.train.Saver()
+        self.saver = train.Saver()
         self.load()
 
 
