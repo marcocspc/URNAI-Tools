@@ -24,8 +24,7 @@ def main(unused_argv):
         action_wrapper = GymWrapper(env)
         state_builder = FrozenLakeState()
 
-        # dq_network = DQLTF(action_wrapper, state_builder, 'urnai/models/saved/frozenlake_dql_working', learning_rate=0.0008, gamma=0.9)
-        dq_network = PolicyGradientTF(action_wrapper, state_builder, 'urnai/models/saved/frozenlake_v0_pg', learning_rate=0.01, gamma=0.9)
+        dq_network = DQLTF(action_wrapper, state_builder, 'urnai/models/saved/frozenlake_dql_working', learning_rate=0.0008, gamma=0.9)
 
         agent = GenericAgent(dq_network, FrozenlakeReward())
 

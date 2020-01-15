@@ -4,6 +4,11 @@ from models.base.abmodel import LearningModel
 from .base.abagent import Agent
 from models.base.abmodel import LearningModel
 from agents.rewards.abreward import RewardBuilder
+
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir)
 from utils import error
 
 _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index

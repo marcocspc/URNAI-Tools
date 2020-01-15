@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.python.framework import ops
-from tensorflow.compat.v1 import Session,ConfigProto,placeholder,layers,train,global_variables_initializer
+from tensorflow.compat.v1 import Session,ConfigProto,placeholder,layers,train,global_variables_initializer,layers,keras
 import numpy as np
 import random
 import os
@@ -8,9 +8,20 @@ from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 
+import sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir)
+from utils import error
+
 
 class PolicyGradientTF(LearningModel):
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path, learning_rate=0.01, gamma=0.95, name='PolicyGradient'):
+
+        #This code is too old and need to be updated to tensorflow 2.0
+        error = 'PolicyGradients is unsupported until its code is updated to Tensorflow 2.0.'
+        raise DeprecatedCodeException(error) 
+
         super(PolicyGradientTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
 
         # Initializing variables for the model's state, which must be reset every episode
@@ -30,25 +41,25 @@ class PolicyGradientTF(LearningModel):
         self.discounted_episode_rewards_ = placeholder(tf.float32, [None, ], name='discounted_episode_rewards')
 
         # Defining the layers of the neural network
-        self.fc1 = tf.contrib.layers.fully_connected(inputs=self.inputs_,
-                                                    num_outputs = 10,
-                                                    activation_fn = tf.nn.relu,
-                                                    weights_initializer = tf.contrib.layers.xavier_initializer())
+        self.fc1 = layers.Dense(inputs=self.inputs_,
+                                num_outputs = 10,
+                                activation_fn = tf.nn.relu,
+                                weights_initializer = keras.initializers.glorot_normal())
 
-        self.fc1_1 = tf.contrib.layers.fully_connected(inputs=self.fc1,
-                                                    num_outputs = 10,
-                                                    activation_fn = tf.nn.relu,
-                                                    weights_initializer = tf.contrib.layers.xavier_initializer())
+        self.fc1_1 = layers.Dense(inputs=self.fc1,
+                                  num_outputs = 10,
+                                  activation_fn = tf.nn.relu,
+                                  weights_initializer = keras.initializers.glorot_normal())
 
-        self.fc2 = tf.contrib.layers.fully_connected(inputs=self.fc1_1,
-                                                    num_outputs = self.action_size,
-                                                    activation_fn = tf.nn.relu,
-                                                    weights_initializer = tf.contrib.layers.xavier_initializer())
+        self.fc2 = layers.Dense(inputs=self.fc1_1,
+                                num_outputs = self.action_size,
+                                activation_fn = tf.nn.relu,
+                                weights_initializer = keras.initializers.glorot_normal())
 
-        self.fc3 = tf.contrib.layers.fully_connected(inputs=self.fc2,
-                                                        num_outputs = self.action_size,
-                                                        activation_fn = None,
-                                                        weights_initializer = tf.contrib.layers.xavier_initializer())
+        self.fc3 = layers.Dense(inputs=self.fc2,
+                                num_outputs = self.action_size,
+                                activation_fn = None,
+                                weights_initializer = keras.initializers.glorot_normal())
 
         self.output_layer = tf.nn.softmax(self.fc3)
 

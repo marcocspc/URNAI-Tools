@@ -4,8 +4,23 @@ setup(
     name = "urnai",
     packages = ["urnai"],
     install_requires = [
-        ''
+        'absl-py',
+        'gym',
+        'tensorflow',
+        'numpy',
+        'matplotlib',
+        'keras',
+        'pysc2',
+        'pandas',
         ],
+    extras_require = {
+        '2048' : ['gym_2048'],
+        'pygame' : ['pygame'],
+        'vizdoom' : ['vizdoom'],
+        }
+    dependency_links = [
+        'https://github.com/ntasfi/PyGame-Learning-Environment.git',
+        ]
     entry_points = {
         "console_scripts": ['urnai=urnai.urnai_cmd:main']
         },
