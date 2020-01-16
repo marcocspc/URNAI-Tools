@@ -7,42 +7,47 @@ Follow these instructions to get a working copy of the project on your PC. It's 
 
 ### Prerequisites
 
-- Python 3.6
-- Numpy
-- Pandas
-- TensorFlow
-- Keras
+- Python 3
+- Python 3 PIP
+
+### Basic installation
+
+- You can install from pypi:
+```
+pip3 install urnai
+```
+
+- Or you can install from this repository:
+```
+pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+```
+
+The basic installation will install all the *basic* required dependencies, including OpenAI Gym and SC2LE. But for other supported environments, you will need to install them for yourself. We describe how to do this on the next section. 
 
 ### Optional
 
-You might need to install some of those depending on the environments you're going to use.
+#### Starcraft II
 
-- [PySC2](https://github.com/deepmind/pysc2)
-- [OpenAI Gym](https://github.com/openai/gym)
-- [PyGame Learning Environment](https://github.com/ntasfi/PyGame-Learning-Environment)
+SC2LE is already marked as dependency, so it will be automatically installed by Pip. But you need to install Starcraft II and download the mini-games and maps to Starcraft II, to do this, you can head to:
 
-Be aware that the PySC2 version being used by our library was installed from the "dev" branch. To download the dev branch from PySC2's github you should:
+[How to install Starcraft II and Maps](https://github.com/deepmind/pysc2#get-starcraft-ii) 
 
-1. Locally clone their repository:
+#### 2048
+
+First you need to install PyGame. Head to:
+
+[How to install PyGame](https://github.com/ntasfi/PyGame-Learning-Environment#installation)
+
+Then use:
 ```
-git clone https://github.com/deepmind/pysc2.git
-```
-2. Switch to the dev branch:
-```
-git checkout -t origin/dev
-```
-3. Install PySC2 from there:
-```
-pip install -e . --force-reinstall
+pip3 install gym-2048 
 ```
 
-### Installing
+#### VizDoom
 
-Run these commands on the terminal to install URNAI Tools on your computer.
-
+Just use:
 ```
-cd 'your/save/path'
-git clone https://github.com/pvnetto/URNAI-Tools.git
+pip3 install vizdoom 
 ```
 
 ### Running the examples

@@ -16,7 +16,7 @@ setup(
         'pandas',
         ],
     extras_require = {
-        '2048' : ['gym_2048', git_url.format(user='ntasfi', package='PyGame-Learning-Environment', version='master')],
+        '2048' : ['gym-2048', git_url.format(user='ntasfi', package='PyGame-Learning-Environment', version='master')],
         'vizdoom' : ['vizdoom'],
         'deeprts' : [git_url.format(user='UIA-CAIR', package='DeepRTS', version='e54dc6c')],
         },
