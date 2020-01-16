@@ -15,12 +15,12 @@ setup(
         ],
     extras_require = {
         '2048' : ['gym_2048'],
-        'pygame' : ['pygame'],
+        'pygame' : ['git+https://github.com/{user}/{package}.git/@{version}#egg={package}-0'
+                        .format(user='ntasfi'package='PyGame-Learning-Environment', version='master')],
         'vizdoom' : ['vizdoom'],
+        'deeprts' : ['git+https://github.com/{user}/{package}.git/@{version}#egg={package}-0'
+                        .format(user='UIA-CAIR'package='DeepRTS', version='e54dc6c')],
         }
-    dependency_links = [
-        'https://github.com/ntasfi/PyGame-Learning-Environment.git',
-        ]
     entry_points = {
         "console_scripts": ['urnai=urnai.urnai_cmd:main']
         },
