@@ -1,5 +1,7 @@
 from setuptools import setup
 
+git_url = '{package} @ git+https://github.com/{user}/{package}.git/@{version}#egg={package}-0'
+
 setup(
     name = "urnai",
     packages = ["urnai"],
@@ -14,13 +16,10 @@ setup(
         'pandas',
         ],
     extras_require = {
-        '2048' : ['gym_2048'],
-        'pygame' : ['git+https://github.com/{user}/{package}.git/@{version}#egg={package}-0'
-                        .format(user='ntasfi'package='PyGame-Learning-Environment', version='master')],
+        '2048' : ['gym_2048', git_url.format(user='ntasfi', package='PyGame-Learning-Environment', version='master')],
         'vizdoom' : ['vizdoom'],
-        'deeprts' : ['git+https://github.com/{user}/{package}.git/@{version}#egg={package}-0'
-                        .format(user='UIA-CAIR'package='DeepRTS', version='e54dc6c')],
-        }
+        'deeprts' : [git_url.format(user='UIA-CAIR', package='DeepRTS', version='e54dc6c')],
+        },
     entry_points = {
         "console_scripts": ['urnai=urnai.urnai_cmd:main']
         },
