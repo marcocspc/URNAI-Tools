@@ -4,6 +4,7 @@ from .runner.parserbuilder import ParserBuilder
 
 def main():
     parser = ParserBuilder.DefaultParser()
-    runner = RunnerBuilder.build(parser)
+    args = parser.parse_args()
+    runner = RunnerBuilder.build(args)
 
     runner.run()

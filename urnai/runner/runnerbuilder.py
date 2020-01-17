@@ -5,12 +5,12 @@ class RunnerBuilder():
     COMMANDS = [DeepRTSMapView]
 
     @staticmethod
-    def build(parser):
-        args = parser.parse_args()
+    def build(args):
         runner = None
 
         for cls in COMMANDS:
             if (args.command == cls.COMMAND):
                 runner = cls(args)
+                break
 
         return runner
