@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
 
 git_url = '{package} @ git+https://github.com/{user}/{package}.git/@{version}#egg={package}-0'
