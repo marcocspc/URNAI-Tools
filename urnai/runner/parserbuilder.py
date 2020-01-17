@@ -7,7 +7,7 @@ class ParserBuilder():
 
     @staticmethod
     def DefaultParser():
-        parser = argparse.ArgumentParser(description=DESCRIPTION)
+        parser = argparse.ArgumentParser(description=ParserBuilder.DESCRIPTION)
         avail_cmd = []
 
         for cls in RunnerBuilder.COMMANDS:

@@ -1,12 +1,4 @@
 from .base.runner import Runner
-import os
-
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
-from envs.deep_rts import DeepRTSEnv
-
 
 class DeepRTSMapView(Runner):
 
@@ -17,6 +9,12 @@ class DeepRTSMapView(Runner):
 
 
     def run():
+        import os,sys,inspect
+        currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+        parentdir = os.path.dirname(currentdir)
+        sys.path.insert(0,parentdir) 
+        from envs.deep_rts import DeepRTSEnv
+
         print("Starting DeepRTS using map " + self.args.map)
         stamp = os.stat(self.args.map).st_mtime 
         drts = DeepRTSEnv(render=True,map=self.args.map)
