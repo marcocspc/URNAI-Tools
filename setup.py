@@ -5,7 +5,7 @@ git_url = '{package} @ git+https://github.com/{user}/{package}.git/@{version}#eg
 
 setup(
     name = "urnai",
-    packages = ["urnai"],
+    packages = find_packages(),
     install_requires = [
         'absl-py',
         'gym',
