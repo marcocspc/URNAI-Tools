@@ -10,7 +10,7 @@ class RunnerBuilder():
 
         for cls in RunnerBuilder.COMMANDS:
             if (args.command == cls.COMMAND):
-                runner = cls(args)
+                runner = cls(parser, args)
                 break
 
         return runner
