@@ -8,7 +8,7 @@ class RunnerBuilder():
     def build(args):
         runner = None
 
-        for cls in COMMANDS:
+        for cls in RunnerBuilder.COMMANDS:
             if (args.command == cls.COMMAND):
                 runner = cls(args)
                 break
