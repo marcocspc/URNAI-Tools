@@ -8,7 +8,7 @@ class DeepRTSMapView(Runner):
         super().__init__(args)
 
 
-    def run():
+    def run(self):
         import os,sys,inspect
         currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
         parentdir = os.path.dirname(currentdir)
