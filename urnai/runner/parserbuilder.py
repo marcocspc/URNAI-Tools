@@ -14,7 +14,7 @@ class ParserBuilder():
             avail_cmd.append(cls.COMMAND)
 
 
-        parser.add_argument('command', type=string, choices=avail_cmd, help='Command to run.')
-        parser.add_argument('--map', type=string, help='Map to use on RTS environments.')
+        parser.add_argument('command', choices=avail_cmd, help='Command to run.')
+        parser.add_argument('--map', help='Map to use on RTS environments.')
 
         return parser
