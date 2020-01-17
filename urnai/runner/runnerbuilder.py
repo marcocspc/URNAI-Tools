@@ -5,7 +5,7 @@ class RunnerBuilder():
     COMMANDS = [DeepRTSMapView]
 
     @staticmethod
-    def build(args):
+    def build(parser, args):
         runner = None
 
         for cls in RunnerBuilder.COMMANDS:
