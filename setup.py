@@ -3,10 +3,6 @@ import os
 
 git_url = '{package} @ git+https://github.com/{user}/{package}.git/@{version}#egg={package}-0'
 
-selfpath = os.path.realpath(__file__)
-with open(selfpath + '/package_description.txt') as file:
-    desc = file.read()
-
 setup(
     name = "urnai",
     packages = ["urnai"],
