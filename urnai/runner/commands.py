@@ -15,6 +15,7 @@ class DeepRTSMapView(Runner):
         parentdir = os.path.dirname(currentdir)
         sys.path.insert(0,parentdir) 
         from envs.deep_rts import DeepRTSEnv
+        import DeepRTS
 
         if not self.is_map_installed(self.args.map):
             self.install_map(self.args.map)
