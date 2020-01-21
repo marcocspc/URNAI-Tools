@@ -20,10 +20,12 @@ class DeepRTSMapView(Runner):
         if not self.is_map_installed(self.args.map, drts):
             self.install_map(self.args.map, drts)
 
+        map_name = os.path.basename(self.args.map)
+
         if (self.args.map is not None): 
-            print("Starting DeepRTS using map " + self.args.map)
+            print("Starting DeepRTS using map " + map_name)
             stamp = os.stat(self.args.map).st_mtime 
-            drts = DeepRTSEnv(render=True,map=self.args.map)
+            drts = DeepRTSEnv(render=True,map=map_name)
             drts.reset()
 
             try:
@@ -32,7 +34,8 @@ class DeepRTSMapView(Runner):
                     if current_stamp != stamp:
                         stamp = current_stamp
                         drts.stop()
-                        drts = DeepRTSEnv(render=True,map=self.args.map)
+                        self.install_map(self.args.map, drts)
+                        drts = DeepRTSEnv(render=True,map=map_name)
                         drts.reset()
             except KeyboardInterrupt:
                 print("Bye!")
