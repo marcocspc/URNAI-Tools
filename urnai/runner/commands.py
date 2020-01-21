@@ -40,7 +40,7 @@ class DeepRTSMapView(Runner):
             self.parser.error("--map was not informed.")
         
 
-    def is_map_installed(self, mapn drts):
+    def is_map_installed(self, map, drts):
         map_name = os.path.basename(map)
         maps_folder = os.path.dirname(os.path.realpath(drts.python.__file__)) + '/assets/maps' 
         should_exist = maps_folder + os.path.sep + map_name
