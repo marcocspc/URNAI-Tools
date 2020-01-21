@@ -1,4 +1,6 @@
 from .base.runner import Runner
+from shutil import copyfile
+import os
 
 class DeepRTSMapView(Runner):
 
@@ -13,6 +15,9 @@ class DeepRTSMapView(Runner):
         parentdir = os.path.dirname(currentdir)
         sys.path.insert(0,parentdir) 
         from envs.deep_rts import DeepRTSEnv
+
+        if not self.is_map_installed(self.args.map):
+            self.install_map(self.args.map)
 
         if (self.args.map is not None): 
             print("Starting DeepRTS using map " + self.args.map)
@@ -33,3 +38,18 @@ class DeepRTSMapView(Runner):
         else:
             self.parser.error("--map was not informed.")
         
+
+    def is_map_installed(self, map):
+        map_name = os.path.basename(map)
+        maps_folder = os.path.dirname(os.path.realpath(DeepRTS.python.__file__)) + '/assets/maps' 
+        should_exist = maps_folder + os.path.sep + map_name
+
+        return os.path.exists(should_exist)
+
+    def install_map(self, map):
+        map_name = os.path.basename(map)
+        maps_folder = os.path.dirname(os.path.realpath(DeepRTS.python.__file__)) + '/assets/maps' 
+        copy_to = maps_folder + os.path.sep + map_name
+
+        print("{map} is not installed, installing on DeepRTS...".format(map=map_name))
+        copyfile(map, copy_to)
