@@ -15,10 +15,10 @@ class DeepRTSMapView(Runner):
         parentdir = os.path.dirname(currentdir)
         sys.path.insert(0,parentdir) 
         from envs.deep_rts import DeepRTSEnv
-        import DeepRTS
+        import DeepRTS as drts
 
-        if not self.is_map_installed(self.args.map):
-            self.install_map(self.args.map)
+        if not self.is_map_installed(self.args.map, drts):
+            self.install_map(self.args.map, drts)
 
         if (self.args.map is not None): 
             print("Starting DeepRTS using map " + self.args.map)
@@ -40,16 +40,16 @@ class DeepRTSMapView(Runner):
             self.parser.error("--map was not informed.")
         
 
-    def is_map_installed(self, map):
+    def is_map_installed(self, mapn drts):
         map_name = os.path.basename(map)
-        maps_folder = os.path.dirname(os.path.realpath(DeepRTS.python.__file__)) + '/assets/maps' 
+        maps_folder = os.path.dirname(os.path.realpath(drts.python.__file__)) + '/assets/maps' 
         should_exist = maps_folder + os.path.sep + map_name
 
         return os.path.exists(should_exist)
 
-    def install_map(self, map):
+    def install_map(self, map, drts):
         map_name = os.path.basename(map)
-        maps_folder = os.path.dirname(os.path.realpath(DeepRTS.python.__file__)) + '/assets/maps' 
+        maps_folder = os.path.dirname(os.path.realpath(drts.python.__file__)) + '/assets/maps' 
         copy_to = maps_folder + os.path.sep + map_name
 
         print("{map} is not installed, installing on DeepRTS...".format(map=map_name))
