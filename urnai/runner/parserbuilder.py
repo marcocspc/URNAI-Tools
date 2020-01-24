@@ -17,25 +17,25 @@ class ParserBuilder():
         avail_opt_cmd = []
 
         for cls in RunnerBuilder.COMMANDS:
-            avail_pos_cmd += cls.COMMANDS
+            avail_pos_cmd.append(cls.COMMAND)
             avail_opt_cmd += cls.OPT_COMMANDS
 
-        if not (ParserBuilder.check_unique_entries(avail_pos_cmd) and ParserBuilder.check_unique_entries(avail_opt_cmd)):
-            raise CommandsNotUniqueError("There are repeated positional commands or optional commands on commands.py")
-
-        for cmd in avail_pos_cmd:
-            parser.add_argument(cmd['command'], help=cmd['help'], type=cmd['type'])
+        opt_cmd_aux_list = []
 
         for cmd in avail_opt_cmd:
-            parser.add_argument(cmd['command'], help=cmd['help'], type=cmd['type'])
+            opt_cmd_aux_list.append(cmd['command'])
+
+        if not (ParserBuilder.check_unique_entries(avail_pos_cmd) and ParserBuilder.check_unique_entries(opt_cmd_aux_list)):
+            raise CommandsNotUniqueError("There are repeated positional commands or optional commands on commands.py")
+
+        parser.add_argument('command', help='Which command urnai should run. Choices: {%(choices)s}', choices=avail_pos_cmd, metavar='COMMAND')
+
+        for cmd in avail_opt_cmd:
+            #parser.add_argument(cmd['command'], help=cmd['help'], action=cmd['action'], type=cmd['type'], metavar=cmd['metavar'])
+            parser.add_argument(cmd['command'], **{key:cmd[key] for key in cmd if key != 'command'})
 
         return parser
 
     @staticmethod
-    def check_unique_entries(cmd_list):
-        new_cmd_list = []
-
-        for cmd in cmd_list:
-            new_cmd_list.append(cmd['command'])
-
-        return len(new_cmd_list) == len(set(new_cmd_list))
+    def check_unique_entries(lst):
+        return len(lst) == len(set(lst))
