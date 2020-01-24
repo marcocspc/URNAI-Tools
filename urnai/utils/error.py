@@ -3,3 +3,6 @@ class ActionError(Exception):
 
 class DeprecatedCodeException(Exception):
     pass
+
+class CommandsNotUniqueError(Exception):
+    pass

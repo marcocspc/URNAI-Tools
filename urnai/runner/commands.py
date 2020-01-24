@@ -1,10 +1,18 @@
 from .base.runner import Runner
 from shutil import copyfile
 import os
+import argparse
 
 class DeepRTSMapView(Runner):
 
-    COMMAND = 'drtsmapview'
+    COMMANDS = [
+            {'command': 'drts', 'help': 'Execute operations related to DeepRTS env.', 'type' : str},
+            ]
+    OPT_COMMANDS = [
+            {'command': '--drts-map', 'help': 'Map to install, uninstall or use on DeepRTS.', 'type' : str},
+            {'command': '--install', 'help': 'Install map on DeepRTS.', 'type' : bool},
+            {'command': '--uninstall', 'help': 'Uninstall map on DeepRTS.', 'type' : bool},
+            ]
     
     def __init__(self, parser, args):
         super().__init__(parser, args)
@@ -17,43 +25,50 @@ class DeepRTSMapView(Runner):
         from envs.deep_rts import DeepRTSEnv
         import DeepRTS as drts
 
-        if not self.is_map_installed(self.args.map, drts):
-            self.install_map(self.args.map, drts)
+        if self.args.drts_map is not None:
+            map_name = os.path.basename(self.args.drts_map)
+            full_map_path = os.path.abspath('map_name')
+            drts_map_dir = os.path.dirname(os.path.realpath(drts.python.__file__)) + '/assets/maps' 
 
-        map_name = os.path.basename(self.args.map)
+            if self.args.install:
+                self.install_map(full_map_path, drts_map_dir)
+            elif self.args.uninstall:
+                self.uninstall_map(full_map_path, drts_map_dir)
+            else:
+                if not self.is_map_installed(drts_map_dir, map_name):
+                    self.install_map(full_map_path, drts_map_dir)
 
-        if (self.args.map is not None): 
-            print("Starting DeepRTS using map " + map_name)
-            stamp = os.stat(self.args.map).st_mtime 
-            drts = DeepRTSEnv(render=True,map=map_name)
-            drts.reset()
+                print("Starting DeepRTS using map " + map_name)
+                stamp = os.stat(full_map_path).st_mtime 
+                drts = DeepRTSEnv(render=True,map=map_name)
+                drts.reset()
 
-            try:
-                while True:
-                    current_stamp = os.stat(self.args.map).st_mtime 
-                    if current_stamp != stamp:
-                        stamp = current_stamp
-                        drts.stop()
-                        self.install_map(self.args.map, drts)
-                        drts = DeepRTSEnv(render=True,map=map_name)
-                        drts.reset()
-            except KeyboardInterrupt:
-                print("Bye!")
+                try:
+                    while True:
+                        current_stamp = os.stat(full_map_path).st_mtime 
+                        if current_stamp != stamp:
+                            stamp = current_stamp
+                            drts.stop()
+                            self.install_map(full_map_path, drts)
+                            drts = DeepRTSEnv(render=True,map=map_name)
+                            drts.reset()
+                except KeyboardInterrupt:
+                    print("Bye!")
         else:
-            self.parser.error("--map was not informed.")
+            raise argparse.ArgumentError("--drts-map not informed.")
         
 
-    def is_map_installed(self, map, drts):
-        map_name = os.path.basename(map)
-        maps_folder = os.path.dirname(os.path.realpath(drts.python.__file__)) + '/assets/maps' 
-        should_exist = maps_folder + os.path.sep + map_name
+    def is_map_installed(self, drts_map_dir, map_name):
+        return os.path.exists(drts_map_dir + os.sep + map_name)
 
-        return os.path.exists(should_exist)
+    def install_map(self, map_path, drts_map_dir):
+        print("{map} is not installed, installing on DeepRTS...".format(map=os.path.basename(map_path)))
+        copyfile(map_name, drts_map_dir)
 
-    def install_map(self, map, drts):
-        map_name = os.path.basename(map)
-        maps_folder = os.path.dirname(os.path.realpath(drts.python.__file__)) + '/assets/maps' 
-        copy_to = maps_folder + os.path.sep + map_name
-
-        print("{map} is not installed, installing on DeepRTS...".format(map=map_name))
-        copyfile(map, copy_to)
+    def uninstall_map(self, map_path, drts_map_dir):
+        if is_map_installed(drts_map_dir, map_path):
+            os.remove(drts_map_dir + os.sep + map_path)
+            print("{map} was removed.".format(map=os.path.basename(map_path)))
+        else:
+            print("{map} is not installed.".format(map=os.path.basename(map_path)))
+            
