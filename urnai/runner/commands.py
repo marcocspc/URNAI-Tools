@@ -44,28 +44,20 @@ class DeepRTSRunner(Runner):
                 drts = DeepRTSEnv(render=True,map=map_name)
                 drts.reset()
 
-                count = 0
                 try:
                     while True:
                         try:
-                            if count == 0:
-                                current_stamp = os.stat(full_map_path).st_mtime 
-                            if current_stamp != stamp or count > 0:
-                                stamp = current_stamp
-                                drts.close()
-                                del drts
-                                time.sleep(3)
+                            current_stamp = os.stat(full_map_path).st_mtime 
+                            if current_stamp != stamp:
                                 self.install_map(full_map_path, drts_map_dir, force=True)
-                                drts = DeepRTSEnv(render=True,map=map_name)
-                                drts.reset()
-                                count = 0
+                                drts.rese()
+                                stamp = current_stamp
                             drts.step(15)
-                        except FileNotFoundError:
-                            count =+ 1
-                            if count == 3:
-                                raise
-                            else:
-                                time.sleep(1)
+                            time.sleep(1)
+                        except FileNotFoundError as e:
+                            print(e)
+                            time.sleep(1)
+                            continue
                 except KeyboardInterrupt:
                     print("Bye!")
                         
