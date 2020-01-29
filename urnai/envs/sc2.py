@@ -32,25 +32,26 @@ class SC2Env(Env):
         self.spatial_dim = spatial_dim
         self.players = players
 
+        # commenting out this section since it's not being used anywhere
         ## TODO: Get action_ids from the currently used wrapper. It's used by the ActionWrapper to return available actions and might help in performance.
         ## Setting a list of action IDs for the selected actions
-        if not action_ids or action_ids in [ACTIONS_MINIGAMES, ACTIONS_MINIGAMES_ALL]:
-            action_ids = [0, 1, 2, 3, 4, 6, 7, 12, 13, 42, 44, 50, 91, 183, 234, 309, 331, 332, 333, 334, 451, 452, 490]
+        #if not action_ids or action_ids in [ACTIONS_MINIGAMES, ACTIONS_MINIGAMES_ALL]:
+        #    action_ids = [0, 1, 2, 3, 4, 6, 7, 12, 13, 42, 44, 50, 91, 183, 234, 309, 331, 332, 333, 334, 451, 452, 490]
 
-        if action_ids == ACTIONS_MINIGAMES_ALL:
-            action_ids += [11, 71, 72, 73, 74, 79, 140, 168, 239, 261, 264, 269, 274, 318, 335, 336, 453, 477]
+        #if action_ids == ACTIONS_MINIGAMES_ALL:
+        #    action_ids += [11, 71, 72, 73, 74, 79, 140, 168, 239, 261, 264, 269, 274, 318, 335, 336, 453, 477]
 
-        if action_ids == ACTIONS_ALL:
-            action_ids = [function.id for function in actions.FUNCTIONS]
+        #if action_ids == ACTIONS_ALL:
+        #    action_ids = [function.id for function in actions.FUNCTIONS]
 
 
-        ## Setting a list of features to include in our observation
-        if not obs_features:
-            obs_features = {
-                'screen': ['player_relative', 'selected', 'visibility_map', 'unit_hit_points_ratio', 'unit_density'],
-                'minimap': ['player_relative', 'selected', 'visibility_map', 'camera'],
-                'non-spatial': ['available_actions', 'player']
-            }
+        ### Setting a list of features to include in our observation
+        #if not obs_features:
+        #    obs_features = {
+        #        'screen': ['player_relative', 'selected', 'visibility_map', 'unit_hit_points_ratio', 'unit_density'],
+        #        'minimap': ['player_relative', 'selected', 'visibility_map', 'camera'],
+        #        'non-spatial': ['available_actions', 'player']
+        #    }
 
         self.start()
 
