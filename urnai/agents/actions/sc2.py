@@ -549,8 +549,9 @@ def get_unit_race(unit_type):
 #move a unit to a new position
 #based on https://gist.github.com/fyr91/168996a23f5675536dbf6f1cf75b30d6#file-defeat_zerglings_banelings_env_5-py-L41
 def move_to(obs, unit, dest_x, dest_y):
+    target = [dest_x, dest_y]
     try:
         return actions.RAW_FUNCTIONS.Move_pt("now", unit.tag, target)
-    else:
+    except:
         return no_op()
-)
+
