@@ -122,6 +122,10 @@ def main():
             else:
                 state, reward, done = scii.step([actions.RAW_FUNCTIONS.no_op()])
 
+            #Reward is 1 for every mineral shard collected 
+            #Reward is not cumulative
+            print("Reward: {r}".format(r=reward))
+
 
             #print("Current state: ")
             #print(state)
