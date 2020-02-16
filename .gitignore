@@ -105,5 +105,5 @@ venv.bak/
 
 .DS_Store
 .vscode/
-.swp
+*.swp
 _vizdoom.ini
