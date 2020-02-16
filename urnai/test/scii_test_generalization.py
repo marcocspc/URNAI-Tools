@@ -15,12 +15,16 @@ VER_THRESHOLD = 2
 
 PENDING_ACTIONS = []
 
+#USING THRESHOLDS = 2
+#Map walkable size 10 (H) x 8 (V)
+#corners coordinates: [22, 28] (UP LEFT), [22, 42] (DOWN LEFT), [43, 43] (DOWN RIGHT), [43, 28] (UP RIGHT)
+
 def print_army_mean(obs):
     army = scaux.select_army(obs, sc2_env.Race.terran)
     xs = [unit.x for unit in army]
     ys = [unit.y for unit in army]
 
-    #print("Army position is [{x}, {y}]".format(x=int(mean(xs)),y=int(mean(ys))))
+    print("Army position is [{x}, {y}]".format(x=int(mean(xs)),y=int(mean(ys))))
 
 def move_left(obs):
     army = scaux.select_army(obs, sc2_env.Race.terran)

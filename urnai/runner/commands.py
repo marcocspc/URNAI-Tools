@@ -36,30 +36,19 @@ class DeepRTSRunner(Runner):
             elif self.args.uninstall:
                 self.uninstall_map(full_map_path, drts_map_dir)
             else:
-                if not self.is_map_installed(drts_map_dir, map_name):
-                    self.install_map(full_map_path, drts_map_dir)
+                self.install_map(full_map_path, drts_map_dir)
 
                 print("Starting DeepRTS using map " + map_name)
-                stamp = os.stat(full_map_path).st_mtime 
                 drts = DeepRTSEnv(render=True,map=map_name)
                 drts.reset()
 
                 try:
-                    while True:
-                        try:
-                            current_stamp = os.stat(full_map_path).st_mtime 
-                            if current_stamp != stamp:
-                                self.install_map(full_map_path, drts_map_dir, force=True)
-                                drts.rese()
-                                stamp = current_stamp
-                            drts.step(15)
-                            time.sleep(1)
-                        except FileNotFoundError as e:
-                            print(e)
-                            time.sleep(1)
-                            continue
+                    drts.reset()
+                    drts.step(15)
+                    time.sleep(1)
                 except KeyboardInterrupt:
                     print("Bye!")
+                    self.uninstall_map(full_map_path, drts_map_dir)
                         
         else:
             raise argparse.ArgumentError(message="--drts-map not informed.")
