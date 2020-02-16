@@ -59,8 +59,6 @@ class DeepRTSRunner(Runner):
 
     def install_map(self, map_path, drts_map_dir, force=False):
         if force or not self.is_map_installed(drts_map_dir, os.path.basename(map_path)):
-            if force:
-                os.remove(drts_map_dir + os.sep + os.path.basename(map_path))
             if not force:
                 print("{map} is not installed, installing on DeepRTS...".format(map=os.path.basename(map_path)))
             copyfile(map_path, drts_map_dir + os.sep + os.path.basename(map_path))
