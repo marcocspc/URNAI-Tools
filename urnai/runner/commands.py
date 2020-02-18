@@ -63,7 +63,7 @@ class DeepRTSRunner(Runner):
                 print("{map} is not installed, installing on DeepRTS...".format(map=os.path.basename(map_path)))
             copyfile(map_path, drts_map_dir + os.sep + os.path.basename(map_path))
         else:
-            print("{map} is already installed.".format(map=map_name))
+            print("{map} is already installed.".format(map=os.path.basename(map_path)))
 
 
     def uninstall_map(self, map_path, drts_map_dir):

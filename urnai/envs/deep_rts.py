@@ -14,6 +14,8 @@ class DeepRTSEnv(Env):
        DeepRTS.python.Config Defaults: https://github.com/cair/deep-rts/blob/master/DeepRTS/python/_py_config.py
        DeepRTS.Engine.Config.defaults() : https://github.com/cair/deep-rts/blob/master/src/Config.h
        Possible actions: https://github.com/cair/deep-rts/blob/master/src/Constants.h
+       Player class: https://github.com/cair/deep-rts/blob/master/bindings/Player.cpp
+       Unit class: https://github.com/cair/deep-rts/blob/master/bindings/Unit.cpp
     '''
     
     def __init__(self, map = Config.Map.TEN, render = False, 
@@ -52,6 +54,8 @@ class DeepRTSEnv(Env):
         )
         self.game.set_max_fps(self.max_fps)
         self.game.set_max_ups(self.max_ups)
+	
+        self.players = self.game.players
 
     def start(self):
         #Set done
