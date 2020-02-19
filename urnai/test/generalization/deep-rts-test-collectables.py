@@ -38,7 +38,12 @@ for ep in range(episodes):
                 NoAction = 16
         '''
 
-        action = int(input(text)) - 1
+        action = None
+
+        try:
+            action = int(input(text)) - 1
+        except ValueError:
+            action = 15
 
         state, done = drts.step(action)
 
@@ -46,11 +51,13 @@ for ep in range(episodes):
         print(state)
         print("Player 1 selected unit:")
         print(drts.players[0].get_targeted_unit())
+        print("Unit coordinates: {x}, {y}".format(x=drts.players[0].get_targeted_unit().tile.x,y=drts.players[0].get_targeted_unit().tile.y))
         print("Some Player 1 stats:")
         print("Oil: {oil}".format(oil=drts.players[0].oil))
         print("Gold: {gold}".format(gold=drts.players[0].gold))
         print("Food: {food}".format(food=drts.players[0].food))
         print("Lumber: {lumber}".format(lumber=drts.players[0].lumber))
+
 
         print("FPS: " + str(drts.game.get_fps()))
 
