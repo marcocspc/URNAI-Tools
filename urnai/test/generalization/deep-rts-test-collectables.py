@@ -45,7 +45,12 @@ for ep in range(episodes):
         print("Current state: ")
         print(state)
         print("Player 1 selected unit:")
-        print(drts.players[0].get_targeted_unit().name_id)
+        print(drts.players[0].get_targeted_unit())
+        print("Some Player 1 stats:")
+        print("Oil: {oil}".format(oil=drts.players[0].oil))
+        print("Gold: {gold}".format(gold=drts.players[0].gold))
+        print("Food: {food}".format(food=drts.players[0].food))
+        print("Lumber: {lumber}".format(lumber=drts.players[0].lumber))
 
         print("FPS: " + str(drts.game.get_fps()))
 
