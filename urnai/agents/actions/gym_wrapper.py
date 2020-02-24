@@ -6,9 +6,9 @@ from utils.agent_utils import one_hot_encode, transformDistance, transformLocati
 
 class GymWrapper(ActionWrapper):
 
-    def __init__(self, env):
+    def __init__(self, action_space_size):
         self.move_number = 0
-        self.actions = [action_idx for action_idx in range(env.env_instance.action_space.n)]
+        self.actions = [action_idx for action_idx in range(action_space_size)]
 
 
 

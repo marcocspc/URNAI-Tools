@@ -6,10 +6,10 @@ from utils.agent_utils import one_hot_encode, transformDistance, transformLocati
 
 class PLEWrapper(ActionWrapper):
 
-    def __init__(self, env):
+    def __init__(self, action_set,action_space_size):
         self.move_number = 0
-        self.actions = env.env_instance.getActionSet()
-        self.action_indices = [idx for idx in range(len(self.actions))]
+        self.actions = action_set 
+        self.action_indices = [idx for idx in range(action_space_size))]
 
 
     def is_action_done(self):

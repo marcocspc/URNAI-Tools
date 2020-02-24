@@ -15,18 +15,15 @@ _PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
 _PLAYER_SELF = 1
 
 class SC2Agent(Agent):
-    def __init__(self, model: LearningModel, reward_builder: RewardBuilder, env):
+    def __init__(self, model: LearningModel, reward_builder: RewardBuilder, observation_spec, action_spec):
         super(SC2Agent, self).__init__(model, reward_builder)
-        self.setup(env)
+        self.obs_spec = observation_spec
+        self.action_spec = action_spec
         self.reward = 0
         self.episodes = 0
         self.steps = 0
         self.obs_spec = None
         self.action_spec = None
-
-    def setup(self, env):
-        self.obs_spec = env.env_instance.observation_spec()
-        self.action_spec = env.env_instance.action_spec()
 
     def reset(self):
         super(SC2Agent, self).reset()

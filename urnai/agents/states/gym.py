@@ -18,8 +18,9 @@ class FrozenLakeState(StateBuilder):
 
 
 class Game2048State(StateBuilder):
-    def __init__(self, env: Env):
+    def __init__(self, env: Env, state_dimension_height, state_dimension_width):
         self.state_dim = env.env_instance.height*env.env_instance.width
+        self.state_dim = state_dimension_height*state_dimension_width
 
     def build_state(self, obs):
         obs = obs.reshape(1, self.get_state_dim())
@@ -30,8 +31,9 @@ class Game2048State(StateBuilder):
 
 
 class PureState(StateBuilder):
-    def __init__(self, env: Env):
-        self.state_dim = self.parse_dims(env.env_instance.observation_space)
+    def __init__(self, observation_space):
+        #you can get observation_space from env.env_instance.observation_space
+        self.state_dim = self.parse_dims(observation_space)
 
     def parse_dims(self, obs_space):
         observation_type = type(obs_space).__name__

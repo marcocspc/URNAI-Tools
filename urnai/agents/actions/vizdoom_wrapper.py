@@ -3,7 +3,7 @@ from .base.abwrapper import ActionWrapper
 
 class VizdoomWrapper(ActionWrapper):
 
-    def __init__(self, env):
+    def __init__(self):
         self.move_number = 0
 
         attack = [1, 0, 0, 0, 0, 0, 0, 0]
@@ -40,7 +40,7 @@ class VizdoomWrapper(ActionWrapper):
 
 class VizdoomHealthGatheringWrapper(ActionWrapper):
 
-    def __init__(self, env):
+    def __init__(self):
         self.move_number = 0
         
         move_forward = [0, 0, 1, 0, 0, 0, 0, 0]
