@@ -14,8 +14,6 @@ drts = DeepRTSEnv(render=True, map='10x8-collect_twenty.json', updates_per_actio
 
 def set_collectable_list(width, height):
     map = np.zeros((height, width)) 
-    print('w' + str(width))
-    print('h' + str(height))
 
     for i in range(width):
         for j in range(height):

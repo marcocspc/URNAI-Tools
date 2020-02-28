@@ -1,11 +1,18 @@
 from .base.abenv import Env
 import os
+import DeepRTS as drts
 from DeepRTS import Engine
 from DeepRTS.python import scenario
 from DeepRTS.python import Config
 from DeepRTS.python import Game
 
-#TODO: add a way to view game main window if render = True
+import sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir) 
+
+from utils.error import MapNotFoundError  
+
 #TODO: add enemy AI
 
 class DeepRTSEnv(Env):
@@ -22,7 +29,12 @@ class DeepRTSEnv(Env):
             max_fps = 1000000, max_ups = 1000000, play_audio = False, 
             number_of_players = 1, updates_per_action = 1, flatten_state = True):
 
-        self.map = map
+        if self.is_map_installed(map):
+            self.map = map
+        else:
+            err = "Map {map_name} was not found on DeepRTS maps folder.".format(map_name=map)
+            raise MapNotFoundError(map)
+
         self.render = render
         self.play_audio = play_audio
         self.updates_per_action = updates_per_action
@@ -111,3 +123,7 @@ class DeepRTSEnv(Env):
 
     def restart(self):
         self.reset()
+
+    def is_map_installed(self, map_name):
+        drts_map_dir = os.path.dirname(os.path.realpath(drts.python.__file__)) + '/assets/maps' 
+        return os.path.exists(drts_map_dir + os.sep + map_name)

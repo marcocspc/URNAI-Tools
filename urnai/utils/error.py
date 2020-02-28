@@ -6,3 +6,9 @@ class DeprecatedCodeException(Exception):
 
 class CommandsNotUniqueError(Exception):
     pass
+
+class EnvironmentNotSupportedError(Exception):
+    pass
+
+class MapNotFoundError(Exception):
+    pass
