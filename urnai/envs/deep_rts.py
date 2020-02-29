@@ -24,6 +24,7 @@ class DeepRTSEnv(Env):
        Player class: https://github.com/cair/deep-rts/blob/master/bindings/Player.cpp
        Unit class: https://github.com/cair/deep-rts/blob/master/bindings/Unit.cpp
        Engine.Config.defaults(): https://github.com/cair/deep-rts/blob/master/src/Config.h
+       Engine.Config options: https://github.com/cair/deep-rts/blob/master/bindings/Config.cpp
     '''
     
     def __init__(self, map = Config.Map.TEN, render = False, 
