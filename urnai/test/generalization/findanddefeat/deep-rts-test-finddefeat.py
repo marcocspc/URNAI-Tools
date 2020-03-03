@@ -9,10 +9,6 @@ from envs.deep_rts import DeepRTSEnv
 import random
 import numpy as np
 
-episodes = 100
-steps = 1000 
-drts = DeepRTSEnv(render=True, updates_per_action = 12)
-
 def set_collectable_list(width, height):
     map = np.zeros((height, width)) 
 
@@ -29,6 +25,13 @@ def set_collectable_list(width, height):
         break
 
     return map
+
+episodes = 100
+steps = 1000 
+drts = DeepRTSEnv(render=True, updates_per_action = 12)
+
+drts.engine_config.set_footman(False)
+drts.engine_config.set_archer(True)
 
 for ep in range(episodes):
     print("Episode " + str(ep + 1))
@@ -99,3 +102,4 @@ for ep in range(episodes):
 
         if done:
             break
+
