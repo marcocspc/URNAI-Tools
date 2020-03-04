@@ -5,10 +5,11 @@ from utils.types import ActionIndex
 
 class LearningModel(ABC):
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, save_path, name=None):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, save_path, file_name, name=None):
         self.gamma = gamma
         self.learning_rate = learning_rate
         self.save_path = save_path
+        self.file_name = file_name
         self.name = name
         self.action_wrapper = action_wrapper
         self.state_builder = state_builder

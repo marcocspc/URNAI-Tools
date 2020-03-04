@@ -4,21 +4,30 @@ from tensorflow.compat.v1 import Session,ConfigProto,placeholder,layers,train,gl
 import numpy as np
 import random
 import os
+import pickle
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 
 # EXPLORATION PARAMETERS FOR EPSILON GREEDY STRATEGY
-explore_start = 1.0
-explore_stop = 0.01
-decay_rate = 0.0001
+
 
 
 class DQLTF(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path, learning_rate=0.0002, gamma=0.95, name='DQN'):
-        super(DQLTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path, file_name, learning_rate=0.0002, gamma=0.95, name='DQN'):
+        super(DQLTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, file_name, name)
 
+        # self.explore_start = 1.0
+        # self.explore_stop = 0.01
+        # self.decay_rate = 0.0001
+        
+        self.explore_start = 1.0
+        self.explore_stop = 0.01
+        self.decay_rate = 0.0001
         self.decay_step = 0
+
+        # self.epsilon_objects = {1:self.explore_start, 2:self.explore_stop, 3:self.decay_rate, 4:self.decay_step}
+
 
         ops.reset_default_graph()
 
@@ -83,7 +92,7 @@ class DQLTF(LearningModel):
 
         expl_expt_tradeoff = np.random.rand()
 
-        explore_probability = explore_stop + (explore_start - explore_stop) * np.exp(-decay_rate * self.decay_step)
+        explore_probability = self.explore_stop + (self.explore_start - self.explore_stop) * np.exp(-self.decay_rate * self.decay_step)
 
         if explore_probability > expl_expt_tradeoff:
             random_action = random.choice(self.actions)
@@ -114,12 +123,25 @@ class DQLTF(LearningModel):
         print()
         print("> Saving the model!")
         print()
-        self.saver.save(self.sess, self.save_path)
+        self.saver.save(self.sess, self.save_path+self.file_name)
+        pickle_out = open(self.save_path+self.file_name+"_model.pickle", "wb")
+        pickle.dump(self.decay_step, pickle_out)
+        pickle_out.close()
 
     def load(self):
-        exists = os.path.isfile(self.save_path + '.meta')
+        exists = os.path.isfile(self.save_path + self.file_name + '.meta')
         if exists:
             print()
             print("> Loading saved model!")
             print()
-            self.saver.restore(self.sess, self.save_path)
+            self.saver.restore(self.sess, self.save_path + self.file_name)
+
+            exists_pickle = os.path.isfile(self.save_path + self.file_name + '_model.pickle')
+            if exists_pickle:
+                pickle_in = open(self.save_path + self.file_name + "_model.pickle", "rb")
+                self.decay_step = pickle.load(pickle_in)
+                # self.explore_start = epsilon_objects[1]
+                # self.explore_stop = epsilon_objects[2]
+                # self.decay_rate = epsilon_objects[3]
+                # self.decay_step = epsilon_objects[4]
+                print("teste")
