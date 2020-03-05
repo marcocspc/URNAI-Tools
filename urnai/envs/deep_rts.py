@@ -29,7 +29,7 @@ class DeepRTSEnv(Env):
     
     def __init__(self, map = Config.Map.TEN, render = False, 
             max_fps = 1000000, max_ups = 1000000, play_audio = False, 
-            number_of_players = 1, updates_per_action = 1, flatten_state = True):
+            number_of_players = 1, updates_per_action = 1, flatten_state = True, drts_engine_config = None):
 
         if self.is_map_installed(map):
             self.map = map
@@ -57,7 +57,10 @@ class DeepRTSEnv(Env):
             audio_volume=50
         )
 
-        self.engine_config = Engine.Config.defaults()
+        if drts_engine_config == None:
+            self.engine_config = Engine.Config.defaults()
+        else:
+            self.engine_config = drts_engine_config
 
         self.game = Game(
             self.map,
@@ -68,7 +71,7 @@ class DeepRTSEnv(Env):
         )
         self.game.set_max_fps(self.max_fps)
         self.game.set_max_ups(self.max_ups)
-	
+ 
         self.players = self.game.players
 
     def start(self):
