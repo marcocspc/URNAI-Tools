@@ -77,6 +77,21 @@ class Simple64State(StateBuilder):
             new_state.append(get_units_amount(obs, units.Protoss.RoboticsBay))
             new_state.append(get_units_amount(obs, units.Protoss.TemplarArchive))
             new_state.append(get_units_amount(obs, units.Protoss.DarkShrine))
+            
+        elif self.player_race == sc2_env.Race.zerg:
+            new_state.append(get_units_amount(obs, units.Zerg.BanelingNest))
+            new_state.append(get_units_amount(obs, units.Zerg.EvolutionChamber))
+            new_state.append(get_units_amount(obs, units.Zerg.Extractor))
+            new_state.append(get_units_amount(obs, units.Zerg.Hatchery))
+            new_state.append(get_units_amount(obs, units.Zerg.HydraliskDen))
+            new_state.append(get_units_amount(obs, units.Zerg.InfestationPit))
+            new_state.append(get_units_amount(obs, units.Zerg.LurkerDen))
+            new_state.append(get_units_amount(obs, units.Zerg.NydusNetwork))
+            new_state.append(get_units_amount(obs, units.Zerg.RoachWarren))
+            new_state.append(get_units_amount(obs, units.Zerg.SpawningPool))
+            new_state.append(get_units_amount(obs, units.Zerg.SpineCrawler))
+            new_state.append(get_units_amount(obs, units.Zerg.Spire))
+            new_state.append(get_units_amount(obs, units.Zerg.SporeCrawler))
 
         # TO DO: Append observations for zergs
         #elif self.player_race == sc2_env.Race.zerg:
