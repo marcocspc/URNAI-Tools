@@ -628,19 +628,13 @@ class TerranWrapper(SC2Wrapper):
             command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
             self.base_top_left = (command_center.x < 32)
 
-        # if self.base_top_left:
-        #     ybrange = 0
-        #     ytrange = 32
-        # else:
-        #     ybrange = 32
-        #     ytrange = 63
 
         '''LIST OF ACTIONS THE AGENT IS ABLE TO CHOOSE FROM:'''
 
         # BUILD COMMAND CENTER
         if named_action == ACTION_BUILD_COMMAND_CENTER:
             targets = [[18, 15], [41, 21]]
-            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.CommandCenter, 
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.CommandCenter, 
                                                         sc2._BUILD_COMMAND_CENTER, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount=2, targets=targets)
             return action
@@ -649,7 +643,7 @@ class TerranWrapper(SC2Wrapper):
         if named_action == ACTION_BUILD_SUPPLY_DEPOT:
             targets = [[21, 25], [23, 25], [25, 25], [22,26], [24,26], [26,26], [26.7,26]]
             # targets = [[21, 26], [22, 27], [23, 28], [22,24], [24,25], [25,26]]
-            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.SupplyDepot, 
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.SupplyDepot, 
                                                         sc2._BUILD_SUPPLY_DEPOT, self.move_number,self.last_worker, 
                                                         self.base_top_left, max_amount=8, targets=targets)
             return action
@@ -662,7 +656,7 @@ class TerranWrapper(SC2Wrapper):
         # BUILD ENGINEERINGBAY
         if named_action == ACTION_BUILD_ENGINEERINGBAY:
             targets = [[18,28]]
-            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.EngineeringBay, 
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.EngineeringBay, 
                                                         sc2._BUILD_ENGINEERINGBAY, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount=1, targets=targets)
             return action
@@ -670,7 +664,7 @@ class TerranWrapper(SC2Wrapper):
         # BUILD ARMORY
         if named_action == ACTION_BUILD_ARMORY:
             targets = [[20,29]]
-            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.Armory, 
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Armory, 
                                                         sc2._BUILD_ARMORY, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount = 1, targets=targets)
             return action
@@ -693,7 +687,7 @@ class TerranWrapper(SC2Wrapper):
         # BUILD FUSIONCORE
         if named_action == ACTION_BUILD_FUSIONCORE:
             targets = [[38, 23]]
-            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.FusionCore, 
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.FusionCore, 
                                                         sc2._BUILD_FUSIONCORE, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount = 1, targets=targets)
             return action
@@ -701,7 +695,7 @@ class TerranWrapper(SC2Wrapper):
         # BUILD GHOSTACADEMY
         if named_action == ACTION_BUILD_GHOSTACADEMY:
             targets = [[36, 23]]
-            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.GhostAcademy, 
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.GhostAcademy, 
                                                         sc2._BUILD_GHOSTACADEMY, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount = 1, targets=targets)
             return action
@@ -709,7 +703,7 @@ class TerranWrapper(SC2Wrapper):
         # BUILD BARRACKS
         if named_action == ACTION_BUILD_BARRACKS:
             targets = [[25, 18], [25, 22], [28, 24]]
-            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.Barracks, 
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Barracks, 
                                                         sc2._BUILD_BARRACKS, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount = 3, targets=targets)
             return action
@@ -717,7 +711,7 @@ class TerranWrapper(SC2Wrapper):
         # BUILD FACTORY
         if named_action == ACTION_BUILD_FACTORY:
             targets = [[39, 26], [43, 26]]
-            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.Factory, 
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Factory, 
                                                         sc2._BUILD_FACTORY, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount = 2, targets=targets)
             return action
@@ -725,7 +719,7 @@ class TerranWrapper(SC2Wrapper):
         # BUILD STARPORT
         if named_action == ACTION_BUILD_STARPORT:
             targets = [[37, 29], [41, 29]]
-            action, self.last_worker, self.move_number = build_structure_raw_pt2(obs, units.Terran.Starport, 
+            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.Starport, 
                                                         sc2._BUILD_STARPORT, self.move_number, self.last_worker, 
                                                         self.base_top_left, max_amount = 2, targets=targets)
             return action
@@ -762,32 +756,6 @@ class TerranWrapper(SC2Wrapper):
                 
 
         # HARVEST MINERALS WITH IDLE WORKER
-        # if named_action == ACTION_HARVEST_MINERALS_IDLE:
-        #     idle_worker = select_idle_worker(obs, sc2_env.Race.terran)
-        #     if idle_worker != sc2._NO_UNITS:
-        #         if building_exists(obs, units.Terran.CommandCenter):
-        #             ccs = get_my_units_by_type(obs, units.Terran.CommandCenter)
-        #             for cc in ccs:
-        #                 if get_euclidean_distance([idle_worker.x, idle_worker.y], [cc.x, cc.y]) < 10:
-        #                     return harvest_gather_minerals(obs, idle_worker, cc)
-        #     return no_op()
-
-        # if named_action == ACTION_HARVEST_MINERALS_IDLE:
-        #     idle_workers = get_all_idle_workers(obs, sc2_env.Race.terran)
-        #     if idle_workers != sc2._NO_UNITS:
-        #         if building_exists(obs, units.Terran.CommandCenter) or \
-        #             building_exists(obs, units.Terran.PlanetaryFortress) or \
-        #             building_exists(obs, units.Terran.OrbitalCommand):
-        #             ccs = get_my_units_by_type(obs, units.Terran.CommandCenter)
-        #             ccs.extend(get_my_units_by_type(obs, units.Terran.PlanetaryFortress))
-        #             ccs.extend(get_my_units_by_type(obs, units.Terran.OrbitalCommand))
-        #             for cc in ccs:
-        #                 target = [cc.x, cc.y]
-        #                 idle_worker = get_closest_unit(obs, target, units_list=idle_workers)
-        #                 if idle_worker != sc2._NO_UNITS:
-        #                     return harvest_gather_minerals(obs, idle_worker, cc)
-        #     return no_op()
-
         if named_action == ACTION_HARVEST_MINERALS_IDLE:
             idle_workers = get_all_idle_workers(obs, sc2_env.Race.terran)
             if idle_workers != sc2._NO_UNITS:
@@ -797,40 +765,32 @@ class TerranWrapper(SC2Wrapper):
         # TO DO: Create a harvest minerals with worker from refinery line so the bot can juggle workers from mineral lines to gas back and forth
 
         # HARVEST MINERALS WITH WORKER FROM GAS LINE
-        # if named_action == ACTION_HARVEST_MINERALS_FROM_GAS:
-        #     if building_exists(obs, units.Terran.CommandCenter):
-        #         ccs = get_my_units_by_type(obs, units.Terran.CommandCenter)
-        #         for cc in ccs:
-        #             # Check if command center is not full of workers yet
-        #             if cc.assigned_harvesters < cc.ideal_harvesters:
-        #                 workers = get_my_units_by_type(obs, units.Terran.SCV)
-        #                 for worker in workers:
-        #                     if get_euclidean_distance([worker.x, worker.y], [cc.x, cc.y]) < 10:
-        #                         # Checking if worker is harvesting, if so, send him to harvest minerals
-        #                         if worker.order_id_0 == 362 or worker.order_id_0 == 359:
-        #                             return harvest_gather_minerals(obs, worker, cc)
-        #     return no_op()
         if named_action == ACTION_HARVEST_MINERALS_FROM_GAS:
             if building_exists(obs, units.Terran.CommandCenter) or building_exists(obs, units.Terran.PlanetaryFortress) or building_exists(obs, units.Terran.OrbitalCommand):
                 return harvest_gather_minerals(obs, sc2_env.Race.terran)
             return no_op()
 
         # HARVEST GAS WITH WORKER FROM MINERAL LINE
+        # if named_action == ACTION_HARVEST_GAS_FROM_MINERALS:
+        #     if building_exists(obs, units.Terran.CommandCenter):
+        #         if building_exists(obs, units.Terran.Refinery):
+        #             refineries = get_my_units_by_type(obs, units.Terran.Refinery)
+        #             # Going through all refineries
+        #             for refinery in refineries:
+        #                 # Checking if refinery is not full of workers yet
+        #                 if refinery.assigned_harvesters < refinery.ideal_harvesters:
+        #                     workers = get_my_units_by_type(obs, units.Terran.SCV)
+        #                     for worker in workers:
+        #                         # Checking if worker is close by to the refinery
+        #                         if get_euclidean_distance([worker.x, worker.y], [refinery.x, refinery.y]) < 10:
+        #                             # Checking if worker is harvesting, if so, send him to harvest gas
+        #                             if worker.order_id_0 == 362 or worker.order_id_0 == 359:
+        #                                 return harvest_gather_gas(obs, worker, refinery)
+        #     return no_op()
+
         if named_action == ACTION_HARVEST_GAS_FROM_MINERALS:
-            if building_exists(obs, units.Terran.CommandCenter):
-                if building_exists(obs, units.Terran.Refinery):
-                    refineries = get_my_units_by_type(obs, units.Terran.Refinery)
-                    # Going through all refineries
-                    for refinery in refineries:
-                        # Checking if refinery is not full of workers yet
-                        if refinery.assigned_harvesters < refinery.ideal_harvesters:
-                            workers = get_my_units_by_type(obs, units.Terran.SCV)
-                            for worker in workers:
-                                # Checking if worker is close by to the refinery
-                                if get_euclidean_distance([worker.x, worker.y], [refinery.x, refinery.y]) < 10:
-                                    # Checking if worker is harvesting, if so, send him to harvest gas
-                                    if worker.order_id_0 == 362 or worker.order_id_0 == 359:
-                                        return harvest_gather_gas(obs, worker, refinery)
+            if building_exists(obs, units.Terran.Refinery):
+                return harvest_gather_gas(obs, sc2_env.Race.terran)
             return no_op()
 
         '''ENGINEERING BAY RESEARCH'''

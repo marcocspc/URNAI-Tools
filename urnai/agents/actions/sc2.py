@@ -8,16 +8,15 @@ from pysc2.env import sc2_env
 An action set defines all actions an agent can use. In the case of StarCraft 2 using PySC2, some actions require extra
 processing to work, so it's up to the developper to come up with a way to make them work.
 
-Even though this is not called action_wrapper, this actually acts as a wrapper
+Even though this is not called an action_wrapper, it effectively acts as a wrapper
 
-e.g: select_point is a function implemented in PySC2 that requires some extra arguments to work, like which point to select.
-Using the action_set we can define a way to select which point select_point will use.
-Following this example, we could implement a select_random_unit function which processes a random unit from the observation
-and returns the corresponding PySC2 call to select_point that would select this processed unit.
+e.g: actions.RAW_FUNCTIONS.Build_Barracks_pt is a function implemented in PySC2 that requires some extra arguments to work, like 
+whether to build it now or to queue the action, which worker is going to perform this action, and the target (given by a [x, y] position)
+
 '''
 
 ## TODO: Move constants to a separate file, so they can be imported and used by other modules
-## Defining constants for action ids, so our agent can check if an action is valid
+## Defining constants for action ids, so our agent can check if an action is valid, and pass these actions as arguments to functions easily
 _NO_OP = actions.FUNCTIONS.no_op
 
 _BUILD_COMMAND_CENTER = actions.RAW_FUNCTIONS.Build_CommandCenter_pt
@@ -104,6 +103,7 @@ _EFFECT_STIMPACK = actions.RAW_FUNCTIONS.Effect_Stim_quick
 
 _BUILD_PYLON = actions.RAW_FUNCTIONS.Build_Pylon_pt
 
+
 '''CONSTANTS USED TO DO GENERAL CHECKS'''
 _NO_UNITS = "no_units"
 _TERRAN = sc2_env.Race.terran
@@ -123,7 +123,7 @@ def select_random_unit_by_type(obs, unit_type):
         return random_unit
     return _NO_UNITS
 
-def get_idle_worker(obs, player_race):
+def get_random_idle_worker(obs, player_race):
     if player_race == _PROTOSS:
         workers = get_my_units_by_type(obs, units.Protoss.Probe)
     elif player_race == _TERRAN:
@@ -182,7 +182,7 @@ def build_structure_by_type(obs, action_id, player_race, target=None):
     
     if worker != _NO_UNITS and target != _NO_UNITS:
         if " raw_cmd " in str(action_id.function_type):                 # Checking if the build action is of type RAW_CMD
-            return action_id("now", target.tag), _NO_UNITS              # RAW_CMD actions only need a [0]queue and [1]unit_tags and doesn't use a worker (i think)
+            return action_id("now", target.tag), _NO_UNITS              # RAW_CMD actions only need a [0]queue and [1]unit_tags and doesn't use a worker
         
         elif " raw_cmd_pt " in str(action_id.function_type):            # Checking if the build action is of type RAW_CMD_PT
             if is_valid_target(target):                
@@ -266,41 +266,22 @@ def harvest_gather_minerals_quick(obs, worker, player_race):
                         distances = get_distances(obs, mineral_fields, target)
                         closest_mineral = mineral_fields[np.argmin(distances)]
                         return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, closest_mineral.tag)
-                        # for mineral_field in mineral_fields:
-                        #     target = [mineral_field.x, mineral_field.y]
-                        #     distances = get_distances(obs, townhalls, target)
-                        #     if distances[np.argmin(distances)] < 10:
-                        #         return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, mineral_field.tag)
 
     return _NO_OP()
 
-
-# def harvest_gather_minerals(obs, worker, command_center, player_race):
-#     if player_race == _TERRAN: 
-#         townhalls = get_my_units_by_type(obs, units.Terran.CommandCenter)
-#         townhalls.extend(get_my_units_by_type(obs, units.Terran.PlanetaryFortress))
-#         townhalls.extend(get_my_units_by_type(obs, units.Terran.OrbitalCommand))
-#     if player_race == _PROTOSS: townhalls = get_my_units_by_type(obs, units.Protoss.Nexus)
-#     if player_race == _ZERG: townhalls = get_my_units_by_type(obs, units.Zerg.Hatchery)
-
-#     if worker != _NO_UNITS:
-#         mineral_fields = get_neutral_units_by_type(obs, units.Neutral.MineralField)
-#         if len(mineral_fields) > 0:
-#             target = [command_center.x, command_center.y]
-#             distances = get_distances(obs, mineral_fields, target)
-#             idx_argmin = np.argmin(distances)
-#             if distances[idx_argmin] < 10:
-#                 return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, mineral_fields[idx_argmin].tag)
-
-#     return _NO_OP()
 
 def harvest_gather_minerals(obs, player_race, idle_workers=False):
     if player_race == _TERRAN: 
         townhalls = get_my_units_by_type(obs, units.Terran.CommandCenter)
         townhalls.extend(get_my_units_by_type(obs, units.Terran.PlanetaryFortress))
         townhalls.extend(get_my_units_by_type(obs, units.Terran.OrbitalCommand))
-    if player_race == _PROTOSS: townhalls = get_my_units_by_type(obs, units.Protoss.Nexus)
-    if player_race == _ZERG: townhalls = get_my_units_by_type(obs, units.Zerg.Hatchery)
+        worker_type = units.Terran.SCV
+    if player_race == _PROTOSS: 
+        townhalls = get_my_units_by_type(obs, units.Protoss.Nexus)
+        worker_type = units.Protoss.Probe
+    if player_race == _ZERG: 
+        townhalls = get_my_units_by_type(obs, units.Zerg.Hatchery)
+        worker_type = units.Zerg.Drone
 
     mineral_fields = get_neutral_units_by_type(obs, units.Neutral.MineralField)
     if len(mineral_fields) > 0:
@@ -313,22 +294,40 @@ def harvest_gather_minerals(obs, player_race, idle_workers=False):
                     if idle_workers:
                         worker = get_closest_unit(obs, target, units_list=idle_workers)
                     else:
-                        worker = get_closest_unit(obs, target, unit_type=units.Terran.SCV)
+                        worker = get_closest_unit(obs, target, unit_type=worker_type)
                     if worker.order_id_0 == 362 or worker.order_id_0 == 359 or worker.order_length == 0:
-                        for townhall in townhalls:
-                            if townhall.assigned_harvesters < townhall.ideal_harvesters:
-                                target = [townhall.x, townhall.y]
-                                distances = get_distances(obs, mineral_fields, target)
-                                closest_mineral = mineral_fields[np.argmin(distances)]
-                                return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, closest_mineral.tag)
+                        distances = get_distances(obs, mineral_fields, target)
+                        closest_mineral = mineral_fields[np.argmin(distances)]
+                        return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, closest_mineral.tag)
 
     return _NO_OP()
 
 
-def harvest_gather_gas(obs, worker, refinery):
-    if worker != _NO_UNITS:
-        return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, refinery.tag)
+# def harvest_gather_gas(obs, worker, refinery):
+#     if worker != _NO_UNITS:
+#         return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, refinery.tag)
+#     return _NO_OP()
+def harvest_gather_gas(obs, player_race):
+    if player_race == _TERRAN: 
+        gas_colectors = get_my_units_by_type(obs, units.Terran.Refinery)
+        worker_type = units.Terran.SCV
+    if player_race == _PROTOSS: 
+        gas_colectors = get_my_units_by_type(obs, units.Protoss.Assimilator)
+        worker_type = units.Protoss.Probe
+    if player_race == _ZERG: 
+        gas_colectors = get_my_units_by_type(obs, units.Zerg.Extractor)
+        worker_type = units.Zerg.Drone
+
+    if len(gas_colectors) > 0:
+        for gas_colector in gas_colectors:
+            if gas_colector.assigned_harvesters < gas_colector.ideal_harvesters:
+                target = [gas_colector.x, gas_colector.y]
+                worker = get_closest_unit(obs, target, unit_type=worker_type)
+                if worker.order_id_0 == 362 or worker.order_id_0 == 359 or worker.order_length == 0:
+                    return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, gas_colector.tag)
     return _NO_OP()
+
+
 
 
 def harvest_return(obs, worker):
@@ -359,29 +358,7 @@ def build_structure_raw(obs, building_type, building_action, move_number, last_w
     return _NO_OP(), last_worker, move_number
 
 
-def build_structure_raw_pt(obs, building_type, building_action, move_number, last_worker, base_top_left, max_amount = 999):
-    ybrange=0 if base_top_left else 32
-    ytrange=32 if base_top_left else 63
-
-    player_race = get_unit_race(building_type)
-        
-    if get_units_amount(obs, building_type) < max_amount:
-        if move_number == 0:
-            move_number += 1
-            x = random.randint(0,63)
-            y = random.randint(ybrange, ytrange)
-            target = [x, y]
-            action, last_worker = build_structure_by_type(obs, building_action, player_race, target)
-            return action, last_worker, move_number
-        if move_number == 1:
-            move_number +=1
-            return harvest_gather_minerals_quick(obs, last_worker, player_race), last_worker, move_number
-        if move_number == 2:
-            move_number = 0
-    return _NO_OP(), last_worker, move_number
-
-
-def build_structure_raw_pt2(obs, building_type, building_action, move_number, last_worker, base_top_left, max_amount = 999, targets = []):
+def build_structure_raw_pt(obs, building_type, building_action, move_number, last_worker, base_top_left, max_amount = 999, targets = []):
     ybrange=0 if base_top_left else 32
     ytrange=32 if base_top_left else 63
 
@@ -487,7 +464,7 @@ def get_euclidean_distance(unit_xy, xy):
 # Create a "get my units by types" where we pass instead of a single type an array of unit types and the return is an array of those units from the chosen types:
 # possible function prototype: get_my_units_by_types(obs, unit_types) (maybe we can just reuse the get_my_units_by_type function and create a verification if unit_type is a single type or array of types)
 
-# check_unit_validity (should check if the object im receiving is a proper unit from pysc2)
+# check_unit_validity (should check if the object being received is a proper unit from pysc2)
 
 def select_army(obs, player_race):
     army = []
@@ -519,8 +496,10 @@ def select_army(obs, player_race):
         army = _NO_UNITS
     return army
 
-# Reduces a matrix "resolution" by a reduction factor. If we have a 64x64 matrix and rf=4 the map will be reduced to 16x16 in which
-# every new element of the matrix is an average from 4x4=16 elements from the original matrix
+"""
+Reduces a matrix "resolution" by a reduction factor. If we have a 64x64 matrix and rf=4 the map will be reduced to 16x16 in which
+every new element of the matrix is an average from 4x4=16 elements from the original matrix
+"""
 def lower_featuremap_resolution(map, rf):   #rf = reduction_factor
     if rf == 1: return map
     
@@ -546,8 +525,10 @@ def get_unit_race(unit_type):
     if unit_type in units.Zerg:
         return _ZERG
 
-#move a unit to a new position
-#based on https://gist.github.com/fyr91/168996a23f5675536dbf6f1cf75b30d6#file-defeat_zerglings_banelings_env_5-py-L41
+"""
+move a unit to a new position
+based on https://gist.github.com/fyr91/168996a23f5675536dbf6f1cf75b30d6#file-defeat_zerglings_banelings_env_5-py-L41
+"""
 def move_to(obs, unit, dest_x, dest_y):
     target = [dest_x, dest_y]
     try:
