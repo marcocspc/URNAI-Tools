@@ -2,9 +2,8 @@ from .base.abenv import Env
 import os
 import DeepRTS as drts
 from DeepRTS import Engine
-from DeepRTS.python import scenario
-from DeepRTS.python import Config
-from DeepRTS.python import Game
+from DeepRTS.Engine import Constants, UnitManager 
+from DeepRTS.python import Config, Game 
 
 import sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -26,10 +25,19 @@ class DeepRTSEnv(Env):
        Engine.Config.defaults(): https://github.com/cair/deep-rts/blob/master/src/Config.h
        Engine.Config options: https://github.com/cair/deep-rts/blob/master/bindings/Config.cpp
     '''
+
+    MAP_MICRO = Config.Map.TEN
+    MAP_SMALL = Config.Map.FIFTEEN
+    MAP_MEDIUM = Config.Map.TWENTYONE
+    MAP_BIG = Config.Map.THIRTYONE
+    MAP_BIG_MORE_PLAYERS = Config.Map.THIRTYONE_FOUR
+    MAO_BIG_MAX_PLAYERS = Config.Map.THIRTYONE_SIX
     
     def __init__(self, map = Config.Map.TEN, render = False, 
             max_fps = 1000000, max_ups = 1000000, play_audio = False, 
-            number_of_players = 1, updates_per_action = 1, flatten_state = True, drts_engine_config = None):
+            number_of_players = 1, updates_per_action = 1, flatten_state = True,
+            drts_engine_config = None,
+            start_oil=0, start_gold=1500, start_lumber=750):
 
         if self.is_map_installed(map):
             self.map = map
@@ -44,6 +52,8 @@ class DeepRTSEnv(Env):
         self.number_of_players = number_of_players
         self.max_fps = max_fps
         self.max_ups = max_ups
+        self.unit_manager = UnitManager
+        self.constants = Constants 
 
         self.gui_config = Config(
             render=True,
@@ -59,6 +69,12 @@ class DeepRTSEnv(Env):
 
         if drts_engine_config == None:
             self.engine_config = Engine.Config.defaults()
+            self.engine_config.set_start_oil(start_oil)
+            self.engine_config.set_start_gold(start_gold)
+            self.engine_config.set_start_lumber(start_lumber)
+            self.engine_config.set_archer(True)
+            self.engine_config.set_instant_town_hall(True)
+            self.engine_config.set_barracks(True)
         else:
             self.engine_config = drts_engine_config
 

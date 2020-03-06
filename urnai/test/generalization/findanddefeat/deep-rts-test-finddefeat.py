@@ -28,7 +28,7 @@ def set_collectable_list(width, height):
 
 episodes = 100
 steps = 1000 
-drts = DeepRTSEnv(render=True, updates_per_action = 12)
+drts = DeepRTSEnv(map = DeepRTSEnv.MAP_BIG,render=True, updates_per_action = 12, start_oil=99999, start_gold=99999, start_lumber=99999)
 
 drts.engine_config.set_footman(False)
 drts.engine_config.set_archer(True)
@@ -38,6 +38,7 @@ for ep in range(episodes):
     drts.reset()
     collectables_map = set_collectable_list(10, 8)
     epi_reward = 0
+
 
     for step in range(steps):
         print("Step " + str(step + 1))
@@ -60,6 +61,7 @@ for ep in range(episodes):
                 Build1 = 14,
                 Build2 = 15,
                 NoAction = 16
+                BuildArcher = 17
         '''
 
         action = None
@@ -69,8 +71,17 @@ for ep in range(episodes):
         except ValueError:
             action = 15
 
-        state, done = drts.step(action)
+        if action == 16:
+            # build archer
+            print("Trying to build archer")
+            drts.unit_manager.construct_unit(drts.constants.Unit.Archer, drts.players[0])
+            state, done = drts.step(15)
+        else:
+            state, done = drts.step(action)
 
+
+        unit_x = -1
+        unit_y = -1
         try:
             unit_x = drts.players[0].get_targeted_unit().tile.x
             unit_y = drts.players[0].get_targeted_unit().tile.y
@@ -83,8 +94,8 @@ for ep in range(episodes):
         if (reward > 0):
             collectables_map[unit_y - 1, unit_x - 1] = 0
 
-        print("Current state: ")
-        print(state)
+        #print("Current state: ")
+        #print(state)
         print("Player 1 selected unit:")
         print(drts.players[0].get_targeted_unit())
         print("Unit coordinates: {x}, {y}".format(x=unit_x,y=unit_y))
@@ -95,7 +106,7 @@ for ep in range(episodes):
         print("Lumber: {lumber}".format(lumber=drts.players[0].lumber))
         print("Total Episode Reward: {rwd}".format(rwd=epi_reward))
         print("Step Reward: {rwd}".format(rwd=reward))
-        print("Collectables map: {map}".format(map=collectables_map))
+        #print("Collectables map: {map}".format(map=collectables_map))
 
 
         print("FPS: " + str(drts.game.get_fps()))
