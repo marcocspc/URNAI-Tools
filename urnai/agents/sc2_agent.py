@@ -11,8 +11,6 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 from utils import error
 
-_PLAYER_RELATIVE = features.SCREEN_FEATURES.player_relative.index
-_PLAYER_SELF = 1
 
 class SC2Agent(Agent):
     def __init__(self, model: LearningModel, reward_builder: RewardBuilder, observation_spec, action_spec):

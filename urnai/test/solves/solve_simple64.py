@@ -4,10 +4,6 @@ parentdir = os.path.dirname(currentdir)
 parentdir = os.path.dirname(parentdir)
 sys.path.insert(0,parentdir)
 
-
-"""Change this environment variable to your SC2 installation path. It should work both on Linux and Windows"""
-os.environ["SC2PATH"] = "D:/Program Files (x86)/StarCraft II"
-
 from absl import app
 from pysc2.env import sc2_env
 from envs.sc2 import SC2Env
@@ -19,11 +15,22 @@ from agents.rewards.sc2 import KilledUnitsReward, GeneralReward
 from agents.states.sc2 import Simple64State_1
 from agents.states.sc2 import Simple64State
 from models.dql_tf import DQLTF
+from utils.functions import query_yes_no
+
+""" Change "sc2_local_path" to your local SC2 installation path. 
+If you used the default installation path, you may ignore this step.
+For more information consult https://github.com/deepmind/pysc2#get-starcraft-ii 
+"""
+sc2_local_path = "D:/Program Files (x86)/StarCraft II"
 
 def main(unused_argv):
     trainer = Trainer()
 
     try:
+        ## Checking whether or not to change SC2's instalation path environment variable
+        if query_yes_no("Change SC2PATH to " + sc2_local_path + " ?"):
+            os.environ["SC2PATH"] = sc2_local_path
+
         ## Initializing our StarCraft 2 environment
         players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.medium)]
         env = SC2Env(map_name="Simple64", players=players, render=True, step_mul=16)

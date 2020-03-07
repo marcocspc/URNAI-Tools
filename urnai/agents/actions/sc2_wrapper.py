@@ -1090,406 +1090,406 @@ class ProtossWrapper(SC2Wrapper):
 
         return no_op()
 
-class ZergWrapper(SC2Wrapper):
-    def __init__(self):
-        SC2Wrapper.__init__(self)       # Imports self variables from SC2Wrapper
+# class ZergWrapper(SC2Wrapper):
+#     def __init__(self):
+#         SC2Wrapper.__init__(self)       # Imports self variables from SC2Wrapper
 
-        self.named_actions = [
-            ACTION_DO_NOTHING,
+#         self.named_actions = [
+#             ACTION_DO_NOTHING,
 
-            ACTION_HARVEST_MINERALS_IDLE,
-            ACTION_HARVEST_MINERALS_FROM_GAS,
-            ACTION_HARVEST_GAS_FROM_MINERALS,
+#             ACTION_HARVEST_MINERALS_IDLE,
+#             ACTION_HARVEST_MINERALS_FROM_GAS,
+#             ACTION_HARVEST_GAS_FROM_MINERALS,
 
-            ACTION_ATTACK_ENEMY_BASE,
-            ACTION_ATTACK_ENEMY_SECOND_BASE,
-            ACTION_ATTACK_MY_BASE,
-            ACTION_ATTACK_MY_SECOND_BASE,
+#             ACTION_ATTACK_ENEMY_BASE,
+#             ACTION_ATTACK_ENEMY_SECOND_BASE,
+#             ACTION_ATTACK_MY_BASE,
+#             ACTION_ATTACK_MY_SECOND_BASE,
 			
-			# BUILD ACTIONS
-			ACTION_BUILD_HATCHERY,
-			ACTION_BUILD_LAIR,
-			ACTION_BUILD_HIVE,
+# 			# BUILD ACTIONS
+# 			ACTION_BUILD_HATCHERY,
+# 			ACTION_BUILD_LAIR,
+# 			ACTION_BUILD_HIVE,
 			
-			ACTION_BUILD_EXTRACTOR,
-			ACTION_BUILD_SPAWNINGPOOL,
+# 			ACTION_BUILD_EXTRACTOR,
+# 			ACTION_BUILD_SPAWNINGPOOL,
 			
-			ACTION_BUILD_EVOLUTIONCHAMBER,
-			ACTION_BUILD_ROACHWARREN,
-			ACTION_BUILD_BANELINGNEST,
+# 			ACTION_BUILD_EVOLUTIONCHAMBER,
+# 			ACTION_BUILD_ROACHWARREN,
+# 			ACTION_BUILD_BANELINGNEST,
 			
-			ACTION_BUILD_SPINECRAWLER,
-			ACTION_BUILD_SPORECRAWLER,
+# 			ACTION_BUILD_SPINECRAWLER,
+# 			ACTION_BUILD_SPORECRAWLER,
 			
-			ACTION_BUILD_HYDRALISKDEN,
-			ACTION_BUILD_LURKERDEN,
+# 			ACTION_BUILD_HYDRALISKDEN,
+# 			ACTION_BUILD_LURKERDEN,
 			
-			ACTION_BUILD_INFESTATIONPIT,
+# 			ACTION_BUILD_INFESTATIONPIT,
 			
-			ACTION_BUILD_SPIRE,
-			ACTION_BUILD_GREATERSPIRE,
+# 			ACTION_BUILD_SPIRE,
+# 			ACTION_BUILD_GREATERSPIRE,
 			
-			ACTION_BUILD_NYDUSNETWORK,
-			ACTION_BUILD_ULTRALISKCAVERN,
+# 			ACTION_BUILD_NYDUSNETWORK,
+# 			ACTION_BUILD_ULTRALISKCAVERN,
 			
-			#RESEARCH ACTIONS
-			ACTION_RESEARCH_,
+# 			#RESEARCH ACTIONS
+# 			ACTION_RESEARCH_,
 			
-			ACTION_RESEARCH_METABOLICBOOST,
-			ACTION_RESEARCH_ADRENALGLANDS,
+# 			ACTION_RESEARCH_METABOLICBOOST,
+# 			ACTION_RESEARCH_ADRENALGLANDS,
 			
-			ACTION_RESEARCH_MELEEATTACKS,
-			ACTION_RESEARCH_MISSILEATTACKS,
-			ACTION_RESEARCH_GROUNDCARAPACE,
+# 			ACTION_RESEARCH_MELEEATTACKS,
+# 			ACTION_RESEARCH_MISSILEATTACKS,
+# 			ACTION_RESEARCH_GROUNDCARAPACE,
 			
-			ACTION_RESEARCH_GLIALRECONSTITUTION,
-			ACTION_RESEARCH_TUNNELINGCLAWS,
+# 			ACTION_RESEARCH_GLIALRECONSTITUTION,
+# 			ACTION_RESEARCH_TUNNELINGCLAWS,
 			
-			ACTION_RESEARCH_CENTRIFUGALHOOKS,
+# 			ACTION_RESEARCH_CENTRIFUGALHOOKS,
 			
-			ACTION_RESEARCH_GROOVEDSPINES,
-			ACTION_RESEARCH_MUSCULARAUGMENTS,
+# 			ACTION_RESEARCH_GROOVEDSPINES,
+# 			ACTION_RESEARCH_MUSCULARAUGMENTS,
 			
-			ACTION_RESEARCH_ADAPTIVETALONS,
+# 			ACTION_RESEARCH_ADAPTIVETALONS,
 			
-			ACTION_RESEARCH_PHATOGENGLANDS,
-			ACTION_RESEARCH_NEURALPARASITE,
+# 			ACTION_RESEARCH_PHATOGENGLANDS,
+# 			ACTION_RESEARCH_NEURALPARASITE,
 			
-			ACTION_RESEARCH_FLYERATTACKS,
-			ACTION_RESEARCH_FLYERCARAPACE,
+# 			ACTION_RESEARCH_FLYERATTACKS,
+# 			ACTION_RESEARCH_FLYERCARAPACE,
 			
-			ACTION_RESEARCH_CHITINOUSPLATING,
-			ACTION_RESEARCH_ANABOLICSYNTHESIS,
+# 			ACTION_RESEARCH_CHITINOUSPLATING,
+# 			ACTION_RESEARCH_ANABOLICSYNTHESIS,
 			
-			#TRAIN ACTIONS
-			ACTION_TRAIN_DRONE,			#BORN FROM LARVA
-			ACTION_TRAIN_ZERGLING,		#BORN FROM LARVA
-			ACTION_TRAIN_BANELING,		#MORPHED FROM ZERGLING
-			ACTION_TRAIN_ROACH,			#BORN FROM LARVA
-			ACTION_TRAIN_RAVAGER,		#MORPHED FROM ROACH
-			ACTION_TRAIN_HYDRALISK,		#BORN FROM LARVA
-			ACTION_TRAIN_LURKER,		#MORPHED FROM HYDRALISK
-			ACTION_TRAIN_VIPER,			#BORN FROM LARVA
-			ACTION_TRAIN_MUTALISK,		#BORN FROM LARVA
-			ACTION_TRAIN_CORRUPTOR,		#BORN FROM LARVA
-			ACTION_TRAIN_SWARMHOST,		#BORN FROM LARVA
-			ACTION_TRAIN_LOCUST,		#SPAWNED FROM SWARMHOST
-			ACTION_TRAIN_INFESTOR,		#BORN FROM LARVA
-			ACTION_TRAIN_ULTRALISK,		#BORN FROM LARVA
-			ACTION_TRAIN_BROODLORD,		#MORPHED FROM CORRUPTOR
-			ACTION_TRAIN_OVERLORD,		#BORN FROM LARVA
-			ACTION_TRAIN_OVERSEER, 		#MORPHED FROM OVERLORD
-			ACTION_TRAIN_QUEEN, 		#BORN FROM HATCHERY
-			ACTION_TRAIN_CHANGELING,	#SPAWNED FROM OVERSEER
-			ACTION_TRAIN_INFESTEDTERRAN,
-			ACTION_TRAIN_SPINECRAWLER,	#UPROOT FROM SPINECRAWLER
-			ACTION_TRAIN_SPORECRAWLER,	#UPROOT FROM SPORECRAWLER
-			ACTION_TRAIN_NYDUSWORM		#SPAWNED FROM NYDUSNETWORK
-		]
-        self.action_indices = [idx for idx in range(len(self.named_actions))]
+# 			#TRAIN ACTIONS
+# 			ACTION_TRAIN_DRONE,			#BORN FROM LARVA
+# 			ACTION_TRAIN_ZERGLING,		#BORN FROM LARVA
+# 			ACTION_TRAIN_BANELING,		#MORPHED FROM ZERGLING
+# 			ACTION_TRAIN_ROACH,			#BORN FROM LARVA
+# 			ACTION_TRAIN_RAVAGER,		#MORPHED FROM ROACH
+# 			ACTION_TRAIN_HYDRALISK,		#BORN FROM LARVA
+# 			ACTION_TRAIN_LURKER,		#MORPHED FROM HYDRALISK
+# 			ACTION_TRAIN_VIPER,			#BORN FROM LARVA
+# 			ACTION_TRAIN_MUTALISK,		#BORN FROM LARVA
+# 			ACTION_TRAIN_CORRUPTOR,		#BORN FROM LARVA
+# 			ACTION_TRAIN_SWARMHOST,		#BORN FROM LARVA
+# 			ACTION_TRAIN_LOCUST,		#SPAWNED FROM SWARMHOST
+# 			ACTION_TRAIN_INFESTOR,		#BORN FROM LARVA
+# 			ACTION_TRAIN_ULTRALISK,		#BORN FROM LARVA
+# 			ACTION_TRAIN_BROODLORD,		#MORPHED FROM CORRUPTOR
+# 			ACTION_TRAIN_OVERLORD,		#BORN FROM LARVA
+# 			ACTION_TRAIN_OVERSEER, 		#MORPHED FROM OVERLORD
+# 			ACTION_TRAIN_QUEEN, 		#BORN FROM HATCHERY
+# 			ACTION_TRAIN_CHANGELING,	#SPAWNED FROM OVERSEER
+# 			ACTION_TRAIN_INFESTEDTERRAN,
+# 			ACTION_TRAIN_SPINECRAWLER,	#UPROOT FROM SPINECRAWLER
+# 			ACTION_TRAIN_SPORECRAWLER,	#UPROOT FROM SPORECRAWLER
+# 			ACTION_TRAIN_NYDUSWORM		#SPAWNED FROM NYDUSNETWORK
+# 		]
+#         self.action_indices = [idx for idx in range(len(self.named_actions))]
 		
-    def get_excluded_actions(self, obs):
-		# START
+#     def get_excluded_actions(self, obs):
+# 		# START
 		
-        excluded_actions = []
+#         excluded_actions = []
 
-        excluded_actions = self.named_actions.copy()
+#         excluded_actions = self.named_actions.copy()
 
-        minerals = obs.player.minerals
-        vespene = obs.player.vespene
-        freesupply = get_free_supply(obs)
+#         minerals = obs.player.minerals
+#         vespene = obs.player.vespene
+#         freesupply = get_free_supply(obs)
 		
-		# VERIFICATION
+# 		# VERIFICATION
 		
-		#Missing units: Baneling, Ravager...
-		has_drone = building_exists(obs, units.Zerg.Drone)
-        has_army = select_army(obs, sc2_env.Race.zerg) != sc2._NO_UNITS
-        has_larva = building_exists(obs, units.Zerg.Larva)
-        has_overlord = building_exists(obs, units.Zerg.Overlord)
-		has_zergling = building_exists(obs, units.Zerg.Zergling)
-		has_corruptor = building_exists(obs, units.Zerg.Corruptor)
-		has_hydralisk = building_exists(obs, units.Zerg.Hydralisk)
-		has_roach = building_exists(obs, units.Zerg.Roach)
-		has_overseer = building_exists(obs, units.Zerg.Overseer)
-		has_swarmhost = building_exists(obs, units.Zerg.Swarmhost)
-		has_infestor = building_exists(obs, units.Zerg.Infestor)
+# 		# Missing units: Baneling, Ravager...
+#         has_drone = building_exists(obs, units.Zerg.Drone)
+#         has_army = select_army(obs, sc2_env.Race.zerg) != sc2._NO_UNITS
+#         has_larva = building_exists(obs, units.Zerg.Larva)
+#         has_overlord = building_exists(obs, units.Zerg.Overlord)
+#         has_zergling = building_exists(obs, units.Zerg.Zergling)
+#         has_corruptor = building_exists(obs, units.Zerg.Corruptor)
+#         has_hydralisk = building_exists(obs, units.Zerg.Hydralisk)
+#         has_roach = building_exists(obs, units.Zerg.Roach)
+#         has_overseer = building_exists(obs, units.Zerg.Overseer)
+#         has_swarmhost = building_exists(obs, units.Zerg.Swarmhost)
+#         has_infestor = building_exists(obs, units.Zerg.Infestor)
 		
-		# BUILDING BOOLEANS
-        has_spawningpool = building_exists(obs, units.Zerg.SpawningPool)
-        has_evolutionchamber = building_exists(obs, units.Zerg.EvolutionChamber)
-        has_roachwarren = building_exists(obs, units.Zerg.RoachWarren)
-        has_banelingnest = building_exists(obs, units.Zerg.BanelingNest)
-        has_hydraliskden = building_exists(obs, units.Zerg.HydraliskDen)
-        has_lurkerden = building_exists(obs, units.Zerg.LurkerDen)
-        has_infestationpit = building_exists(obs, units.Zerg.InfestationPit)
-        has_nydusnetwork = building_exists(obs, units.Zerg.NydusNetwork)
-		has_ultraliskcavern = building_exists(obs, units.Zerg.UltraliskCavern)
-		has_spire = building_exists(obs, units.Zerg.Spire)
-		has_greaterspire = building_exists(obs, units.Zerg.GreaterSpire)
-        has_hatchery = building_exists(obs, units.Zerg.Hatchery)
-		has_lair = building_exists(obs, units.Zerg.Lair)
-		has_hive = building_exists(obs, units.Zerg.Hive)
-		has_spinecrawler = building_exists(obs, units.Zerg.SpineCrawler)
-		has_sporecrawler = building_exists(obs, units.Zerg.SporeCrawler)
+# 		# BUILDING BOOLEANS
+#         has_spawningpool = building_exists(obs, units.Zerg.SpawningPool)
+#         has_evolutionchamber = building_exists(obs, units.Zerg.EvolutionChamber)
+#         has_roachwarren = building_exists(obs, units.Zerg.RoachWarren)
+#         has_banelingnest = building_exists(obs, units.Zerg.BanelingNest)
+#         has_hydraliskden = building_exists(obs, units.Zerg.HydraliskDen)
+#         has_lurkerden = building_exists(obs, units.Zerg.LurkerDen)
+#         has_infestationpit = building_exists(obs, units.Zerg.InfestationPit)
+#         has_nydusnetwork = building_exists(obs, units.Zerg.NydusNetwork)
+#         has_ultraliskcavern = building_exists(obs, units.Zerg.UltraliskCavern)
+#         has_spire = building_exists(obs, units.Zerg.Spire)
+#         has_greaterspire = building_exists(obs, units.Zerg.GreaterSpire)
+#         has_hatchery = building_exists(obs, units.Zerg.Hatchery)
+#         has_lair = building_exists(obs, units.Zerg.Lair)
+#         has_hive = building_exists(obs, units.Zerg.Hive)
+#         has_spinecrawler = building_exists(obs, units.Zerg.SpineCrawler)
+#         has_sporecrawler = building_exists(obs, units.Zerg.SporeCrawler)
 		
-		excluded_actions.remove(ACTION_DO_NOTHING)
+#         excluded_actions.remove(ACTION_DO_NOTHING)
 		
-		# BASICS VERIFICATION
+# 		# BASICS VERIFICATION
 		
-		if has_drone:
-			if obs.player.idle_worker_count != 0:
-				excluded_actions.remove(ACTION_HARVEST_MINERALS_IDLE)     
+#         if has_drone:
+# 			if obs.player.idle_worker_count != 0:
+# 				excluded_actions.remove(ACTION_HARVEST_MINERALS_IDLE)     
             
-            excluded_actions.remove(ACTION_HARVEST_MINERALS_FROM_GAS)
-            excluded_actions.remove(ACTION_HARVEST_GAS_FROM_MINERALS)
+#             excluded_actions.remove(ACTION_HARVEST_MINERALS_FROM_GAS)
+#             excluded_actions.remove(ACTION_HARVEST_GAS_FROM_MINERALS)
 
-            # ACTION_BUILD_HATCHERY
-            if minerals > 300:
-                excluded_actions.remove(ACTION_BUILD_HATCHERY)
+#             # ACTION_BUILD_HATCHERY
+#             if minerals > 300:
+#                 excluded_actions.remove(ACTION_BUILD_HATCHERY)
 				
-            # ACTION_BUILD_EXTRACTOR
-            if minerals > 50:
-                excluded_actions.remove(ACTION_BUILD_EXTRACTOR)
+#             # ACTION_BUILD_EXTRACTOR
+#             if minerals > 50:
+#                 excluded_actions.remove(ACTION_BUILD_EXTRACTOR)
 		
-		if has_larva:
-			if minerals > 50:
-				excluded_actions.remove(ACTION_TRAIN_DRONE)
-			if minerals > 100:
-				excluded_actions.remove(ACTION_TRAIN_OVERLORD)
+# 		if has_larva:
+# 			if minerals > 50:
+# 				excluded_actions.remove(ACTION_TRAIN_DRONE)
+# 			if minerals > 100:
+# 				excluded_actions.remove(ACTION_TRAIN_OVERLORD)
 		
-		if has_army:
-			excluded_actions.remove(ACTION_ATTACK_ENEMY_BASE)
-            excluded_actions.remove(ACTION_ATTACK_ENEMY_SECOND_BASE)
-            excluded_actions.remove(ACTION_ATTACK_MY_BASE)
-            excluded_actions.remove(ACTION_ATTACK_MY_SECOND_BASE)
+# 		if has_army:
+# 			excluded_actions.remove(ACTION_ATTACK_ENEMY_BASE)
+#             excluded_actions.remove(ACTION_ATTACK_ENEMY_SECOND_BASE)
+#             excluded_actions.remove(ACTION_ATTACK_MY_BASE)
+#             excluded_actions.remove(ACTION_ATTACK_MY_SECOND_BASE)
 			
-		# BUILDS VERIFICATION
+# 		# BUILDS VERIFICATION
 		
-		if has_spawningpool:
-			if has_hatchery and minerals > 150:
-				excluded_actions.remove(ACTION_TRAIN_QUEEN)
-			if has_larva and minerals > 50:
-				excluded_actions.remove(ACTION_TRAIN_ZERGLING)
+# 		if has_spawningpool:
+# 			if has_hatchery and minerals > 150:
+# 				excluded_actions.remove(ACTION_TRAIN_QUEEN)
+# 			if has_larva and minerals > 50:
+# 				excluded_actions.remove(ACTION_TRAIN_ZERGLING)
 				
-			if has_drone and minerals > 100:
-				excluded_actions.remove(ACTION_BUILD_SPINECRAWLER)
-			if has_drone and minerals > 75:
-				excluded_actions.remove(ACTION_BUILD_SPORECRAWLER)
-			if has_drone and minerals > 150:
-				excluded_actions.remove(ACTION_BUILD_ROACHWARREN)
-			if has_drone and minerals > 100 and vespene > 50:
-				excluded_actions.remove(ACTION_BUILD_BANELINGNEST)
+# 			if has_drone and minerals > 100:
+# 				excluded_actions.remove(ACTION_BUILD_SPINECRAWLER)
+# 			if has_drone and minerals > 75:
+# 				excluded_actions.remove(ACTION_BUILD_SPORECRAWLER)
+# 			if has_drone and minerals > 150:
+# 				excluded_actions.remove(ACTION_BUILD_ROACHWARREN)
+# 			if has_drone and minerals > 100 and vespene > 50:
+# 				excluded_actions.remove(ACTION_BUILD_BANELINGNEST)
 				
-			if has_drone and minerals > 100 and vespene > 50:
-				excluded_actions.remove(ACTION_BUILD_BANELINGNEST)
+# 			if has_drone and minerals > 100 and vespene > 50:
+# 				excluded_actions.remove(ACTION_BUILD_BANELINGNEST)
 		
-		if has_roachwarren:
-			if has_larva and minerals > 75 and vespene > 25:
-				excluded_actions.remove(ACTION_TRAIN_ROACH)
-			if has_roach and minerals > 25 and vespene > 75:
-				excluded_actions.remove(ACTION_TRAIN_RAVAGER)
+# 		if has_roachwarren:
+# 			if has_larva and minerals > 75 and vespene > 25:
+# 				excluded_actions.remove(ACTION_TRAIN_ROACH)
+# 			if has_roach and minerals > 25 and vespene > 75:
+# 				excluded_actions.remove(ACTION_TRAIN_RAVAGER)
 				
-		if has_banelingnest:
-			if has_zergling and minerals > 25 and vespene > 25:
-				excluded_actions.remove(ACTION_TRAIN_BANELING)
+# 		if has_banelingnest:
+# 			if has_zergling and minerals > 25 and vespene > 25:
+# 				excluded_actions.remove(ACTION_TRAIN_BANELING)
 				
-		if has_hydraliskden:
-			if has_larva and minerals > 100 and vespene > 50:
-				excluded_actions.remove(ACTION_TRAIN_HYDRALISK)
+# 		if has_hydraliskden:
+# 			if has_larva and minerals > 100 and vespene > 50:
+# 				excluded_actions.remove(ACTION_TRAIN_HYDRALISK)
 				
-			if has_drone and minerals > 100 and vespene > 150:
-				excluded_actions.remove(ACTION_BUILD_LURKERDEN)
+# 			if has_drone and minerals > 100 and vespene > 150:
+# 				excluded_actions.remove(ACTION_BUILD_LURKERDEN)
 				
-		if has_lurkerden:
-			if has_hydralisk and minerals > 100 and vespene > 100:
-				excluded_actions.remove(ACTION_TRAIN_LURKER)
+# 		if has_lurkerden:
+# 			if has_hydralisk and minerals > 100 and vespene > 100:
+# 				excluded_actions.remove(ACTION_TRAIN_LURKER)
 		
-		if has_infestationpit:
-			if has_larva and minerals > 100 and vespene > 150:
-				excluded_actions.remove(ACTION_TRAIN_INFESTOR)
-			if has_larva and minerals > 200 and vespene > 100:
-				excluded_actions.remove(ACTION_TRAIN_SWARMHOST)
+# 		if has_infestationpit:
+# 			if has_larva and minerals > 100 and vespene > 150:
+# 				excluded_actions.remove(ACTION_TRAIN_INFESTOR)
+# 			if has_larva and minerals > 200 and vespene > 100:
+# 				excluded_actions.remove(ACTION_TRAIN_SWARMHOST)
 				
-		if has_ultraliskcavern:
-			if has_larva and minerals > 300 and vespene > 200:
-				excluded_actions.remove(ACTION_TRAIN_ULTRALISK)
+# 		if has_ultraliskcavern:
+# 			if has_larva and minerals > 300 and vespene > 200:
+# 				excluded_actions.remove(ACTION_TRAIN_ULTRALISK)
 				
-		if has_spire:
-			if has_larva and minerals > 100 and vespene > 100:
-				excluded_actions.remove(ACTION_TRAIN_MUTALISK)
-			if has_larva and minerals > 150 and vespene > 100:
-				excluded_actions.remove(ACTION_TRAIN_CORRUPTOR)
+# 		if has_spire:
+# 			if has_larva and minerals > 100 and vespene > 100:
+# 				excluded_actions.remove(ACTION_TRAIN_MUTALISK)
+# 			if has_larva and minerals > 150 and vespene > 100:
+# 				excluded_actions.remove(ACTION_TRAIN_CORRUPTOR)
 		
-		if has_greaterspire:
-			if has_corruptor and minerals > 150 and vespene > 150:
-				excluded_actions.remove(ACTION_TRAIN_BROODLORD)
+# 		if has_greaterspire:
+# 			if has_corruptor and minerals > 150 and vespene > 150:
+# 				excluded_actions.remove(ACTION_TRAIN_BROODLORD)
 				
-		if has_hatchery:
-			if has_drone and minerals > 75:
-				excluded_actions.remove(ACTION_BUILD_EVOLUTIONCHAMBER)
-			if has_drone and minerals > 200:
-				excluded_actions.remove(ACTION_BUILD_SPAWNINGPOOL)
+# 		if has_hatchery:
+# 			if has_drone and minerals > 75:
+# 				excluded_actions.remove(ACTION_BUILD_EVOLUTIONCHAMBER)
+# 			if has_drone and minerals > 200:
+# 				excluded_actions.remove(ACTION_BUILD_SPAWNINGPOOL)
 				
-			if has_spawningpool and minerals > 150 and vespene > 100:
-				excluded_actions.remove(ACTION_BUILD_LAIR)
+# 			if has_spawningpool and minerals > 150 and vespene > 100:
+# 				excluded_actions.remove(ACTION_BUILD_LAIR)
 		
-		if has_lair:
-			if has_overlord and minerals > 50 and vespene > 50:
-				excluded_actions.remove(ACTION_TRAIN_OVERSEER)
+# 		if has_lair:
+# 			if has_overlord and minerals > 50 and vespene > 50:
+# 				excluded_actions.remove(ACTION_TRAIN_OVERSEER)
 				
-			if has_drone and minerals > 100 and vespene > 100:
-				excluded_actions.remove(ACTION_BUILD_HYDRALISKDEN)
-			if has_drone and minerals > 100 and vespene > 100:
-				excluded_actions.remove(ACTION_BUILD_INFESTATIONPIT)
-			if has_drone and minerals > 200 and vespene > 200:
-				excluded_actions.remove(ACTION_BUILD_SPIRE)
-			if has_drone and minerals > 150 and vespene > 150:
-				excluded_actions.remove(ACTION_BUILD_NYDUSNETWORK)
+# 			if has_drone and minerals > 100 and vespene > 100:
+# 				excluded_actions.remove(ACTION_BUILD_HYDRALISKDEN)
+# 			if has_drone and minerals > 100 and vespene > 100:
+# 				excluded_actions.remove(ACTION_BUILD_INFESTATIONPIT)
+# 			if has_drone and minerals > 200 and vespene > 200:
+# 				excluded_actions.remove(ACTION_BUILD_SPIRE)
+# 			if has_drone and minerals > 150 and vespene > 150:
+# 				excluded_actions.remove(ACTION_BUILD_NYDUSNETWORK)
 				
-			if has_infestationpit and minerals > 200 and vespene > 150:
-				excluded_actions.remove(ACTION_BUILD_HIVE)
+# 			if has_infestationpit and minerals > 200 and vespene > 150:
+# 				excluded_actions.remove(ACTION_BUILD_HIVE)
 				
-		if has_hive:
-			if has_larva and minerals > 100 and vespene > 200:
-				excluded_actions.remove(ACTION_TRAIN_VIPER)
+# 		if has_hive:
+# 			if has_larva and minerals > 100 and vespene > 200:
+# 				excluded_actions.remove(ACTION_TRAIN_VIPER)
 				
-			if has_drone and minerals > 150 and vespene > 200:
-				excluded_actions.remove(ACTION_BUILD_ULTRALISKCAVERN)
+# 			if has_drone and minerals > 150 and vespene > 200:
+# 				excluded_actions.remove(ACTION_BUILD_ULTRALISKCAVERN)
 				
-			if has_spire and minerals > 100 and vespene > 150:
-				excluded_actions.remove(ACTION_BUILD_GREATERSPIRE)
+# 			if has_spire and minerals > 100 and vespene > 150:
+# 				excluded_actions.remove(ACTION_BUILD_GREATERSPIRE)
 		
-		if has_nydusnetwork:
-			if minerals > 75 and vespene > 75:
-				excluded_actions.remove(ACTION_TRAIN_NYDUSWORM)
+# 		if has_nydusnetwork:
+# 			if minerals > 75 and vespene > 75:
+# 				excluded_actions.remove(ACTION_TRAIN_NYDUSWORM)
 				
-		if has_evolutionchamber:
+# 		if has_evolutionchamber:
 		
-		if has_spinecrawler:
-			excluded_actions.remove(ACTION_TRAIN_SPINECRAWLER)
+# 		if has_spinecrawler:
+# 			excluded_actions.remove(ACTION_TRAIN_SPINECRAWLER)
 			
-		if has_sporecrawler:
-			excluded_actions.remove(ACTION_TRAIN_SPORECRAWLER)
+# 		if has_sporecrawler:
+# 			excluded_actions.remove(ACTION_TRAIN_SPORECRAWLER)
 		
-		# UNITS VERIFICATION
+# 		# UNITS VERIFICATION
 		
-		#if has_zergling:
-			#excluded_actions.remove(ACTION_EFFECT_STIMPACK)
+# 		#if has_zergling:
+# 			#excluded_actions.remove(ACTION_EFFECT_STIMPACK)
 		
-		if has_overseer:
-			excluded_actions.remove(ACTION_TRAIN_CHANGELING)
+# 		if has_overseer:
+# 			excluded_actions.remove(ACTION_TRAIN_CHANGELING)
 			
-		if has_swarmhost:
-			excluded_actions.remove(ACTION_TRAIN_LOCUST)
+# 		if has_swarmhost:
+# 			excluded_actions.remove(ACTION_TRAIN_LOCUST)
 			
-		if has_infestor:
-			excluded_actions.remove(ACTION_TRAIN_INFESTEDTERRAN)
+# 		if has_infestor:
+# 			excluded_actions.remove(ACTION_TRAIN_INFESTEDTERRAN)
 			
-		# END
+# 		# END
 		
-        id_excluded_actions = []
+#         id_excluded_actions = []
 
-        for item in excluded_actions:
-            id_excluded_actions.append(self.named_actions.index(item))
+#         for item in excluded_actions:
+#             id_excluded_actions.append(self.named_actions.index(item))
 
-        return id_excluded_actions
+#         return id_excluded_actions
 		
-    def get_action(self, action_idx, obs):
-        named_action = self.named_actions[action_idx]
-        #named_action, x, y = self.split_action(named_action)
+#     def get_action(self, action_idx, obs):
+#         named_action = self.named_actions[action_idx]
+#         #named_action, x, y = self.split_action(named_action)
 
-        if self.units_to_attack != sc2._NO_UNITS:
-            named_action = self.last_attack_action
+#         if self.units_to_attack != sc2._NO_UNITS:
+#             named_action = self.last_attack_action
 
-        if self.units_to_effect != sc2._NO_UNITS:
-            named_action = self.last_effect_action
+#         if self.units_to_effect != sc2._NO_UNITS:
+#             named_action = self.last_effect_action
 
-        if obs.game_loop[0] == 0:
-            hatchery = get_my_units_by_type(obs, units.Zerg.Hatchery)[0]
-            self.base_top_left = (hatchery.x < 32)
+#         if obs.game_loop[0] == 0:
+#             hatchery = get_my_units_by_type(obs, units.Zerg.Hatchery)[0]
+#             self.base_top_left = (hatchery.x < 32)
 
-        # BUILD HATCHERY
-        if named_action == ACTION_BUILD_HATCHERY:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.Hatchery, sc2._BUILD_HATCHERY, self.move_number, self.last_worker, self.base_top_left, max_amount = 2)
-            return action
+#         # BUILD HATCHERY
+#         if named_action == ACTION_BUILD_HATCHERY:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.Hatchery, sc2._BUILD_HATCHERY, self.move_number, self.last_worker, self.base_top_left, max_amount = 2)
+#             return action
         
-		# BUILD EXTRACTOR
-        if named_action == ACTION_BUILD_EXTRACTOR:
-            action, self.last_worker, self.move_number = build_gas_structure_raw_unit(
-			obs, units.Zerg.Extractor, sc2._BUILD_EXTRACTOR, sc2_env.Race.zerg, self.move_number, self.last_worker)        
-            return action
+# 		# BUILD EXTRACTOR
+#         if named_action == ACTION_BUILD_EXTRACTOR:
+#             action, self.last_worker, self.move_number = build_gas_structure_raw_unit(
+# 			obs, units.Zerg.Extractor, sc2._BUILD_EXTRACTOR, sc2_env.Race.zerg, self.move_number, self.last_worker)        
+#             return action
 			
-		# BUILD SPAWNING POOL
-		if named_action == ACTION_BUILD_SPAWNINGPOOL:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.SpawningPool, sc2._BUILD_SPAWNINGPOOL, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
-            return action
+# 		# BUILD SPAWNING POOL
+# 		if named_action == ACTION_BUILD_SPAWNINGPOOL:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.SpawningPool, sc2._BUILD_SPAWNINGPOOL, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+#             return action
 		
-		# BUILD EVOLUTION CHAMBER
-		if named_action == ACTION_BUILD_EVOLUTIONCHAMBER:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.EvolutionChamber, sc2._BUILD_EVOLUTIONCHAMBER, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
-            return action
+# 		# BUILD EVOLUTION CHAMBER
+# 		if named_action == ACTION_BUILD_EVOLUTIONCHAMBER:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.EvolutionChamber, sc2._BUILD_EVOLUTIONCHAMBER, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+#             return action
 		
-		# BUILD ROACH WARREN
-		if named_action == ACTION_BUILD_ROACHWARREN:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.RoachWarren, sc2._BUILD_ROACHWARREN, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
-            return action
+# 		# BUILD ROACH WARREN
+# 		if named_action == ACTION_BUILD_ROACHWARREN:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.RoachWarren, sc2._BUILD_ROACHWARREN, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+#             return action
 		
-		# BUILD BANELING NEST
-		if named_action == ACTION_BUILD_BANELINGNEST:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.BanelingNest, sc2._BUILD_BANELINGNEST, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
-            return action
+# 		# BUILD BANELING NEST
+# 		if named_action == ACTION_BUILD_BANELINGNEST:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.BanelingNest, sc2._BUILD_BANELINGNEST, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+#             return action
 		
-		# BUILD SPINE CRAWLER
-        if named_action == ACTION_BUILD_SPINECRAWLER:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.SpineCrawler, sc2._BUILD_SPINECRAWLER, self.move_number, self.last_worker, self.base_top_left, max_amount = 5)
-            return action
+# 		# BUILD SPINE CRAWLER
+#         if named_action == ACTION_BUILD_SPINECRAWLER:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.SpineCrawler, sc2._BUILD_SPINECRAWLER, self.move_number, self.last_worker, self.base_top_left, max_amount = 5)
+#             return action
 		
-		# BUILD SPORE CRAWLER
-        if named_action == ACTION_BUILD_SPORECRAWLER:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.SporeCrawler, sc2._BUILD_SPORECRAWLER, self.move_number, self.last_worker, self.base_top_left, max_amount = 5)
-            return action
+# 		# BUILD SPORE CRAWLER
+#         if named_action == ACTION_BUILD_SPORECRAWLER:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.SporeCrawler, sc2._BUILD_SPORECRAWLER, self.move_number, self.last_worker, self.base_top_left, max_amount = 5)
+#             return action
 		
-		# BUILD HYDRALISK DEN
-		if named_action == ACTION_BUILD_HYDRALISKDEN:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.HydraliskDen, sc2._BUILD_HYDRALISKDEN, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
-            return action
+# 		# BUILD HYDRALISK DEN
+# 		if named_action == ACTION_BUILD_HYDRALISKDEN:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.HydraliskDen, sc2._BUILD_HYDRALISKDEN, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+#             return action
 		
-		# BUILD LURKER DEN
-		if named_action == ACTION_BUILD_LURKERDEN:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.LurkerDen, sc2._BUILD_LURKERDEN, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
-            return action
+# 		# BUILD LURKER DEN
+# 		if named_action == ACTION_BUILD_LURKERDEN:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.LurkerDen, sc2._BUILD_LURKERDEN, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+#             return action
 		
-		# BUILD INFESTATION PIT
-		if named_action == ACTION_BUILD_INFESTATIONPIT:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.InfestationPit, sc2._BUILD_INFESTATIONPIT, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
-            return action
+# 		# BUILD INFESTATION PIT
+# 		if named_action == ACTION_BUILD_INFESTATIONPIT:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.InfestationPit, sc2._BUILD_INFESTATIONPIT, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+#             return action
 		
-		# BUILD SPIRE
-		if named_action == ACTION_BUILD_SPIRE:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.Spire, sc2._BUILD_SPIRE, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
-            return action
+# 		# BUILD SPIRE
+# 		if named_action == ACTION_BUILD_SPIRE:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.Spire, sc2._BUILD_SPIRE, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+#             return action
 		
-		# BUILD NYDUS NETWORK
-		if named_action == ACTION_BUILD_NYDUSNETWORK:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.NydusNetwork, sc2._BUILD_NYDUSNETWORK, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
-            return action
+# 		# BUILD NYDUS NETWORK
+# 		if named_action == ACTION_BUILD_NYDUSNETWORK:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.NydusNetwork, sc2._BUILD_NYDUSNETWORK, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+#             return action
 		
-		# BUILD ULTRALISK CAVERN
-		if named_action == ACTION_BUILD_ULTRALISKCAVERN:
-            action, self.last_worker, self.move_number = build_structure_raw_pt(
-			obs, units.Zerg.UltraliskCavern, sc2._BUILD_ULTRALISKCAVERN, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
-            return action
+# 		# BUILD ULTRALISK CAVERN
+# 		if named_action == ACTION_BUILD_ULTRALISKCAVERN:
+#             action, self.last_worker, self.move_number = build_structure_raw_pt(
+# 			obs, units.Zerg.UltraliskCavern, sc2._BUILD_ULTRALISKCAVERN, self.move_number, self.last_worker, self.base_top_left, max_amount = 1)
+#             return action
 		
-        return no_op()
+#         return no_op()
