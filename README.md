@@ -32,22 +32,60 @@ SC2LE is already marked as dependency, so it will be automatically installed by 
 
 [How to install Starcraft II and Maps](https://github.com/deepmind/pysc2#get-starcraft-ii) 
 
-#### 2048
+#### 2048 Support
 
-First you need to install PyGame. Head to:
+To install urnai with gym-2048 support, use:
 
-[How to install PyGame](https://github.com/ntasfi/PyGame-Learning-Environment#installation)
-
-Then use:
+- On Unix:
 ```
-pip3 install gym-2048 
+URNAI_2048=1 pip3 install urnai 
+```
+
+- On Windows:
+```
+set "URNAI_2048=1" && pip3 install urnai 
 ```
 
 #### VizDoom
 
-Just use:
+To install urnai with vizdoom support, use:
+
+- On Unix:
 ```
-pip3 install vizdoom 
+URNAI_VIZDOOM=1 pip3 install urnai 
+```
+
+- On Windows:
+```
+set "URNAI_VIZDOOM=1" && pip3 install urnai 
+```
+
+#### DeepRTS 
+
+To install urnai with DeepRTS support, use:
+
+- On Unix:
+```
+URNAI_DEEPRTS=1 pip3 install urnai 
+```
+
+- On Windows:
+```
+set "URNAI_DEEPRTS=1" && pip3 install urnai 
+```
+
+#### Full Install (with all optional environments)
+
+To install urnai with all optional environments, use:
+
+- On Unix:
+```
+URNAI_DEEPRTS=1 URNAI_VIZDOOM=1 URNAI_2048=1 pip3 install urnai 
+```
+
+- On Windows:
+```
+set "URNAI_DEEPRTS=1" && set "URNAI_VIZDOOM=1" && set "URNAI_2048=1" && pip3 install urnai 
 ```
 
 ### Running the examples
