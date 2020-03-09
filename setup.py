@@ -1,7 +1,46 @@
 from setuptools import setup, find_packages
+from setuptools.command.install import install
 import os
 
-git_url = '{package} @ git+https://github.com/{user}/{package}.git/@{version}#egg={package}-0'
+#git_url = '{package} @ git+https://github.com/{user}/{package}.git/@{version}#egg={package}-0'
+git_url = 'https://github.com/{user}/{package}.git/@{version}#egg={package}-0'
+dep_links = []
+dep_list = []
+
+class Optionals(install):
+    user_options = install.user_options + [
+        ('deeprts', None, None), 
+        ('vizdoom', None, None), 
+        ('g2048', None, None), 
+    ]
+
+    def initialize_options(self):
+        install.initialize_options(self)
+        self.deeprts = None
+        self.vizdoom = None
+        self.g2048 = None
+
+    def finalize_options(self):
+        install.finalize_options(self)
+
+    def run(self):
+        global someopt
+        someopt = self.someopt # will be 1 or None
+        if self.deeprts == 1:
+            print("DeepRTS installation enabled.")
+            dep_links.append(git_url.format(user='UIA-CAIR', package='DeepRTS', version='e54dc6c'))
+
+        if self.vizdoom == 1:
+            print("VizDoom installation enabled.")
+            dep_list.append('vizdoom')
+
+        if self.g2048 == 1:
+            print("Gym-2048 installation enabled.")
+            dep_list.append('gym-2048')
+            dep_links.append(git_url.format(user='ntasfi', package='PyGame-Learning-Environment', version='master'))
+
+        install.run(self)
+
 
 setup(
     name = "urnai",
@@ -15,12 +54,8 @@ setup(
         'keras',
         'pysc2',
         'pandas',
-        ],
-    extras_require = {
-        '2048' : ['gym-2048', git_url.format(user='ntasfi', package='PyGame-Learning-Environment', version='master')],
-        'vizdoom' : ['vizdoom'],
-        'deeprts' : [git_url.format(user='UIA-CAIR', package='DeepRTS', version='e54dc6c')],
-        },
+        ] + dep_list,
+    dependency_links=dep_links,
     entry_points = {
         "console_scripts": ['urnai=urnai.urnai_cmd:main']
         },
@@ -30,4 +65,7 @@ setup(
     author = "UFRN-IMD-URNAITeam",
     author_email = "urnaiteam@gmail.com",
     url = "https://github.com/pvnetto/URNAI-Tools",
+    cmdclass={
+        'install': Optionals,
+    },
 )
