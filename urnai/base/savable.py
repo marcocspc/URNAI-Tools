@@ -12,7 +12,7 @@ class Savable(ABC):
     1) Get a save path as parameter,
     2) Use its default filename to save itself as a file inside the given path.
     '''
-    def step(self, savepath):
+    def save(self, savepath):
         raise NotImplementedError 
 
 
@@ -21,5 +21,5 @@ class Savable(ABC):
     1) Get a load path as parameter,
     2) Use its default filename to load itself from inside the given path.
     '''
-    def play(self, loadpath):
+    def load(self, loadpath):
         raise NotImplementedError 
