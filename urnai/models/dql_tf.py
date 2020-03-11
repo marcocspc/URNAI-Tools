@@ -10,8 +10,11 @@ from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 
 class DQLTF(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path, file_name, learning_rate=0.0002, gamma=0.95, name='DQN'):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path=None, file_name='temp', learning_rate=0.0002, gamma=0.95, name='DQN'):
         super(DQLTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, file_name, name)
+
+        if save_path is None:
+            raise TypeError
 
         # EXPLORATION PARAMETERS FOR EPSILON GREEDY STRATEGY
         self.explore_start = 1.0
