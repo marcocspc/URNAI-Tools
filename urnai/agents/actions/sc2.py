@@ -303,10 +303,6 @@ def harvest_gather_minerals(obs, player_race, idle_workers=False):
     return _NO_OP()
 
 
-# def harvest_gather_gas(obs, worker, refinery):
-#     if worker != _NO_UNITS:
-#         return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, refinery.tag)
-#     return _NO_OP()
 def harvest_gather_gas(obs, player_race):
     if player_race == _TERRAN: 
         gas_colectors = get_my_units_by_type(obs, units.Terran.Refinery)
@@ -326,8 +322,6 @@ def harvest_gather_gas(obs, player_race):
                 if worker.order_id_0 == 362 or worker.order_id_0 == 359 or worker.order_length == 0:
                     return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, gas_colector.tag)
     return _NO_OP()
-
-
 
 
 def harvest_return(obs, worker):
@@ -382,6 +376,28 @@ def build_structure_raw_pt(obs, building_type, building_action, move_number, las
         if move_number == 2:
             move_number = 0
     return _NO_OP(), last_worker, move_number
+
+
+def build_structure_raw_pt2(obs, building_type, building_action, base_top_left, max_amount = 999, targets = []):
+    ybrange=0 if base_top_left else 32
+    ytrange=32 if base_top_left else 63
+
+    player_race = get_unit_race(building_type)
+
+    building_amount = get_units_amount(obs, building_type)
+    if len(targets) == 0 or building_amount >= len(targets):
+        target = [random.randint(0,63), random.randint(ybrange, ytrange)]
+    else:
+        target = targets[building_amount]
+        if not base_top_left: target = (63-target[0]-5, 63-target[1]+5)
+
+    if building_amount < max_amount:
+        action_one, last_worker = build_structure_by_type(obs, building_action, player_race, target)
+        action_two = harvest_gather_minerals_quick(obs, last_worker, player_race)
+        actions_queue = [action_one, action_two]
+        return actions_queue
+        
+    return [_NO_OP()]
 
 
 def build_gas_structure_raw_unit(obs, building_type, building_action, player_race, move_number, last_worker, max_amount = 999):  

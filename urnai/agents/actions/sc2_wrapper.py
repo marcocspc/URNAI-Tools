@@ -119,8 +119,11 @@ class SC2Wrapper(ActionWrapper):
         
         self.base_top_left = True                       # Variable used to verify if the initial players base is on the top left or bottom right part of the map (used mainly for internal calculations)
 
-        self.my_base_xy = [19, 23]
-        self.my_second_base_xy = [41, 21]
+        self.my_base_xy = [19, 23]                      # Variable that represents the x,y position of the player's base in the simple64 map
+        self.my_second_base_xy = [41, 21]               # Variable that represents the x,y position of the enemy's base in the simple64 map
+
+        self.actions_queue = []                         # These are the actions that are stored by the wrapper to be done subsequently. The model will not be able to choose another 
+                                                        # action so long as this queue is not empty, allowing for an easy way to code multi-step actions.
 
         '''
         We're defining names for our actions for two reasons:
@@ -618,6 +621,9 @@ class TerranWrapper(SC2Wrapper):
         named_action = self.named_actions[action_idx]
         #named_action, x, y = self.split_action(named_action)
 
+        while len(self.actions_queue) > 0:
+            return self.actions_queue.pop(0)
+
         if self.units_to_attack != sc2._NO_UNITS:
             named_action = self.last_attack_action
 
@@ -640,12 +646,20 @@ class TerranWrapper(SC2Wrapper):
             return action
 
         # BUILD SUPPLY DEPOT
+        # if named_action == ACTION_BUILD_SUPPLY_DEPOT:
+        #     targets = [[21, 25], [23, 25], [25, 25], [22,26], [24,26], [26,26], [26.7,26]]
+        #     # targets = [[21, 26], [22, 27], [23, 28], [22,24], [24,25], [25,26]]
+        #     action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.SupplyDepot, 
+        #                                                 sc2._BUILD_SUPPLY_DEPOT, self.move_number,self.last_worker, 
+        #                                                 self.base_top_left, max_amount=8, targets=targets)
+        #     return action
         if named_action == ACTION_BUILD_SUPPLY_DEPOT:
             targets = [[21, 25], [23, 25], [25, 25], [22,26], [24,26], [26,26], [26.7,26]]
-            # targets = [[21, 26], [22, 27], [23, 28], [22,24], [24,25], [25,26]]
-            action, self.last_worker, self.move_number = build_structure_raw_pt(obs, units.Terran.SupplyDepot, 
-                                                        sc2._BUILD_SUPPLY_DEPOT, self.move_number,self.last_worker, 
-                                                        self.base_top_left, max_amount=8, targets=targets)
+            actions = build_structure_raw_pt2(obs, units.Terran.SupplyDepot, sc2._BUILD_SUPPLY_DEPOT, 
+                                                self.base_top_left, max_amount=8, targets=targets)
+            action = actions.pop(0)
+            while len(actions) > 0:
+                self.actions_queue.append(actions.pop(0))
             return action
 
         # BUILD REFINERY
@@ -771,23 +785,6 @@ class TerranWrapper(SC2Wrapper):
             return no_op()
 
         # HARVEST GAS WITH WORKER FROM MINERAL LINE
-        # if named_action == ACTION_HARVEST_GAS_FROM_MINERALS:
-        #     if building_exists(obs, units.Terran.CommandCenter):
-        #         if building_exists(obs, units.Terran.Refinery):
-        #             refineries = get_my_units_by_type(obs, units.Terran.Refinery)
-        #             # Going through all refineries
-        #             for refinery in refineries:
-        #                 # Checking if refinery is not full of workers yet
-        #                 if refinery.assigned_harvesters < refinery.ideal_harvesters:
-        #                     workers = get_my_units_by_type(obs, units.Terran.SCV)
-        #                     for worker in workers:
-        #                         # Checking if worker is close by to the refinery
-        #                         if get_euclidean_distance([worker.x, worker.y], [refinery.x, refinery.y]) < 10:
-        #                             # Checking if worker is harvesting, if so, send him to harvest gas
-        #                             if worker.order_id_0 == 362 or worker.order_id_0 == 359:
-        #                                 return harvest_gather_gas(obs, worker, refinery)
-        #     return no_op()
-
         if named_action == ACTION_HARVEST_GAS_FROM_MINERALS:
             if building_exists(obs, units.Terran.Refinery):
                 return harvest_gather_gas(obs, sc2_env.Race.terran)
