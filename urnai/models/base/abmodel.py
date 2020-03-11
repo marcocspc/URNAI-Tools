@@ -1,9 +1,17 @@
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+parentdir = os.path.dirname(parentdir)
+parentdir = os.path.dirname(parentdir)
+sys.path.insert(0,parentdir)
+
 from abc import ABC, abstractmethod
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 from utils.types import ActionIndex
+from urnai.base.savable import Savable 
 
-class LearningModel(ABC):
+class LearningModel(ABC, Savable):
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, save_path, file_name, name=None):
         self.gamma = gamma

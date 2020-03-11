@@ -4,10 +4,10 @@ parentdir = os.path.dirname(currentdir)
 parentdir = os.path.dirname(parentdir)
 sys.path.insert(0,parentdir) 
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from envs.base.abenv import ABEnv
 
-class ABScenario(ABEnv):
+class ABScenario(ABC, ABEnv):
     '''
         Abstract class for all Scenarios supported. A Scenario works like an environment, but uses it
         as a base to create a trainment pattern. For example, for an environment like DeepRTS, one can train an agent

@@ -1,8 +1,16 @@
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+parentdir = os.path.dirname(parentdir)
+parentdir = os.path.dirname(parentdir)
+sys.path.insert(0,parentdir)
+
 from abc import ABC, abstractmethod
 from models.base.abmodel import LearningModel
 from agents.rewards.abreward import RewardBuilder
+from urnai.base.savable import Savable 
 
-class Agent(ABC):
+class Agent(ABC, Savable):
     
     def __init__(self, model: LearningModel, reward_builder: RewardBuilder):
         self.model = model
