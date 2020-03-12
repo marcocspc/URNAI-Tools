@@ -28,8 +28,8 @@ def main(unused_argv):
 
     try:
         ## Checking whether or not to change SC2's instalation path environment variable
-        if query_yes_no("Change SC2PATH to " + sc2_local_path + " ?"):
-            os.environ["SC2PATH"] = sc2_local_path
+        # if query_yes_no("Change SC2PATH to " + sc2_local_path + " ?"):
+        #     os.environ["SC2PATH"] = sc2_local_path
 
         ## Initializing our StarCraft 2 environment
         players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.medium)]
