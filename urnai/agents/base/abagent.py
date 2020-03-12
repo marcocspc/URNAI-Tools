@@ -10,7 +10,7 @@ from models.base.abmodel import LearningModel
 from agents.rewards.abreward import RewardBuilder
 from urnai.base.savable import Savable 
 
-class Agent(ABC, Savable):
+class Agent(Savable):
     
     def __init__(self, model: LearningModel, reward_builder: RewardBuilder):
         self.model = model

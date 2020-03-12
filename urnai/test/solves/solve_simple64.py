@@ -7,8 +7,8 @@ sys.path.insert(0,parentdir)
 from absl import app
 from pysc2.env import sc2_env
 from envs.sc2 import SC2Env
-from envs.trainer import Trainer
-from envs.trainer import TestParams
+from trainers.trainer import Trainer
+from trainers.trainer import TestParams
 from agents.sc2_agent import SC2Agent
 from agents.actions.sc2_wrapper import SC2Wrapper, TerranWrapper, ProtossWrapper
 from agents.rewards.sc2 import KilledUnitsReward, GeneralReward

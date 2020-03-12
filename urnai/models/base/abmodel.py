@@ -11,7 +11,7 @@ from agents.states.abstate import StateBuilder
 from utils.types import ActionIndex
 from urnai.base.savable import Savable 
 
-class LearningModel(ABC, Savable):
+class LearningModel(Savable):
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, save_path, file_name, name=None):
         self.gamma = gamma
