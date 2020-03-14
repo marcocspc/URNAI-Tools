@@ -7,6 +7,7 @@ from .abstate import StateBuilder
 from pysc2.lib import actions, features, units
 from agents.actions.sc2 import *
 from pysc2.env import sc2_env
+from utils.image import *
 
 
 class Simple64State(StateBuilder):
