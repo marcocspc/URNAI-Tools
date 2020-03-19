@@ -10,7 +10,7 @@ from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 
 class DQLTF(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='temp', learning_rate=0.0002, gamma=0.95, name='DQN'):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='temp', learning_rate=0.0002, gamma=0.95, name='DQN', nodes_layer1=10, nodes_layer2=10):
         super(DQLTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, file_name, name)
 
         if save_path is None:
@@ -24,6 +24,15 @@ class DQLTF(LearningModel):
         self.decay_rate = 0.0001
         self.decay_step = 0
 
+        # Number of Nodes of each Layer of our model
+        self.nodes_layer1 = nodes_layer1
+        self.nodes_layer2 = nodes_layer2
+
+        self.pickle_obj = [self.decay_step, self.nodes_layer1, self.nodes_layer2]
+
+        # Attempting to Load our serialized variables, as some of them will be used during the definition of our model
+        self.load_pickle()
+        
         ops.reset_default_graph()
 
         tf.compat.v1.disable_eager_execution()
@@ -33,15 +42,16 @@ class DQLTF(LearningModel):
 
         self.inputs_ = placeholder(dtype=tf.float32, shape=[None, self.state_size], name='inputs_')
         self.actions_ = placeholder(dtype=tf.float32, shape=[None, self.action_size], name='actions_')
+        
 
         # Defining the model's layers
         self.fc1 = layers.dense(inputs=self.inputs_,
-                                   units=50,
+                                   units=self.nodes_layer1,
                                    activation=tf.nn.relu,
                                    name='fc1')
 
         self.fc2 = layers.dense(inputs=self.fc1,
-                                   units=50,
+                                   units=self.nodes_layer2,
                                    activation=tf.nn.relu,
                                    name='fc2')
 
@@ -122,7 +132,8 @@ class DQLTF(LearningModel):
 
         # Dumping (serializing) decay_step into a pickle file
         pickle_out = open(self.save_path+self.file_name+"/"+self.file_name+"_model.pickle", "wb")
-        pickle.dump(self.decay_step, pickle_out)
+        self.pickle_obj = [self.decay_step, self.nodes_layer1, self.nodes_layer2]
+        pickle.dump(self.pickle_obj, pickle_out)
         pickle_out.close()
 
     def load(self):
@@ -133,8 +144,12 @@ class DQLTF(LearningModel):
             print()
             self.saver.restore(self.sess, self.save_path + self.file_name + "/" + self.file_name)
 
-            # Loading (deserializing) decay_step from a pickle file 
-            exists_pickle = os.path.isfile(self.save_path + self.file_name + "/" + self.file_name + '_model.pickle')
-            if exists_pickle:
-                pickle_in = open(self.save_path + self.file_name + "/" + self.file_name + "_model.pickle", "rb")
-                self.decay_step = pickle.load(pickle_in)
+    def load_pickle(self):
+    # Loading (deserializing) a few parameters from a pickle file 
+        exists_pickle = os.path.isfile(self.save_path + self.file_name + "/" + self.file_name + '_model.pickle')
+        if exists_pickle:
+            pickle_in  = open(self.save_path + self.file_name + "/" + self.file_name + "_model.pickle", "rb")
+            self.pickle_obj = pickle.load(pickle_in)
+            self.decay_step = self.pickle_obj[0]
+            self.nodes_layer1 = self.pickle_obj[1]
+            self.nodes_layer2 = self.pickle_obj[2]
