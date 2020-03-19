@@ -43,8 +43,8 @@ def main(unused_argv):
         agent = SC2Agent(dq_network, GeneralReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())
 
         test_params = TestParams(num_matches=1, steps_per_test=25, max_steps=10000, reward_threshold=1000)
-        trainer.train(env, agent, num_episodes=6, save_steps=2, enable_save=True, reward_from_env=True, test_params=test_params, max_steps=10000)
-        trainer.play(env, agent, num_matches=3)
+        trainer.train(env, agent, num_episodes=100, save_steps=20, enable_save=True, reward_from_env=True, test_params=test_params, max_steps=20000)
+        trainer.play(env, agent, num_matches=10)
 
     except KeyboardInterrupt:
         pass

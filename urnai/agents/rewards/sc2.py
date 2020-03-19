@@ -14,7 +14,7 @@ class SparseReward(RewardBuilder):
 
 class GeneralReward(RewardBuilder):
     def __init__(self):
-        self.our_reward = 0
+        self.reward = 0
         #self.last_own_units_score = 0
         #self.last_own_structures_score = 0
         self.last_killed_units_score = 0
@@ -23,6 +23,9 @@ class GeneralReward(RewardBuilder):
         #self.last_vespene_rate = 0
 
     def get_reward(self, obs, reward, done):
+        return self.reward
+
+    def set_reward(self, obs, reward, done):
         currentscore = -1
         #currentscore += self.last_own_units_score - obs.score_cumulative.total_value_units
         #currentscore += self.last_own_structures_score - obs.score_cumulative.total_value_structures
@@ -38,16 +41,8 @@ class GeneralReward(RewardBuilder):
         #self.last_mineral_rate = obs.score_cumulative.collection_rate_minerals
         #self.last_vespene_rate = obs.score_cumulative.collection_rate_vespene
 
-        if not done:
-            if currentscore != -1:
-                self.our_reward = currentscore
-                return currentscore
-            elif currentscore == -1:
-                currentscore = self.our_reward
-                self.our_reward = 0
-                return currentscore
-            return self.our_reward
-        return reward*1000
+        self.reward = currentscore
+        return self.reward
         
 
 class KilledUnitsReward(RewardBuilder):

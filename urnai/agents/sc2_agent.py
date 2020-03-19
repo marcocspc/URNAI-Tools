@@ -31,10 +31,6 @@ class SC2Agent(Agent):
         self.steps += 1
         self.reward += reward
 
-        # if done:
-        #     self.reset()
-        #     return [actions.FUNCTIONS.no_op()]
-
         if self.action_wrapper.is_action_done():
             ## Building our agent's state
             current_state = self.build_state(obs)
