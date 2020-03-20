@@ -12,3 +12,6 @@ class EnvironmentNotSupportedError(Exception):
 
 class MapNotFoundError(Exception):
     pass
+
+class WadNotFoundError(Exception):
+    pass
