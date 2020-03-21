@@ -15,3 +15,6 @@ class MapNotFoundError(Exception):
 
 class WadNotFoundError(Exception):
     pass
+
+class IncoherentBuildModelError(Exception):
+    pass
