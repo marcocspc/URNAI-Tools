@@ -10,7 +10,7 @@ from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 
 class DQLTF(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='temp', learning_rate=0.0002, gamma=0.95, name='DQN', nodes_layer1=10, nodes_layer2=10):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='temp', learning_rate=0.001, gamma=0.90, name='DQN', nodes_layer1=10, nodes_layer2=10):
         super(DQLTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, file_name, name)
 
         if save_path is None:
@@ -21,7 +21,7 @@ class DQLTF(LearningModel):
         # EXPLORATION PARAMETERS FOR EPSILON GREEDY STRATEGY
         self.explore_start = 1.0
         self.explore_stop = 0.01
-        self.decay_rate = 0.0001
+        self.decay_rate = 0.000001
         self.decay_step = 0
 
         # Number of Nodes of each Layer of our model
@@ -125,9 +125,7 @@ class DQLTF(LearningModel):
         return action
 
     def save(self):
-        print()
-        print("> Saving the model!")
-        print()
+        print("\n> Saving the model!\n")
         self.saver.save(self.sess, self.save_path+self.file_name+"/"+self.file_name)
 
         # Dumping (serializing) decay_step into a pickle file
@@ -139,9 +137,7 @@ class DQLTF(LearningModel):
     def load(self):
         exists = os.path.isfile(self.save_path + self.file_name + "/" + self.file_name + '.meta')
         if exists:
-            print()
-            print("> Loading saved model!")
-            print()
+            print("\n> Loading saved model!\n")
             self.saver.restore(self.sess, self.save_path + self.file_name + "/" + self.file_name)
 
     def load_pickle(self):
