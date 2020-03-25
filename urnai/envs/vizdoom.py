@@ -1,12 +1,18 @@
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(parentdir)
+sys.path.insert(0,parentdir)
+
 from vizdoom import * 
 from .base.abenv import Env
+from utils.error import WadNotFoundError
 
 class VizdoomEnv(Env):
 
     RES_640X480 = ScreenResolution.RES_640X480 
     RES_160X120 = ScreenResolution.RES_160X120 
 
-    def __init__(self, wad, doommap="map01", _id="vizdoom", render=True, reset_done=True, num_steps=1000, res=RES_160X120):
+    def __init__(self, wad, doommap="map01", _id="vizdoom", render=True, reset_done=True, num_steps=1000, res=RES_160X120, auto_map=True):
         if wad != None and wad != "":
             super().__init__(_id, render, reset_done)
             self.num_steps = num_steps
@@ -15,7 +21,7 @@ class VizdoomEnv(Env):
             self.game = DoomGame()
             self.res = res
         else:
-            raise Exception("A wad file is needed.")
+            raise WadNotFoundError("A wad file is needed.")
 
     def start(self):
         '''
@@ -61,6 +67,14 @@ class VizdoomEnv(Env):
         self.game.add_available_game_variable(GameVariable.POSITION_Y)
         self.game.add_available_game_variable(GameVariable.POSITION_Z)
 
+        #Set mini_map available in game obs
+        #To get automap: observation.automap_buffer
+        #Example: https://github.com/mwydmuch/ViZDoom/blob/master/examples/python/automap.py
+        if auto_map:
+            self.game.set_automap_buffer_enabled(True)
+            self.game.set_automap_mode(AutomapMode.OBJECTS_WITH_SIZE)
+
+
         #Some graphic properties
         self.game.set_screen_resolution(self.res)
         self.game.set_screen_format(ScreenFormat.RGB24)
@@ -79,6 +93,7 @@ class VizdoomEnv(Env):
         self.game.set_episode_timeout(self.num_steps)
         self.game.set_episode_start_time(0)
 
+
         self.game.init()
 
     def step(self, action):
@@ -91,7 +106,6 @@ class VizdoomEnv(Env):
         state = self.game.get_state()
         if state != None:
             self.observation = state
-        
         
         return self.observation, reward, done
 
