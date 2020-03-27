@@ -101,10 +101,10 @@ ACTION_HARVEST_GAS_FROM_MINERALS = 'harvestgasfromminerals'
 class SC2Wrapper(ActionWrapper):
 
     def __init__(self):
-        self.move_number = 0                            # Variable used to sequentially execute different parts of code inside a function without having to worry about returns
+        #self.move_number = 0                            # Variable used to sequentially execute different parts of code inside a function without having to worry about returns
                                                         # For an example on how self.move_number works check out build_structure_raw{actions\sc2.py}
 
-        self.last_worker = sc2._NO_UNITS                # self.last_worker is used to issue commands to the last worker used in the previous action
+        #self.last_worker = sc2._NO_UNITS                # self.last_worker is used to issue commands to the last worker used in the previous action
                                                         # For example, to queue the action of harvesting minerals after the worker was sent to build a structure
 
         self.units_to_attack = sc2._NO_UNITS            # self.units_to_attack is used as a memory of units that are being used by an attack action, once an attack is issued this variable
@@ -174,10 +174,10 @@ class SC2Wrapper(ActionWrapper):
         self.action_indices = [idx for idx in range(len(self.named_actions))]
 
     def is_action_done(self):
-        return self.move_number == 0
+        return len(self.actions_queue) == 0
     
     def reset(self):
-        self.move_number = 0
+        self.actions_queue = []
 
     def get_actions(self):
         return self.action_indices
@@ -655,7 +655,8 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD REFINERY
         if named_action == ACTION_BUILD_REFINERY:
-            action, self.last_worker, self.move_number = build_gas_structure_raw_unit(obs, units.Terran.Refinery, sc2._BUILD_REFINERY, sc2_env.Race.terran, self.move_number, self.last_worker)        
+            actions = build_gas_structure_raw_unit(obs, units.Terran.Refinery, sc2._BUILD_REFINERY, sc2_env.Race.terran)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)     
             return action
 
         # BUILD ENGINEERINGBAY
@@ -734,32 +735,38 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD TECHLAB BARRACKS
         if named_action == ACTION_BUILD_TECHLAB_BARRACKS:
-            action, self.last_worker, self.move_number = build_structure_raw(obs, units.Terran.Barracks, sc2._BUILD_TECHLAB_BARRACKS, self.move_number, self.last_worker)
+            actions = build_structure_raw(obs, units.Terran.Barracks, sc2._BUILD_TECHLAB_BARRACKS)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
             return action
             
         # BUILD TECHLAB FACTORY
         if named_action == ACTION_BUILD_TECHLAB_FACTORY:
-            action, self.last_worker, self.move_number = build_structure_raw(obs, units.Terran.Factory, sc2._BUILD_TECHLAB_FACTORY, self.move_number, self.last_worker)
+            actions = build_structure_raw(obs, units.Terran.Factory, sc2._BUILD_TECHLAB_FACTORY)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
             return action
 
         # BUILD TECHLAB STARPORT
         if named_action == ACTION_BUILD_TECHLAB_STARPORT:
-            action, self.last_worker, self.move_number = build_structure_raw(obs, units.Terran.Starport, sc2._BUILD_TECHLAB_STARPORT, self.move_number, self.last_worker)
+            actions = build_structure_raw(obs, units.Terran.Starport, sc2._BUILD_TECHLAB_STARPORT)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
             return action
 
         # BUILD REACTOR BARRACKS
         if named_action == ACTION_BUILD_REACTOR_BARRACKS:
-            action, self.last_worker, self.move_number = build_structure_raw(obs, units.Terran.Barracks, sc2._BUILD_REACTOR_BARRACKS, self.move_number, self.last_worker)
+            actions = build_structure_raw(obs, units.Terran.Barracks, sc2._BUILD_REACTOR_BARRACKS)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
             return action
 
         # BUILD REACTOR FACTORY
         if named_action == ACTION_BUILD_REACTOR_FACTORY:
-            action, self.last_worker, self.move_number = build_structure_raw(obs, units.Terran.Factory, sc2._BUILD_REACTOR_FACTORY, self.move_number, self.last_worker)
+            actions = build_structure_raw(obs, units.Terran.Factory, sc2._BUILD_REACTOR_FACTORY)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
             return action
 
         # BUILD REACTOR STARPORT
         if named_action == ACTION_BUILD_REACTOR_STARPORT:
-            action, self.last_worker, self.move_number = build_structure_raw(obs, units.Terran.Starport, sc2._BUILD_REACTOR_STARPORT, self.move_number, self.last_worker)
+            actions = build_structure_raw(obs, units.Terran.Starport, sc2._BUILD_REACTOR_STARPORT)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
             return action
                 
 

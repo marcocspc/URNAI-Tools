@@ -289,7 +289,7 @@ def harvest_gather_minerals(obs, player_race, idle_workers=False):
         # If we find one, send the worker to gather minerals there.
         if len(townhalls) > 0:
             for townhall in townhalls:
-                if townhall.assigned_harvesters < townhall.ideal_harvesters:
+                if townhall.assigned_harvesters <= townhall.ideal_harvesters:
                     target = [townhall.x, townhall.y]
                     if idle_workers:
                         worker = get_closest_unit(obs, target, units_list=idle_workers)
@@ -316,7 +316,7 @@ def harvest_gather_gas(obs, player_race):
 
     if len(gas_colectors) > 0:
         for gas_colector in gas_colectors:
-            if gas_colector.assigned_harvesters < gas_colector.ideal_harvesters:
+            if gas_colector.assigned_harvesters <= gas_colector.ideal_harvesters:
                 target = [gas_colector.x, gas_colector.y]
                 worker = get_closest_unit(obs, target, unit_type=worker_type)
                 if worker.order_id_0 == 362 or worker.order_id_0 == 359 or worker.order_length == 0:
@@ -330,52 +330,20 @@ def harvest_return(obs, worker):
     return _NO_OP()
 
 
-def build_structure_raw(obs, building_type, building_action, move_number, last_worker, max_amount = 999):
+def build_structure_raw(obs, building_type, building_action, max_amount = 999):
 
     player_race = get_unit_race(building_type)
 
     if get_units_amount(obs, building_type) < max_amount:
-        if move_number == 0:
-            move_number += 1
+        buildings = get_my_units_by_type(obs, building_type)
+        if len(buildings) > 0:
+            target = random.choice(buildings)
+            action_one, last_worker = build_structure_by_type(obs, building_action, player_race, target)
+            action_two = harvest_gather_minerals_quick(obs, last_worker, player_race)
+            actions_queue = [action_one, action_two]
+            return actions_queue
 
-            buildings = get_my_units_by_type(obs, building_type)
-            if len(buildings) > 0:
-                target = random.choice(buildings)
-                action, last_worker = build_structure_by_type(obs, building_action, player_race, target)
-                return action, last_worker, move_number
-
-        if move_number == 1:
-            move_number +=1
-            return harvest_gather_minerals_quick(obs, last_worker, player_race), last_worker, move_number
-        if move_number == 2:
-            move_number = 0
-    return _NO_OP(), last_worker, move_number
-
-
-# def build_structure_raw_pt(obs, building_type, building_action, move_number, last_worker, base_top_left, max_amount = 999, targets = []):
-#     ybrange=0 if base_top_left else 32
-#     ytrange=32 if base_top_left else 63
-
-#     player_race = get_unit_race(building_type)
-
-#     building_amount = get_units_amount(obs, building_type)
-#     if len(targets) == 0 or building_amount >= len(targets):
-#         target = [random.randint(0,63), random.randint(ybrange, ytrange)]
-#     else:
-#         target = targets[building_amount]
-#         if not base_top_left: target = (63-target[0]-5, 63-target[1]+5)
-        
-#     if building_amount < max_amount:
-#         if move_number == 0:
-#             move_number += 1
-#             action, last_worker = build_structure_by_type(obs, building_action, player_race, target)
-#             return action, last_worker, move_number
-#         if move_number == 1:
-#             move_number +=1
-#             return harvest_gather_minerals_quick(obs, last_worker, player_race), last_worker, move_number
-#         if move_number == 2:
-#             move_number = 0
-#     return _NO_OP(), last_worker, move_number
+    return [_NO_OP()]
 
 
 def build_structure_raw_pt(obs, building_type, building_action, base_top_left, max_amount = 999, targets = []):
@@ -400,22 +368,15 @@ def build_structure_raw_pt(obs, building_type, building_action, base_top_left, m
     return [_NO_OP()]
 
 
-def build_gas_structure_raw_unit(obs, building_type, building_action, player_race, move_number, last_worker, max_amount = 999):  
-
+def build_gas_structure_raw_unit(obs, building_type, building_action, player_race, max_amount = 999):  
     player_race = get_unit_race(building_type)
-
     if get_units_amount(obs, building_type) < max_amount:
-        if move_number == 0:
-            move_number += 1
-            chosen_geyser = get_exploitable_geyser(obs, player_race)
-            action, last_worker = build_structure_by_type(obs, building_action, player_race, chosen_geyser)
-            return action, last_worker, move_number
-        if move_number == 1:
-            move_number +=1
-            return harvest_gather_minerals_quick(obs, last_worker, player_race), last_worker, move_number
-        if move_number == 2:
-            move_number = 0
-    return _NO_OP(), last_worker, move_number
+        chosen_geyser = get_exploitable_geyser(obs, player_race)
+        action_one, last_worker = build_structure_by_type(obs, building_action, player_race, chosen_geyser)
+        action_two = harvest_gather_minerals_quick(obs, last_worker, player_race)
+        actions_queue = [action_one, action_two]
+        return actions_queue
+    return [_NO_OP()]
 
 '''
 The following methods are used to aid in various mechanical operations the agent has to perform,
