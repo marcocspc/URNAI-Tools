@@ -23,14 +23,11 @@ class GeneralReward(RewardBuilder):
         #self.last_vespene_rate = 0
 
     def get_reward(self, obs, reward, done):
-        return self.reward
-
-    def set_reward(self, obs, reward, done):
-        currentscore = -1
+        currentscore = -0.1
         currentscore += obs.score_cumulative.total_value_units - self.last_own_units_score
         currentscore += obs.score_cumulative.total_value_structures - self.last_own_structures_score
-        currentscore += obs.score_cumulative.killed_value_units - self.last_killed_units_score
-        currentscore += obs.score_cumulative.killed_value_structures - self.last_killed_structures_score
+        currentscore += (obs.score_cumulative.killed_value_units - self.last_killed_units_score)*10
+        currentscore += (obs.score_cumulative.killed_value_structures - self.last_killed_structures_score)*10
         #currentscore += self.last_mineral_rate - obs.score_cumulative.collection_rate_minerals
         #currentscore += self.last_vespene_rate - obs.score_cumulative.collection_rate_vespene
 

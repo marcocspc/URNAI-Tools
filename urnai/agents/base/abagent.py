@@ -25,7 +25,7 @@ class Agent(Savable):
         return self.state_builder.build_state(obs)
 
     def get_reward(self, obs, reward, done):
-        return self.reward_builder.set_reward(obs, reward, done)
+        return self.reward_builder.get_reward(obs, reward, done)
 
     def get_state_dim(self):
         return self.state_builder.get_state_dim()
