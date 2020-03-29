@@ -20,8 +20,8 @@ class DQLTF(LearningModel):
 
         # EXPLORATION PARAMETERS FOR EPSILON GREEDY STRATEGY
         self.explore_start = 1.0
-        self.explore_stop = 0.01
-        self.decay_rate = 0.000001
+        self.explore_stop = 0.05
+        self.decay_rate = 0.00001
         self.decay_step = 0
 
         # Number of Nodes of each Layer of our model
@@ -29,6 +29,9 @@ class DQLTF(LearningModel):
         self.nodes_layer2 = nodes_layer2
 
         self.pickle_obj = [self.decay_step, self.nodes_layer1, self.nodes_layer2]
+
+        self.save_path = save_path
+        self.file_name = file_name
 
         # Attempting to Load our serialized variables, as some of them will be used during the definition of our model
         self.load_pickle()
@@ -124,7 +127,7 @@ class DQLTF(LearningModel):
         action = self.actions[int(action_idx)]
         return action
 
-    def save(self):
+    def save(self, save_path, file_name):
         print("\n> Saving the model!\n")
         self.saver.save(self.sess, self.save_path+self.file_name+"/"+self.file_name)
 

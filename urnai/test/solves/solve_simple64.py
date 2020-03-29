@@ -24,8 +24,6 @@ For more information consult https://github.com/deepmind/pysc2#get-starcraft-ii
 sc2_local_path = "D:/Program Files (x86)/StarCraft II"
 
 def main(unused_argv):
-    trainer = Trainer()
-
     try:
         ## Checking whether or not to change SC2's instalation path environment variable
         # if query_yes_no("Change SC2PATH to " + sc2_local_path + " ?"):
@@ -33,18 +31,19 @@ def main(unused_argv):
 
         ## Initializing our StarCraft 2 environment
         players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
-        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=16)
+        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=128)
         
         action_wrapper = TerranWrapper()
         state_builder = Simple64State()
-        dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, save_path='urnai/models/saved/', file_name="terran_dql", nodes_layer1=512, nodes_layer2=256, learning_rate=0.005, gamma=0.8)
+        dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=512, nodes_layer2=256, learning_rate=0.005, gamma=0.9, save_path='urnai/models/saved/', file_name="terran_dql")
 
         ## Terran agent with a Deep Q-Learning model
         agent = SC2Agent(dq_network, GeneralReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())
 
         #test_params = TestParams(num_matches=1, steps_per_test=25, max_steps=10000, reward_threshold=1000)
-        trainer.train(env, agent, num_episodes=100, save_steps=20, enable_save=True, reward_from_env=True, max_steps=10000)
-        trainer.play(env, agent, num_matches=5)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved/', file_name="terran_dql")
+        trainer.train(num_episodes=100, save_steps=20, enable_save=True, reward_from_env=True, max_steps=10000)
+        trainer.play(num_matches=5)
 
     except KeyboardInterrupt:
         pass

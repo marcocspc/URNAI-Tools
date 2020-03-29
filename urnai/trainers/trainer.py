@@ -21,7 +21,15 @@ class TestParams():
 
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
-    def train(self, env, agent, num_episodes=float('inf'), max_steps=float('inf'), save_steps=1000, enable_save=False, test_params: TestParams = None, reward_from_env = False):
+
+    def __init__(self, env, agent, save_path="urnai/models/saved/", file_name="temp"):
+        self.env = env
+        self.agent = agent
+        self.save_path = save_path
+        self.file_name = file_name
+        
+
+    def train(self, num_episodes=float('inf'), max_steps=float('inf'), save_steps=10, enable_save=False, test_params: TestParams = None, reward_from_env = True):
         start_time = time.time()
         
         print("> Training")
@@ -34,13 +42,13 @@ class Trainer(Savable):
             if episode >= num_episodes:
                 break
 
-            env.start()
+            self.env.start()
 
             # Reset the environment
-            obs = env.reset()
+            obs = self.env.reset()
             step_reward = 0
             done = False
-            agent.reset()
+            self.agent.reset()
 
             ep_reward = 0
             victory = False
@@ -52,17 +60,17 @@ class Trainer(Savable):
                 is_last_step = step == max_steps - 1
 
                 # Choosing an action and passing it to our env.step() in order to act on our environment
-                action = agent.step(obs, step_reward, done)
-                obs, default_reward, done = env.step(action)
+                action = self.agent.step(obs, step_reward, done)
+                obs, default_reward, done = self.env.step(action)
 
                 # Checking whether or not to use the reward from the reward builder so we can pass that to the agent
                 if reward_from_env:
-                    step_reward = agent.get_reward(obs, step_reward, done)
+                    step_reward = self.agent.get_reward(obs, step_reward, done)
                 else:
                     step_reward = default_reward
 
                 # Making the agent learn
-                agent.learn(obs, step_reward, done, is_last_step)
+                self.agent.learn(obs, step_reward, done, is_last_step)
 
                 # Adding our step reward to the total count of the episode's reward
                 ep_reward += step_reward
@@ -74,11 +82,11 @@ class Trainer(Savable):
             
             logger.log_ep_stats()
             if enable_save and episode > 0 and episode % save_steps == 0:
-                agent.model.save()
+                self.save(self.agent, self.save_path, self.file_name)
 
             if test_params != None and episode % test_params.test_steps == 0 and episode != 0:
                 test_params.current_ep_count = episode
-                self.play(env, agent, test_params.num_matches, test_params.max_steps, test_params)
+                self.play(test_params.num_matches, test_params.max_steps, test_params)
 
                 # Stops training if reward threshold was reached in play testing
                 if test_params.reward_threshold != None and test_params.reward_threshold <= test_params.logger.play_rewards_avg[-1]:
@@ -91,12 +99,12 @@ class Trainer(Savable):
 
         # Saving the model when the training is ended
         if enable_save:
-            agent.model.save()
+            self.save(self.agent, self.save_path, self.file_name)
         logger.log_train_stats()
-        logger.plot_train_stats(agent)
+        logger.plot_train_stats(self.agent)
 
 
-    def play(self, env, agent, num_matches, max_steps=float('inf'), test_params=None):
+    def play(self, num_matches, max_steps=float('inf'), test_params=None, reward_from_env = True):
         print("\n\n> Playing")
 
         logger = Logger(num_matches)
@@ -105,13 +113,13 @@ class Trainer(Savable):
             if match >= num_matches:
                 break
 
-            env.start()
+            self.env.start()
 
             # Reset the environment
-            obs = env.reset()
-            reward = 0
+            obs = self.env.reset()
+            step_reward = 0
             done = False
-            agent.reset()
+            self.agent.reset()
 
             ep_reward = 0
             victory = False
@@ -120,15 +128,21 @@ class Trainer(Savable):
                 if step >= max_steps:
                     break
 
-                action = agent.play(obs)
+                action = self.agent.play(obs)
                 # Take the action (a) and observe the outcome state(s') and reward (r)
-                obs, reward, done = env.step(action)
-                ep_reward += reward
+                obs, default_reward, done = self.env.step(action)
+
+                if reward_from_env:
+                    step_reward = self.agent.get_reward(obs, step_reward, done)
+                else:
+                    step_reward = default_reward
+
+                ep_reward += step_reward
 
                 is_last_step = step == max_steps - 1
                 # If done (if we're dead) : finish episode
                 if done or is_last_step:
-                    victory = reward == 1
+                    victory = default_reward == 1
                     logger.record_episode(ep_reward, victory, step + 1)
                     break
 
@@ -140,3 +154,6 @@ class Trainer(Savable):
         else:
             # Only logs train stats if this is not a test, to avoid cluttering the interface with info
             logger.log_train_stats()
+
+    def save(self, agent, save_path='urnai/models/saved/', file_name='temp'):
+        agent.save(save_path, file_name)
