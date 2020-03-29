@@ -37,32 +37,32 @@ class Simple64State(StateBuilder):
             self.base_top_left = (townhall.x < 32)
 
         new_state = []
-        new_state.append(obs.player.minerals)
-        new_state.append(obs.player.vespene)
-        new_state.append(obs.player.food_cap)
-        new_state.append(obs.player.food_used)
-        new_state.append(obs.player.food_army)
-        new_state.append(obs.player.food_workers)
-        new_state.append(obs.player.food_cap - obs.player.food_used)
-        new_state.append(obs.player.army_count)
-        new_state.append(obs.player.idle_worker_count)
+        new_state.append(obs.player.minerals/4000)
+        new_state.append(obs.player.vespene/2000)
+        new_state.append(obs.player.food_cap/200)
+        new_state.append(obs.player.food_used/200)
+        new_state.append(obs.player.food_army/200)
+        new_state.append(obs.player.food_workers/200)
+        new_state.append((obs.player.food_cap - obs.player.food_used)/200)
+        new_state.append(obs.player.army_count/200)
+        new_state.append(obs.player.idle_worker_count/200)
 
         if self.player_race == sc2_env.Race.terran:
             new_state.append(get_units_amount(obs, units.Terran.CommandCenter)+
                             get_units_amount(obs, units.Terran.OrbitalCommand)+
-                            get_units_amount(obs, units.Terran.PlanetaryFortress))
-            new_state.append(get_units_amount(obs, units.Terran.SupplyDepot))
-            new_state.append(get_units_amount(obs, units.Terran.Refinery))
+                            get_units_amount(obs, units.Terran.PlanetaryFortress)/2)
+            new_state.append(get_units_amount(obs, units.Terran.SupplyDepot)/8)
+            new_state.append(get_units_amount(obs, units.Terran.Refinery)/4)
             new_state.append(get_units_amount(obs, units.Terran.EngineeringBay))
             new_state.append(get_units_amount(obs, units.Terran.Armory))
-            new_state.append(get_units_amount(obs, units.Terran.MissileTurret))
-            new_state.append(get_units_amount(obs, units.Terran.SensorTower))
-            new_state.append(get_units_amount(obs, units.Terran.Bunker))
+            new_state.append(get_units_amount(obs, units.Terran.MissileTurret)/8)
+            new_state.append(get_units_amount(obs, units.Terran.SensorTower)/3)
+            new_state.append(get_units_amount(obs, units.Terran.Bunker)/5)
             new_state.append(get_units_amount(obs, units.Terran.FusionCore))
             new_state.append(get_units_amount(obs, units.Terran.GhostAcademy))
-            new_state.append(get_units_amount(obs, units.Terran.Barracks))
-            new_state.append(get_units_amount(obs, units.Terran.Factory))
-            new_state.append(get_units_amount(obs, units.Terran.Starport))
+            new_state.append(get_units_amount(obs, units.Terran.Barracks)/3)
+            new_state.append(get_units_amount(obs, units.Terran.Factory)/2)
+            new_state.append(get_units_amount(obs, units.Terran.Starport)/2)
 
         elif self.player_race == sc2_env.Race.protoss:
             new_state.append(get_units_amount(obs, units.Protoss.Nexus))
@@ -99,11 +99,13 @@ class Simple64State(StateBuilder):
 
         m0 = obs.feature_minimap[0]     # Feature layer of the map's terrain (elevation and shape)
         m0 = m0/10
+
         m1 = obs.feature_minimap[2]     # Feature layer of creep in the minimap (generally will be quite empty, especially on games without zergs hehe)
-        m1[m1 == 1] = 16                # Transforming creep info from 1 to 8 in the map (makes it more visible)
+        m1[m1 == 1] = 16                # Transforming creep info from 1 to 16 in the map (makes it more visible)
+
         m2 = obs.feature_minimap[4]     # Feature layer of all visible units (neutral, friendly and enemy) on the minimap
-        m2[m2 == 1] = 128               # Transforming own units from 1 to 64 for visibility
-        m2[m2 == 3] = 64                # Transforming enemy units from 3 to 32 for visibility
+        m2[m2 == 1] = 128               # Transforming own units from 1 to 128 for visibility
+        m2[m2 == 3] = 64                # Transforming enemy units from 3 to 64 for visibility
         m2[m2 == 2] = 64
         m2[m2 == 16] = 32               # Transforming mineral fields and geysers from 16 to 32 for visibility               
         
