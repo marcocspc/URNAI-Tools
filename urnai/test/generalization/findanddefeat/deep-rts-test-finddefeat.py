@@ -9,6 +9,49 @@ from envs.deep_rts import DeepRTSEnv
 import random
 import numpy as np
 
+def print_unit(unit):
+    if (unit != None):
+        print("Unit type: {type}, unit nameID: {name_id}".format(type=unit.type,name_id=unit.name_id))
+    else:
+        print("None")
+
+def get_buildable_tile(drts_unit, drts_game):
+    tile = drts_unit.tile
+    x = tile.x
+    y = tile.y
+
+    map = drts_game.tilemap
+
+    tile_list = []
+    #UP_LEFT
+    tile_list.append(map.get_tile(x - 1, y - 1))
+
+    #UP
+    tile_list.append(map.get_tile(x, y - 1))
+
+    #UP_RIGHT
+    tile_list.append(map.get_tile(x + 1, y - 1))
+
+    #RIGHT
+    tile_list.append(map.get_tile(x + 1, y))
+
+    #RIGHT_DOWN
+    tile_list.append(map.get_tile(x + 1, y + 1))
+
+    #DOWN
+    tile_list.append(map.get_tile(x, y + 1))
+
+    #DOWN_RIGHT
+    tile_list.append(map.get_tile(x - 1, y + 1))
+
+    #LEFT
+    tile_list.append(map.get_tile(x - 1, y))
+
+    for tile in tile_list:
+        if tile.is_buildable:
+            return tile
+
+
 def set_collectable_list(width, height):
     map = np.zeros((height, width)) 
 
@@ -28,7 +71,7 @@ def set_collectable_list(width, height):
 
 episodes = 100
 steps = 1000 
-drts = DeepRTSEnv(map = DeepRTSEnv.MAP_BIG,render=True, updates_per_action = 12, start_oil=99999, start_gold=99999, start_lumber=99999)
+drts = DeepRTSEnv(map = DeepRTSEnv.MAP_BIG,render=True, updates_per_action = 12, start_oil=99999, start_gold=99999, start_lumber=99999, start_food=99999)
 
 drts.engine_config.set_footman(False)
 drts.engine_config.set_archer(True)
@@ -74,7 +117,16 @@ for ep in range(episodes):
         if action == 16:
             # build archer
             print("Trying to build archer")
-            drts.unit_manager.construct_unit(drts.constants.Unit.Archer, drts.players[0])
+            archer = drts.unit_manager.construct_unit(drts.constants.Unit.Archer, drts.players[0])
+            #Archer IS BUILT, but need to be spawned
+            print_unit(archer)
+
+            try:
+                #archer.spawn(get_buildable_tile(drts.players[0].get_targeted_unit(), drts.game), archer.spawn_timer)
+                archer.spawn(get_buildable_tile(drts.players[0].get_targeted_unit(), drts.game), 0)
+            except AttributeError:
+                print("You must first select a Footman!")
+
             state, done = drts.step(15)
         else:
             state, done = drts.step(action)
@@ -88,7 +140,8 @@ for ep in range(episodes):
         except AttributeError:
             pass
 
-        reward = collectables_map[unit_y - 1, unit_x - 1]
+        #reward = collectables_map[unit_y - 1, unit_x - 1]
+        reward = 0
         epi_reward += reward
 
         if (reward > 0):
@@ -97,7 +150,7 @@ for ep in range(episodes):
         #print("Current state: ")
         #print(state)
         print("Player 1 selected unit:")
-        print(drts.players[0].get_targeted_unit())
+        print_unit(drts.players[0].get_targeted_unit())
         print("Unit coordinates: {x}, {y}".format(x=unit_x,y=unit_y))
         print("Some Player 1 stats:")
         print("Oil: {oil}".format(oil=drts.players[0].oil))

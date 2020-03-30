@@ -37,7 +37,7 @@ class DeepRTSEnv(Env):
             max_fps = 1000000, max_ups = 1000000, play_audio = False, 
             number_of_players = 1, updates_per_action = 1, flatten_state = True,
             drts_engine_config = None,
-            start_oil=0, start_gold=1500, start_lumber=750):
+            start_oil=0, start_gold=1500, start_lumber=750, start_food = 1):
 
         if self.is_map_installed(map):
             self.map = map
@@ -72,8 +72,9 @@ class DeepRTSEnv(Env):
             self.engine_config.set_start_oil(start_oil)
             self.engine_config.set_start_gold(start_gold)
             self.engine_config.set_start_lumber(start_lumber)
+            self.engine_config.set_start_food(start_food)
             self.engine_config.set_archer(True)
-            self.engine_config.set_instant_town_hall(True)
+            self.engine_config.set_instant_town_hall(False)
             self.engine_config.set_barracks(True)
         else:
             self.engine_config = drts_engine_config
