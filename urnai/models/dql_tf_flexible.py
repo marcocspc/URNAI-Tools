@@ -14,34 +14,34 @@ import pickle
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
-from .model_builder.ModelBuilder import LAYER_INPUT, LAYER_FULLY_CONNECTED 
+from .model_builder import ModelBuilder
 
 class DqlTfFlexible(LearningModel):
 
     #Some useful class constants
     DEFAULT_BUILD_MODEL = [ 
         {
-            'type' : LAYER_INPUT,
+            'type' : ModelBuilder.LAYER_INPUT,
             'shape' : [None, 10],
         },
         {
-            'type' : LAYER_FULLY_CONNECTED,
+            'type' : ModelBuilder.LAYER_FULLY_CONNECTED,
             'nodes' : 50,
             'name' : 'fc1',
         },
         {
-            'type' : LAYER_FULLY_CONNECTED,
+            'type' : ModelBuilder.LAYER_FULLY_CONNECTED,
             'nodes' : 50,
             'name' : 'fc2',
         },
         {
-            'type' : LAYER_OUTPUT,
+            'type' : ModelBuilder.LAYER_OUTPUT,
             'length' : 50, 
         },
     ]
 
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='dqltfflexible', learning_rate=0.0002, gamma=0.95, name='DQN', build_model = DqlTfFlexible.DEFAULT_BUILD_MODEL):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='dqltfflexible', learning_rate=0.0002, gamma=0.95, name='DQN', build_model = DEFAULT_BUILD_MODEL):
         super(DqlTfFlexible, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, file_name, name)
 
         if save_path is None or file_name is None:
@@ -80,7 +80,7 @@ class DqlTfFlexible(LearningModel):
         #self.load()
 
     def learn(self, s, a, r, s_, done, is_last_step: bool):
-        qsa_values = self.sess.run(self.output_layer, feed_dict={self.inputs_: s})
+        qsa_values = self.sess.run(self.model_layers[-1], feed_dict={self.model_layers[0]: s})
 
         current_q = 0
 
@@ -91,12 +91,12 @@ class DqlTfFlexible(LearningModel):
 
         qsa_values[0, a] = current_q
 
-        self.sess.run(self.optimizer, feed_dict={self.inputs_: s, self.tf_qsa: qsa_values})
+        self.sess.run(self.optimizer, feed_dict={self.model_layers[0] : s, self.tf_qsa: qsa_values})
 
-        qsa_values = self.sess.run(self.output_layer, feed_dict={self.inputs_: s})
+        qsa_values = self.sess.run(self.model_layers[-1], feed_dict={self.model_layers[0]: s})
 
     def __maxq(self, state):
-        values = self.sess.run(self.output_layer, feed_dict={self.inputs_: state})
+        values = self.sess.run(self.model_layers[-1], feed_dict={self.model_layers[0]: state})
 
         index = np.argmax(values[0])
         mxq = values[0, index]
@@ -159,7 +159,7 @@ class DqlTfFlexible(LearningModel):
         self.make_model()
         self.load_tf()
 
-    def load_tf(self)
+    def load_tf(self):
         #Check if tf file exists
         exists = os.path.isfile(self.get_full_persistance_tensorflow_path + ".meta")
         #If yes, load it
@@ -193,17 +193,17 @@ class DqlTfFlexible(LearningModel):
         #Load each layer
         self.model_layers = []
         for layer_model in self.build_model:
-            if layer_model['type'] == LAYER_INPUT: 
+            if layer_model['type'] == ModelBuilder.LAYER_INPUT: 
                 if self.build_model.index(layer_model) == 0:
                     self.model_layers.append(placeholder(dtype=tf.float32, 
                         shape=layer_model['shape'], name='inputs_'))
                 else:
                     raise IncoherentBuildModelError("Input Layer must be the first one.") 
-            elif layer_model['type'] == LAYER_FULLY_CONNECTED:
+            elif layer_model['type'] == ModelBuilder.LAYER_FULLY_CONNECTED:
                 self.model_layers.append(layers.dense(inputs=self.model_layers[-1], 
                     units=layer_model['nodes'], 
                     activation=tf.nn.relu, name=layer_model['name']))
-            elif layer_model['type'] == LAYER_OUTPUT:
+            elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
                 self.model_layers.append(layers.dense(inputs=self.model_layers[-1], 
                     units=self.action_size,activation=None))
 
