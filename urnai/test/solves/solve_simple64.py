@@ -15,6 +15,7 @@ from agents.rewards.sc2 import KilledUnitsReward, GeneralReward
 from agents.states.sc2 import Simple64State_1
 from agents.states.sc2 import Simple64State
 from models.dql_tf import DQLTF
+from models.pg_tf import PolicyGradientTF
 from utils.functions import query_yes_no
 
 """ Change "sc2_local_path" to your local SC2 installation path. 
@@ -31,11 +32,12 @@ def main(unused_argv):
 
         ## Initializing our StarCraft 2 environment
         players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
-        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=128)
+        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=40)
         
         action_wrapper = TerranWrapper()
         state_builder = Simple64State()
-        dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=512, nodes_layer2=256, learning_rate=0.005, gamma=0.9, save_path='urnai/models/saved/', file_name="terran_dql")
+        #dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=512, nodes_layer2=256, learning_rate=0.005, gamma=0.9, save_path='urnai/models/saved/', file_name="terran_dql")
+        dq_network = PolicyGradientTF(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, save_path='urnai/models/saved/', file_name="terran_dql")
 
         ## Terran agent with a Deep Q-Learning model
         agent = SC2Agent(dq_network, GeneralReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())
@@ -43,7 +45,7 @@ def main(unused_argv):
         #test_params = TestParams(num_matches=1, steps_per_test=25, max_steps=10000, reward_threshold=1000)
         trainer = Trainer(env, agent, save_path='urnai/models/saved/', file_name="terran_dql")
         trainer.train(num_episodes=100, save_steps=20, enable_save=True, reward_from_env=True, max_steps=10000)
-        trainer.play(num_matches=5)
+        trainer.play(num_matches=10)
 
     except KeyboardInterrupt:
         pass

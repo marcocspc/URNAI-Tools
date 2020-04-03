@@ -621,7 +621,7 @@ class TerranWrapper(SC2Wrapper):
         named_action = self.named_actions[action_idx]
         #named_action, x, y = self.split_action(named_action)
 
-        while len(self.actions_queue) > 0:
+        if len(self.actions_queue) > 0:
             return self.actions_queue.pop(0)
 
         if self.units_to_attack != sc2._NO_UNITS:

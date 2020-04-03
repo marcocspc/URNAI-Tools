@@ -10,7 +10,7 @@ from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 
 class DQLTF(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='temp', learning_rate=0.001, gamma=0.90, name='DQN', nodes_layer1=10, nodes_layer2=10):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='temp_dqltf', learning_rate=0.001, gamma=0.90, decay_rate = 0.00001, name='DQN', nodes_layer1=10, nodes_layer2=10):
         super(DQLTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, file_name, name)
 
         if save_path is None:
@@ -21,7 +21,7 @@ class DQLTF(LearningModel):
         # EXPLORATION PARAMETERS FOR EPSILON GREEDY STRATEGY
         self.explore_start = 1.0
         self.explore_stop = 0.05
-        self.decay_rate = 0.00001
+        self.decay_rate = decay_rate
         self.decay_step = 0
 
         # Number of Nodes of each Layer of our model
