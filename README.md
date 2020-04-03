@@ -134,7 +134,7 @@ Here you'll find all the things that we plan to do in this project. **Bold** ite
   * [ ] Proximal Policy Optimization
 * [X] Core codebase improvements
   * [X] Logger class
-  * [ ] Save model parameters (currently saves only the weights)
+  * [X] Save model parameters (currently saves only the weights)
 * [ ] Solve more problems
   * [X] Frozenlake
   * [X] Cartpole-V0
