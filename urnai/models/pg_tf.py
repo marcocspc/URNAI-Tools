@@ -16,7 +16,7 @@ from utils import error
 
 
 class PolicyGradientTF(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path, learning_rate=0.01, gamma=0.95, name='PolicyGradient'):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='temp_pgtf', learning_rate=0.01, gamma=0.95, name='PolicyGradient'):
 
         #This code is too old and need to be updated to tensorflow 2.0
         error = 'PolicyGradients is unsupported until its code is updated to Tensorflow 2.0.'
@@ -34,32 +34,30 @@ class PolicyGradientTF(LearningModel):
         # Initializing TensorFlow session
         self.sess = Session(config=ConfigProto(allow_soft_placement=True))
 
-        self.inputs_ = placeholder(dtype=tf.float32, shape=[None, self.state_size], name='inputs_')
+        self.inputs_ = tf.placeholder(dtype=tf.float32, shape=[None, self.state_size], name='inputs_')
 
         # Placeholder used to output the probability distribution for the actions
         self.actions_ = placeholder(dtype=tf.float32, shape=[None, self.action_size], name='actions_')
         self.discounted_episode_rewards_ = placeholder(tf.float32, [None, ], name='discounted_episode_rewards')
 
         # Defining the layers of the neural network
-        self.fc1 = layers.Dense(inputs=self.inputs_,
-                                num_outputs = 10,
-                                activation_fn = tf.nn.relu,
-                                weights_initializer = keras.initializers.glorot_normal())
+        self.fc1 = tf.contrib.layers.fully_connected(
+                        inputs=self.inputs_,
+                        num_outputs = 256,
+                        activation_fn = tf.nn.relu,
+                        weights_initializer = tf.random_normal)
 
-        self.fc1_1 = layers.Dense(inputs=self.fc1,
-                                  num_outputs = 10,
-                                  activation_fn = tf.nn.relu,
-                                  weights_initializer = keras.initializers.glorot_normal())
+        self.fc2 = tf.contrib.layers.fully_connected(
+                        inputs=self.fc1,
+                        num_outputs = self.action_size,
+                        activation_fn = tf.nn.relu,
+                        weights_initializer = tf.random_normal)
 
-        self.fc2 = layers.Dense(inputs=self.fc1_1,
-                                num_outputs = self.action_size,
-                                activation_fn = tf.nn.relu,
-                                weights_initializer = keras.initializers.glorot_normal())
-
-        self.fc3 = layers.Dense(inputs=self.fc2,
-                                num_outputs = self.action_size,
-                                activation_fn = None,
-                                weights_initializer = keras.initializers.glorot_normal())
+        self.fc3 = tf.contrib.layers.fully_connected(
+                        inputs=self.fc2,
+                        num_outputs = self.action_size,
+                        activation_fn = tf.nn.relu,
+                        weights_initializer = tf.random_normal)
 
         self.output_layer = tf.nn.softmax(self.fc3)
 
@@ -133,15 +131,11 @@ class PolicyGradientTF(LearningModel):
         return action
 
     def save(self):
-        print()
-        print("> Saving the model!")
-        print()
-        self.saver.save(self.sess, self.save_path)
+        print("\n> Saving the model!\n")
+        self.saver.save(self.sess, self.save_path + self.file_name + "/" + self.file_name)
 
     def load(self):
-        exists = os.path.isfile(self.save_path + '.meta')
+        exists = os.path.isfile(self.save_path + self.file_name + "/" + self.file_name + '.meta')
         if exists:
-            print()
-            print("> Loading saved model!")
-            print()
-            self.saver.restore(self.sess, self.save_path)
+            print("\n> Loading saved model!\n")
+            self.saver.restore(self.sess, self.save_path + self.file_name + "/" + self.file_name)
