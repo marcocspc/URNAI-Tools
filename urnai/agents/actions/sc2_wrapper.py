@@ -120,7 +120,9 @@ class SC2Wrapper(ActionWrapper):
         self.base_top_left = True                       # Variable used to verify if the initial players base is on the top left or bottom right part of the map (used mainly for internal calculations)
 
         self.my_base_xy = [19, 23]                      # Variable that represents the x,y position of the player's base in the simple64 map
-        self.my_second_base_xy = [41, 21]               # Variable that represents the x,y position of the enemy's base in the simple64 map
+        self.my_second_base_xy = [43, 23]               # Variable that represents the x,y position of the enemy's base in the simple64 map
+        self.enemy_base_xy = [38, 46]
+        self.enemy_second_base_xy = [14, 46]
 
         self.actions_queue = []                         # These are the actions that are stored by the wrapper to be done subsequently. The model will not be able to choose another 
                                                         # action so long as this queue is not empty, allowing for an easy way to code multi-step actions.
@@ -774,7 +776,7 @@ class TerranWrapper(SC2Wrapper):
         if named_action == ACTION_HARVEST_MINERALS_IDLE:
             idle_workers = get_all_idle_workers(obs, sc2_env.Race.terran)
             if idle_workers != sc2._NO_UNITS:
-                return harvest_gather_minerals(obs, sc2_env.Race.terran, idle_workers=idle_workers)
+                return harvest_gather_minerals_idle(obs, sc2_env.Race.terran, idle_workers)
             return no_op()
             
         # TO DO: Create a harvest minerals with worker from refinery line so the bot can juggle workers from mineral lines to gas back and forth
@@ -975,73 +977,36 @@ class TerranWrapper(SC2Wrapper):
         # ATTACK MY BASE
         if named_action == ACTION_ATTACK_MY_BASE:
             target=self.my_base_xy
-            if not self.base_top_left: target = (63-target[0]-5, 63-target[1]+5)
-            if self.units_to_attack == sc2._NO_UNITS:
-                army = select_army(obs, sc2_env.Race.terran)
-            else:
-                army = self.units_to_attack
-            if army != sc2._NO_UNITS:
-                action, self.units_to_attack = attack_target_point(obs, army, target)
-                self.last_attack_action = ACTION_ATTACK_MY_BASE
-                return action
-            return no_op()
+            actions = attack_target_point(obs, sc2_env.Race.terran, target, self.base_top_left)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+            return action
 
         # ATTACK MY SECOND BASE
         if named_action == ACTION_ATTACK_MY_SECOND_BASE:
             target=self.my_second_base_xy
-            if not self.base_top_left: target = (63-target[0]-5, 63-target[1]+5)
-            if self.units_to_attack == sc2._NO_UNITS:
-                army = select_army(obs, sc2_env.Race.terran)
-            else:
-                army = self.units_to_attack
-            if army != sc2._NO_UNITS:
-                action, self.units_to_attack = attack_target_point(obs, army, target)
-                self.last_attack_action = ACTION_ATTACK_MY_SECOND_BASE
-                return action
-            return no_op()
+            actions = attack_target_point(obs, sc2_env.Race.terran, target, self.base_top_left)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+            return action
 
-        # ATTACK ENEMY BASE
+        # # ATTACK ENEMY BASE
         if named_action == ACTION_ATTACK_ENEMY_BASE:
-            # Using our base as a reference for coordinate transformation to find the enemy's first base location
-            target=(63-self.my_base_xy[0]-5, 63-self.my_base_xy[1]+5)
-            if not self.base_top_left: target = (63-target[0]-5, 63-target[1]+5)
-            if self.units_to_attack == sc2._NO_UNITS:
-                army = select_army(obs, sc2_env.Race.terran)
-            else:
-                army = self.units_to_attack
-            if army != sc2._NO_UNITS:
-                action, self.units_to_attack = attack_target_point(obs, army, target)
-                self.last_attack_action = ACTION_ATTACK_ENEMY_BASE
-                return action
-            return no_op()
+            target=self.enemy_base_xy
+            actions = attack_target_point(obs, sc2_env.Race.terran, target, self.base_top_left)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+            return action
 
-        # ATTACK ENEMY SECOND BASE
+        # # ATTACK ENEMY SECOND BASE
         if named_action == ACTION_ATTACK_ENEMY_SECOND_BASE:
-            # Using our second base as a reference for coordinate transformation to find the enemy's second base location
-            target=(63-self.my_second_base_xy[0]-5, 63-self.my_second_base_xy[1]+5)
-            if not self.base_top_left: target = (63-target[0]-5, 63-target[1]+5)
-            if self.units_to_attack == sc2._NO_UNITS:
-                army = select_army(obs, sc2_env.Race.terran)
-            else:
-                army = self.units_to_attack
-            if army != sc2._NO_UNITS:
-                action, self.units_to_attack = attack_target_point(obs, army, target)
-                self.last_attack_action = ACTION_ATTACK_ENEMY_SECOND_BASE
-                return action
-            return no_op()
+            target=self.enemy_second_base_xy
+            actions = attack_target_point(obs, sc2_env.Race.terran, target, self.base_top_left)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+            return action
 
         # ATTACK DISTRIBUTE ARMY
         if named_action == ACTION_ATTACK_DISTRIBUTE_ARMY:
-            if self.units_to_attack == sc2._NO_UNITS:
-                army = select_army(obs, sc2_env.Race.terran)
-            else:
-                army = self.units_to_attack
-            if army != sc2._NO_UNITS:
-                action, self.units_to_attack = attack_distribute_army(obs, army)
-                self.last_attack_action = ACTION_ATTACK_DISTRIBUTE_ARMY
-                return action
-            return no_op()
-
+            actions = attack_distribute_army(obs, sc2_env.Race.terran)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+            return action
 
         return no_op()
 

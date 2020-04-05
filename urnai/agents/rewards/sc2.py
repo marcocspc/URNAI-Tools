@@ -18,20 +18,23 @@ class GeneralReward(RewardBuilder):
 
         self.last_own_worker_count = 0
         self.last_own_army_count = 0
+        self.last_structures_score = 0
         self.last_killed_units_score = 0
         self.last_killed_structures_score = 0
 
     def get_reward(self, obs, reward, done):
         currentscore = -0.1
-        currentscore += (obs.player.food_army - self.last_own_army_count)*10
-        currentscore += (obs.player.food_workers - self.last_own_worker_count)*10
-        currentscore += (obs.score_cumulative.killed_value_units - self.last_killed_units_score)*100
-        currentscore += (obs.score_cumulative.killed_value_structures - self.last_killed_structures_score)*100
+        currentscore += (obs.player.food_army - self.last_own_army_count)*100
+        currentscore += (obs.player.food_workers - self.last_own_worker_count)*100
+        currentscore += obs.score_cumulative.total_value_structures - self.last_structures_score
+        currentscore += (obs.score_cumulative.killed_value_units - self.last_killed_units_score)*5
+        currentscore += (obs.score_cumulative.killed_value_structures - self.last_killed_structures_score)*15
 
         self.last_own_army_count = obs.player.food_army
         self.last_own_worker_count = obs.player.food_workers
         self.last_killed_units_score = obs.score_cumulative.killed_value_units
         self.last_killed_structures_score = obs.score_cumulative.killed_value_structures
+        self.last_structures_score = obs.score_cumulative.total_value_structures
 
         self.reward = currentscore
         return self.reward
