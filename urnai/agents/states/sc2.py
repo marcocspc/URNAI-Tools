@@ -12,8 +12,8 @@ from utils.image import *
 
 class Simple64State(StateBuilder):
 
-    def __init__(self):
-        self.reduction_factor = 4
+    def __init__(self, reduction_factor=4):
+        self.reduction_factor = reduction_factor
 
         self._state_size = 22 + (64/self.reduction_factor)**2
         self.player_race = 0
@@ -37,8 +37,8 @@ class Simple64State(StateBuilder):
             self.base_top_left = (townhall.x < 32)
 
         new_state = []
-        new_state.append(obs.player.minerals/4000)
-        new_state.append(obs.player.vespene/2000)
+        new_state.append(obs.player.minerals/6000)
+        new_state.append(obs.player.vespene/4000)
         new_state.append(obs.player.food_cap/200)
         new_state.append(obs.player.food_used/200)
         new_state.append(obs.player.food_army/200)

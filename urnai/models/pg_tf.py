@@ -19,8 +19,8 @@ class PolicyGradientTF(LearningModel):
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='temp_pgtf', learning_rate=0.01, gamma=0.95, name='PolicyGradient'):
 
         #This code is too old and need to be updated to tensorflow 2.0
-        error = 'PolicyGradients is unsupported until its code is updated to Tensorflow 2.0.'
-        raise DeprecatedCodeException(error) 
+        error1 = 'PolicyGradients is unsupported until its code is updated to Tensorflow 2.0.'
+        raise DeprecatedCodeException(error1) 
 
         super(PolicyGradientTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
 
