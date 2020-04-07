@@ -176,7 +176,8 @@ def attack_target_point(obs, player_race, target, base_top_left):
     if not base_top_left: target = (63-target[0]-5, 63-target[1]+5)
     army = select_army(obs, player_race)
     if army != _NO_UNITS:
-        distances = list(get_distances(obs, army, target))
+        if len(army) > 0:
+            distances = list(get_distances(obs, army, target))
         actions_queue = []
         while len(army) != 0:
             unit_index = np.argmax(distances)
@@ -242,7 +243,8 @@ def harvest_gather_minerals(obs, player_race):
             for townhall in townhalls:
                 if townhall.assigned_harvesters <= townhall.ideal_harvesters and townhall.build_progress == 100:
                     target = [townhall.x, townhall.y]
-                    distances = list(get_distances(obs, workers, target))
+                    if len(workers) > 0:
+                        distances = list(get_distances(obs, workers, target))
                     while len(workers) != 0:
                         index = np.argmin(distances)
                         if (workers[index].order_id_0 == 362 or workers[index].order_length == 0) and distances[index] >= 2:
@@ -290,7 +292,8 @@ def harvest_gather_gas(obs, player_race):
         for gas_colector in gas_colectors:
             if 0 <= gas_colector.assigned_harvesters < 3 and gas_colector.build_progress == 100:
                 target = [gas_colector.x, gas_colector.y]
-                distances = list(get_distances(obs, workers, target))
+                if len(workers) > 0:
+                    distances = list(get_distances(obs, workers, target))
                 while len(workers) != 0:
                     index = np.argmin(distances)
                     if (workers[index].order_id_0 == 362 or workers[index].order_length == 0) and distances[index] >= 3:
@@ -460,8 +463,10 @@ def get_exploitable_geyser(obs, player_race):
     return _NO_UNITS
 
 def get_distances(obs, units, xy):
-    units_xy = [(unit.x, unit.y) for unit in units]
-    return np.linalg.norm(np.array(units_xy) - np.array(xy), axis=1)
+    if len(units) > 0:
+        units_xy = [(unit.x, unit.y) for unit in units]
+        return np.linalg.norm(np.array(units_xy) - np.array(xy), axis=1)
+    pass
 
 def get_euclidean_distance(unit_xy, xy):
     return np.linalg.norm(np.array(unit_xy) - np.array(xy))
