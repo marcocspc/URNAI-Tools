@@ -27,16 +27,19 @@ class Trainer(Savable):
         self.agent = agent
         self.save_path = save_path
         self.file_name = file_name
+        self.logger = None
+        self.load(self.save_path, self.file_name)
         
 
     def train(self, num_episodes=float('inf'), max_steps=float('inf'), save_steps=10, enable_save=False, test_params: TestParams = None, reward_from_env = True):
         start_time = time.time()
         
         print("> Training")
-        logger = Logger(num_episodes)
+        if self.logger == None:
+            self.logger = Logger(num_episodes)
 
         if test_params != None:
-            test_params.logger = logger
+            test_params.logger = self.logger
 
         for episode in itertools.count():
             if episode >= num_episodes:
@@ -77,10 +80,10 @@ class Trainer(Savable):
 
                 if done or is_last_step:
                     victory = default_reward == 1
-                    logger.record_episode(ep_reward, victory, step + 1)
+                    self.logger.record_episode(ep_reward, victory, step + 1)
                     break
             
-            logger.log_ep_stats()
+            self.logger.log_ep_stats()
             if enable_save and episode > 0 and episode % save_steps == 0:
                 self.save(self.agent, self.save_path, self.file_name)
 
@@ -100,14 +103,14 @@ class Trainer(Savable):
         # Saving the model when the training is ended
         if enable_save:
             self.save(self.agent, self.save_path, self.file_name)
-        logger.log_train_stats()
-        logger.plot_train_stats(self.agent)
+        self.logger.log_train_stats()
+        self.logger.plot_train_stats(self.agent)
 
 
     def play(self, num_matches, max_steps=float('inf'), test_params=None, reward_from_env = True):
         print("\n\n> Playing")
 
-        logger = Logger(num_matches)
+        self.logger = Logger(num_matches)
 
         for match in itertools.count():
             if match >= num_matches:
@@ -143,17 +146,21 @@ class Trainer(Savable):
                 # If done (if we're dead) : finish episode
                 if done or is_last_step:
                     victory = default_reward == 1
-                    logger.record_episode(ep_reward, victory, step + 1)
+                    self.logger.record_episode(ep_reward, victory, step + 1)
                     break
 
-            logger.log_ep_stats()
+            self.logger.log_ep_stats()
 
         if test_params != None:
-            test_params.logger.record_play_test(test_params.current_ep_count, logger.ep_rewards, logger.victories, num_matches)
+            test_params.logger.record_play_test(test_params.current_ep_count, self.logger.ep_rewards, self.logger.victories, num_matches)
             print()
         else:
             # Only logs train stats if this is not a test, to avoid cluttering the interface with info
-            logger.log_train_stats()
+            self.logger.log_train_stats()
 
-    def save(self, agent, save_path='urnai/models/saved/', file_name='temp'):
+    def save(self, agent, save_path, file_name):
         agent.save(save_path, file_name)
+        self.logger.save(save_path, file_name)
+
+    def load(self, save_path, file_name):
+        self.logger = Logger.load(self, save_path, file_name)

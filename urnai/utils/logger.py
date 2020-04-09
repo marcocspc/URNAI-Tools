@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
+import os
 from matplotlib.ticker import PercentFormatter
 
 class Logger():
@@ -27,6 +29,51 @@ class Logger():
         self.play_win_rates = []
 
         self.is_episodic = is_episodic
+
+    def save(self, save_path, file_name):
+        print("\n> Saving the Logger...\n")
+        pickle_out = open(save_path+file_name+"/"+file_name+"_logger.pickle", "wb")
+        pickle_obj =    [
+                        self.ep_count,
+                        self.ep_total,
+                        self.best_reward,
+                        self.ep_rewards,
+                        self.ep_avg_rewards,
+                        self.ep_steps_count,
+                        self.ep_avg_steps,
+                        self.victories,
+                        self.play_ep_count,
+                        self.play_rewards_avg,
+                        self.play_match_count,
+                        self.play_win_rates,
+                        self.is_episodic
+                        ]
+        pickle.dump(pickle_obj, pickle_out)
+        pickle_out.close()
+        print("> Logger saved!\n")
+
+    def load(self, save_path, file_name):
+        exists_pickle = os.path.isfile(save_path + file_name + "/" + file_name + '_logger.pickle')
+        if exists_pickle:
+            print("\n> Loading saved logger...\n")
+            pickle_in  = open(save_path + file_name + "/" + file_name + "_logger.pickle", "rb")
+            pickle_obj = pickle.load(pickle_in)
+            logger = Logger(pickle_obj[1])
+            logger.ep_count = pickle_obj[0]
+            logger.best_reward = pickle_obj[2]
+            logger.ep_rewards = pickle_obj[3]
+            logger.ep_avg_rewards = pickle_obj[4]
+            logger.ep_steps_count = pickle_obj[5]
+            logger.ep_avg_steps = pickle_obj[6]
+            logger.victories = pickle_obj[7]
+            logger.play_ep_count = pickle_obj[8]
+            logger.play_rewards_avg = pickle_obj[9]
+            logger.play_match_count = pickle_obj[10]
+            logger.play_win_rates = pickle_obj[11]
+            logger.is_episodic = pickle_obj[12]
+            print("> Logger loaded!\n")
+            return logger
+        return None
     
     def reset(self):
         self.ep_count = 0
