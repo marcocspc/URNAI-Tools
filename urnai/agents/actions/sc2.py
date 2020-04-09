@@ -218,7 +218,8 @@ def harvest_gather_minerals_quick(obs, worker, player_race):
                     if townhall.assigned_harvesters <= townhall.ideal_harvesters and townhall.build_progress == 100:
                         target = [townhall.x, townhall.y]
                         closest_mineral = get_closest_unit(obs, target, units_list=mineral_fields)
-                        return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, closest_mineral.tag)
+                        if closest_mineral != _NO_UNITS:
+                            return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", worker.tag, closest_mineral.tag)
 
     return _NO_OP()
 
@@ -249,7 +250,8 @@ def harvest_gather_minerals(obs, player_race):
                         index = np.argmin(distances)
                         if (workers[index].order_id_0 == 362 or workers[index].order_length == 0) and distances[index] >= 2:
                             closest_mineral = get_closest_unit(obs, target, units_list=mineral_fields)
-                            return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", workers[index].tag, closest_mineral.tag)
+                            if closest_mineral != _NO_UNITS:
+                                return actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", workers[index].tag, closest_mineral.tag)
                         else:
                             workers.pop(index)
                             distances.pop(index)
@@ -272,9 +274,10 @@ def harvest_gather_minerals_idle(obs, player_race, idle_workers):
                 if townhall.assigned_harvesters <= townhall.ideal_harvesters and townhall.build_progress == 100:
                     target = [townhall.x, townhall.y]
                     worker = get_closest_unit(obs, target, units_list=idle_workers)
-                    distances = get_distances(obs, mineral_fields, target)
-                    closest_mineral_to_townhall = mineral_fields[np.argmin(distances)]
-                    return actions.RAW_FUNCTIONS.Harvest_Gather_unit("now", worker.tag, closest_mineral_to_townhall.tag)
+                    if worker != _NO_UNITS:
+                        distances = get_distances(obs, mineral_fields, target)
+                        closest_mineral_to_townhall = mineral_fields[np.argmin(distances)]
+                        return actions.RAW_FUNCTIONS.Harvest_Gather_unit("now", worker.tag, closest_mineral_to_townhall.tag)
     return _NO_OP()
 
 def harvest_gather_gas(obs, player_race):
@@ -408,12 +411,11 @@ def get_closest_unit(obs, target_xy, unit_type = _NO_UNITS, units_list = _NO_UNI
             return unit
 
     elif units_list != _NO_UNITS:
-        if len(units_list) == 0:
-            units_list = [units_list]
-        distances = get_distances(obs, units_list, target_xy)
-        min_dist_index = np.argmin(distances)
-        unit = units_list[min_dist_index]
-        return unit
+        if len(units_list) != 0:
+            distances = get_distances(obs, units_list, target_xy)
+            min_dist_index = np.argmin(distances)
+            unit = units_list[min_dist_index]
+            return unit
     return _NO_UNITS
 
 def get_my_units_by_type(obs, unit_type):
