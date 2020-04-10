@@ -14,6 +14,7 @@ from urnai.base.savable import Savable
 class LearningModel(Savable):
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, save_path, file_name, name=None):
+        super(LearningModel, self).__init__()
         self.gamma = gamma
         self.learning_rate = learning_rate
         self.save_path = save_path
@@ -43,7 +44,6 @@ class LearningModel(Savable):
         Given a State, returns the index for the action with the highest Q-Value.
         '''
         pass
-
 
     @abstractmethod
     def save(self) -> None : ...

@@ -22,14 +22,15 @@ class TestParams():
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
 
-    def __init__(self, env, agent, save_path="urnai/models/saved/", file_name="temp"):
+    def __init__(self, env, agent, save_path="urnai/models/saved/", file_name="temp", enable_save=False):
         self.env = env
         self.agent = agent
         self.save_path = save_path
         self.file_name = file_name
+        self.enable_save = enable_save
         
 
-    def train(self, num_episodes=float('inf'), max_steps=float('inf'), save_steps=10, enable_save=False, test_params: TestParams = None, reward_from_env = True):
+    def train(self, num_episodes=float('inf'), max_steps=float('inf'), save_steps=10, test_params: TestParams = None, reward_from_env = True):
         start_time = time.time()
         
         print("> Training")
@@ -81,7 +82,7 @@ class Trainer(Savable):
                     break
             
             logger.log_ep_stats()
-            if enable_save and episode > 0 and episode % save_steps == 0:
+            if self.enable_save and episode > 0 and episode % save_steps == 0:
                 self.save(self.agent, self.save_path, self.file_name)
 
             if test_params != None and episode % test_params.test_steps == 0 and episode != 0:
@@ -98,7 +99,7 @@ class Trainer(Savable):
         print("\n> Training duration: {} seconds".format(end_time - start_time))
 
         # Saving the model when the training is ended
-        if enable_save:
+        if self.enable_save:
             self.save(self.agent, self.save_path, self.file_name)
         logger.log_train_stats()
         logger.plot_train_stats(self.agent)
@@ -157,3 +158,4 @@ class Trainer(Savable):
 
     def save(self, agent, save_path='urnai/models/saved/', file_name='temp'):
         agent.save(save_path, file_name)
+

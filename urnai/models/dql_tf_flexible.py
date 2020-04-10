@@ -53,11 +53,6 @@ class DqlTfFlexible(LearningModel):
         self.decay_rate = 0.0001
         self.decay_step = 0
 
-
-        # ///// load_pickle should be called by the user! If it stays here, it may cause an accident if the user really wants a NEW OBJECT and at the same time he/she has a saved model inside the default folder, commenting this out!
-        # Attempting to Load our serialized variables, as some of them will be used during the definition of our model
-        #self.load_pickle()
-
         ops.reset_default_graph()
         tf.compat.v1.disable_eager_execution()
 
@@ -76,8 +71,6 @@ class DqlTfFlexible(LearningModel):
         self.sess.run(global_variables_initializer())
 
         self.saver = train.Saver()
-        # The default behavior of the __init__() method should be to create a new object, if the user wants to load from the default folder, he/she may call the load method.
-        #self.load()
 
     def learn(self, s, a, r, s_, done, is_last_step: bool):
         qsa_values = self.sess.run(self.model_layers[-1], feed_dict={self.model_layers[0]: s})
@@ -135,53 +128,25 @@ class DqlTfFlexible(LearningModel):
         action = self.actions[int(action_idx)]
         return action
 
-    def get_full_persistance_pickle_path(self):
-        return self.save_path + self.file_name + os.path.sep + "model_" + self.file_name + ".pkl"
-
-
-    def get_full_persistance_tensorflow_path(self):
-        return self.save_path + os.path.sep + "model_tensorflow_" + self.file_name
-
-    def save(self):
-        print("Saving model...")
-
+    def save_extra(self, persist_path):
         #Saving tensorflow stuff
-        self.saver.save(self.sess, self.get_full_persistance_tensorflow_path())
-        # Dumping (serializing) decay_step into a pickle file
-        with open(self.get_full_persistance_pickle_path(), "wb") as pickle_out: 
-            pickle.dump(self.pickle_obj, pickle_out)
+        self.saver.save(self.sess, self.get_full_persistance_tensorflow_path(persist_path))
 
-    def load(self):
-        #Load this model from persistant file
-        #Tensorflow variables need to be loaded separated,
-        #Because Session must be configured first. 
-        self.load_pickle()
+    def load_extra(self, persist_path):
+        #Puts pickle stuff where it needs to be
+        self.decay_step = self.pickle_obj[0]
+        self.build_model = self.pickle_obj[1]
+        #Makes model, needed to be done before loading tensorflow's persistance
         self.make_model()
-        self.load_tf()
-
-    def load_tf(self):
         #Check if tf file exists
-        exists = os.path.isfile(self.get_full_persistance_tensorflow_path + ".meta")
+        exists = os.path.isfile(self.get_full_persistance_tensorflow_path(persist_path))
         #If yes, load it
         if exists:
             self.make_model()
-            self.saver.restore(self.sess, self.save_path + self.file_name + "/" + self.file_name)
+            self.saver.restore(self.sess, self.get_full_persistance_tensorflow_path(persist_path))
         else:
             #Else, raise exception
-            raise FileNotFoundError(self.get_full_persistance_tensorflow_path + " was not found.")
-
-    def load_pickle(self):
-        #Check if pickle file exists
-        exists_pickle = os.path.isfile(self.get_full_persistance_pickle_path)
-        #If yes, load it
-        if exists_pickle:
-            with open(self.get_full_persistance_pickle_path(), "wb") as pickle_in: 
-                self.pickle_obj = pickle.load(pickle_in)
-                self.decay_step = self.pickle_obj[0]
-                self.build_model = self.pickle_obj[1]
-        else:
-            #Else, raise exception
-            raise FileNotFoundError(self.get_full_persistance_tensorflow_path + " was not found.")
+            raise FileNotFoundError(self.get_full_persistance_tensorflow_path(persist_path) + " was not found.")
 
     def make_model(self):
         #If the build model is the same as the default one, apply

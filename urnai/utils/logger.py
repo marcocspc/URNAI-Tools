@@ -1,8 +1,15 @@
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir) 
+from urnai.base.savable import Savable 
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import PercentFormatter
 
-class Logger():
+class Logger(Savable):
     def __init__(self, ep_total, is_episodic=True):
         # Episode count
         self.ep_count = 0
@@ -27,6 +34,21 @@ class Logger():
         self.play_win_rates = []
 
         self.is_episodic = is_episodic
+
+        self.pickle_obj = [ self.ep_count,
+                            self.ep_total,
+                            self.best_reward,
+                            self.ep_rewards,
+                            self.ep_avg_rewards,
+                            self.ep_steps_count,
+                            self.ep_avg_steps,
+                            self.victories,
+                            self.play_ep_count,
+                            self.play_rewards_avg,
+                            self.play_match_count,
+                            self.play_win_rates,
+                            self.is_episodic,
+            ]
     
     def reset(self):
         self.ep_count = 0
@@ -98,6 +120,30 @@ class Logger():
 
         plt.show()
 
+    def load_extra(self, persist_path):
+        # Episode count
+        self.ep_count = self.pickle_obj[0] 
+        self.ep_total = self.pickle_obj[1] 
+
+        # Reward count
+        self.best_reward = self.pickle_obj[2] 
+        self.ep_rewards = self.pickle_obj[3] 
+        self.ep_avg_rewards = self.pickle_obj[4] 
+
+        # Steps count
+        self.ep_steps_count = self.pickle_obj[5] 
+        self.ep_avg_steps = self.pickle_obj[6] 
+
+        # Win rate count
+        self.victories = self.pickle_obj[7] 
+
+        # Play testing count
+        self.play_ep_count = self.pickle_obj[8] 
+        self.play_rewards_avg = self.pickle_obj[9] 
+        self.play_match_count = self.pickle_obj[10] 
+        self.play_win_rates = self.pickle_obj[11] 
+
+        self.is_episodic = self.pickle_obj[12] 
 
     def __plot_bar(self, x_values, y_bars, bar_labels, x_label, y_label, title, width=0.2, format_percent=False, percent_scale=1):
         fig, ax = plt.subplots()
