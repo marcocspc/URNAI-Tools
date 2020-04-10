@@ -7,6 +7,8 @@ from urnai.base.savable import Savable
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
+import os
 from matplotlib.ticker import PercentFormatter
 
 class Logger(Savable):
@@ -49,7 +51,7 @@ class Logger(Savable):
                             self.play_win_rates,
                             self.is_episodic,
             ]
-    
+
     def reset(self):
         self.ep_count = 0
 

@@ -11,8 +11,10 @@ class Savable(ABC):
         '''
         This init method is here
         to instantiate self.pickle_obj
+        self.file_name
         '''
         self.pickle_obj = []
+        self.file_name = self.get_default_filename
 
     def get_default_filename(self):
         '''
