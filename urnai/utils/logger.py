@@ -12,7 +12,7 @@ import os
 from matplotlib.ticker import PercentFormatter
 
 class Logger(Savable):
-    def __init__(self, ep_total, is_episodic=True):
+    def __init__(self, ep_total, is_episodic=True, render=True):
         # Episode count
         self.ep_count = 0
         self.ep_total = ep_total
@@ -37,6 +37,8 @@ class Logger(Savable):
 
         self.is_episodic = is_episodic
 
+        self.render = render
+
         self.pickle_obj = [ self.ep_count,
                             self.ep_total,
                             self.best_reward,
@@ -50,6 +52,7 @@ class Logger(Savable):
                             self.play_match_count,
                             self.play_win_rates,
                             self.is_episodic,
+                            self.render,
             ]
 
     def reset(self):
@@ -113,14 +116,20 @@ class Logger(Savable):
             self.__plot_bar(self.play_ep_count, [self.play_win_rates], ['Play'], 'Episode', 'Win rate (%)', 'Win rate percentage over play testing', format_percent=True)
             self.__plot_bar(self.play_ep_count, [self.play_rewards_avg], ['Play'], 'Episode', 'Reward avg.', 'Reward avg. over play testing')
 
-    def __plot_curve(self, x, y, x_label, y_label, title):
-        fig, ax = plt.subplots()
-        ax.plot(x, y)
+    def save_extra(self, persist_path):
+        if self.bar_graph == None or self.curve_graph == None:
+            self.bar_graph = self.__plot_bar()
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_bar.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_bar.pdf")
+            self.bar_graph.close()
+            self.bar_graph = None
 
-        ax.set(xlabel=x_label, ylabel=y_label, title=title)
-        ax.grid()
 
-        plt.show()
+            self.curve_graph = self.__plot_curve()
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_curve.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_curve.pdf")
+            self.curve_graph.close()
+            self.curve_graph = None
 
     def load_extra(self, persist_path):
         # Episode count
@@ -146,6 +155,21 @@ class Logger(Savable):
         self.play_win_rates = self.pickle_obj[11] 
 
         self.is_episodic = self.pickle_obj[12] 
+        self.render = self.pickle_obj[13] 
+
+    def __plot_curve(self, x, y, x_label, y_label, title):
+        fig, ax = plt.subplots()
+        ax.plot(x, y)
+
+        ax.set(xlabel=x_label, ylabel=y_label, title=title)
+        ax.grid()
+
+        if self.render: 
+            plt.ion()
+            plt.show()
+            plt.pause(0.001)
+
+        return fig
 
     def __plot_bar(self, x_values, y_bars, bar_labels, x_label, y_label, title, width=0.2, format_percent=False, percent_scale=1):
         fig, ax = plt.subplots()
@@ -168,8 +192,12 @@ class Logger(Savable):
         if format_percent:
             ax.yaxis.set_major_formatter(PercentFormatter(xmax=percent_scale))
 
-        plt.show()
+        if self.render: 
+            plt.ion()
+            plt.show()
+            plt.pause(0.001)
 
+        return fig
 
     def __lerp(self, a, b, t):
         return (1 - t) * a + t * b

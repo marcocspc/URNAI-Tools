@@ -8,6 +8,7 @@ import itertools
 import time
 from utils.logger import Logger
 from urnai.base.savable import Savable 
+from datetime import datetime
 
 class TestParams():
     def __init__(self, num_matches, steps_per_test, max_steps=float('inf'), reward_threshold=None):
@@ -22,18 +23,29 @@ class TestParams():
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
 
-    def __init__(self, env, agent, save_path="urnai/models/saved/", file_name="temp", enable_save=False):
+    def __init__(self, env, agent, save_path=os.path.expanduser("~") + "urnai_saved_traingings/", file_name=str(datetime.now()), enable_save=False, save_every=10):
         self.env = env
         self.agent = agent
         self.save_path = save_path
         self.file_name = file_name
+        self.full_save_path = self.save_path + os.path.sep + self.file_name 
         self.enable_save = enable_save
-
-        self.logger = None
-        self.load(self.save_path)
+        self.save_every = save_every
         
+        self.pickle_obj = [self.save_every]
 
-    def train(self, num_episodes=float('inf'), max_steps=float('inf'), save_steps=10, test_params: TestParams = None, reward_from_env = True):
+        self.logger = Logger() 
+
+        if enable_save and os.path.exists(self.full_save_path):
+            print("WARNING! Loading training from " + self.full_save_path + " with SAVING ENABLED.")
+            self.load(self.full_save_path)
+        elif enable_save:
+            print("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
+            os.mkdir(self.full_save_path)
+        else:
+            print("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
+
+    def train(self, num_episodes=float('inf'), max_steps=float('inf'), save_steps=self.save_every, test_params: TestParams = None, reward_from_env = True):
         start_time = time.time()
         
         print("> Training")
@@ -87,9 +99,10 @@ class Trainer(Savable):
             
             logger.log_ep_stats()
             if self.enable_save and episode > 0 and episode % save_steps == 0:
-                self.logger.log_ep_stats()
-            if enable_save and episode > 0 and episode % save_steps == 0:
-                self.save(self.save_path)
+                #self.logger.log_ep_stats()
+                self.save(self.full_save_path)
+            #if enable_save and episode > 0 and episode % save_steps == 0:
+                #self.save(self.full_save_path)
 
             if test_params != None and episode % test_params.test_steps == 0 and episode != 0:
                 test_params.current_ep_count = episode
@@ -104,11 +117,11 @@ class Trainer(Savable):
         end_time = time.time()
         print("\n> Training duration: {} seconds".format(end_time - start_time))
 
-        # Saving the model when the training is ended
-        if self.enable_save:
-            self.save(self.agent, self.save_path, self.file_name)
         self.logger.log_train_stats()
         self.logger.plot_train_stats(self.agent)
+        # Saving the model when the training has ended
+        if self.enable_save:
+            self.save(self.full_save_path)
 
 
     def play(self, num_matches, max_steps=float('inf'), test_params=None, reward_from_env = True):
@@ -157,17 +170,18 @@ class Trainer(Savable):
 
         if test_params != None:
             test_params.logger.record_play_test(test_params.current_ep_count, self.logger.ep_rewards, self.logger.victories, num_matches)
-            print()
         else:
             # Only logs train stats if this is not a test, to avoid cluttering the interface with info
             self.logger.log_train_stats()
 
-    def save(self, save_path):
-        self.agent.save(save_path, self.file_name)
-        self.logger.save(save_path, self.file_name)
+    def save_extra(self, save_path):
+        self.env.save(save_path)
+        self.agent.save(save_path)
+        self.logger.save(save_path)
 
-    def load(self, save_path):
-        #self.logger = Logger.load(self, save_path, file_name)
+    def load_extra(self, save_path):
+        self.save_every = self.pickle_obj[0]
 
-        self.logger = Logger()
+        self.agent.load(save_path)
+        self.env.load(save_path)
         self.logger.load(save_path)

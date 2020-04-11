@@ -14,9 +14,9 @@ class Savable(ABC):
         self.file_name
         '''
         self.pickle_obj = []
-        self.file_name = self.get_default_filename
+        self.save_stamp = self.get_default_save_stamp()
 
-    def get_default_filename(self):
+    def get_default_save_stamp(self):
         '''
         This method returns the default
         file name that should be used while
@@ -39,7 +39,8 @@ class Savable(ABC):
         This method should be implemented when
         some extra persistence is to be saved.
         '''
-        pass
+        print("WARNING Saving for class " + self.__class__.__name__ + " is not supported yet.")
+        print("Not saving.")
 
     def load_pickle(self, persist_path):
         '''
@@ -67,19 +68,21 @@ class Savable(ABC):
         self.a = pickle_obj[0]
         self.b = pickle_obj[1]
         '''
-        pass
+        print("WARNING Loading for class " + self.__class__.__name__ + " is not supported yet.")
+        print("Not loading.")
+        
 
     def get_full_persistance_pickle_path(self, persist_path):
         '''
         This method returns the default persistance pickle path. 
         '''
-        return persist_path + self.file_name + os.path.sep + self.get_default_filename() + self.file_name + ".pkl"
+        return persist_path + self.file_name + os.path.sep + self.get_default_save_stamp() + self.file_name + ".pkl"
 
     def get_full_persistance_tensorflow_path(self, persist_path):
         '''
         This method returns the default persistance tensorflow path. 
         '''
-        return persist_path + os.path.sep + self.get_default_filename + "tensorflow_" + self.file_name
+        return persist_path + os.path.sep + self.get_default_save_stamp() + "tensorflow_" + self.file_name
 
     def save(self, savepath):
         '''

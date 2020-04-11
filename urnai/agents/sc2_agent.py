@@ -58,5 +58,3 @@ class SC2Agent(Agent):
         arrayed_action = [self.action_wrapper.get_action(self.previous_action, obs)]
         return arrayed_action
 
-    def save(self, save_path, file_name):
-        self.model.save(save_path, file_name)

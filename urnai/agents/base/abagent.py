@@ -62,3 +62,9 @@ class Agent(Savable):
     @abstractmethod
     def play(self, obs):
         pass
+
+    def save_extra(self, save_path):
+        self.model.save(save_path)
+
+    def load_extra(self, load_path):
+        self.model.load(load_path)
