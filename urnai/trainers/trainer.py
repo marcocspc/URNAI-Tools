@@ -28,7 +28,7 @@ class Trainer(Savable):
         self.agent = agent
         self.save_path = save_path
         self.file_name = file_name
-        self.full_save_path = "../" + self.save_path + os.path.sep + self.file_name 
+        self.full_save_path = self.save_path + os.path.sep + self.file_name 
         self.enable_save = enable_save
         self.save_every = save_every
         
@@ -39,9 +39,9 @@ class Trainer(Savable):
         if self.enable_save and os.path.exists(self.full_save_path):
             print("WARNING! Loading training from " + self.full_save_path + " with SAVING ENABLED.")
             self.load(self.full_save_path)
-        elif self.enable_save:
-            print("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
-            os.mkdir(self.full_save_path)
+        # elif self.enable_save:
+        #     print("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
+        #     os.mkdir(self.full_save_path)
         else:
             print("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
