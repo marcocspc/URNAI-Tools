@@ -45,9 +45,9 @@ class LearningModel(Savable):
         '''
         pass
 
-    @abstractmethod
-    def save(self) -> None : ...
+    # @abstractmethod
+    # def save(self) -> None : ...
 
 
-    @abstractmethod
-    def load(self) -> None: ...
+    # @abstractmethod
+    # def load(self) -> None: ...

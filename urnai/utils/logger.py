@@ -116,20 +116,40 @@ class Logger(Savable):
             self.__plot_bar(self.play_ep_count, [self.play_win_rates], ['Play'], 'Episode', 'Win rate (%)', 'Win rate percentage over play testing', format_percent=True)
             self.__plot_bar(self.play_ep_count, [self.play_rewards_avg], ['Play'], 'Episode', 'Reward avg.', 'Reward avg. over play testing')
 
-    def save_extra(self, persist_path):
-        if self.bar_graph == None or self.curve_graph == None:
-            self.bar_graph = self.__plot_bar()
-            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_bar.png")
-            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_bar.pdf")
-            self.bar_graph.close()
-            self.bar_graph = None
+    # def save_extra(self, persist_path):
+    #     if self.bar_graph == None or self.curve_graph == None:
+    #         self.bar_graph = self.__plot_bar()
+    #         plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_bar.png")
+    #         plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_bar.pdf")
+    #         self.bar_graph.close()
+    #         self.bar_graph = None
 
 
-            self.curve_graph = self.__plot_curve()
-            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_curve.png")
-            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_curve.pdf")
-            self.curve_graph.close()
-            self.curve_graph = None
+    #         self.curve_graph = self.__plot_curve()
+    #         plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_curve.png")
+    #         plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_curve.pdf")
+    #         self.curve_graph.close()
+    #         self.curve_graph = None
+
+    def save_pickle(self, persist_path):
+        self.pickle_obj = [ self.ep_count,
+                            self.ep_total,
+                            self.best_reward,
+                            self.ep_rewards,
+                            self.ep_avg_rewards,
+                            self.ep_steps_count,
+                            self.ep_avg_steps,
+                            self.victories,
+                            self.play_ep_count,
+                            self.play_rewards_avg,
+                            self.play_match_count,
+                            self.play_win_rates,
+                            self.is_episodic,
+                            self.render,
+            ]
+            
+        with open(self.get_full_persistance_pickle_path(persist_path), "wb") as pickle_out: 
+            pickle.dump(self.pickle_obj, pickle_out)
 
     def load_extra(self, persist_path):
         # Episode count

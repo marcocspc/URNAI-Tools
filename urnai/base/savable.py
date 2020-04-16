@@ -1,3 +1,5 @@
+import os
+import pickle
 from abc import ABC, abstractmethod
 
 class Savable(ABC):
@@ -31,7 +33,7 @@ class Savable(ABC):
 
         self.pickle_obj should be populated in __init__ method.
         '''
-        with open(self.get_full_persistance_pickle_path(), "wb") as pickle_out: 
+        with open(self.get_full_persistance_pickle_path(persist_path), "wb") as pickle_out: 
             pickle.dump(self.pickle_obj, pickle_out)
     
     def save_extra(self, persist_path):
@@ -47,15 +49,17 @@ class Savable(ABC):
         This method loads a list instance
         saved by pickle.
         '''
-            #Check if pickle file exists
-            exists_pickle = os.path.isfile(self.get_full_persistance_pickle_path(persist_path))
-            #If yes, load it
-            if exists_pickle:
-                with open(self.get_full_persistance_pickle_path(persist_path), "wb") as pickle_in: 
+        #Check if pickle file exists
+        pickle_path = self.get_full_persistance_pickle_path(persist_path)
+        exists_pickle = os.path.isfile(pickle_path)
+        #If yes, load it
+        if exists_pickle:
+            if os.path.getsize(pickle_path) > 0: 
+                with open(pickle_path, "rb") as pickle_in: 
                     self.pickle_obj = pickle.load(pickle_in)
-            else:
-                #Else, raise exception
-                raise FileNotFoundError(self.get_full_persistance_tensorflow_path(persist_path) + " was not found.")
+        #else:
+            #Else, raise exception
+            #raise FileNotFoundError(self.get_full_persistance_tensorflow_path(persist_path) + " was not found.")
 
     def load_extra(self, persist_path):
         '''
@@ -76,13 +80,13 @@ class Savable(ABC):
         '''
         This method returns the default persistance pickle path. 
         '''
-        return persist_path + self.file_name + os.path.sep + self.get_default_save_stamp() + self.file_name + ".pkl"
+        return persist_path + os.path.sep + self.get_default_save_stamp() + ".pkl"
 
     def get_full_persistance_tensorflow_path(self, persist_path):
         '''
         This method returns the default persistance tensorflow path. 
         '''
-        return persist_path + os.path.sep + self.get_default_save_stamp() + "tensorflow_" + self.file_name
+        return persist_path + os.path.sep + self.get_default_save_stamp() + "tensorflow_"
 
     def save(self, savepath):
         '''

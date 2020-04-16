@@ -31,6 +31,7 @@ class SC2Env(Env):
         self.game_steps_per_ep = game_steps_per_ep
         self.spatial_dim = spatial_dim
         self.players = players
+        self.pickle_obj = []
 
         self.start()
 

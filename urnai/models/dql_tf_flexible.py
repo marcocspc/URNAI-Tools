@@ -143,7 +143,7 @@ class DqlTfFlexible(LearningModel):
         #If yes, load it
         if exists:
             self.make_model()
-            self.saver.restore(self.sess, self.get_full_persistance_tensorflow_path(persist_path))
+            self.saver.restore(self.sess, self.get_full_persistance_tensorflow_path(persist_path)+".meta")
         else:
             #Else, raise exception
             raise FileNotFoundError(self.get_full_persistance_tensorflow_path(persist_path) + " was not found.")

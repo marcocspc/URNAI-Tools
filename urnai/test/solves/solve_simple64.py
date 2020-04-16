@@ -36,16 +36,17 @@ def main(unused_argv):
         
         action_wrapper = TerranWrapper()
         state_builder = Simple64State()
-        #dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=1024, nodes_layer2=512, learning_rate=0.005, gamma=0.95, save_path='/home/lpdcalves/', file_name="terran_dql")
-        dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=1024, nodes_layer2=512, learning_rate=0.005, gamma=0.95, save_path='urnai/models/saved/', file_name="terran_dql")
-        #dq_network = PolicyGradientTF(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, save_path='urnai/models/saved/', file_name="terran_dql")
+        
+        # Deep Q Learning Model
+        dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=256, nodes_layer2=256, nodes_layer3=256, nodes_layer4=256, learning_rate=0.005, gamma=0.95)
 
-        ## Terran agent with a Deep Q-Learning model
+        # Terran agent with a Deep Q-Learning model
         agent = SC2Agent(dq_network, GeneralReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())
 
         #test_params = TestParams(num_matches=1, steps_per_test=25, max_steps=10000, reward_threshold=1000)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved/', file_name="terran_dql")
-        trainer.train(num_episodes=3, save_steps=1, enable_save=True, reward_from_env=True, max_steps=10000)
+        trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_dql", save_every=20, enable_save=True)
+        #trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dql", save_every=10, enable_save=True)
+        trainer.train(num_episodes=500, reward_from_env=True, max_steps=10000)
         trainer.play(num_matches=10)
 
     except KeyboardInterrupt:

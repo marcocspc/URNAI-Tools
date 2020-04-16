@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from base.savable import Savable 
 from utils.types import *
 
-class Env(ABC):
+class Env(Savable):
     '''
     Abstract Base Class for all environments currently supported.
     Environments are classes used to create a link between agents, models and

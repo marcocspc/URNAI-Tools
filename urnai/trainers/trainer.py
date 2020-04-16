@@ -28,28 +28,28 @@ class Trainer(Savable):
         self.agent = agent
         self.save_path = save_path
         self.file_name = file_name
-        self.full_save_path = self.save_path + os.path.sep + self.file_name 
+        self.full_save_path = "../" + self.save_path + os.path.sep + self.file_name 
         self.enable_save = enable_save
         self.save_every = save_every
         
         self.pickle_obj = [self.save_every]
 
-        self.logger = Logger() 
+        self.logger = Logger(0) 
 
-        if enable_save and os.path.exists(self.full_save_path):
+        if self.enable_save and os.path.exists(self.full_save_path):
             print("WARNING! Loading training from " + self.full_save_path + " with SAVING ENABLED.")
             self.load(self.full_save_path)
-        elif enable_save:
+        elif self.enable_save:
             print("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
             os.mkdir(self.full_save_path)
         else:
             print("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
-    def train(self, num_episodes=float('inf'), max_steps=float('inf'), save_steps=self.save_every, test_params: TestParams = None, reward_from_env = True):
+    def train(self, num_episodes=float('inf'), max_steps=float('inf'), test_params: TestParams = None, reward_from_env = True):
         start_time = time.time()
         
         print("> Training")
-        if self.logger == None:
+        if self.logger.ep_count == 0:
             self.logger = Logger(num_episodes)
 
         if test_params != None:
@@ -97,8 +97,8 @@ class Trainer(Savable):
                     self.logger.record_episode(ep_reward, victory, step + 1)
                     break
             
-            logger.log_ep_stats()
-            if self.enable_save and episode > 0 and episode % save_steps == 0:
+            self.logger.log_ep_stats()
+            if self.enable_save and episode > 0 and episode % self.save_every == 0:
                 #self.logger.log_ep_stats()
                 self.save(self.full_save_path)
             #if enable_save and episode > 0 and episode % save_steps == 0:
