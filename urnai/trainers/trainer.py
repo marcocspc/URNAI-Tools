@@ -23,25 +23,31 @@ class TestParams():
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
 
-    def __init__(self, env, agent, save_path=os.path.expanduser("~") + "urnai_saved_traingings/", file_name=str(datetime.now()), enable_save=False, save_every=10):
+    def __init__(self, env, agent, save_path=os.path.expanduser("~") + "urnai_saved_traingings/", file_name=str(datetime.now()), enable_save=False, save_every=10, relative_path=True):
         self.env = env
         self.agent = agent
         self.save_path = save_path
-        self.file_name = file_name
-        self.full_save_path = self.save_path + os.path.sep + self.file_name 
+        self.file_name = file_name 
         self.enable_save = enable_save
         self.save_every = save_every
+        self.relative_path = relative_path
         
         self.pickle_obj = [self.save_every]
 
         self.logger = Logger(0) 
 
+        if(relative_path):
+            self.full_save_path = "../" + self.save_path + os.path.sep + self.file_name
+        else:
+            self.full_save_path = self.save_path + os.path.sep + self.file_name
+        
+
         if self.enable_save and os.path.exists(self.full_save_path):
             print("WARNING! Loading training from " + self.full_save_path + " with SAVING ENABLED.")
             self.load(self.full_save_path)
-        # elif self.enable_save:
-        #     print("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
-        #     os.mkdir(self.full_save_path)
+        elif self.enable_save:
+            print("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
+            os.makedirs(self.full_save_path)
         else:
             print("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
