@@ -117,15 +117,7 @@ for ep in range(episodes):
         if action == 16:
             # build archer
             print("Trying to build archer")
-            archer = drts.unit_manager.construct_unit(drts.constants.Unit.Archer, drts.players[0])
-            #Archer IS BUILT, but need to be spawned
-            print_unit(archer)
-
-            try:
-                #archer.spawn(get_buildable_tile(drts.players[0].get_targeted_unit(), drts.game), archer.spawn_timer)
-                archer.spawn(get_buildable_tile(drts.players[0].get_targeted_unit(), drts.game), 0)
-            except AttributeError:
-                print("You must first select a Footman!")
+            drts.players[0].spawn_unit(drts.constants.Unit.Archer)
 
             state, done = drts.step(15)
         else:
