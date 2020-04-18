@@ -26,8 +26,8 @@ def main(unused_argv):
         state_builder = PureState(env)
 
         # dq_network = PolicyGradientTF(action_wrapper, state_builder, 'urnai/models/saved/cartpole_v0_pg', learning_rate=0.01, gamma=0.95)
-        dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, save_path='urnai/models/saved/cartpole_v0_dqltf', learning_rate=0.01)
-        q_table = QLearning(action_wrapper, state_builder, save_path="models/saved/tax1-v2-Q-table", gamma=0.95, learning_rate=0.1)
+        dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.01)
+        q_table = QLearning(action_wrapper, state_builder, gamma=0.95, learning_rate=0.1)
 
         agent = GenericAgent(q_table, PureReward())
 

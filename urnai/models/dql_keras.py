@@ -11,9 +11,9 @@ from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 
 class DQNKeras(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path, learning_rate=0.001, gamma=0.95,
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.95,
                     name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32, memory_size=50000):
-        super(DQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
+        super(DQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, name)
 
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min
@@ -81,19 +81,3 @@ class DQNKeras(LearningModel):
         corresponding action with the highest Q-Value.
         '''
         return self.actions[int(np.argmax(self.model.predict(state)[0]))]
-
-
-    def save(self):
-        print("\n> Saving...\n")
-        self.model.save_weights(self.save_path + '.h5')
-        print("> The model's weights were succesfully saved!\n")
-
-
-    def load(self):
-        print("\n> Loading...\n")
-        exists = os.path.isfile(self.save_path + '.h5')
-        if exists:
-            self.model.load_weights(self.save_path + '.h5')
-            print("> The model's weights were succesfully loaded!\n")
-        else:
-            print("> There are no weights saved in " + self.save_path)

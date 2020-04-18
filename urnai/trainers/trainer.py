@@ -31,12 +31,13 @@ class Trainer(Savable):
         self.enable_save = enable_save
         self.save_every = save_every
         self.relative_path = relative_path
-        
-        self.pickle_obj = [self.save_every]
 
         self.logger = Logger(0) 
 
         if(relative_path):
+            #parentdir = os.path.dirname(currentdir)
+#            parentdir = os.path.dirname(parentdir)
+#            self.full_save_path = parentdir + os.path.sep + self.save_path + os.path.sep + self.file_name
             self.full_save_path = "../" + self.save_path + os.path.sep + self.file_name
         else:
             self.full_save_path = self.save_path + os.path.sep + self.file_name
@@ -186,7 +187,6 @@ class Trainer(Savable):
         self.logger.save(save_path)
 
     def load_extra(self, save_path):
-        self.save_every = self.pickle_obj[0]
 
         self.agent.load(save_path)
         self.env.load(save_path)

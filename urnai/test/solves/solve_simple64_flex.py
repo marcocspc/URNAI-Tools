@@ -41,15 +41,17 @@ def main(unused_argv):
         helper.add_input_layer(int(state_builder.get_state_dim()))
         helper.add_fullyconn_layer(512)
         helper.add_fullyconn_layer(256)
+        helper.add_fullyconn_layer(256)
+        helper.add_fullyconn_layer(256)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
-        dq_network = DqlTfFlexible(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.9, save_path='urnai/models/saved/dql_flex_test/', file_name="terran_dql", build_model=helper.get_model_layout())
+        dq_network = DqlTfFlexible(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.9, build_model=helper.get_model_layout())
 
         ## Terran agent with a Deep Q-Learning model
         agent = SC2Agent(dq_network, GeneralReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())
 
         #test_params = TestParams(num_matches=1, steps_per_test=25, max_steps=10000, reward_threshold=1000)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved/', file_name="terran_dql", save_every=1, enable_save=True)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved/', save_every=1, enable_save=True)
         trainer.train(num_episodes=1, reward_from_env=True, max_steps=10000)
         trainer.play(num_matches=5)
 

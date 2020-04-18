@@ -13,12 +13,10 @@ from urnai.base.savable import Savable
 
 class LearningModel(Savable):
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, save_path, file_name, name=None):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, name=None):
         super(LearningModel, self).__init__()
         self.gamma = gamma
         self.learning_rate = learning_rate
-        self.save_path = save_path
-        self.file_name = file_name
         self.name = name
         self.action_wrapper = action_wrapper
         self.state_builder = state_builder

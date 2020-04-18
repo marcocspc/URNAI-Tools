@@ -22,7 +22,6 @@ class SC2Agent(Agent):
         self.steps = 0
         self.obs_spec = None
         self.action_spec = None
-        self.pickle_obj = []
 
     def reset(self):
         super(SC2Agent, self).reset()

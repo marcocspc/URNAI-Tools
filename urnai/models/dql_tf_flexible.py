@@ -41,36 +41,19 @@ class DqlTfFlexible(LearningModel):
     ]
 
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='dqltfflexible', learning_rate=0.0002, gamma=0.95, name='DQN', build_model = DEFAULT_BUILD_MODEL):
-        super(DqlTfFlexible, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, file_name, name)
-
-        if save_path is None or file_name is None:
-            raise TypeError
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, gamma=0.95, name='DQN', build_model = DEFAULT_BUILD_MODEL):
+        super(DqlTfFlexible, self).__init__(action_wrapper, state_builder, gamma, learning_rate, name)
 
         # EXPLORATION PARAMETERS FOR EPSILON GREEDY STRATEGY
         self.explore_start = 1.0
         self.explore_stop = 0.01
         self.decay_rate = 0.0001
         self.decay_step = 0
-
-        ops.reset_default_graph()
-        tf.compat.v1.disable_eager_execution()
-
-        # Initializing TensorFlow session
-        self.sess = Session(config=ConfigProto(allow_soft_placement=True))
-
+        
         # Defining the model's layers. Tensorflow's objects are stored into self.model_layers
         self.build_model = build_model
         self.make_model()
 
-        self.pickle_obj = [self.decay_step, self.build_model]
-        
-        #Not being used anywhere, commenting out:
-        #self.actions_ = placeholder(dtype=tf.float32, shape=[None, self.action_size], name='actions_')
-        
-        self.sess.run(global_variables_initializer())
-
-        self.saver = train.Saver()
 
     def learn(self, s, a, r, s_, done, is_last_step: bool):
         qsa_values = self.sess.run(self.model_layers[-1], feed_dict={self.model_layers[0]: s})
@@ -116,7 +99,7 @@ class DqlTfFlexible(LearningModel):
         return action
 
     def predict(self, state, excluded_actions=[]):
-        q_values = self.sess.run(self.output_layer, feed_dict={self.inputs_: state})
+        q_values = self.sess.run(self.model_layers[-1], feed_dict={self.model_layers[0]: state})
         action_idx = np.argmax(q_values)
 
         # Removing excluded actions
@@ -133,22 +116,22 @@ class DqlTfFlexible(LearningModel):
         self.saver.save(self.sess, self.get_full_persistance_tensorflow_path(persist_path))
 
     def load_extra(self, persist_path):
-        #Puts pickle stuff where it needs to be
-        self.decay_step = self.pickle_obj[0]
-        self.build_model = self.pickle_obj[1]
         #Makes model, needed to be done before loading tensorflow's persistance
         self.make_model()
         #Check if tf file exists
-        exists = os.path.isfile(self.get_full_persistance_tensorflow_path(persist_path))
+        exists = os.path.isfile(self.get_full_persistance_tensorflow_path(persist_path) + ".meta")
         #If yes, load it
         if exists:
-            self.make_model()
-            self.saver.restore(self.sess, self.get_full_persistance_tensorflow_path(persist_path)+".meta")
-        else:
-            #Else, raise exception
-            raise FileNotFoundError(self.get_full_persistance_tensorflow_path(persist_path) + " was not found.")
+            self.saver.restore(self.sess, self.get_full_persistance_tensorflow_path(persist_path))
 
     def make_model(self):
+        #These are already inside make_model(), commenting out
+        ops.reset_default_graph()
+        tf.compat.v1.disable_eager_execution()
+
+        # Initializing TensorFlow session
+        self.sess = Session(config=ConfigProto(allow_soft_placement=True))
+
         #If the build model is the same as the default one, apply
         #the default properties to input and output
         if self.build_model == DqlTfFlexible.DEFAULT_BUILD_MODEL:
@@ -177,3 +160,6 @@ class DqlTfFlexible(LearningModel):
         self.loss = tf.losses.mean_squared_error(self.tf_qsa, self.model_layers[-1])
         self.optimizer = train.AdamOptimizer(self.learning_rate).minimize(self.loss)
 
+        self.sess.run(global_variables_initializer())
+
+        self.saver = train.Saver()

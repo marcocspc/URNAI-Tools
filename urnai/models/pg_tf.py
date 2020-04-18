@@ -16,13 +16,13 @@ from utils import error
 
 
 class PolicyGradientTF(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='temp_pgtf', learning_rate=0.01, gamma=0.95, name='PolicyGradient'):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.01, gamma=0.95, name='PolicyGradient'):
 
         #This code is too old and need to be updated to tensorflow 2.0
         error1 = 'PolicyGradients is unsupported until its code is updated to Tensorflow 2.0.'
         raise DeprecatedCodeException(error1) 
 
-        super(PolicyGradientTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
+        super(PolicyGradientTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, name)
 
         # Initializing variables for the model's state, which must be reset every episode
         self.episode_states, self.episode_actions, self.episode_rewards = [], [], []  # Records all states, actions and rewards for an episode
@@ -129,13 +129,3 @@ class PolicyGradientTF(LearningModel):
         action_idx = np.argmax(q_values)
         action = self.actions[int(action_idx)]
         return action
-
-    def save(self):
-        print("\n> Saving the model!\n")
-        self.saver.save(self.sess, self.save_path + self.file_name + "/" + self.file_name)
-
-    def load(self):
-        exists = os.path.isfile(self.save_path + self.file_name + "/" + self.file_name + '.meta')
-        if exists:
-            print("\n> Loading saved model!\n")
-            self.saver.restore(self.sess, self.save_path + self.file_name + "/" + self.file_name)

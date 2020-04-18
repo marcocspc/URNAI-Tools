@@ -7,9 +7,9 @@ from agents.states.abstate import StateBuilder
 
 class QLearning(LearningModel):
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path: str, learning_rate=0.1,
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.1,
                  gamma=0.95, epsilon=1, epsilon_min=0.01, epsilon_decay=0.996, name='Q-learning'):
-        super(QLearning, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, name)
+        super(QLearning, self).__init__(action_wrapper, state_builder, gamma, learning_rate, name)
         self.__set_hyperparameters(learning_rate, gamma, epsilon, epsilon_min, epsilon_decay)
         self._q_table = pd.DataFrame(columns=range(self.action_size), dtype=np.float64)
 
@@ -60,10 +60,3 @@ class QLearning(LearningModel):
 
         return self._q_table.loc[state_str, : ].idxmax()
 
-    def save(self):
-        # np.save('urnai/' + self.save_path, self._q_table)
-        return
-
-    def load(self):
-        # self._q_table = np.load('urnai/' + self.save_path)
-        return

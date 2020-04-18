@@ -10,15 +10,10 @@ from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 
 class DQLTF(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, save_path='urnai/models/saved/', file_name='temp_dqltf', learning_rate=0.001, gamma=0.90, decay_rate = 0.00001, name='DQN', nodes_layer1=10, nodes_layer2=10, nodes_layer3=10, nodes_layer4=10):
-        super(DQLTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, save_path, file_name, name)
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.90, decay_rate = 0.00001, name='DQN', nodes_layer1=10, nodes_layer2=10, nodes_layer3=10, nodes_layer4=10):
+        super(DQLTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, name)
 
-        if save_path is None:
-            raise TypeError
-        if file_name is None:
-            raise TypeError
-
-        self.full_save_path = "../" + self.save_path + os.path.sep + self.file_name 
+        #self.full_save_path = "../" + self.save_path + os.path.sep + self.file_name 
 
         # EXPLORATION PARAMETERS FOR EPSILON GREEDY STRATEGY
         self.explore_start = 1.0
@@ -32,23 +27,23 @@ class DQLTF(LearningModel):
         self.nodes_layer3 = nodes_layer3
         self.nodes_layer4 = nodes_layer4
 
-        self.pickle_obj = [self.decay_step, self.nodes_layer1, self.nodes_layer2, self.nodes_layer3, self.nodes_layer4]
-
-        self.save_path = save_path
-        self.file_name = file_name
+#        self.save_path = save_path
+#        self.file_name = file_name
 
         # Attempting to Load our serialized variables, as some of them will be used during the definition of our model
         # self.load_pickle()
         
         ops.reset_default_graph()
-
         tf.compat.v1.disable_eager_execution()
 
         # Initializing TensorFlow session
         self.sess = Session(config=ConfigProto(allow_soft_placement=True))
 
-        self.inputs_ = placeholder(dtype=tf.float32, shape=[None, self.state_size], name='inputs_')
-        self.actions_ = placeholder(dtype=tf.float32, shape=[None, self.action_size], name='actions_')
+        #In the mos recent tensorflow version, shape=[None, SIZE] must be filled with an integer
+        #value. If using older version, remove int() function from the next two lines.
+        #I'm just updating here since we should be moving to newer TF versions.
+        self.inputs_ = placeholder(dtype=tf.float32, shape=[None, int(self.state_size)], name='inputs_')
+        self.actions_ = placeholder(dtype=tf.float32, shape=[None, int(self.action_size)], name='actions_')
         
 
         # Defining the model's layers
@@ -141,20 +136,10 @@ class DQLTF(LearningModel):
         action = self.actions[int(action_idx)]
         return action
 
-    def save_pickle(self, persist_path):
-        self.pickle_obj = [self.decay_step, self.nodes_layer1, self.nodes_layer2, self.nodes_layer3, self.nodes_layer4]
-
-        with open(self.get_full_persistance_pickle_path(persist_path), "wb") as pickle_out: 
-            pickle.dump(self.pickle_obj, pickle_out)
-
     def save_extra(self, persist_path):
         self.saver.save(self.sess, self.get_full_persistance_tensorflow_path(persist_path))
 
     def load_extra(self, persist_path):
-        self.decay_step = self.pickle_obj[0]
-        self.nodes_layer1 = self.pickle_obj[1]
-        self.nodes_layer2 = self.pickle_obj[2]
-
         tf_path = self.get_full_persistance_tensorflow_path(persist_path)
         exists = os.path.isfile(self.get_full_persistance_tensorflow_path(persist_path)+".meta")
         #If yes, load it
