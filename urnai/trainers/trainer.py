@@ -23,7 +23,7 @@ class TestParams():
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
 
-    def __init__(self, env, agent, save_path=os.path.expanduser("~") + "urnai_saved_traingings/", file_name=str(datetime.now()), enable_save=False, save_every=10, relative_path=True):
+    def __init__(self, env, agent, save_path=os.path.expanduser("~") + "urnai_saved_traingings/", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=True):
         self.env = env
         self.agent = agent
         self.save_path = save_path
