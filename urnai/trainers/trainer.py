@@ -35,10 +35,7 @@ class Trainer(Savable):
         self.logger = Logger(0) 
 
         if(relative_path):
-            #parentdir = os.path.dirname(currentdir)
-#            parentdir = os.path.dirname(parentdir)
-#            self.full_save_path = parentdir + os.path.sep + self.save_path + os.path.sep + self.file_name
-            self.full_save_path = "../" + self.save_path + os.path.sep + self.file_name
+            self.full_save_path = parentdir + os.path.sep + self.save_path + os.path.sep + self.file_name
         else:
             self.full_save_path = self.save_path + os.path.sep + self.file_name
         
