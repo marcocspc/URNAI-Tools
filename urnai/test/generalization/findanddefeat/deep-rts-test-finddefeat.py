@@ -104,7 +104,8 @@ for ep in range(episodes):
                 Build1 = 14,
                 Build2 = 15,
                 NoAction = 16
-                BuildArcher = 17
+                AutoBuildArcher = 17
+                BuildArcher = 18
         '''
 
         action = None
@@ -117,12 +118,17 @@ for ep in range(episodes):
         if action == 16:
             # build archer
             print("Trying to build archer")
-            drts.players[0].spawn_unit(drts.constants.Unit.Archer)
+            drts.players[0].spawn_unit_around_spawn_point(drts.constants.Unit.Archer)
 
             state, done = drts.step(15)
+        elif action == 17:
+            print("You need to input the x and y coordinates: ")
+            x = int(input("X: "))
+            y = int(input("Y: "))
+
+            drts.players[0].spawn_unit(drts.constants.Unit.Archer, drts.game.tilemap.get_tile(x, y))
         else:
             state, done = drts.step(action)
-
 
         unit_x = -1
         unit_y = -1
