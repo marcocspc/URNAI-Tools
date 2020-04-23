@@ -119,6 +119,12 @@ class Savable(ABC):
                     continue
                 else:
                     raise
+            except AttributeError as ae:
+                if "Can't pickle" in str(te):
+                    continue
+                else:
+                    raise
+
 
         return pickleable_list
 
