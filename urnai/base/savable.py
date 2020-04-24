@@ -127,10 +127,18 @@ class Savable(ABC):
                 else:
                     raise
             except AttributeError as ae:
+<<<<<<< HEAD
                 if "Can't pickle" in str(ae):
                     continue
                 else:
                     raise
+=======
+                if "Can't pickle" in str(te):
+                    continue
+                else:
+                    raise
+
+>>>>>>> 99c0759d27c6be781b8eddfd73cfad5f935a5bee
 
         return pickleable_list
 
