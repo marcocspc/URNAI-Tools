@@ -16,6 +16,7 @@ from agents.states.sc2 import Simple64State_1
 from agents.states.sc2 import Simple64State
 from models.dql_tf import DQLTF
 from models.pg_tf import PolicyGradientTF
+from models.dql_keras_mem import DQNKerasMem
 from utils.functions import query_yes_no
 
 """ Change "sc2_local_path" to your local SC2 installation path. 
@@ -38,16 +39,17 @@ def main(unused_argv):
         state_builder = Simple64State()
         
         # Deep Q Learning Model
-        dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=256, nodes_layer2=256, nodes_layer3=256, nodes_layer4=256, learning_rate=0.005, gamma=0.95)
+        #dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=256, nodes_layer2=256, nodes_layer3=256, nodes_layer4=256, learning_rate=0.005, gamma=0.95)
+        dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=256, nodes_layer2=256, nodes_layer3=256, nodes_layer4=256, learning_rate=0.005, gamma=0.90)
 
         # Terran agent with a Deep Q-Learning model
         agent = SC2Agent(dq_network, GeneralReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())
 
         #test_params = TestParams(num_matches=1, steps_per_test=25, max_steps=10000, reward_threshold=1000)
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_dql", save_every=20, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dql", save_every=20, enable_save=True)
-        trainer.train(num_episodes=1, reward_from_env=True, max_steps=500)
-        #trainer.play(num_matches=1)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dql_kerasmem", save_every=10, enable_save=True)
+        trainer.train(num_episodes=50, reward_from_env=True, max_steps=500)
+        trainer.play(num_matches=10)
 
     except KeyboardInterrupt:
         pass

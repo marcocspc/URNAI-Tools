@@ -61,6 +61,7 @@ class Savable(ABC):
                 with open(pickle_path, "rb") as pickle_in: 
                     pickle_dict = pickle.load(pickle_in)
                     self.restore_pickleable_attributes(pickle_dict)
+                    print("**************************************** \n Pickle for ", self.get_default_save_stamp(), " loaded. \n****************************************")
 
     def load_extra(self, persist_path):
         '''
@@ -80,6 +81,12 @@ class Savable(ABC):
         This method returns the default persistance tensorflow path. 
         '''
         return persist_path + os.path.sep + self.get_default_save_stamp() + "tensorflow_"
+    
+    def get_full_persistance_path(self, persist_path):
+        '''
+        This method returns the default persistance path. 
+        '''
+        return persist_path + os.path.sep + self.get_default_save_stamp()
 
     def save(self, savepath):
         '''
@@ -116,6 +123,11 @@ class Savable(ABC):
                     raise
             except NotImplementedError as nie:
                 if str(nie) == "numpy() is only available when eager execution is enabled.":
+                    continue
+                else:
+                    raise
+            except AttributeError as ae:
+                if "Can't pickle" in str(ae):
                     continue
                 else:
                     raise

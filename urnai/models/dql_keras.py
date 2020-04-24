@@ -23,7 +23,7 @@ class DQNKeras(LearningModel):
 
         self.model = self.__build_model()
         self.memory = deque(maxlen=memory_size)
-        self.load()
+        #self.load()
 
 
     def __build_model(self):
