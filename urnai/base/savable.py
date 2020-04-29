@@ -2,6 +2,7 @@ import os
 import pickle
 import tempfile
 from abc import ABC, abstractmethod
+from urnai.tdd.reporter import Reporter as rp
 
 class SavableAttr:
     def __init__(self, value):
@@ -61,7 +62,7 @@ class Savable(ABC):
                 with open(pickle_path, "rb") as pickle_in: 
                     pickle_dict = pickle.load(pickle_in)
                     self.restore_pickleable_attributes(pickle_dict)
-                    print("**************************************** \n Pickle for ", self.get_default_save_stamp(), " loaded. \n****************************************")
+                    rp.report("**************************************** \n Pickle for ", self.get_default_save_stamp(), " loaded. \n****************************************", 1)
 
     def load_extra(self, persist_path):
         '''

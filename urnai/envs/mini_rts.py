@@ -121,9 +121,9 @@ class MiniRTSEnv():
         return
 
 
-print("URNAI: start minirts")
+rp.report("URNAI: start minirts")
 rts = MiniRTSEnv()
-print("URNAI: run minirts")
+rp.report("URNAI: run minirts")
 rts.rts.Run()
-print("URNAI: closing minirts")
+rp.report("URNAI: closing minirts")
 rts.close()

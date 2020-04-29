@@ -8,6 +8,7 @@ import itertools
 import time
 from utils.logger import Logger
 from urnai.base.savable import Savable 
+from urnai.tdd.reporter import Reporter as rp
 from datetime import datetime
 
 class TestParams():
@@ -23,7 +24,7 @@ class TestParams():
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
 
-    def __init__(self, env, agent, save_path=os.path.expanduser("~") + "urnai_saved_traingings/", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=True):
+    def __init__(self, env, agent, save_path=os.path.expanduser("~") + "urnai_saved_traingings/", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=True, debug_level=0):
         self.env = env
         self.agent = agent
         self.save_path = save_path
@@ -31,6 +32,7 @@ class Trainer(Savable):
         self.enable_save = enable_save
         self.save_every = save_every
         self.relative_path = relative_path
+        rp.VERBOSITY_LEVEL = debug_level
 
         self.logger = Logger(0) 
 
@@ -41,18 +43,18 @@ class Trainer(Savable):
         
 
         if self.enable_save and os.path.exists(self.full_save_path):
-            print("WARNING! Loading training from " + self.full_save_path + " with SAVING ENABLED.")
+            rp.report("WARNING! Loading training from " + self.full_save_path + " with SAVING ENABLED.")
             self.load(self.full_save_path)
         elif self.enable_save:
-            print("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
+            rp.report("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
             os.makedirs(self.full_save_path)
         else:
-            print("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
+            rp.report("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
     def train(self, num_episodes=float('inf'), max_steps=float('inf'), test_params: TestParams = None, reward_from_env = True):
         start_time = time.time()
         
-        print("> Training")
+        rp.report("> Training")
         if self.logger.ep_count == 0:
             self.logger = Logger(num_episodes)
 
@@ -114,12 +116,12 @@ class Trainer(Savable):
 
                 # Stops training if reward threshold was reached in play testing
                 if test_params.reward_threshold != None and test_params.reward_threshold <= test_params.logger.play_rewards_avg[-1]:
-                    print("> Reward threshold was reached!")
-                    print("> Stopping training")
+                    rp.report("> Reward threshold was reached!")
+                    rp.report("> Stopping training")
                     break
 
         end_time = time.time()
-        print("\n> Training duration: {} seconds".format(end_time - start_time))
+        rp.report("\n> Training duration: {} seconds".format(end_time - start_time))
 
         self.logger.log_train_stats()
         self.logger.plot_train_stats(self.agent)
@@ -129,7 +131,7 @@ class Trainer(Savable):
 
 
     def play(self, num_matches, max_steps=float('inf'), test_params=None, reward_from_env = True):
-        print("\n\n> Playing")
+        rp.report("\n\n> Playing")
 
         self.logger = Logger(num_matches)
 
@@ -182,9 +184,10 @@ class Trainer(Savable):
         self.env.save(save_path)
         self.agent.save(save_path)
         self.logger.save(save_path)
+        rp.save(save_path)
 
     def load_extra(self, save_path):
-
         self.agent.load(save_path)
         self.env.load(save_path)
         self.logger.load(save_path)
+        rp.load(save_path)

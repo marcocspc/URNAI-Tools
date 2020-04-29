@@ -9,6 +9,7 @@ import numpy as np
 import pickle
 import os
 from matplotlib.ticker import PercentFormatter
+from urnai.tdd.reporter import Reporter as rp
 
 class Logger(Savable):
     def __init__(self, ep_total, is_episodic=True, render=True):
@@ -75,19 +76,19 @@ class Logger(Savable):
 
     def log_ep_stats(self):
         if self.ep_count > 0:
-            print("Episode: {}/{} | Avg. Reward: {:10.6f} | Avg. Steps: {:10.6f} | Best Reward: {}"
+            rp.report("Episode: {}/{} | Avg. Reward: {:10.6f} | Avg. Steps: {:10.6f} | Best Reward: {}"
             .format(self.ep_count, self.ep_total, self.ep_avg_rewards[-1], self.ep_avg_steps[-1], self.best_reward), end="\r")
         else:
-            print("There are no recorded episodes!")
+            rp.report("There are no recorded episodes!")
 
     def log_train_stats(self):
         if self.ep_count > 0:
-            print()
-            print("Current Reward Avg.: " + str(sum(self.ep_rewards) / self.ep_count))
-            print("Win rate: {:10.3f}%".format((self.victories / self.ep_count) * 100))
-            print()
+            rp.report()
+            rp.report("Current Reward Avg.: " + str(sum(self.ep_rewards) / self.ep_count))
+            rp.report("Win rate: {:10.3f}%".format((self.victories / self.ep_count) * 100))
+            rp.report()
         else:
-            print("There are no recorded episodes!")
+            rp.report("There are no recorded episodes!")
     
     def plot_train_stats(self, agent):
         # Plotting average reward graph
