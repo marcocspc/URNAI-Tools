@@ -129,7 +129,7 @@ class Trainer(Savable):
         self.logger.plot_train_stats()
         # Saving the model when the training has ended
         if self.enable_save:
-            self.save(self.full_save_path + os.path.sep + "play_files")
+            self.save(self.full_save_path)
 
 
     def play(self, num_matches, max_steps=float('inf'), test_params=None, reward_from_env = True):
