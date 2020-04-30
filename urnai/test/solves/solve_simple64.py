@@ -47,7 +47,7 @@ def main(unused_argv):
 
         #test_params = TestParams(num_matches=1, steps_per_test=25, max_steps=10000, reward_threshold=1000)
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_dql", save_every=20, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dql_kerasmem", save_every=10, enable_save=True)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dql_kerasmem", save_every=10, enable_save=True, relative_path=True)
         trainer.train(num_episodes=50, reward_from_env=True, max_steps=500)
         trainer.play(num_matches=10)
 

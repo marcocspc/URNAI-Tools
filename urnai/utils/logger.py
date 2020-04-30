@@ -37,8 +37,8 @@ class Logger(Savable):
 
         self.is_episodic = is_episodic
 
-        self.bar_graph = None 
-        self.curve_graph = None
+        self.avg_reward_graph = None 
+        self.avg_steps_graph = None
 
         self.render = render
 
@@ -83,40 +83,61 @@ class Logger(Savable):
 
     def log_train_stats(self):
         if self.ep_count > 0:
-            rp.report()
+            rp.report("\n")
             rp.report("Current Reward Avg.: " + str(sum(self.ep_rewards) / self.ep_count))
             rp.report("Win rate: {:10.3f}%".format((self.victories / self.ep_count) * 100))
-            rp.report()
+            rp.report("\n")
         else:
             rp.report("There are no recorded episodes!")
     
-    def plot_train_stats(self, agent):
-        # Plotting average reward graph
-        self.__plot_curve(range(self.ep_count), self.ep_avg_rewards, 'Episode Count',
-                            'Avg. Reward', r'Reward avg. over training, $\gamma={}, \alpha={}$'.format(agent.model.gamma, agent.model.learning_rate))
+    def plot_train_stats(self):
+        self.plot_average_reward_graph()
 
-        # Plotting average steps graph
-        self.__plot_curve(range(self.ep_count), self.ep_avg_steps, 'Episode Count',
-                            'Avg. Steps', r'Steps avg. over training, $\gamma={}, \alpha={}$'.format(agent.model.gamma, agent.model.learning_rate))
+        self.plot_average_steps_graph()
    
         if len(self.play_ep_count) > 0:
-            self.__plot_bar(self.play_ep_count, [self.play_win_rates], ['Play'], 'Episode', 'Win rate (%)', 'Win rate percentage over play testing', format_percent=True)
-            self.__plot_bar(self.play_ep_count, [self.play_rewards_avg], ['Play'], 'Episode', 'Reward avg.', 'Reward avg. over play testing')
+            self.plot_win_rate_percentage_over_play_testing_graph()
+            self.plot_reward_average_over_play_testing_graph()
 
-#    def save_extra(self, persist_path):
-#        if self.bar_graph == None or self.curve_graph == None:
-#             self.bar_graph = self.__plot_bar()
-#             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_bar.png")
-#             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_bar.pdf")
-#             self.bar_graph.close()
-#             self.bar_graph = None
-#
-#
-#             self.curve_graph = self.__plot_curve()
-#             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_curve.png")
-#             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "_curve.pdf")
-#             self.curve_graph.close()
-#             self.curve_graph = None
+    def plot_average_reward_graph(self):
+        # Plotting average reward graph
+        return self.__plot_curve(range(self.ep_count), self.ep_avg_rewards, 'Episode Count',
+                            'Avg. Reward', r'Reward avg. over training')
+
+    def plot_average_steps_graph(self):
+        # Plotting average steps graph
+        return self.__plot_curve(range(self.ep_count), self.ep_avg_steps, 'Episode Count',
+                            'Avg. Steps', r'Steps avg. over training')
+
+    def plot_win_rate_percentage_over_play_testing_graph(self):
+        # Plotting win rate over play testing graph
+        return self.__plot_bar(self.play_ep_count, [self.play_win_rates], ['Play'], 'Episode', 'Win rate (%)', 'Win rate percentage over play testing', format_percent=True)
+
+    def plot_reward_average_over_play_testing_graph(self):
+        # Plotting reward average over play testing graph
+        return self.__plot_bar(self.play_ep_count, [self.play_rewards_avg], ['Play'], 'Episode', 'Reward avg.', 'Reward avg. over play testing')
+
+
+
+
+    def save_extra(self, persist_path):
+        if self.avg_reward_graph is None or self.avg_steps_graph is None:
+             self.render = False
+
+             self.avg_reward_graph = self.plot_average_reward_graph()
+             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_reward_graph_bar.png")
+             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_reward_graph_bar.pdf")
+             plt.close(self.avg_reward_graph)
+             self.avg_reward_graph = None
+
+
+             self.avg_steps_graph = self.plot_average_steps_graph() 
+             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_steps_graph_bar.png")
+             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_steps_graph_bar.pdf")
+             plt.close(self.avg_steps_graph)
+             self.avg_steps_graph = None
+
+             self.render = True 
 
     def __plot_curve(self, x, y, x_label, y_label, title):
         fig, ax = plt.subplots()

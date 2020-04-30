@@ -24,7 +24,7 @@ class TestParams():
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
 
-    def __init__(self, env, agent, save_path=os.path.expanduser("~") + "urnai_saved_traingings/", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=True, debug_level=0):
+    def __init__(self, env, agent, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0):
         self.env = env
         self.agent = agent
         self.save_path = save_path
@@ -39,8 +39,9 @@ class Trainer(Savable):
         if(relative_path):
             self.full_save_path = parentdir + os.path.sep + self.save_path + os.path.sep + self.file_name
         else:
-            self.full_save_path = self.save_path + os.path.sep + self.file_name
+            self.full_save_path = self.save_path + os.path.sep + self.file_name 
         
+        self.full_save_play_path = self.full_save_path + os.path.sep + "play_files"
 
         if self.enable_save and os.path.exists(self.full_save_path):
             rp.report("WARNING! Loading training from " + self.full_save_path + " with SAVING ENABLED.")
@@ -48,6 +49,7 @@ class Trainer(Savable):
         elif self.enable_save:
             rp.report("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
             os.makedirs(self.full_save_path)
+            os.makedirs(self.full_save_play_path)
         else:
             rp.report("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
@@ -124,10 +126,10 @@ class Trainer(Savable):
         rp.report("\n> Training duration: {} seconds".format(end_time - start_time))
 
         self.logger.log_train_stats()
-        self.logger.plot_train_stats(self.agent)
+        self.logger.plot_train_stats()
         # Saving the model when the training has ended
         if self.enable_save:
-            self.save(self.full_save_path)
+            self.save(self.full_save_path + os.path.sep + "play_files")
 
 
     def play(self, num_matches, max_steps=float('inf'), test_params=None, reward_from_env = True):
@@ -179,6 +181,10 @@ class Trainer(Savable):
         else:
             # Only logs train stats if this is not a test, to avoid cluttering the interface with info
             self.logger.log_train_stats()
+
+        #We need to save playing status as well 
+        if self.enable_save:
+            self.save(self.full_save_play_path)
 
     def save_extra(self, save_path):
         self.env.save(save_path)

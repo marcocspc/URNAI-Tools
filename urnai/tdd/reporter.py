@@ -1,3 +1,6 @@
+import os
+import pickle
+
 class Reporter():
 
     '''
@@ -18,27 +21,27 @@ class Reporter():
     MESSAGES = []
 
     @staticmethod
-    def report(message, verbosity_lvl = 0):
+    def report(message, verbosity_lvl = 0, end = "\n"):
         if (verbosity_lvl <= Reporter.VERBOSITY_LEVEL):
-            print(message)
+            print(message, end=end)
             Reporter.MESSAGES.append(message)
 
     @staticmethod
     def save(persist_path):
-        pickle_path = persist_path + "report.pkl"
+        pickle_path = persist_path + os.path.sep + "report.pkl"
         with open(pickle_path, "wb") as pickle_out: 
             pickle.dump(Reporter.MESSAGES, pickle_out)
 
         string_out = ""
         for line in Reporter.MESSAGES:
-            string_out = line + "\n"
+            string_out += line + "\n"
 
-        with open(pickle_path.replace(".pkl", ".txt"), "wb") as text_out: 
+        with open(pickle_path.replace(".pkl", ".txt"), "w") as text_out: 
             text_out.write(string_out)
 
     @staticmethod
     def load(persist_path):
-        pickle_path = persist_path + "report.pkl"
+        pickle_path = persist_path + os.path.sep + "report.pkl"
         exists_pickle = os.path.isfile(pickle_path)
         if exists_pickle:
             with open(pickle_path, "rb") as pickle_in: 

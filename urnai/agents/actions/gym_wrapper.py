@@ -2,13 +2,17 @@ import random
 import numpy as np
 from .base.abwrapper import ActionWrapper
 from utils.agent_utils import one_hot_encode, transformDistance, transformLocation
+from utils.error import ActionError
 
 
 class GymWrapper(ActionWrapper):
 
-    def __init__(self, action_space_size):
-        self.move_number = 0
-        self.actions = [action_idx for action_idx in range(action_space_size)]
+    def __init__(self, gym_env_actions):
+        if gym_env_actions != None:
+            self.move_number = 0
+            self.actions = [action_idx for action_idx in range(gym_env_actions)]
+        else:
+            raise ActionError("Action Space Size must not be None!")
 
 
 

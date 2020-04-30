@@ -1,5 +1,6 @@
 import gym
 from .base.abenv import Env
+from agents.actions.gym_wrapper import GymWrapper 
 
 class GymEnv(Env):
     def __init__(self, id, render=False, reset_done=True, num_steps=100):
@@ -30,4 +31,8 @@ class GymEnv(Env):
     def restart(self):
         self.close()
         self.reset()
+
+    def get_action_wrapper(self):
+        if self.env_instance is not None:
+            return GymWrapper(self.env_instance.action_space.n)
 
