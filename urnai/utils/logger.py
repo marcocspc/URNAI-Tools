@@ -12,13 +12,22 @@ from matplotlib.ticker import PercentFormatter
 from urnai.tdd.reporter import Reporter as rp
 
 class Logger(Savable):
-    def __init__(self, ep_total, is_episodic=True, render=True):
+    def __init__(self, ep_total, agent_name, model_name, action_wrapper_name, state_builder_name, reward_builder_name, env_name, is_episodic=True, render=True):
+        #Training information
+        self.agent_name = agent_name
+        self.model_name = model_name
+        self.action_wrapper_name = action_wrapper_name
+        self.state_builder_name = state_builder_name
+        self.reward_builder_name = reward_builder_name
+        self.env_name = env_name
+
         # Episode count
         self.ep_count = 0
         self.ep_total = ep_total
 
         # Reward count
         self.best_reward = -999999
+        self.best_reward_episode = -1
         self.ep_rewards = []
         self.ep_avg_rewards = []
 
@@ -35,10 +44,16 @@ class Logger(Savable):
         self.play_match_count = []
         self.play_win_rates = []
 
+        # Some agent info
+        self.agent_info = []
+
         self.is_episodic = is_episodic
 
         self.avg_reward_graph = None 
         self.avg_steps_graph = None
+
+        #Training report
+        self.training_report = ""
 
         self.render = render
 
@@ -53,7 +68,7 @@ class Logger(Savable):
 
         self.victories = 0
 
-    def record_episode(self, ep_reward, has_won, steps_count):
+    def record_episode(self, ep_reward, has_won, steps_count, agent_info):
         self.ep_count += 1
 
         self.ep_rewards.append(ep_reward)
@@ -64,9 +79,12 @@ class Logger(Savable):
 
         if ep_reward > self.best_reward:
             self.best_reward = ep_reward
+            self.best_reward_episode = self.ep_count
 
         if self.is_episodic and has_won:
             self.victories += 1
+
+        self.agent_info.append(agent_info)
 
     def record_play_test(self, ep_count, play_rewards, play_victories, num_matches):
         self.play_ep_count.append(ep_count)
@@ -74,19 +92,32 @@ class Logger(Savable):
         self.play_win_rates.append(play_victories/num_matches)
         self.play_rewards_avg.append(sum(play_rewards) / num_matches)
 
+    def log_training_start_information(self):
+        self.training_report += ("    Agent: {}\n".format(self.agent_name)
+                + "        Model: {}\n".format(self.model_name)
+                + "        ActionWrapper: {}\n".format(self.action_wrapper_name)
+                + "        StateBuilder: {}\n".format(self.state_builder_name)
+                + "        RewardBuilder: {}\n".format(self.reward_builder_name)
+                + "    Environment: {}\n".format (self.env_name))
+
+        rp.report(self.training_report)
+
     def log_ep_stats(self):
         if self.ep_count > 0:
-            rp.report("Episode: {}/{} | Avg. Reward: {:10.6f} | Avg. Steps: {:10.6f} | Best Reward: {}"
-            .format(self.ep_count, self.ep_total, self.ep_avg_rewards[-1], self.ep_avg_steps[-1], self.best_reward), end="\r")
+            rp.report("Episode: {}/{} | Episode Avg. Reward: {:10.6f} | Episode Steps: {:10.6f} | Best Reward was {} on episode: {} | Agent info: {}"
+            .format(self.ep_count, self.ep_total, self.ep_avg_rewards[-1], self.ep_steps_count[-1], self.best_reward, self.best_reward_episode, self.agent_info[-1]), end="\r")
         else:
             rp.report("There are no recorded episodes!")
 
     def log_train_stats(self):
         if self.ep_count > 0:
-            rp.report("\n")
-            rp.report("Current Reward Avg.: " + str(sum(self.ep_rewards) / self.ep_count))
-            rp.report("Win rate: {:10.3f}%".format((self.victories / self.ep_count) * 100))
-            rp.report("\n")
+            self.training_report += ("\n"
+            + "Current Reward Avg.: {}".format(sum(self.ep_rewards) / self.ep_count)
+            + " Win rate: {:10.3f}%".format((self.victories / self.ep_count) * 100)
+            + " Avg number of steps: {}".format(sum(self.ep_avg_steps)/ self.ep_count)
+            + "\n")
+
+            rp.report(self.training_report)
         else:
             rp.report("There are no recorded episodes!")
     

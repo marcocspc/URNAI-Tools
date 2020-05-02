@@ -13,7 +13,7 @@ from urnai.base.savable import Savable
 
 class LearningModel(Savable):
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, name=None):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay_rate, per_episode_epsilon_decay=False, name=None):
         super(LearningModel, self).__init__()
         self.gamma = gamma
         self.learning_rate = learning_rate
@@ -23,6 +23,12 @@ class LearningModel(Savable):
         self.actions = action_wrapper.get_actions()
         self.action_size = action_wrapper.get_action_space_dim()
         self.state_size = state_builder.get_state_dim()
+
+        # EXPLORATION PARAMETERS FOR EPSILON GREEDY STRATEGY
+        self.epsilon_greedy = epsilon_start 
+        self.epsilon_min = epsilon_min 
+        self.epsilon_decay_rate = epsilon_decay_rate 
+        self.per_episode_epsilon_decay = per_episode_epsilon_decay
 
     @abstractmethod
     def learn(self, s, a, r, s_, done, is_last_step: bool) -> None : ...
@@ -43,9 +49,10 @@ class LearningModel(Savable):
         '''
         pass
 
-    # @abstractmethod
-    # def save(self) -> None : ...
+    def decay_epsilon(self):
+        if self.epsilon_greedy > self.epsilon_min:
+            self.epsilon_greedy *= self.epsilon_decay_rate
 
-
-    # @abstractmethod
-    # def load(self) -> None: ...
+    def ep_reset(self):
+        if self.per_episode_epsilon_decay:
+            self.decay_epsilon()

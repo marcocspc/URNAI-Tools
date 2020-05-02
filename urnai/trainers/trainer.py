@@ -34,7 +34,7 @@ class Trainer(Savable):
         self.relative_path = relative_path
         rp.VERBOSITY_LEVEL = debug_level
 
-        self.logger = Logger(0) 
+        self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
 
         if(relative_path):
             self.full_save_path = parentdir + os.path.sep + self.save_path + os.path.sep + self.file_name
@@ -53,12 +53,14 @@ class Trainer(Savable):
         else:
             rp.report("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
+        self.logger.log_training_start_information()
+
     def train(self, num_episodes=float('inf'), max_steps=float('inf'), test_params: TestParams = None, reward_from_env = True):
         start_time = time.time()
         
         rp.report("> Training")
         if self.logger.ep_count == 0:
-            self.logger = Logger(num_episodes)
+            self.logger = Logger(num_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
 
         if test_params != None:
             test_params.logger = self.logger
@@ -102,7 +104,12 @@ class Trainer(Savable):
 
                 if done or is_last_step:
                     victory = default_reward == 1
-                    self.logger.record_episode(ep_reward, victory, step + 1)
+                    agent_info = {
+                            "Learning rate" : self.agent.model.learning_rate,
+                            "Gamma" : self.agent.model.gamma,
+                            "Epsilon" : self.agent.model.epsilon_greedy,
+                            }
+                    self.logger.record_episode(ep_reward, victory, step + 1, agent_info)
                     break
             
             self.logger.log_ep_stats()
@@ -135,7 +142,7 @@ class Trainer(Savable):
     def play(self, num_matches, max_steps=float('inf'), test_params=None, reward_from_env = True):
         rp.report("\n\n> Playing")
 
-        self.logger = Logger(num_matches)
+        self.logger = Logger(num_matches, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
 
         for match in itertools.count():
             if match >= num_matches:
@@ -171,7 +178,12 @@ class Trainer(Savable):
                 # If done (if we're dead) : finish episode
                 if done or is_last_step:
                     victory = default_reward == 1
-                    self.logger.record_episode(ep_reward, victory, step + 1)
+                    agent_info = {
+                            "Learning rate" : self.agent.model.learning_rate,
+                            "Gamma" : self.agent.model.gamma,
+                            "Epsilon" : self.agent.model.epsilon_greedy,
+                            }
+                    self.logger.record_episode(ep_reward, victory, step + 1, agent_info)
                     break
 
             self.logger.log_ep_stats()

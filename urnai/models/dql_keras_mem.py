@@ -26,12 +26,9 @@ class DQNKerasMem(LearningModel):
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.002, gamma=0.95, 
                 name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32,
-                nodes_layer1=200, nodes_layer2=200, nodes_layer3=200, nodes_layer4=200, memory_maxlen=2000):
-        super(DQNKerasMem, self).__init__(action_wrapper, state_builder, gamma, learning_rate, name)
-
-        self.epsilon = epsilon
-        self.epsilon_min = epsilon_min
-        self.epsilon_decay = epsilon_decay
+                nodes_layer1=200, nodes_layer2=200, nodes_layer3=200, nodes_layer4=200, memory_maxlen=2000,
+                use_memory=True, per_episode_epsilon_decay=False):
+        super(DQNKerasMem, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay, per_episode_epsilon_decay, name)
         self.n_resets = n_resets
         self.batch_size = batch_size
 
@@ -44,7 +41,9 @@ class DQNKerasMem(LearningModel):
         self.state_size = int(self.state_size)
 
         self.model = self.build_model()
-        self.memory = deque(maxlen=self.memory_maxlen)
+        self.use_memory = use_memory
+        if self.use_memory:
+            self.memory = deque(maxlen=self.memory_maxlen)
         
     def build_model(self):
         model = Sequential()
@@ -66,26 +65,41 @@ class DQNKerasMem(LearningModel):
             target = reward
             if not done:
                 target = (reward + self.gamma * np.amax(self.model.predict(next_state)[0]))
-                
             target_f = self.model.predict(state)
             target_f[0][action] = target
             self.model.fit(state, target_f, epochs=1, verbose=0)
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
+        #Epsilon decay operation was here, moved it to "decay_epsilon()" and to "learn()"
+
+    def no_memory_learning(self, s, a, r, s_, done, is_last_step):
+            target = r 
+            if not done:
+                target = (r + self.gamma * np.amax(self.model.predict(s_)[0]))
+            target_f = self.model.predict(s)
+            target_f[0][a] = target
+            self.model.fit(s, target_f, epochs=1, verbose=0)
 
     def learn(self, s, a, r, s_, done, is_last_step: bool):
-        self.memorize(s, a, r, s_, done)
-        if(len(self.memory) > self.batch_size):
-            self.replay()
+        if self.use_memory:
+            self.memorize(s, a, r, s_, done)
+            if(len(self.memory) > self.batch_size):
+                self.replay()
+        else:
+            #TODO test learning without memory:
+            self.no_memory_learning(s, a, r, s_, done, is_last_step)
+
+        if not self.per_episode_epsilon_decay:
+            self.decay_epsilon()
+
 
     def choose_action(self, state, excluded_actions=[]):
-        if np.random.rand() <= self.epsilon:
+        if np.random.rand() <= self.epsilon_greedy:
             random_action = random.choice(self.actions)
             # Removing excluded actions
             while random_action in excluded_actions:
                 random_action = random.choice(self.actions)
             return random_action
-        return self.predict(state)
+        else:
+            return self.predict(state)
 
     def predict(self, state):
         '''

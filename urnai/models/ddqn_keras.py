@@ -19,12 +19,8 @@ class DDQNKeras(LearningModel):
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.002, gamma=0.95, 
                 name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32,
-                nodes_layer1=200, nodes_layer2=200, nodes_layer3=200, nodes_layer4=200, memory_maxlen=2000):
-        super(DDQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, name)
-
-        self.epsilon = epsilon
-        self.epsilon_min = epsilon_min
-        self.epsilon_decay = epsilon_decay
+                nodes_layer1=200, nodes_layer2=200, nodes_layer3=200, nodes_layer4=200, memory_maxlen=2000, use_memory=True, per_episode_epsilon_decay=False):
+        super(DDQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay, per_episode_epsilon_decay, name)
         self.n_resets = n_resets
         self.batch_size = batch_size
 
@@ -38,7 +34,9 @@ class DDQNKeras(LearningModel):
 
         self.model = self.build_model()
         self.target_model = self.build_model()
-        self.memory = deque(maxlen=self.memory_maxlen)
+        self.use_memory = use_memory
+        if self.use_memory:
+            self.memory = deque(maxlen=self.memory_maxlen)
 
     def _huber_loss(self, y_true, y_pred, clip_delta=1.0):
         error = y_true - y_pred
@@ -76,18 +74,31 @@ class DDQNKeras(LearningModel):
                 t = self.target_model.predict(next_state)[0]
                 target[0][action] = reward + self.gamma * np.amax(t)
             self.model.fit(state, target, epochs=1, verbose=0)
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
+        #Epsilon decay operation was here, moved it to "decay_epsilon()" and to "learn()"
+
+    def no_memory_learning(self, s, a, r, s_, done, is_last_step):
+        target = self.model.predict(s)
+        if done:
+            target[0][a] = r 
+        else:
+            t = self.target_model.predict(s_)[0]
+            target[0][a] = r + self.gamma * np.amax(t)
+        self.model.fit(s, target, epochs=1, verbose=0)
 
     def learn(self, s, a, r, s_, done, is_last_step: bool):
-        self.memorize(s, a, r, s_, done)
-        if(len(self.memory) > self.batch_size):
-            self.replay()
-        if(done):
-            self.update_target_model()
+        if self.use_memory:
+            self.memorize(s, a, r, s_, done)
+            if(len(self.memory) > self.batch_size):
+                self.replay()
+            if(done):
+                self.update_target_model()
+        else:
+            #TODO test learning without memory:
+            self.no_memory_learning(s, a, r, s_, done, is_last_step)
+        self.decay_epsilon()
 
     def choose_action(self, state, excluded_actions=[]):
-        if np.random.rand() <= self.epsilon:
+        if np.random.rand() <= self.epsilon_greedy:
             random_action = random.choice(self.actions)
             # Removing excluded actions
             while random_action in excluded_actions:

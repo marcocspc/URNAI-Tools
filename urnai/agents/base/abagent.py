@@ -34,6 +34,7 @@ class Agent(Savable):
         self.previous_action = None
         self.previous_state = None
         self.action_wrapper.reset()
+        self.model.ep_reset()
 
     def learn(self, obs, reward, done, is_last_step: bool):
         if self.previous_state is not None:

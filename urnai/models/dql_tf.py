@@ -10,16 +10,8 @@ from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 
 class DQLTF(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.90, decay_rate = 0.00001, name='DQN', nodes_layer1=10, nodes_layer2=10, nodes_layer3=10, nodes_layer4=10):
-        super(DQLTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, name)
-
-        #self.full_save_path = "../" + self.save_path + os.path.sep + self.file_name 
-
-        # EXPLORATION PARAMETERS FOR EPSILON GREEDY STRATEGY
-        self.explore_start = 1.0
-        self.explore_stop = 0.05
-        self.decay_rate = decay_rate
-        self.decay_step = 0
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.90, decay_rate = 0.00001, name='DQN', nodes_layer1=10, nodes_layer2=10, nodes_layer3=10, nodes_layer4=10, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False):
+        super(DQLTF, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay, per_episode_epsilon_decay, name=name)
 
         # Number of Nodes of each Layer of our model
         self.nodes_layer1 = nodes_layer1
@@ -105,13 +97,9 @@ class DQLTF(LearningModel):
         return mxq
 
     def choose_action(self, state, excluded_actions=[]):
-        self.decay_step += 1
-
         expl_expt_tradeoff = np.random.rand()
 
-        explore_probability = self.explore_stop + (self.explore_start - self.explore_stop) * np.exp(-self.decay_rate * self.decay_step)
-
-        if explore_probability > expl_expt_tradeoff:
+        if self.epsilon_greedy > expl_expt_tradeoff:
             random_action = random.choice(self.actions)
 
             # Removing excluded actions
@@ -120,6 +108,9 @@ class DQLTF(LearningModel):
             action = random_action
         else:
             action = self.predict(state, excluded_actions)
+
+        if not self.per_episode_epsilon_decay:
+            self.decay_epsilon()
 
         return action
 

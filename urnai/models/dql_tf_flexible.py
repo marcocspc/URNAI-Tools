@@ -41,15 +41,8 @@ class DqlTfFlexible(LearningModel):
     ]
 
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, gamma=0.95, name='DQN', build_model = DEFAULT_BUILD_MODEL):
-        super(DqlTfFlexible, self).__init__(action_wrapper, state_builder, gamma, learning_rate, name)
-
-        # EXPLORATION PARAMETERS FOR EPSILON GREEDY STRATEGY
-        self.explore_start = 1.0
-        self.explore_stop = 0.01
-        self.decay_rate = 0.0001
-        self.decay_step = 0
-        
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, gamma=0.95, name='DQN', build_model = DEFAULT_BUILD_MODEL, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False):
+        super(DqlTfFlexible, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay , per_episode_epsilon_decay ,name)
         # Defining the model's layers. Tensorflow's objects are stored into self.model_layers
         self.build_model = build_model
         self.make_model()
@@ -80,13 +73,10 @@ class DqlTfFlexible(LearningModel):
         return mxq
 
     def choose_action(self, state, excluded_actions=[]):
-        self.decay_step += 1
 
         expl_expt_tradeoff = np.random.rand()
 
-        explore_probability = self.explore_stop + (self.explore_start - self.explore_stop) * np.exp(-self.decay_rate * self.decay_step)
-
-        if explore_probability > expl_expt_tradeoff:
+        if self.epsilon_greedy > expl_expt_tradeoff:
             random_action = random.choice(self.actions)
 
             # Removing excluded actions
@@ -95,6 +85,8 @@ class DqlTfFlexible(LearningModel):
             action = random_action
         else:
             action = self.predict(state, excluded_actions)
+
+        self.decay_epsilon()
 
         return action
 
