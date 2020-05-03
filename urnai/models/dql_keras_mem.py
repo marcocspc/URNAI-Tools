@@ -16,7 +16,7 @@ import random
 import os
 from collections import deque
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten 
+from keras.layers import Dense, Conv2D, Flatten, MaxPooling2k 
 from keras.optimizers import Adam
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
@@ -70,9 +70,11 @@ class DQNKerasMem(LearningModel):
                 if self.build_model.index(layer_model) == 0:
                     model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
                               padding=layer_model['padding'], activation='relu', input_shape=layer_model['input_shape']))
+                    model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
                 else:
                     model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
                               padding=layer_model['padding'], activation='relu'))
+                    model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
             else:
                 raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
 
@@ -109,7 +111,6 @@ class DQNKerasMem(LearningModel):
             if(len(self.memory) > self.batch_size):
                 self.replay()
         else:
-            #TODO test learning without memory:
             self.no_memory_learning(s, a, r, s_, done, is_last_step)
 
         if not self.per_episode_epsilon_decay:

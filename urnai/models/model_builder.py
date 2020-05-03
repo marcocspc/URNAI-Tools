@@ -39,6 +39,7 @@ class ModelBuilder():
             'filter_shape' : (3, 3),
             'padding' : 'same',
             'name' : 'conv1',
+            'max_pooling_pool_size_shape' : (2, 2),
         },
         {
             'type' : LAYER_FULLY_CONNECTED,
@@ -75,7 +76,7 @@ class ModelBuilder():
         else:
             raise TypeError("Input layer shape should be a list with its dimensions in it.")
 
-    def add_convolutional_layer(self, filters = 1, filter_shape = (3, 3), padding = 'same', name = 'default', input_shape = None):
+    def add_convolutional_layer(self, filters = 1, filter_shape = (3, 3), padding = 'same', name = 'default', input_shape = None, max_pooling_pool_size_shape = (2, 2)):
         if name == "default":
             cont = 0
             for layer in self.layers:
@@ -95,6 +96,7 @@ class ModelBuilder():
                     'padding' : padding,
                     'name' : name,
                     'input_shape' : input_shape,
+                    'max_pooling_pool_size_shape' : max_pooling_pool_size_shape,
                     }
                     )
                 else:
