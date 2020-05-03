@@ -6,7 +6,7 @@ sys.path.insert(0,parentdir)
 
 import itertools
 import time
-from utils.logger import Logger
+from urnai.utils.logger import Logger
 from urnai.base.savable import Savable 
 from urnai.tdd.reporter import Reporter as rp
 from datetime import datetime

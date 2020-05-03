@@ -1,11 +1,6 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(parentdir)
-sys.path.insert(0,parentdir)
-
 from vizdoom import * 
 from .base.abenv import Env
-from utils.error import WadNotFoundError
+from ..utils.error import WadNotFoundError
 
 class VizdoomEnv(Env):
 
@@ -20,6 +15,7 @@ class VizdoomEnv(Env):
             self.doommap = doommap
             self.game = DoomGame()
             self.res = res
+            self.auto_map = auto_map
         else:
             raise WadNotFoundError("A wad file is needed.")
 
@@ -70,14 +66,24 @@ class VizdoomEnv(Env):
         #Set mini_map available in game obs
         #To get automap: observation.automap_buffer
         #Example: https://github.com/mwydmuch/ViZDoom/blob/master/examples/python/automap.py
-        if auto_map:
+        if self.auto_map:
             self.game.set_automap_buffer_enabled(True)
             self.game.set_automap_mode(AutomapMode.OBJECTS_WITH_SIZE)
 
 
+        #To get gamescreen on state, you should:
+        #game.get_state().screen_buffer
         #Some graphic properties
+        #screen format may be:
+        # game.set_screen_format(ScreenFormat.RGB24)
+        # game.set_screen_format(ScreenFormat.RGBA32)
+        # game.set_screen_format(ScreenFormat.ARGB32)
+        # game.set_screen_format(ScreenFormat.BGRA32)
+        # game.set_screen_format(ScreenFormat.ABGR32)
+        # game.set_screen_format(ScreenFormat.GRAY8)
+        # self.game.set_screen_format(ScreenFormat.RGB24)
+        self.game.set_screen_format(ScreenFormat.GRAY8)
         self.game.set_screen_resolution(self.res)
-        self.game.set_screen_format(ScreenFormat.RGB24)
         self.game.set_render_hud(True)
         self.game.set_render_crosshair(False)
         self.game.set_render_weapon(True)
@@ -128,4 +134,10 @@ class VizdoomEnv(Env):
 
     def restart(self):
         self.reset()
+
+    def get_screen_width(self):
+        return int(self.game.get_screen_width() / 2)
+
+    def get_screen_height(self):
+        return int(self.game.get_screen_height() / 2)
 

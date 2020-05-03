@@ -1,14 +1,10 @@
-'''
-
-'''
-
 import tensorflow as tf
 import numpy as np
 import random
 import os
 from collections import deque
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Conv2D, Flatten 
 from keras.optimizers import Adam
 from keras import backend as K
 from .base.abmodel import LearningModel
@@ -25,7 +21,7 @@ class DDQNKeras(LearningModel):
         self.n_resets = n_resets
         self.batch_size = batch_size
 
-        self.state_size = int(self.state_size)
+        #self.state_size = int(self.state_size)
 
         self.build_model = build_model
         self.model = self.make_model()
@@ -50,8 +46,6 @@ class DDQNKeras(LearningModel):
         if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
             self.build_model[0]['shape'] = [None, self.state_size]
             self.build_model[-1]['length'] = self.action_size
-        else:
-            raise IncoherentBuildModelError("Input Layer must be the first one and Output layer must be the last one.")
 
         for layer_model in self.build_model:
             if layer_model['type'] == ModelBuilder.LAYER_INPUT:
@@ -60,9 +54,24 @@ class DDQNKeras(LearningModel):
                 else:
                     raise IncoherentBuildModelError("Input Layer must be the first one.")
             elif layer_model['type'] == ModelBuilder.LAYER_FULLY_CONNECTED:
+                idx = self.build_model.index(layer_model) - 1 
+                if self.build_model[idx]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
+                    model.add(Flatten())
+
                 model.add(Dense(layer_model['nodes'], activation='relu'))
             elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
+                idx = self.build_model.index(layer_model) - 1 
+                if self.build_model[idx]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
+                    model.add(Flatten())
+
                 model.add(Dense(layer_model['length'], activation='linear'))
+            elif layer_model['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
+                if self.build_model.index(layer_model) == 0:
+                    model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
+                              padding=layer_model['padding'], activation='relu', input_shape=layer_model['input_shape']))
+                else:
+                    model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
+                              padding=layer_model['padding'], activation='relu'))
 
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
 

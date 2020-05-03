@@ -49,7 +49,6 @@ class VizdoomHealthGatheringWrapper(ActionWrapper):
 
         self.actions = [move_forward, turn_right, turn_left]
 
-
     def is_action_done(self):
         return True
 

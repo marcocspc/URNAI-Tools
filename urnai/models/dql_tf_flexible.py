@@ -105,8 +105,6 @@ class DqlTfFlexible(LearningModel):
         if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
             self.build_model[0]['shape'] = [None, self.state_size]
             self.build_model[-1]['length'] = self.actions_size
-        else:
-            raise IncoherentBuildModelError("Input Layer must be the first one and Output layer must be the last one.")
 
         #Load each layer
         self.model_layers = []

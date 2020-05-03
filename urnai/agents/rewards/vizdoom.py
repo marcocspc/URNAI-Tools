@@ -30,10 +30,10 @@ class VizDoomHealthGatheringReward(RewardBuilder):
     def get_reward(self, obs, reward, done):
         r = 0
         
-        r += -10 * obs.game_variables[VizDoomHealthGatheringReward.DEAD]
-        r += 15 * obs.game_variables[VizDoomHealthGatheringReward.ITEMCOUNT] 
-        r += 10 * obs.game_variables[VizDoomHealthGatheringReward.HEALTH] 
-        r += -10 * reward
+        #r += -10 * obs.game_variables[VizDoomHealthGatheringReward.DEAD]
+        #r += 15 * obs.game_variables[VizDoomHealthGatheringReward.ITEMCOUNT] 
+        r += obs.game_variables[VizDoomHealthGatheringReward.HEALTH] 
+        #r += -10 * reward
 
         return r
 

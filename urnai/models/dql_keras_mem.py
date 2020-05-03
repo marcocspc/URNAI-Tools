@@ -16,12 +16,13 @@ import random
 import os
 from collections import deque
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Conv2D, Flatten 
 from keras.optimizers import Adam
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 from .model_builder import ModelBuilder
+from urnai.utils.error import IncoherentBuildModelError
 
 class DQNKerasMem(LearningModel):
 
@@ -48,8 +49,6 @@ class DQNKerasMem(LearningModel):
         if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
             self.build_model[0]['shape'] = [None, self.state_size]
             self.build_model[-1]['length'] = self.action_size
-        else:
-            raise IncoherentBuildModelError("Input Layer must be the first one and Output layer must be the last one.")
 
         for layer_model in self.build_model:
             if layer_model['type'] == ModelBuilder.LAYER_INPUT: 
@@ -58,9 +57,25 @@ class DQNKerasMem(LearningModel):
                 else:
                     raise IncoherentBuildModelError("Input Layer must be the first one.") 
             elif layer_model['type'] == ModelBuilder.LAYER_FULLY_CONNECTED:
+                idx = self.build_model.index(layer_model) - 1 
+                if self.build_model[idx]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
+                    model.add(Flatten())
+
                 model.add(Dense(layer_model['nodes'], activation='relu'))
             elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
+                idx = self.build_model.index(layer_model) - 1 
+                if self.build_model[idx]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
+                    model.add(Flatten())
+
                 model.add(Dense(layer_model['length'], activation='linear'))
+            elif layer_model['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
+                if self.build_model.index(layer_model) == 0:
+                    model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
+                              padding=layer_model['padding'], activation='relu', input_shape=layer_model['input_shape']))
+                else:
+                    model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
+                              padding=layer_model['padding'], activation='relu'))
+
 
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
 
