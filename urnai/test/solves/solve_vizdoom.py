@@ -16,7 +16,7 @@ from datetime import datetime
 
 def main(unused_argv):
     try:
-        env = VizdoomEnv(parentdir + os.path.sep +"utils/vizdoomwads/health_gathering.wad", render=False, doommap=None, res=VizdoomEnv.RES_160X120)
+        env = VizdoomEnv(parentdir + os.path.sep +"utils/vizdoomwads/health_gathering.wad", render=True, doommap=None, res=VizdoomEnv.RES_160X120)
 
         training_date = str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_")
 
