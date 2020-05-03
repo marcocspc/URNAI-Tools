@@ -5,7 +5,7 @@ sys.path.insert(0,parentdir)
 
 import tensorflow as tf
 from tensorflow.python.framework import ops
-from utils.error import IncoherentBuildModelError
+from utils.error import IncoherentBuildModelError, UnsupportedBuildModelLayerTypeError
 from tensorflow.compat.v1 import Session,ConfigProto,placeholder,layers,train,global_variables_initializer
 import numpy as np
 import random
@@ -104,7 +104,7 @@ class DqlTfFlexible(LearningModel):
 
         if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
             self.build_model[0]['shape'] = [None, self.state_size]
-            self.build_model[-1]['length'] = self.actions_size
+            self.build_model[-1]['length'] = self.action_size
 
         #Load each layer
         self.model_layers = []
@@ -122,6 +122,8 @@ class DqlTfFlexible(LearningModel):
             elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
                 self.model_layers.append(layers.dense(inputs=self.model_layers[-1], 
                     units=self.action_size,activation=None))
+            else:
+                raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
 
         #Setup output qsa layer and loss
         self.tf_qsa = placeholder(shape=[None, self.action_size], dtype=tf.float32)

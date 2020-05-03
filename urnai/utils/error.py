@@ -18,3 +18,6 @@ class WadNotFoundError(Exception):
 
 class IncoherentBuildModelError(Exception):
     pass
+
+class UnsupportedBuildModelLayerTypeError(Exception):
+    pass

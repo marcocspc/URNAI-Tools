@@ -33,8 +33,6 @@ class DQNKerasMem(LearningModel):
         self.n_resets = n_resets
         self.batch_size = batch_size
 
-        #self.state_size = int(self.state_size)
-
         self.build_model = build_model
         self.model = self.make_model()
         self.use_memory = use_memory
@@ -75,6 +73,8 @@ class DQNKerasMem(LearningModel):
                 else:
                     model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
                               padding=layer_model['padding'], activation='relu'))
+            else:
+                raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
 
 
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
@@ -126,13 +126,6 @@ class DQNKerasMem(LearningModel):
         else:
             return self.predict(state)
 
-    def predict(self, state):
-        '''
-        model.predict returns an array of arrays, containing the Q-Values for the actions. This function should return the
-        corresponding action with the highest Q-Value.
-        '''
-        return self.actions[int(np.argmax(self.model.predict(state)[0]))]
-
     def save_extra(self, persist_path):
         self.model.save_weights(self.get_full_persistance_path(persist_path)+".h5")
 
@@ -142,4 +135,11 @@ class DQNKerasMem(LearningModel):
         if(exists):
             self.model = self.make_model()
             self.model.load_weights(self.get_full_persistance_path(persist_path)+".h5")
+
+    def predict(self, state):
+        '''
+        model.predict returns an array of arrays, containing the Q-Values for the actions. This function should return the
+        corresponding action with the highest Q-Value.
+        '''
+        return self.actions[int(np.argmax(self.model.predict(state)[0]))]
 
