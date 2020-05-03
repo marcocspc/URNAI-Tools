@@ -9,11 +9,16 @@ from keras.optimizers import Adam
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
+from urnai.utils.error import error
 
 class DQNKeras(LearningModel):
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.95,
                     name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32, memory_size=50000):
         super(DQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, name)
+
+        #This code is too old and need to be updated to tensorflow 2.0
+        error1 = 'DQLTF is not supported anymore, use DQLKERASMEM instead.'
+        raise DeprecatedCodeException(error1) 
 
         self.epsilon = epsilon
         self.epsilon_min = epsilon_min

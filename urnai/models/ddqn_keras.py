@@ -64,10 +64,18 @@ class DDQNKeras(DQNKerasMem):
             if(done):
                 self.update_target_model()
         else:
+            #TODO test learning without memory:
             self.no_memory_learning(s, a, r, s_, done, is_last_step)
 
         if not self.per_episode_epsilon_decay:
             self.decay_epsilon()
+
+    def predict(self, state):
+        '''
+        model.predict returns an array of arrays, containing the Q-Values for the actions. This function should return the
+        corresponding action with the highest Q-Value.
+        '''
+        return self.actions[int(np.argmax(self.model.predict(state)[0]))]
 
     def save_extra(self, persist_path):
         self.model.save_weights(self.get_full_persistance_path(persist_path)+"_model_"+".h5")
