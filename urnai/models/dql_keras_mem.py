@@ -33,7 +33,7 @@ class DQNKerasMem(LearningModel):
         self.n_resets = n_resets
         self.batch_size = batch_size
 
-        self.state_size = int(self.state_size)
+        #self.state_size = int(self.state_size)
 
         self.build_model = build_model
         self.model = self.make_model()

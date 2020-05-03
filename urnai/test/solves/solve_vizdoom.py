@@ -11,12 +11,13 @@ from urnai.agents.actions.vizdoom_wrapper import VizdoomHealthGatheringWrapper
 from urnai.agents.rewards.vizdoom import VizDoomHealthGatheringReward  
 from urnai.agents.states.vizdoom import VizDoomHealthGatheringState
 from urnai.models.ddqn_keras import DDQNKeras 
+from urnai.models.dql_keras_mem import DQNKerasMem
 from urnai.models.model_builder import ModelBuilder
 from datetime import datetime
 
 def main(unused_argv):
     try:
-        env = VizdoomEnv(parentdir + os.path.sep +"utils/vizdoomwads/health_gathering.wad", render=True, doommap=None, res=VizdoomEnv.RES_160X120)
+        env = VizdoomEnv(parentdir + os.path.sep +"utils/vizdoomwads/health_gathering.wad", render=False, doommap=None, res=VizdoomEnv.RES_160X120)
 
         training_date = str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_")
 
@@ -28,7 +29,8 @@ def main(unused_argv):
         helper.add_fullyconn_layer(256)
         helper.add_fullyconn_layer(256)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
-        dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
+        #dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
+        dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
         agent = GenericAgent(dq_network, VizDoomHealthGatheringReward())
         trainer = Trainer(env, agent, file_name=training_date + os.path.sep + "frozenlake_test_ddqnKeras", save_every=2, enable_save=True)
         # FrozenLake is solved when the agent is able to reach the end of the maze 100% of the times
