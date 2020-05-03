@@ -32,7 +32,7 @@ def main(unused_argv):
         #dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
         dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
         agent = GenericAgent(dq_network, VizDoomHealthGatheringReward())
-        trainer = Trainer(env, agent, file_name=training_date + os.path.sep + "frozenlake_test_ddqnKeras", save_every=2, enable_save=True)
+        trainer = Trainer(env, agent, file_name=training_date + os.path.sep + "frozenlake_test_ddqnKeras", save_every=10, enable_save=True)
         # FrozenLake is solved when the agent is able to reach the end of the maze 100% of the times
         trainer.train(num_episodes=3000, reward_from_env=True, max_steps=50)
         trainer.play(num_matches=100)
