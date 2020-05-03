@@ -53,8 +53,6 @@ class Trainer(Savable):
         else:
             rp.report("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
-        self.logger.log_training_start_information()
-
     def train(self, num_episodes=float('inf'), max_steps=float('inf'), test_params: TestParams = None, reward_from_env = True):
         start_time = time.time()
         

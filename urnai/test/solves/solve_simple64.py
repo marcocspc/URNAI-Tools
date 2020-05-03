@@ -18,6 +18,7 @@ from models.dql_tf import DQLTF
 from models.pg_tf import PolicyGradientTF
 from models.dql_keras_mem import DQNKerasMem
 from utils.functions import query_yes_no
+from models.model_builder import ModelBuilder
 
 """ Change "sc2_local_path" to your local SC2 installation path. 
 If you used the default installation path, you may ignore this step.
@@ -40,7 +41,14 @@ def main(unused_argv):
         
         # Deep Q Learning Model
         #dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=256, nodes_layer2=256, nodes_layer3=256, nodes_layer4=256, learning_rate=0.005, gamma=0.95)
-        dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=256, nodes_layer2=256, nodes_layer3=256, nodes_layer4=256, learning_rate=0.005, gamma=0.90)
+        helper = ModelBuilder()
+        helper.add_input_layer(int(state_builder.get_state_dim()))
+        helper.add_fullyconn_layer(256)
+        helper.add_fullyconn_layer(256)
+        helper.add_fullyconn_layer(256)
+        helper.add_fullyconn_layer(256)
+        helper.add_output_layer(action_wrapper.get_action_space_dim())
+        dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, model_builder=helper.get_model_layout())
 
         # Terran agent with a Deep Q-Learning model
         agent = SC2Agent(dq_network, GeneralReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())

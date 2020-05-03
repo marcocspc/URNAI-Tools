@@ -4,11 +4,34 @@ class ModelBuilder():
     LAYER_OUTPUT = 'output'
     LAYER_FULLY_CONNECTED = 'fullyconn'
     LAYER_CONVOLUTIONAL = 'conv'
+    DEFAULT_BUILD_MODEL = [ 
+
+        {
+            'type' : LAYER_INPUT,
+            'nodes' : 50,
+            'shape' : [None, 10],
+        },
+        {
+            'type' : LAYER_FULLY_CONNECTED,
+            'nodes' : 50,
+            'name' : 'fc1',
+        },
+        {
+            'type' : LAYER_FULLY_CONNECTED,
+            'nodes' : 50,
+            'name' : 'fc2',
+        },
+        {
+            'type' : LAYER_OUTPUT,
+            'length' : 50, 
+        },
+    ]
+
 
     def __init__(self):
         self.layers = []
 
-    def add_input_layer(self, size, custom_shape = None):
+    def add_input_layer(self, size, nodes = 50, custom_shape = None):
         shape = None
         if custom_shape == None: 
             shape = [None, size]
@@ -18,6 +41,7 @@ class ModelBuilder():
         if type(shape) == list:
             self.layers.append({
                 'type' : ModelBuilder.LAYER_INPUT,
+                'nodes' : nodes,
                 'shape' : shape 
                 })
         else:

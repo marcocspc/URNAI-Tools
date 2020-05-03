@@ -18,30 +18,7 @@ from .model_builder import ModelBuilder
 
 class DqlTfFlexible(LearningModel):
 
-    #Some useful class constants
-    DEFAULT_BUILD_MODEL = [ 
-        {
-            'type' : ModelBuilder.LAYER_INPUT,
-            'shape' : [None, 10],
-        },
-        {
-            'type' : ModelBuilder.LAYER_FULLY_CONNECTED,
-            'nodes' : 50,
-            'name' : 'fc1',
-        },
-        {
-            'type' : ModelBuilder.LAYER_FULLY_CONNECTED,
-            'nodes' : 50,
-            'name' : 'fc2',
-        },
-        {
-            'type' : ModelBuilder.LAYER_OUTPUT,
-            'length' : 50, 
-        },
-    ]
-
-
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, gamma=0.95, name='DQN', build_model = DEFAULT_BUILD_MODEL, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, gamma=0.95, name='DQN', build_model = ModelBuilder.DEFAULT_BUILD_MODEL, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False):
         super(DqlTfFlexible, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay , per_episode_epsilon_decay ,name)
         # Defining the model's layers. Tensorflow's objects are stored into self.model_layers
         self.build_model = build_model
@@ -86,7 +63,8 @@ class DqlTfFlexible(LearningModel):
         else:
             action = self.predict(state, excluded_actions)
 
-        self.decay_epsilon()
+        if not self.per_episode_epsilon_decay:
+            self.decay_epsilon()
 
         return action
 
@@ -124,11 +102,11 @@ class DqlTfFlexible(LearningModel):
         # Initializing TensorFlow session
         self.sess = Session(config=ConfigProto(allow_soft_placement=True))
 
-        #If the build model is the same as the default one, apply
-        #the default properties to input and output
-        if self.build_model == DqlTfFlexible.DEFAULT_BUILD_MODEL:
-                    self.build_model[0]['shape'] = [None, self.state_size]
-                    self.build_model[3]['length'] = self.actions_size
+        if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
+            self.build_model[0]['shape'] = [None, self.state_size]
+            self.build_model[-1]['length'] = self.actions_size
+        else:
+            raise IncoherentBuildModelError("Input Layer must be the first one and Output layer must be the last one.")
 
         #Load each layer
         self.model_layers = []

@@ -57,6 +57,8 @@ class Logger(Savable):
 
         self.render = render
 
+        self.log_training_start_information()
+
     def reset(self):
         self.ep_count = 0
 
@@ -93,14 +95,16 @@ class Logger(Savable):
         self.play_rewards_avg.append(sum(play_rewards) / num_matches)
 
     def log_training_start_information(self):
-        self.training_report += ("    Agent: {}\n".format(self.agent_name)
+        text = ("    Agent: {}\n".format(self.agent_name)
                 + "        Model: {}\n".format(self.model_name)
                 + "        ActionWrapper: {}\n".format(self.action_wrapper_name)
                 + "        StateBuilder: {}\n".format(self.state_builder_name)
                 + "        RewardBuilder: {}\n".format(self.reward_builder_name)
                 + "    Environment: {}\n".format (self.env_name))
 
-        rp.report(self.training_report)
+        self.training_report += text 
+
+        rp.report(text)
 
     def log_ep_stats(self):
         if self.ep_count > 0:
@@ -111,13 +115,15 @@ class Logger(Savable):
 
     def log_train_stats(self):
         if self.ep_count > 0:
-            self.training_report += ("\n"
+            text = ("\n"
             + "Current Reward Avg.: {}".format(sum(self.ep_rewards) / self.ep_count)
             + " Win rate: {:10.3f}%".format((self.victories / self.ep_count) * 100)
             + " Avg number of steps: {}".format(sum(self.ep_avg_steps)/ self.ep_count)
             + "\n")
 
-            rp.report(self.training_report)
+            self.training_report += text 
+
+            rp.report(text)
         else:
             rp.report("There are no recorded episodes!")
     
@@ -148,9 +154,6 @@ class Logger(Savable):
         # Plotting reward average over play testing graph
         return self.__plot_bar(self.play_ep_count, [self.play_rewards_avg], ['Play'], 'Episode', 'Reward avg.', 'Reward avg. over play testing')
 
-
-
-
     def save_extra(self, persist_path):
         if self.avg_reward_graph is None or self.avg_steps_graph is None:
              self.render = False
@@ -169,6 +172,9 @@ class Logger(Savable):
              self.avg_steps_graph = None
 
              self.render = True 
+
+             with open(persist_path + os.path.sep + self.get_default_save_stamp() + "overall_report.txt", "w") as output:
+                 output.write(self.training_report)
 
     def __plot_curve(self, x, y, x_label, y_label, title):
         fig, ax = plt.subplots()
