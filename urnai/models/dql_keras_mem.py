@@ -16,7 +16,7 @@ import random
 import os
 from collections import deque
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, MaxPooling2k 
+from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D 
 from keras.optimizers import Adam
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
