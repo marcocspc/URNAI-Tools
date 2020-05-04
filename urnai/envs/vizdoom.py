@@ -5,6 +5,7 @@ from ..utils.error import WadNotFoundError
 class VizdoomEnv(Env):
 
     RES_640X480 = ScreenResolution.RES_640X480 
+    RES_320X240 = ScreenResolution.RES_320X240
     RES_160X120 = ScreenResolution.RES_160X120 
 
     def __init__(self, wad, doommap="map01", _id="vizdoom", render=True, reset_done=True, num_steps=1000, res=RES_160X120, auto_map=True):
@@ -71,6 +72,18 @@ class VizdoomEnv(Env):
             self.game.set_automap_mode(AutomapMode.OBJECTS_WITH_SIZE)
 
 
+        if self.res == VizdoomEnv.RES_160X120:
+            self.res_w = 160
+            self.res_h = 120
+        elif self.res == VizdoomEnv.RES_320X240:
+            self.res_w = 320 
+            self.res_h = 240 
+        elif self.res == VizdoomEnv.RES_640X480:
+            self.res_w = 640 
+            self.res_h = 480
+        else:
+            raise UnsupportedVizDoomRes(self.res + " is an unsupported vizdoom resolution, use only VizdoomEnv.RES_640X480, VizdoomEnv.RES_320X240 or VizdoomEnv.RES_160X120.")
+
         #To get gamescreen on state, you should:
         #game.get_state().screen_buffer
         #Some graphic properties
@@ -136,8 +149,8 @@ class VizdoomEnv(Env):
         self.reset()
 
     def get_screen_width(self):
-        return int(self.game.get_screen_width() / 2)
+        return self.res_w 
 
     def get_screen_height(self):
-        return int(self.game.get_screen_height() / 2)
+        return self.res_h 
 

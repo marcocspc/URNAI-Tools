@@ -13,21 +13,15 @@ from urnai.agents.states.vizdoom import VizDoomHealthGatheringState
 from urnai.models.ddqn_keras import DDQNKeras 
 from urnai.models.dql_keras_mem import DQNKerasMem
 from urnai.models.model_builder import ModelBuilder
+import urnai.utils.tf_utils 
 from datetime import datetime
 
 #force tf cpu if using tf_gpu
-#uncomment only if needed
-#os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+#tf_utils.ignore_tensorflow_gpu()
 
 #force tf_gpu to allow more memory usage
 #uncomment only if needed
-#import tensorflow as tf
-#physical_devices = tf.config.list_physical_devices('GPU') 
-#try: 
-#  tf.config.experimental.set_memory_growth(physical_devices[0], True) 
-#except: 
-  # Invalid device or cannot modify virtual devices once initialized. 
-#  pass 
+#tf_utils.allow_memory_growth()
 
 def main(unused_argv):
     try:
@@ -40,13 +34,17 @@ def main(unused_argv):
 
         helper = ModelBuilder()
         helper.add_convolutional_layer(filters=32, input_shape=(env.get_screen_height(), env.get_screen_width(), 1)) #1 means grayscale images 
-        helper.add_convolutional_layer(filters=16) #1 means grayscale images 
+        helper.add_convolutional_layer(filters=16)
         helper.add_fullyconn_layer(50)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
         #dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
         dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
         agent = GenericAgent(dq_network, VizDoomHealthGatheringReward())
         trainer = Trainer(env, agent, file_name=training_date + os.path.sep + "frozenlake_test_dqnKeras_kerasmem", save_every=100, enable_save=True)
+        #trainer = Trainer(env, agent, save_path="", file_name="", save_every=100, enable_save=True)
+        #env = VizdoomEnv(parentdir + os.path.sep +"utils/vizdoomwads/health_gathering.wad", render=True, doommap=None, res=VizdoomEnv.RES_160X120)
+        #trainer.env = env
+
         trainer.train(num_episodes=3000, reward_from_env=True, max_steps=500)
         trainer.play(num_matches=100)
 

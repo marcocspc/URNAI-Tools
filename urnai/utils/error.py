@@ -21,3 +21,6 @@ class IncoherentBuildModelError(Exception):
 
 class UnsupportedBuildModelLayerTypeError(Exception):
     pass
+
+class UnsupportedVizDoomRes(Exception):
+    pass
