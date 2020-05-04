@@ -17,17 +17,16 @@ from datetime import datetime
 
 #force tf cpu if using tf_gpu
 #uncomment only if needed
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+#os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #force tf_gpu to allow more memory usage
 #uncomment only if needed
-#from keras.backend.tensorflow_backend import set_session
-#import tensorflow.compat.v1 as tf
-#config = tf.ConfigProto()
-#config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-#config.log_device_placement = True  # to log device placement (on which device the operation ran)sess = tf.Session(config=config)set_session(sess)  # set this TensorFlow session as the default session for Keras
-#sess = tf.Session(config=config)
-#set_session(sess)  # set this TensorFlow session as the default session for Keras
+physical_devices = tf.config.list_physical_devices('GPU') 
+try: 
+  tf.config.experimental.set_memory_growth(physical_devices[0], True) 
+except: 
+  # Invalid device or cannot modify virtual devices once initialized. 
+  pass 
 
 def main(unused_argv):
     try:
