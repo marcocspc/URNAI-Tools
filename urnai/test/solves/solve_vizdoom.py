@@ -25,7 +25,7 @@ from datetime import datetime
 
 def main(unused_argv):
     try:
-        env = VizdoomEnv(parentdir + os.path.sep +"utils/vizdoomwads/health_gathering.wad", render=False, doommap=None, res=VizdoomEnv.RES_160X120)
+        env = VizdoomEnv(parentdir + os.path.sep +"utils/vizdoomwads/health_gathering.wad", render=False, doommap=None, res=VizdoomEnv.RES_640X480)
 
         training_date = str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_")
 
@@ -40,10 +40,17 @@ def main(unused_argv):
         #dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
         dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
         agent = GenericAgent(dq_network, VizDoomHealthGatheringReward())
-        trainer = Trainer(env, agent, file_name=training_date + os.path.sep + "frozenlake_test_dqnKeras_kerasmem", save_every=100, enable_save=True)
+        trainer = Trainer(env, agent, file_name=training_date + os.path.sep + "frozenlake_test_dqnKeras_kerasmem_3000ep", save_every=100, enable_save=True)
         #trainer = Trainer(env, agent, save_path="", file_name="", save_every=100, enable_save=True)
         #env = VizdoomEnv(parentdir + os.path.sep +"utils/vizdoomwads/health_gathering.wad", render=True, doommap=None, res=VizdoomEnv.RES_160X120)
         #trainer.env = env
+
+        trainer.train(num_episodes=3000, reward_from_env=True, max_steps=500)
+        trainer.play(num_matches=100)
+
+        dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
+        agent = GenericAgent(dq_network, VizDoomHealthGatheringReward())
+        trainer = Trainer(env, agent, file_name=training_date + os.path.sep + "frozenlake_test_dqnKeras_kerasmem_500ep", save_every=100, enable_save=True)
 
         trainer.train(num_episodes=3000, reward_from_env=True, max_steps=500)
         trainer.play(num_matches=100)

@@ -15,8 +15,21 @@ class VizdoomEnv(Env):
             self.wad = wad
             self.doommap = doommap
             self.game = DoomGame()
-            self.res = res
             self.auto_map = auto_map
+
+            self.res = res
+            if self.res == VizdoomEnv.RES_160X120:
+                self.res_w = 160
+                self.res_h = 120
+            elif self.res == VizdoomEnv.RES_320X240:
+                self.res_w = 320 
+                self.res_h = 240 
+            elif self.res == VizdoomEnv.RES_640X480:
+                self.res_w = 640 
+                self.res_h = 480
+            else:
+                raise UnsupportedVizDoomRes(self.res + " is an unsupported vizdoom resolution, use only VizdoomEnv.RES_640X480, VizdoomEnv.RES_320X240 or VizdoomEnv.RES_160X120.")
+
         else:
             raise WadNotFoundError("A wad file is needed.")
 
@@ -72,17 +85,6 @@ class VizdoomEnv(Env):
             self.game.set_automap_mode(AutomapMode.OBJECTS_WITH_SIZE)
 
 
-        if self.res == VizdoomEnv.RES_160X120:
-            self.res_w = 160
-            self.res_h = 120
-        elif self.res == VizdoomEnv.RES_320X240:
-            self.res_w = 320 
-            self.res_h = 240 
-        elif self.res == VizdoomEnv.RES_640X480:
-            self.res_w = 640 
-            self.res_h = 480
-        else:
-            raise UnsupportedVizDoomRes(self.res + " is an unsupported vizdoom resolution, use only VizdoomEnv.RES_640X480, VizdoomEnv.RES_320X240 or VizdoomEnv.RES_160X120.")
 
         #To get gamescreen on state, you should:
         #game.get_state().screen_buffer

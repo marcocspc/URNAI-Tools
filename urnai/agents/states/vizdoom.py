@@ -21,14 +21,14 @@ class VizDoomHealthGatheringState(StateBuilder):
 
         lst = []
         for i in range(self.slices):
-            lst.append(np.zeros((self.screen_width,self.screen_height), dtype=np.int))
+            lst.append(np.zeros((self.screen_height,self.screen_width), dtype=np.int))
 
         self.stacked_frames = deque(lst, maxlen=self.slices)
 
     def build_state(self, obs):
         self.stacked_frames.append(obs.screen_buffer)
         if self.lib=="keras":
-            arr = np.asarray(self.stacked_frames)
+            arr = np.stack(self.stacked_frames)
             arr = arr.reshape(self.slices, self.screen_height, self.screen_width, 1)
             return arr 
 
