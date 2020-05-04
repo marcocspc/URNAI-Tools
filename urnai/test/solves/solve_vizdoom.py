@@ -21,12 +21,13 @@ from datetime import datetime
 
 #force tf_gpu to allow more memory usage
 #uncomment only if needed
-physical_devices = tf.config.list_physical_devices('GPU') 
-try: 
-  tf.config.experimental.set_memory_growth(physical_devices[0], True) 
-except: 
+#import tensorflow as tf
+#physical_devices = tf.config.list_physical_devices('GPU') 
+#try: 
+#  tf.config.experimental.set_memory_growth(physical_devices[0], True) 
+#except: 
   # Invalid device or cannot modify virtual devices once initialized. 
-  pass 
+#  pass 
 
 def main(unused_argv):
     try:
@@ -35,18 +36,18 @@ def main(unused_argv):
         training_date = str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_")
 
         action_wrapper = VizdoomHealthGatheringWrapper()
-        state_builder = VizDoomHealthGatheringState(env.get_screen_width(), env.get_screen_height(), slices=1)
+        state_builder = VizDoomHealthGatheringState(env.get_screen_width(), env.get_screen_height(), slices=3)
 
         helper = ModelBuilder()
         helper.add_convolutional_layer(filters=32, input_shape=(env.get_screen_height(), env.get_screen_width(), 1)) #1 means grayscale images 
-        helper.add_fullyconn_layer(256)
-        helper.add_fullyconn_layer(256)
+        helper.add_convolutional_layer(filters=16) #1 means grayscale images 
+        helper.add_fullyconn_layer(50)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
         #dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
         dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
         agent = GenericAgent(dq_network, VizDoomHealthGatheringReward())
         trainer = Trainer(env, agent, file_name=training_date + os.path.sep + "frozenlake_test_dqnKeras_kerasmem", save_every=100, enable_save=True)
-        trainer.train(num_episodes=3000, reward_from_env=True, max_steps=50)
+        trainer.train(num_episodes=3000, reward_from_env=True, max_steps=500)
         trainer.play(num_matches=100)
 
     except KeyboardInterrupt:

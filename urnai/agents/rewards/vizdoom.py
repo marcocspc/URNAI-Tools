@@ -8,6 +8,10 @@ class VizDoomDefaultReward(RewardBuilder):
 
 class VizDoomHealthGatheringReward(RewardBuilder):
 
+    def __init__(self):
+        self.prev_health = 0
+
+
     KILLCOUNT = 0
     ITEMCOUNT = 1
     SECRETCOUNT = 2
@@ -32,8 +36,10 @@ class VizDoomHealthGatheringReward(RewardBuilder):
         
         #r += -10 * obs.game_variables[VizDoomHealthGatheringReward.DEAD]
         #r += 15 * obs.game_variables[VizDoomHealthGatheringReward.ITEMCOUNT] 
-        r += obs.game_variables[VizDoomHealthGatheringReward.HEALTH] 
+        r += obs.game_variables[VizDoomHealthGatheringReward.HEALTH] - self.prev_health 
         #r += -10 * reward
+
+        self.prev_health = obs.game_variables[VizDoomHealthGatheringReward.HEALTH]
 
         return r
 
