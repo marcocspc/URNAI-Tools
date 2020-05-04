@@ -13,7 +13,7 @@ from urnai.agents.states.vizdoom import VizDoomHealthGatheringState
 from urnai.models.ddqn_keras import DDQNKeras 
 from urnai.models.dql_keras_mem import DQNKerasMem
 from urnai.models.model_builder import ModelBuilder
-import urnai.utils.tf_utils 
+from urnai.utils.tf_utils import ignore_tensorflow_gpu, allow_memory_growth 
 from datetime import datetime
 
 #force tf cpu if using tf_gpu
