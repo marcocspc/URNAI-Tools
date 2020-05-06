@@ -90,7 +90,7 @@ class Trainer(Savable):
 
                 # Checking whether or not to use the reward from the reward builder so we can pass that to the agent
                 if reward_from_env:
-                    step_reward = self.agent.get_reward(obs, step_reward, done)
+                    step_reward = self.agent.get_reward(obs, default_reward, done)
                 else:
                     step_reward = default_reward
 
@@ -166,7 +166,7 @@ class Trainer(Savable):
                 obs, default_reward, done = self.env.step(action)
 
                 if reward_from_env:
-                    step_reward = self.agent.get_reward(obs, step_reward, done)
+                    step_reward = self.agent.get_reward(obs, default_reward, done)
                 else:
                     step_reward = default_reward
 
