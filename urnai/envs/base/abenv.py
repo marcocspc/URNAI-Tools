@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from urnai.base.savable import Savable 
-from urnai.utils.types import *
+from urnai.utils.returns import *
 
 class Env(Savable):
     '''

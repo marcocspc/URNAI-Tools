@@ -24,3 +24,6 @@ class UnsupportedBuildModelLayerTypeError(Exception):
 
 class UnsupportedVizDoomRes(Exception):
     pass
+
+class ClassNotFoundError(Exception):
+    pass

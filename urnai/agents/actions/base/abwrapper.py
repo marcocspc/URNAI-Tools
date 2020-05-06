@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from utils.types import ActionIndex, List
+from utils.returns import ActionIndex, List
 
 class ActionWrapper(ABC):
     """

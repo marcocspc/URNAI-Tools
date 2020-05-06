@@ -8,7 +8,7 @@ sys.path.insert(0,parentdir)
 from abc import ABC, abstractmethod
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
-from utils.types import ActionIndex
+from utils.returns import ActionIndex
 from urnai.base.savable import Savable 
 
 class LearningModel(Savable):

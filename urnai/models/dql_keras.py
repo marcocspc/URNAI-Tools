@@ -9,7 +9,7 @@ from keras.optimizers import Adam
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
-from urnai.utils.error import error
+from urnai.utils.error import DeprecatedCodeException 
 
 class DQNKeras(LearningModel):
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.95,
