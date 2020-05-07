@@ -70,7 +70,7 @@ class DDQNKeras(DQNKerasMem):
         if not self.per_episode_epsilon_decay:
             self.decay_epsilon()
 
-    def predict(self, state):
+    def predict(self, state, excluded_actions=[]):
         '''
         model.predict returns an array of arrays, containing the Q-Values for the actions. This function should return the
         corresponding action with the highest Q-Value.

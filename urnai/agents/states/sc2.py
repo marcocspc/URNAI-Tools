@@ -15,7 +15,7 @@ class Simple64State(StateBuilder):
     def __init__(self, reduction_factor=4):
         self.reduction_factor = reduction_factor
 
-        self._state_size = 22 + (64/self.reduction_factor)**2
+        self._state_size = int(22 + (64/self.reduction_factor)**2)
         self.player_race = 0
 
     def build_state(self, obs):

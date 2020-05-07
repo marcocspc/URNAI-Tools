@@ -1,6 +1,12 @@
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+parentdir = os.path.dirname(parentdir)
+sys.path.insert(0,parentdir)
+
 from abc import ABC, abstractmethod
-from urnai.base.savable import Savable 
-from urnai.utils.types import *
+from base.savable import Savable 
+from utils.types import *
 
 class Env(Savable):
     '''

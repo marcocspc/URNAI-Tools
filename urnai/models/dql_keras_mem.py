@@ -38,7 +38,7 @@ class DQNKerasMem(LearningModel):
         self.use_memory = use_memory
 
         if self.use_memory:
-            self.memory = deque(maxlen=self.memory_maxlen)
+            self.memory = deque(maxlen=memory_maxlen)
             self.memory_maxlen = memory_maxlen
         
     def make_model(self):
@@ -137,7 +137,7 @@ class DQNKerasMem(LearningModel):
             self.model = self.make_model()
             self.model.load_weights(self.get_full_persistance_path(persist_path)+".h5")
 
-    def predict(self, state):
+    def predict(self, state, excluded_actions=[]):
         '''
         model.predict returns an array of arrays, containing the Q-Values for the actions. This function should return the
         corresponding action with the highest Q-Value.
