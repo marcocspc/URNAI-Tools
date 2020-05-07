@@ -39,6 +39,8 @@ class VizDoomHealthGatheringReward(RewardBuilder):
         r += obs.game_variables[VizDoomHealthGatheringReward.HEALTH] - self.prev_health 
         #r += -10 * reward
 
+        if r >0: r *= 5
+
         self.prev_health = obs.game_variables[VizDoomHealthGatheringReward.HEALTH]
 
         return r
