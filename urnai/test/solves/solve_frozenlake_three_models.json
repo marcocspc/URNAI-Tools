@@ -191,7 +191,6 @@
             "params" : {
                 "learning_rate" : 0.005,
                 "gamma" : 0.9,
-                "use_memory" : false,
                 "per_episode_epsilon_decay" : true,
                 "build_model" : [
                     {
