@@ -8,7 +8,7 @@ import pickle
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
-import urnai.utils.error
+from urnai.utils.error import DeprecatedCodeException 
 
 class DQLTF(LearningModel):
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.90, decay_rate = 0.00001, name='DQN', nodes_layer1=10, nodes_layer2=10, nodes_layer3=10, nodes_layer4=10, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False):

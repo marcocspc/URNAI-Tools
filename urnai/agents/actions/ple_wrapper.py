@@ -9,7 +9,7 @@ class PLEWrapper(ActionWrapper):
     def __init__(self, action_set,action_space_size):
         self.move_number = 0
         self.actions = action_set 
-        self.action_indices = [idx for idx in range(action_space_size))]
+        self.action_indices = [idx for idx in range(action_space_size)]
 
 
     def is_action_done(self):

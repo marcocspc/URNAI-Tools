@@ -55,8 +55,8 @@ def main(unused_argv):
         agent = SC2Agent(dq_network, GeneralReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())
 
         #test_params = TestParams(num_matches=1, steps_per_test=25, max_steps=10000, reward_threshold=1000)
-        #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_dql", save_every=20, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dqnkeras_mem", save_every=10, enable_save=True, relative_path=True)
+        #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_dql", save_every=50, enable_save=True)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dqnkeras_mem", save_every=50, enable_save=True, relative_path=True)
         trainer.train(num_episodes=1000, reward_from_env=True, max_steps=800)
         trainer.play(num_matches=50)
 

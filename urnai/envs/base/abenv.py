@@ -6,7 +6,7 @@ sys.path.insert(0,parentdir)
 
 from abc import ABC, abstractmethod
 from base.savable import Savable 
-from utils.types import *
+from utils.returns import *
 
 class Env(Savable):
     '''
