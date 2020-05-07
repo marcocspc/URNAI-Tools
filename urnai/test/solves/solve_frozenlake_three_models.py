@@ -69,13 +69,6 @@ def main(unused_argv):
         # FrozenLake is solved when the agent is able to reach the end of the maze 100% of the times
         trainer.train(num_episodes=3000, reward_from_env=True, max_steps=3000)
         trainer.play(num_matches=100)
-
-        dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=256, nodes_layer2=256, nodes_layer3=256, nodes_layer4=256, learning_rate=0.005, gamma=0.90, per_episode_epsilon_decay = True)
-        agent = GenericAgent(dq_network, FrozenlakeReward())
-        trainer = Trainer(env, agent, file_name=training_date + os.path.sep + "frozenlake_test_dqltf", save_every=1000, enable_save=True)
-        # FrozenLake is solved when the agent is able to reach the end of the maze 100% of the times
-        trainer.train(num_episodes=3000, reward_from_env=True, max_steps=3000)
-        trainer.play(num_matches=100)
     except KeyboardInterrupt:
         pass
 
