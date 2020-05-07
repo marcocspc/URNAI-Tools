@@ -34,5 +34,5 @@ class JSONTrainer():
                 trainer.train(**training["json_trainer"]["train"])
 
             if bool(training["json_trainer"]["play"]):
-                trainer.train(**training["json_trainer"]["play"])
+                trainer.play(**training["json_trainer"]["play"])
 
