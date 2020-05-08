@@ -9,7 +9,6 @@ TF_CPU = 'URNAI_TF_CPU'
 G2048 = 'URNAI_2048'
 DEEPRTS = 'URNAI_DEEPRTS'
 
-#git_url = '{package} @ git+https://github.com/{user}/{package}.git/@{version}#egg={package}-0'
 git_url = '{package} @ git+https://github.com/{user}/{repo}@{branch}#egg={package}'
 dep_links = []
 dep_list = []
