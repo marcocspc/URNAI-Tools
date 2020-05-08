@@ -1,8 +1,8 @@
-from .commands import DeepRTSRunner
+from .commands import DeepRTSRunner, TrainerRunner
 
 class RunnerBuilder():
 
-    COMMANDS = [DeepRTSRunner]
+    COMMANDS = [DeepRTSRunner, TrainerRunner]
 
     @staticmethod
     def build(parser, args):

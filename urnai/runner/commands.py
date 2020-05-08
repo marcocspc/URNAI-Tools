@@ -79,3 +79,24 @@ class DeepRTSRunner(Runner):
         rp.report('Available maps on DeepRTS:')
         rp.report(os.listdir(drts_map_dir))
 
+class TrainerRunner(Runner):
+
+    COMMAND = 'train'
+    OPT_COMMANDS = [
+            {'command': '--json-file', 'help': 'JSON solve file, with all the parameters to start the training.', 'type' : str, 'metavar' : 'JSON_FILE_PATH', 'action' : 'store'},
+#TODO            {'command': '--build-training-file', 'help': 'Helper to build a solve json-file.', 'action' : 'store_true'},
+            ]
+
+    def __init__(self, parser, args):
+        super().__init__(parser, args)
+
+    def run(self):
+        if self.args.json_file is not None:
+            from urnai.trainers.jsontrainer import JSONTrainer
+
+            trainer = JSONTrainer(self.args.json_file)
+            trainer.start_training()
+        #TODO
+        #elif self.args.build_training_file:
+        else:
+            raise argparse.ArgumentError(message="You must specify at least a JSON file path to start training.")

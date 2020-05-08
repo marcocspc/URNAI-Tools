@@ -67,7 +67,6 @@
         "trainer" : {
             "class" : "Trainer",
             "params" : {
-                "save_path" : "/content/drive/My Drive/colab_workspace/urnai_saved_trainings",
                 "file_name" : "frozenlake_dqnkerasmem",
                 "save_every" : 1000,
                 "enable_save" : true
@@ -152,7 +151,6 @@
         "trainer" : {
             "class" : "Trainer",
             "params" : {
-                "save_path" : "/content/drive/My Drive/colab_workspace/urnai_saved_trainings",
                 "file_name" : "frozenlake_ddqnkeras",
                 "save_every" : 1000,
                 "enable_save" : true
@@ -236,7 +234,6 @@
         "trainer" : {
             "class" : "Trainer",
             "params" : {
-                "save_path" : "/content/drive/My Drive/colab_workspace/urnai_saved_trainings",
                 "file_name" : "frozenlake_dqltfflexible",
                 "save_every" : 1000,
                 "enable_save" : true
