@@ -24,6 +24,8 @@ pip3 install git+https://github.com/pvnetto/URNAI-Tools/
 
 The basic installation will install all the *basic* required dependencies, including OpenAI Gym and SC2LE. But for other supported environments, you will need to install them for yourself. We describe how to do this on the next section. 
 
+To use tensorflowp-cpu instead of gpu, go to Optional below.
+
 ### Optional
 
 #### Starcraft II
@@ -47,6 +49,10 @@ set "URNAI_2048=1" && pip3 install urnai
 ```
 
 #### VizDoom
+
+Before setting urnai to install vizdoom, please see if you have all dependencies installed.
+
+Go [here] first.(https://github.com/mwydmuch/ViZDoom/blob/master/doc/Building.md#deps)
 
 To install urnai with vizdoom support, use:
 
@@ -87,17 +93,39 @@ URNAI_DEEPRTS=1 URNAI_VIZDOOM=1 URNAI_2048=1 pip3 install urnai
 ```
 set "URNAI_DEEPRTS=1" && set "URNAI_VIZDOOM=1" && set "URNAI_2048=1" && pip3 install urnai 
 ```
+#### Tensorflow CPU
 
+By default, urnai depdens on tensorflow-gpu, to use tf-cpu instead, use:
+
+- On Unix:
+```
+URNAI_TF_CPU=1 pip3 install urnai 
+```
+
+- On Windows:
+```
+set "URNAI_TF_CPU=1" && pip3 install urnai 
+```
 ### Running the examples
 
-To execute any of the examples we've included, just navigate to the project's folder and run them using Python.
+From version 0.0.2+ you can use json-files:
 
 ```
-cd 'project/save/path'
-python solve_x.py
+git clone https://github.com/marcocspc/URNAI-Tools 
+cd 'URNAI-Tools/urnai/test/solves'
+urnai train --json-file=solve_x.json
 ```
 
-## Guide
+## Command line
+
+You can now use urnai on command line. Commands:
+
+To see what you can do, use:
+```
+urnai -h
+```
+
+## Building your own code
 
 Follow these instructions to start developing new stuff using our library.
 
@@ -139,7 +167,6 @@ Here you'll find all the things that we plan to do in this project. **Bold** ite
   * [X] Frozenlake
   * [X] Cartpole-V0
   * [X] Cartpole-V1
-  * [X] Taxi-V2
   * [ ] Flappy Bird
   * [ ] **StarCraft II - Simple 64 Map - Very Easy difficulty**
 

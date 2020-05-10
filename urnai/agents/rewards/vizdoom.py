@@ -30,18 +30,27 @@ class VizDoomHealthGatheringReward(RewardBuilder):
     POSITION_Y = 15
     POSITION_Z = 16 
     GENERAL_REWARD = 17
+    
+    METHOD_CUMULATIVE = "cumulative"
+    METHOD_DIFFERENCE = "difference"
+    METHOD_POSITIVE_ONLY = "positive_only"
+
+    def __init__(self, method):
+        self.method = method 
 
     def get_reward(self, obs, reward, done):
         r = 0
         
-        #r += -10 * obs.game_variables[VizDoomHealthGatheringReward.DEAD]
-        #r += 15 * obs.game_variables[VizDoomHealthGatheringReward.ITEMCOUNT] 
-        r += obs.game_variables[VizDoomHealthGatheringReward.HEALTH] - self.prev_health 
-        #r += -10 * reward
+        if method == VizDoomHealthGatheringReward.METHOD_CUMULATIVE:
+            r += obs.game_variables[VizDoomHealthGatheringReward.HEALTH]
+        elif method == VizDoomHealthGatheringReward.METHOD_DIFFERENCE:
+            r += obs.game_variables[VizDoomHealthGatheringReward.HEALTH] - self.prev_health 
+            self.prev_health = obs.game_variables[VizDoomHealthGatheringReward.HEALTH]
+        elif method == VizDoomHealthGatheringReward.METHOD_POSITIVE_ONLY:
+            r += obs.game_variables[VizDoomHealthGatheringReward.HEALTH] - self.prev_health 
+            self.prev_health = obs.game_variables[VizDoomHealthGatheringReward.HEALTH]
 
-        if r >0: r *= 5
-
-        self.prev_health = obs.game_variables[VizDoomHealthGatheringReward.HEALTH]
+            if r < 0: r = 0
 
         return r
 
