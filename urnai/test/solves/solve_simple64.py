@@ -34,7 +34,7 @@ def main(unused_argv):
 
         ## Initializing our StarCraft 2 environment
         players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
-        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=32)
+        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=24)
         
         action_wrapper = TerranWrapper()
         state_builder = Simple64State()
@@ -56,9 +56,9 @@ def main(unused_argv):
 
         #test_params = TestParams(num_matches=1, steps_per_test=25, max_steps=10000, reward_threshold=1000)
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_dql", save_every=50, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dqnkeras_mem", save_every=50, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=1000, reward_from_env=True, max_steps=800)
-        trainer.play(num_matches=50)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_test", save_every=50, enable_save=True, relative_path=True)
+        trainer.train(num_episodes=1000, max_steps=800)
+        trainer.play(num_matches=50, max_steps=800)
 
     except KeyboardInterrupt:
         pass

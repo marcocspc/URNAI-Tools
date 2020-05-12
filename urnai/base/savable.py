@@ -120,6 +120,8 @@ class Savable(ABC):
             except TypeError as te:
                 if "can't pickle" in str(te):
                     continue
+                if "cannot pickle" in str(te):
+                    continue
                 else:
                     raise
             except NotImplementedError as nie:
