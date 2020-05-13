@@ -16,7 +16,7 @@ from .dql_keras_mem import DQNKerasMem
 class DDQNKeras(DQNKerasMem):
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.002, gamma=0.95, 
-                name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32,
+                name='DDQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32,
                 memory_maxlen=2000, use_memory=True, per_episode_epsilon_decay=False, build_model = ModelBuilder.DEFAULT_BUILD_MODEL):
         super(DDQNKeras, self).__init__(action_wrapper, state_builder, learning_rate, gamma, name, epsilon, epsilon_min, epsilon_decay, n_resets, batch_size, memory_maxlen, use_memory, per_episode_epsilon_decay, build_model)
 

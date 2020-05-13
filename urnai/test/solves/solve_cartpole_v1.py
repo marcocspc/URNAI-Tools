@@ -17,7 +17,9 @@ from agents.generic_agent import GenericAgent
 from agents.actions.gym_wrapper import GymWrapper
 from agents.rewards.default import PureReward
 from agents.states.gym import PureState
+from agents.states.gym import GymState
 from models.dql_keras_mem import DQNKerasMem
+from models.pg_keras import PGKeras
 from models.model_builder import ModelBuilder
 
 def main(unused_argv):
@@ -25,7 +27,8 @@ def main(unused_argv):
         env = GymEnv(id="CartPole-v1")
 
         action_wrapper = env.get_action_wrapper()
-        state_builder = PureState(env.env_instance.observation_space)
+        #state_builder = PureState(env.env_instance.observation_space)
+        state_builder = GymState(env)
 
         helper = ModelBuilder()
         helper.add_input_layer(int(state_builder.get_state_dim()))
@@ -34,19 +37,19 @@ def main(unused_argv):
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
 
-        dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, 
-                                gamma=0.95, learning_rate=0.001, epsilon_decay=0.995, epsilon_min=0.01, 
-                                build_model=helper.get_model_layout())
+        # dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, 
+        #                         gamma=0.95, learning_rate=0.001, epsilon_decay=0.995, epsilon_min=0.01, 
+        #                         build_model=helper.get_model_layout())
 
-        # dq_network = PolicyGradientTF(action_wrapper, state_builder, 'urnai/models/saved/cartpole_v0_pg', learning_rate=0.01, gamma=0.9)
+        dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99)
 
         agent = GenericAgent(dq_network, PureReward())
 
         # Cartpole-v1 is solved when avg. reward over 100 episodes is greater than or equal to 475
         #test_params = TestParams(num_matches=100, steps_per_test=100, max_steps=500, reward_threshold=500)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v1", save_every=10, enable_save=True, relative_path=True)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v1_pg_2", save_every=500, enable_save=True, relative_path=True)
         trainer.train(num_episodes=1000, max_steps=500, reward_from_env=True)
-        trainer.play(num_matches=100, reward_from_env=True)
+        trainer.play(num_matches=100, max_steps=5000, reward_from_env=True)
     except KeyboardInterrupt:
         pass
 

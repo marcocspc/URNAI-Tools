@@ -34,7 +34,6 @@ class PureState(StateBuilder):
     def __init__(self, observation_space):
         #you can get observation_space from env.env_instance.observation_space
         self.state_dim = self.parse_dims(observation_space)
-        #self.state_dim = self.parse_dims(observation_space)
 
     def parse_dims(self, obs_space):
         observation_type = type(obs_space).__name__
@@ -60,3 +59,13 @@ class PureState(StateBuilder):
     def get_state_dim(self):
         return self.state_dim
 
+class GymState(StateBuilder):
+    def __init__(self, env:Env):
+        #you can get observation_space from env.env_instance.observation_space
+        self.state_dim = env.env_instance.observation_space.shape[0]
+
+    def build_state(self, obs):
+        return obs
+
+    def get_state_dim(self):
+        return self.state_dim
