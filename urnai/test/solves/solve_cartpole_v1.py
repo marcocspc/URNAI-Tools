@@ -32,24 +32,24 @@ def main(unused_argv):
 
         helper = ModelBuilder()
         helper.add_input_layer(int(state_builder.get_state_dim()))
-        helper.add_fullyconn_layer(24)
-        helper.add_fullyconn_layer(24)
+        helper.add_fullyconn_layer(25)
+        helper.add_fullyconn_layer(25)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
 
         # dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, 
-        #                         gamma=0.95, learning_rate=0.001, epsilon_decay=0.995, epsilon_min=0.01, 
-        #                         build_model=helper.get_model_layout())
+        #                          gamma=0.99, learning_rate=0.001, epsilon_decay=0.995, epsilon_min=0.01, 
+        #                          build_model=helper.get_model_layout(), memory_maxlen=500)
 
-        dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99)
+        dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
 
         agent = GenericAgent(dq_network, PureReward())
 
         # Cartpole-v1 is solved when avg. reward over 100 episodes is greater than or equal to 475
         #test_params = TestParams(num_matches=100, steps_per_test=100, max_steps=500, reward_threshold=500)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v1_pg_2", save_every=500, enable_save=True, relative_path=True)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v1_pg_helper", save_every=500, enable_save=True, relative_path=True)
         trainer.train(num_episodes=1000, max_steps=500, reward_from_env=True)
-        trainer.play(num_matches=100, max_steps=5000, reward_from_env=True)
+        trainer.play(num_matches=100, max_steps=500, reward_from_env=True)
     except KeyboardInterrupt:
         pass
 

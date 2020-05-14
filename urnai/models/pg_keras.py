@@ -29,53 +29,52 @@ class PGKeras(LearningModel):
         self.reward_memory = []
         
     def make_model(self):
-        
-        input = Input(shape=(self.state_size,))
-        self.advantages = Input(shape=[1])
-        dense1 = Dense(50, activation='relu')(input)
-        dense2 = Dense(50, activation='relu')(dense1)
-        output = Dense(self.action_size, activation='softmax')(dense2)
+        # input = Input(shape=(self.state_size,))
+        # dense1 = Dense(50, activation='relu')(input)
+        # dense2 = Dense(50, activation='relu')(dense1)
+        # output = Dense(self.action_size, activation='softmax')(dense2)
 
-        model = Model(input=[input, self.advantages], output=[output])
+        # model = Model(input=[input, self.advantages], output=[output])
+        # model.compile(optimizer=Adam(lr=self.learning_rate), loss=self.custom_loss)
+
+        # predict_model = Model(input=[input], output=[output])
+
+        # return model, predict_model
+
+        model_layers = []
+
+        if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
+            self.build_model[0]['shape'] = [None, self.state_size]
+            self.build_model[-1]['length'] = self.action_size
+
+        for layer_model in self.build_model:
+            if layer_model['type'] == ModelBuilder.LAYER_INPUT: 
+                if self.build_model.index(layer_model) == 0:
+                    model_layers = [Input(shape=(layer_model['shape'][1],))]
+                    self.advantages = Input(shape=[1])
+                else:
+                    raise IncoherentBuildModelError("Input Layer must be the first one.") 
+            elif layer_model['type'] == ModelBuilder.LAYER_FULLY_CONNECTED:
+                prev_idx = self.build_model.index(layer_model) - 1 
+                model_layers.append(Dense(layer_model['nodes'], activation='relu')(model_layers[prev_idx]))
+
+            elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
+                prev_idx = self.build_model.index(layer_model) - 1 
+                model_layers.append(Dense(layer_model['length'], activation='softmax')(model_layers[prev_idx]))
+
+            elif layer_model['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
+                raise UnsupportedBuildModelLayerTypeError("This Policy Gradient Model does not support layers of type " + layer_model['type'])
+
+            else:
+                raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
+
+
+        model = Model(input=[model_layers[0], self.advantages], output=[model_layers[-1]])
         model.compile(optimizer=Adam(lr=self.learning_rate), loss=self.custom_loss)
 
-        predict_model = Model(input=[input], output=[output])
+        predict_model = Model(input=[model_layers[0]], output=[model_layers[-1]])
 
         return model, predict_model
-
-        # if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
-        #     self.build_model[0]['shape'] = [None, self.state_size]
-        #     self.build_model[-1]['length'] = self.action_size
-
-        # for layer_model in self.build_model:
-        #     if layer_model['type'] == ModelBuilder.LAYER_INPUT: 
-        #         if self.build_model.index(layer_model) == 0:
-        #             model.add(Dense(layer_model['nodes'], input_dim=layer_model['shape'][1], activation='relu'))
-        #         else:
-        #             raise IncoherentBuildModelError("Input Layer must be the first one.") 
-        #     elif layer_model['type'] == ModelBuilder.LAYER_FULLY_CONNECTED:
-        #         idx = self.build_model.index(layer_model) - 1 
-        #         if self.build_model[idx]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
-        #             model.add(Flatten())
-
-        #         model.add(Dense(layer_model['nodes'], activation='relu'))
-        #     elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
-        #         idx = self.build_model.index(layer_model) - 1 
-        #         if self.build_model[idx]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
-        #             model.add(Flatten())
-
-        #         model.add(Dense(layer_model['length'], activation='linear'))
-        #     elif layer_model['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
-        #         if self.build_model.index(layer_model) == 0:
-        #             model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
-        #                       padding=layer_model['padding'], activation='relu', input_shape=layer_model['input_shape']))
-        #             model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
-        #         else:
-        #             model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
-        #                       padding=layer_model['padding'], activation='relu'))
-        #             model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
-        #     else:
-        #         raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
 
     def custom_loss(self, y_true, y_pred):
             out = K.clip(y_pred, 1e-8, 1-1e-8)
@@ -93,6 +92,7 @@ class PGKeras(LearningModel):
 
         if done or is_last_step:
             state_memory = np.array(self.state_memory)
+            state_memory = state_memory[:, 0, :]
             action_memory = np.array(self.action_memory)
             reward_memory = np.array(self.reward_memory)
 
@@ -114,7 +114,7 @@ class PGKeras(LearningModel):
             std = np.std(G) if np.std(G) > 0 else 1
             G = (G-mean)/std
 
-            self.model.train_on_batch([state_memory, G], actions)
+            self.model.train_on_batch([state_memory, discount_reward], action_onehot)
             
 
     def compute_discounted_R(self, R):
@@ -152,8 +152,8 @@ class PGKeras(LearningModel):
         model.predict returns an array of arrays, containing the Q-Values for the actions. 
         This function uses the action probabilities from our policy to randomly select an action
         '''
-        state = state[np.newaxis, :]
-        action_prob = self.predict_model.predict(state)[0]
+        action_prob = self.predict_model.predict(state)
+        action_prob = action_prob[0]
         action = np.random.choice(np.arange(self.action_size), p=action_prob)
 
         return action

@@ -65,7 +65,8 @@ class GymState(StateBuilder):
         self.state_dim = env.env_instance.observation_space.shape[0]
 
     def build_state(self, obs):
-        return obs
+        state = obs[np.newaxis, :]
+        return state
 
     def get_state_dim(self):
         return self.state_dim

@@ -15,7 +15,7 @@ from agents.rewards.sc2 import KilledUnitsReward, GeneralReward
 from agents.states.sc2 import Simple64State_1
 from agents.states.sc2 import Simple64State
 from models.dql_tf import DQLTF
-from models.pg_tf import PolicyGradientTF
+from models.pg_keras import PGKeras
 from models.dql_keras_mem import DQNKerasMem
 from utils.functions import query_yes_no
 from models.model_builder import ModelBuilder
@@ -39,7 +39,6 @@ def main(unused_argv):
         action_wrapper = TerranWrapper()
         state_builder = Simple64State()
         
-        # Deep Q Learning Model
         #dq_network = DQLTF(action_wrapper=action_wrapper, state_builder=state_builder, nodes_layer1=256, nodes_layer2=256, nodes_layer3=256, nodes_layer4=256, learning_rate=0.005, gamma=0.95)
         helper = ModelBuilder()
         helper.add_input_layer(int(state_builder.get_state_dim()))
@@ -48,17 +47,20 @@ def main(unused_argv):
         helper.add_fullyconn_layer(300)
         helper.add_fullyconn_layer(300)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
-        dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, 
-                                build_model=helper.get_model_layout(), per_episode_epsilon_decay = True)
+        # dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, 
+        #                         build_model=helper.get_model_layout(), per_episode_epsilon_decay = True)
 
-        # Terran agent with a Deep Q-Learning model
+
+        dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
+        
+        # Terran agent
         agent = SC2Agent(dq_network, GeneralReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())
 
-        #test_params = TestParams(num_matches=1, steps_per_test=25, max_steps=10000, reward_threshold=1000)
+
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_dql", save_every=50, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_test", save_every=1, enable_save=True, relative_path=True)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dql", save_every=50, enable_save=True, relative_path=True)
         trainer.train(num_episodes=1000, max_steps=800)
-        trainer.play(num_matches=50, max_steps=800)
+        trainer.play(num_matches=100, max_steps=800)
 
     except KeyboardInterrupt:
         pass
