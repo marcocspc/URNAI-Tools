@@ -36,7 +36,7 @@ class VizdoomWrapper(ActionWrapper):
 
 
     def get_action(self, action_idx, obs):
-        return self.actions[action_idx.index(1)]
+        return self.actions[action_idx]
 
 class VizdoomHealthGatheringWrapper(ActionWrapper):
 
@@ -66,4 +66,4 @@ class VizdoomHealthGatheringWrapper(ActionWrapper):
 
 
     def get_action(self, action_idx, obs):
-        return self.actions[self.actions.index(action_idx)]
+        return self.actions[action_idx]

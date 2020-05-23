@@ -21,7 +21,9 @@ class DDQNKeras(DQNKerasMem):
         super(DDQNKeras, self).__init__(action_wrapper, state_builder, learning_rate, gamma, name, epsilon, epsilon_min, epsilon_decay, n_resets, batch_size, memory_maxlen, use_memory, per_episode_epsilon_decay, build_model)
 
         self.model = self.make_model()
+        self.model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         self.target_model = self.make_model()
+        self.target_model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
 
     def _huber_loss(self, y_true, y_pred, clip_delta=1.0):
         error = y_true - y_pred

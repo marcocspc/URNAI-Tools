@@ -35,6 +35,7 @@ class DQNKerasMem(LearningModel):
 
         self.build_model = build_model
         self.model = self.make_model()
+        self.model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         self.use_memory = use_memory
 
         if self.use_memory:
@@ -77,9 +78,6 @@ class DQNKerasMem(LearningModel):
                     model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
             else:
                 raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
-
-
-        model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
 
         return model
 
