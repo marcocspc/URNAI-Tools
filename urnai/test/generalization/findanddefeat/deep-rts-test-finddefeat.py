@@ -71,7 +71,8 @@ def set_collectable_list(width, height):
 
 episodes = 100
 steps = 1000 
-drts = DeepRTSEnv(map = DeepRTSEnv.MAP_BIG,render=True, updates_per_action = 12, start_oil=99999, start_gold=99999, start_lumber=99999, start_food=99999)
+#drts = DeepRTSEnv(map = DeepRTSEnv.MAP_BIG,render=True, updates_per_action = 12, start_oil=99999, start_gold=99999, start_lumber=99999, start_food=99999)
+drts = DeepRTSEnv(map = "10x10-2v2-custom.json",render=True, updates_per_action = 12, start_oil=99999, start_gold=99999, start_lumber=99999, start_food=99999)
 
 drts.engine_config.set_footman(False)
 drts.engine_config.set_archer(True)
@@ -127,6 +128,7 @@ for ep in range(episodes):
             y = int(input("Y: "))
 
             drts.players[0].spawn_unit(drts.constants.Unit.Archer, drts.game.tilemap.get_tile(x, y))
+            state, done = drts.step(15)
         else:
             state, done = drts.step(action)
 

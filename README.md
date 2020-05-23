@@ -13,6 +13,7 @@ Follow these instructions to get a working copy of the project on your PC. It's 
 ### Basic installation
 
 - You can install from pypi:
+**WARNING**, you cannot install extras from this option because pypi doesn't allow dependencies from github repositories. If you need a full installation, go to next section.
 ```
 pip3 install urnai
 ```
@@ -40,12 +41,12 @@ To install urnai with gym-2048 support, use:
 
 - On Unix:
 ```
-URNAI_2048=1 pip3 install urnai 
+URNAI_2048=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
 ```
 
 - On Windows:
 ```
-set "URNAI_2048=1" && pip3 install urnai 
+set "URNAI_2048=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
 ```
 
 #### VizDoom
@@ -58,12 +59,12 @@ To install urnai with vizdoom support, use:
 
 - On Unix:
 ```
-URNAI_VIZDOOM=1 pip3 install urnai 
+URNAI_VIZDOOM=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
 ```
 
 - On Windows:
 ```
-set "URNAI_VIZDOOM=1" && pip3 install urnai 
+set "URNAI_VIZDOOM=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
 ```
 
 #### DeepRTS 
@@ -72,12 +73,12 @@ To install urnai with DeepRTS support, use:
 
 - On Unix:
 ```
-URNAI_DEEPRTS=1 pip3 install urnai 
+URNAI_DEEPRTS=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
 ```
 
 - On Windows:
 ```
-set "URNAI_DEEPRTS=1" && pip3 install urnai 
+set "URNAI_DEEPRTS=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
 ```
 
 #### Full Install (with all optional environments)
@@ -86,25 +87,26 @@ To install urnai with all optional environments, use:
 
 - On Unix:
 ```
-URNAI_DEEPRTS=1 URNAI_VIZDOOM=1 URNAI_2048=1 pip3 install urnai 
+URNAI_DEEPRTS=1 URNAI_VIZDOOM=1 URNAI_2048=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
 ```
 
 - On Windows:
 ```
-set "URNAI_DEEPRTS=1" && set "URNAI_VIZDOOM=1" && set "URNAI_2048=1" && pip3 install urnai 
+set "URNAI_DEEPRTS=1" && set "URNAI_VIZDOOM=1" && set "URNAI_2048=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
 ```
+
 #### Tensorflow CPU
 
 By default, urnai depdens on tensorflow-gpu, to use tf-cpu instead, use:
 
 - On Unix:
 ```
-URNAI_TF_CPU=1 pip3 install urnai 
+URNAI_TF_CPU=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
 ```
 
 - On Windows:
 ```
-set "URNAI_TF_CPU=1" && pip3 install urnai 
+set "URNAI_TF_CPU=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
 ```
 ### Running the examples
 

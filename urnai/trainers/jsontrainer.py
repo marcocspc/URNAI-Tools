@@ -1,7 +1,9 @@
 from urnai.utils.module_specialist import get_cls
+from .trainer import Trainer
 import json
+import os
 
-class JSONTrainer():
+class JSONTrainer(Trainer):
 
     def __init__(self, json_path):
         with open(json_path, "r") as json_file:
@@ -27,12 +29,21 @@ class JSONTrainer():
             agent_cls = get_cls("urnai", "agents", training["agent"]["class"])
             agent = agent_cls(model, reward, **training["agent"]["params"])
 
-            trainer_cls = get_cls("urnai", "trainers", training["trainer"]["class"])
-            trainer = trainer_cls(env, agent, **training["trainer"]["params"])
+            self.setup(env, agent, **training["trainer"]["params"])
 
-            if bool(training["json_trainer"]["train"]):
-                trainer.train(**training["json_trainer"]["train"])
+            try:
+                self.train(**training["json_trainer"]["train"])
+            except KeyError as ke:
+                if 'train' in str(ke): pass
 
-            if bool(training["json_trainer"]["play"]):
-                trainer.play(**training["json_trainer"]["play"])
+            try:
+                self.play(**training["json_trainer"]["play"])
+            except KeyError as ke:
+                if 'play' in str(ke): pass
 
+    def save_extra(self, save_path):
+        super().save_extra(save_path)
+
+        json_path = save_path + os.path.sep + "training_params.json"
+        with open(json_path, "w+") as out_file:
+            out_file.write(json.dumps(self.trainings, indent=4))

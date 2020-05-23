@@ -15,6 +15,9 @@ class Savable(ABC):
     The heir class should define a constant or attribute as a default filename to save on disk.
     '''
 
+    def __init__(self):
+        self.pickle_black_list = []
+
     def get_default_save_stamp(self):
         '''
         This method returns the default
@@ -106,7 +109,20 @@ class Savable(ABC):
         self.load_extra(loadpath)
 
     def get_pickleable_attributes(self):
-        full_attr_list = [a for a in dir(self) if not a.startswith('__') and not callable(getattr(self, a))]
+        '''
+        This method returns a list of
+        pickeable attributes. If you wish
+        to blacklist one particular 
+        pickleable attribute, put it
+        in self.pickle_black_list as a
+        string.
+        '''
+        if not hasattr(self, 'pickle_black_list'):
+            self.pickle_black_list = []
+        elif self.pickle_black_list is None:
+            self.pickle_black_list = []
+
+        full_attr_list = [a for a in dir(self) if not a.startswith('__') and not callable(getattr(self, a)) and a not in self.pickle_black_list]
         pickleable_list = []
 
         for attr in full_attr_list:
