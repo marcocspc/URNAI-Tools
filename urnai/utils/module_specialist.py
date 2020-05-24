@@ -21,9 +21,9 @@ def get_classes(top_pkg_str, pkg_str):
                 if isinstance(md[key], type): 
                     if aux_str in str(md[key]):
                         class_dict[key] = module_str 
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as mnfe:
             pass
-        except NameError:
+        except NameError as ne:
             pass
 
     return class_dict 
