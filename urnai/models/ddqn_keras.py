@@ -77,7 +77,7 @@ class DDQNKeras(DQNKerasMem):
         model.predict returns an array of arrays, containing the Q-Values for the actions. This function should return the
         corresponding action with the highest Q-Value.
         '''
-        return self.actions[int(np.argmax(self.model.predict(state)[0]))]
+        return int(np.argmax(self.model.predict(state)[0]))
 
     def save_extra(self, persist_path):
         self.model.save_weights(self.get_full_persistance_path(persist_path)+"_model_"+".h5")
