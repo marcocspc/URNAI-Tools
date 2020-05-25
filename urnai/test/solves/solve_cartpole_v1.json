@@ -1,0 +1,80 @@
+[
+    {
+        "env" : {
+            "class" : "GymEnv",
+            "params" : {
+                "id" : "CartPole-v1" 
+            }
+        },
+        "action_wrapper" : {
+            "class" : "GymWrapper",
+            "params" : {
+                "gym_env_actions" : 2
+            } 
+        },
+        "state_builder" : {
+            "class" : "PureState",
+            "params" : {
+                "state_dim" : 4 
+            }
+        },
+        "model" : {
+            "class" : "PGKeras",
+            "params" : {
+                "learning_rate" : 0.005,
+                "gamma" : 0.9,
+                "build_model" : [
+                    {
+                        "type": "input",
+                        "nodes": 50,
+                        "shape": [null, 4]
+                    },
+                    {
+                        "type": "fullyconn",
+                        "nodes": 25,
+                        "name": "default0"
+                    },
+                    {
+                        "type": "fullyconn",
+                        "nodes": 25,
+                        "name": "default1"
+                    },
+                    {
+                        "type": "output",
+                        "length": 4
+                    }
+
+                ]
+             }
+        },
+        "reward" : {
+            "class" : "PureReward",
+            "params" : {} 
+        },
+        "agent" : {
+            "class" : "GenericAgent",
+            "params" : {} 
+        },
+        "trainer" : {
+            "class" : "Trainer",
+            "params" : {
+                "file_name" : "cart_pole_pg",
+                "save_every" : 500,
+                "enable_save" : true,
+                "debug_level" : 1 
+            }
+        },
+        "json_trainer" : {
+            "train": {
+                "num_episodes" : 1000,
+                "reward_from_agent" : true,
+                "max_steps" : 500
+            },
+            "play" : {
+                "num_matches" : 100,
+                "max_steps" : 500,
+                "reward_from_agent" : true
+            }
+        }
+    }
+]

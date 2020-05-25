@@ -28,7 +28,7 @@ def main(unused_argv):
 
         action_wrapper = env.get_action_wrapper()
         #state_builder = PureState(env.env_instance.observation_space)
-        state_builder = GymState(env)
+        state_builder = GymState(env.env_instance.observation_space.shape[0])
 
         helper = ModelBuilder()
         helper.add_input_layer(int(state_builder.get_state_dim()))

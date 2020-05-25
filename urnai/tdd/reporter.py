@@ -24,6 +24,8 @@ class Reporter():
     @staticmethod
     def report(message, verbosity_lvl = 0, end = "\n"):
         date = "[URNAI REPORT AT " + str(datetime.now()) + "] "
+        if not type(message) == str:
+            message = str(message)
         message = date + message
         if (verbosity_lvl <= Reporter.VERBOSITY_LEVEL):
             print(message, end=end)

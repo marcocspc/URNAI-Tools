@@ -2,6 +2,7 @@ import os.path, pkgutil
 import importlib
 import inspect
 from .error import ClassNotFoundError
+from urnai.tdd.reporter import Reporter as rp
 
 def get_modules(top_pkg_str, pkg_str):
     pkg_str_path = os.path.dirname(importlib.import_module(top_pkg_str + "." + pkg_str).__file__)
