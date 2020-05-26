@@ -18,6 +18,8 @@ class VizdoomWrapper(ActionWrapper):
         self.actions = [attack, use, move_forward, move_backward,
             move_right, move_left, turn_right, turn_left]
 
+        self.action_indices = range(len(self.actions))
+
 
     def is_action_done(self):
         return True
@@ -28,7 +30,7 @@ class VizdoomWrapper(ActionWrapper):
 
 
     def get_actions(self):
-        return self.actions
+        return self.action_indices
 
 
     def get_excluded_actions(self, obs):        
@@ -48,6 +50,7 @@ class VizdoomHealthGatheringWrapper(ActionWrapper):
         turn_right = [0, 0, 0, 0, 0, 0, 1, 0]
 
         self.actions = [move_forward, turn_right, turn_left]
+        self.action_indices = range(len(self.actions))
 
     def is_action_done(self):
         return True
@@ -58,7 +61,7 @@ class VizdoomHealthGatheringWrapper(ActionWrapper):
 
 
     def get_actions(self):
-        return self.actions
+        return self.action_indices
 
 
     def get_excluded_actions(self, obs):        

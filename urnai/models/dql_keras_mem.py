@@ -140,5 +140,5 @@ class DQNKerasMem(LearningModel):
         model.predict returns an array of arrays, containing the Q-Values for the actions. This function should return the
         corresponding action with the highest Q-Value.
         '''
-        return int(np.argmax(self.model.predict(state)[0]))
-
+        action = int(np.argmax(self.model.predict(state)[0]))
+        return action
