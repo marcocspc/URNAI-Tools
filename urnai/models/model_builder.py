@@ -84,7 +84,7 @@ class ModelBuilder():
                     if "default" in layer['name']:
                         cont += 1
 
-            name = "default" + str(cont)
+            name = ModelBuilder.LAYER_CONVOLUTIONALi + str(cont)
 
         if type(filters) == int:
             if type(filter_shape) == tuple:
@@ -115,7 +115,7 @@ class ModelBuilder():
                     if "default" in layer['name']:
                         cont += 1
 
-            name = "default" + str(cont)
+            name = ModelBuilder.LAYER_FULLY_CONNECTED + str(cont)
 
         if type(nodes) == int:
             self.layers.append({
@@ -137,3 +137,25 @@ class ModelBuilder():
 
     def get_model_layout(self):
         return self.layers
+
+    @staticmethod
+    def has_convolutional_layers(layers):
+        for layer in layers:
+            if layer["type"] == ModelBuilder.LAYER_CONVOLUTIONAL: 
+                return True
+        return False
+
+    @staticmethod
+    def get_last_convolutional_layer_index(layers):
+        cont = -1
+        for layer in layers:
+            if layer["type"] == ModelBuilder.LAYER_CONVOLUTIONAL: 
+                if cont == -1:
+                    cont = 0
+                else:
+                    cont += 1
+        return cont
+
+    @staticmethod
+    def is_last_conv_layer(layer, layers):
+        return ModelBuilder.get_last_convolutional_layer_index(layers) == layers.index(layer)

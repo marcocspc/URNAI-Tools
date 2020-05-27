@@ -25,6 +25,10 @@ class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
 
     def __init__(self, env, agent, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0):
+        super().__init__()
+        self.setup(env, agent, save_path, file_name, enable_save, save_every, relative_path, debug_level)
+
+    def setup(self, env, agent, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0):
         self.env = env
         self.agent = agent
         self.save_path = save_path
@@ -53,7 +57,8 @@ class Trainer(Savable):
         else:
             rp.report("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
-    def train(self, num_episodes=float('inf'), max_steps=float('inf'), test_params: TestParams = None, reward_from_env = True):
+
+    def train(self, num_episodes=float('inf'), max_steps=float('inf'), test_params: TestParams = None, reward_from_agent = True):
         start_time = time.time()
         
         rp.report("> Training")
@@ -90,7 +95,7 @@ class Trainer(Savable):
                 done = done or is_last_step
 
                 # Checking whether or not to use the reward from the reward builder so we can pass that to the agent
-                if reward_from_env:
+                if reward_from_agent:
                     step_reward = self.agent.get_reward(obs, default_reward, done)
                 else:
                     step_reward = default_reward
@@ -138,7 +143,7 @@ class Trainer(Savable):
             self.save(self.full_save_path)
 
 
-    def play(self, num_matches, max_steps=float('inf'), test_params=None, reward_from_env = True):
+    def play(self, num_matches, max_steps=float('inf'), test_params=None, reward_from_agent = True):
         rp.report("\n\n> Playing")
 
         self.logger = Logger(num_matches, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
@@ -166,7 +171,7 @@ class Trainer(Savable):
                 # Take the action (a) and observe the outcome state(s') and reward (r)
                 obs, default_reward, done = self.env.step(action)
 
-                if reward_from_env:
+                if reward_from_agent:
                     step_reward = self.agent.get_reward(obs, default_reward, done)
                 else:
                     step_reward = default_reward

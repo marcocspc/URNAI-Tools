@@ -75,7 +75,7 @@
         "json_trainer" : {
             "train": {
                 "num_episodes" : 3000,
-                "reward_from_env" : true,
+                "reward_from_agent" : true,
                 "max_steps" : 500
             },
             "play" : {
@@ -159,7 +159,7 @@
         "json_trainer" : {
             "train": {
                 "num_episodes" : 3000,
-                "reward_from_env" : true,
+                "reward_from_agent" : true,
                 "max_steps" : 500
             },
             "play" : {
@@ -242,7 +242,7 @@
         "json_trainer" : {
             "train": {
                 "num_episodes" : 3000,
-                "reward_from_env" : true,
+                "reward_from_agent" : true,
                 "max_steps" : 500
             },
             "play" : {

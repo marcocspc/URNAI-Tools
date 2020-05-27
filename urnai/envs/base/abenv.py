@@ -16,6 +16,7 @@ class Env(Savable):
     should still be used as a wrapper (e.g. implementing an environment for OpenAI gym).
     '''
     def __init__(self, _id: str, render=False, reset_done=True):
+        super().__init__()
         self.id = _id
         self.render = render
         self.reset_done = reset_done

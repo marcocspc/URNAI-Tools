@@ -2,6 +2,7 @@ import os.path, pkgutil
 import importlib
 import inspect
 from .error import ClassNotFoundError
+from urnai.tdd.reporter import Reporter as rp
 
 def get_modules(top_pkg_str, pkg_str):
     pkg_str_path = os.path.dirname(importlib.import_module(top_pkg_str + "." + pkg_str).__file__)
@@ -21,9 +22,9 @@ def get_classes(top_pkg_str, pkg_str):
                 if isinstance(md[key], type): 
                     if aux_str in str(md[key]):
                         class_dict[key] = module_str 
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as mnfe:
             pass
-        except NameError:
+        except NameError as ne:
             pass
 
     return class_dict 

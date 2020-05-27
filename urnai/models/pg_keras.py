@@ -13,7 +13,7 @@ from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 from .model_builder import ModelBuilder
-from urnai.utils.error import IncoherentBuildModelError
+from urnai.utils.error import IncoherentBuildModelError, UnsupportedBuildModelLayerTypeError
 
 class PGKeras(LearningModel):
 
@@ -48,27 +48,41 @@ class PGKeras(LearningModel):
             self.build_model[-1]['length'] = self.action_size
 
         for layer_model in self.build_model:
+            l = len(model_layers)
+            if l >= 0: 
+                prev_idx = l - 1 
+            else: 
+                prev_idx = 0
+
             if layer_model['type'] == ModelBuilder.LAYER_INPUT: 
                 if self.build_model.index(layer_model) == 0:
                     model_layers = [Input(shape=(layer_model['shape'][1],))]
-                    self.advantages = Input(shape=[1])
                 else:
                     raise IncoherentBuildModelError("Input Layer must be the first one.") 
             elif layer_model['type'] == ModelBuilder.LAYER_FULLY_CONNECTED:
-                prev_idx = self.build_model.index(layer_model) - 1 
                 model_layers.append(Dense(layer_model['nodes'], activation='relu')(model_layers[prev_idx]))
 
             elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
-                prev_idx = self.build_model.index(layer_model) - 1 
                 model_layers.append(Dense(layer_model['length'], activation='softmax')(model_layers[prev_idx]))
-
             elif layer_model['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
-                raise UnsupportedBuildModelLayerTypeError("This Policy Gradient Model does not support layers of type " + layer_model['type'])
-
+                if self.build_model.index(layer_model) == 0:
+                    model_layers.append(Input(shape=layer_model['input_shape']))
+                    model_layers.append(Conv2D(layer_model['filters'], layer_model['filter_shape'],
+                              padding=layer_model['padding'], activation='relu', input_shape=layer_model['input_shape'])(model_layers[0]))
+                    model_layers.append(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape'])(model_layers[1]))
+                else:
+                    model_layers.append(Conv2D(layer_model['filters'], layer_model['filter_shape'],
+                              padding=layer_model['padding'], activation='relu')(model_layers[prev_idx]))
+                    prev_idx += 1
+                    model_layers.append(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape'])(model_layers[prev_idx]))
+                    if ModelBuilder.is_last_conv_layer(layer_model, self.build_model):
+                        model_layers.append(Flatten()(model_layers[prev_idx]))
+                        prev_idx += 1
             else:
                 raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
 
 
+        self.advantages = Input(shape=[1])
         model = Model(input=[model_layers[0], self.advantages], output=[model_layers[-1]])
         model.compile(optimizer=Adam(lr=self.learning_rate), loss=self.custom_loss)
 
@@ -155,7 +169,6 @@ class PGKeras(LearningModel):
         action_prob = self.predict_model.predict(state)
         action_prob = action_prob[0]
         action = np.random.choice(np.arange(self.action_size), p=action_prob)
-
         return action
 
     def ep_reset(self):

@@ -31,17 +31,9 @@ class Game2048State(StateBuilder):
 
 
 class PureState(StateBuilder):
-    def __init__(self, observation_space):
-        #you can get observation_space from env.env_instance.observation_space
-        self.state_dim = self.parse_dims(observation_space)
-
-    def parse_dims(self, obs_space):
-        observation_type = type(obs_space).__name__
-
-        if len(obs_space.shape) > 0:
-            return obs_space.shape[0]
-        else:
-            return 1
+    def __init__(self, state_dim):
+        #you can get observation_space from gym_env.env_instance.observation_space.shape[0]
+        self.state_dim = state_dim 
 
     def preprocess_obs(self, obs):
         if type(obs) == int:
@@ -60,8 +52,8 @@ class PureState(StateBuilder):
         return self.state_dim
 
 class GymState(StateBuilder):
-    def __init__(self, env:Env):
-        #you can get observation_space from env.env_instance.observation_space
+    def __init__(self, state_dim):
+        #you can get observation_space from gym_env.env_instance.observation_space.shape[0]
         self.state_dim = env.env_instance.observation_space.shape[0]
 
     def build_state(self, obs):

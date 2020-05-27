@@ -5,7 +5,7 @@ sys.path.insert(0,parentdir)
 
 import tensorflow as tf
 from tensorflow.python.framework import ops
-from utils.error import IncoherentBuildModelError, UnsupportedBuildModelLayerTypeError
+from utils.error import IncoherentBuildModelError, UnsupportedBuildModelLayerTypeError, DeprecatedCodeException
 from tensorflow.compat.v1 import Session,ConfigProto,placeholder,layers,train,global_variables_initializer
 import numpy as np
 import random
@@ -20,6 +20,8 @@ class DqlTfFlexible(LearningModel):
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, gamma=0.95, name='DQN', build_model = ModelBuilder.DEFAULT_BUILD_MODEL, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False):
         super(DqlTfFlexible, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay , per_episode_epsilon_decay ,name)
+        error1 = 'DqlTfFlexible is not supported anymore, use DQLKERASMEM instead.'
+        raise DeprecatedCodeException(error1) 
         # Defining the model's layers. Tensorflow's objects are stored into self.model_layers
         self.build_model = build_model
         self.make_model()
@@ -78,7 +80,7 @@ class DqlTfFlexible(LearningModel):
             q_values = np.delete(q_values, action_idx)
             action_idx = np.argmax(q_values)
         
-        action = self.actions[int(action_idx)]
+        action = int(action_idx)
         return action
 
     def save_extra(self, persist_path):

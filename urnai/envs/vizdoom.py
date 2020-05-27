@@ -16,6 +16,7 @@ class VizdoomEnv(Env):
             self.doommap = doommap
             self.game = DoomGame()
             self.auto_map = auto_map
+            self.pickle_black_list.append("wad")
 
             self.res = res
             if self.res == VizdoomEnv.RES_160X120:
