@@ -7,6 +7,7 @@ class GenericAgent(Agent):
 
     def __init__(self, model: LearningModel, reward_builder: RewardBuilder):
         super(GenericAgent, self).__init__(model, reward_builder)
+        self.pickle_black_list=["model"]
 
     def step(self, obs, obs_reward, done):
         if self.action_wrapper.is_action_done():

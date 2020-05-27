@@ -36,6 +36,7 @@ class Trainer(Savable):
         self.enable_save = enable_save
         self.save_every = save_every
         self.relative_path = relative_path
+        self.pickle_black_list.append("agent")
         rp.VERBOSITY_LEVEL = debug_level
 
         self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 

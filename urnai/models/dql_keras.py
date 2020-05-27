@@ -32,8 +32,6 @@ class DQNKeras(LearningModel):
         self.min_memory_size = min_memory_size
         self.batch_size = batch_size
 
-        self.tensorboard = ModifiedTensorBoard(log_dir=f"logs/{self.name}-{int(time.time())}")
-
 
     def make_model(self):
         model = Sequential()
@@ -83,8 +81,7 @@ class DQNKeras(LearningModel):
         np_inputs = np.squeeze(np.array(inputs))
         np_targets = np.array(targets)
 
-        self.model.fit(np_inputs, np_targets, batch_size=self.batch_size, 
-        verbose=0, shuffle=False)
+        self.model.fit(np_inputs, np_targets, batch_size=self.batch_size, verbose=0, shuffle=False)
 
         # If it's the end of an episode, increase the target update counter
         if done:
@@ -127,36 +124,3 @@ class DQNKeras(LearningModel):
         if(exists):
             self.model = self.make_model()
             self.model.load_weights(self.get_full_persistance_path(persist_path)+".h5")
-
-# Daniel Kukieła's Tensorboard class
-class ModifiedTensorBoard(TensorBoard):
-
-    # Overriding init to set initial step and writer (we want one log file for all .fit() calls)
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.step = 1
-        self.writer = tf.summary.create_file_writer(self.log_dir)
-        
-
-    # Overriding this method to stop creating default log writer
-    def set_model(self, model):
-        pass
-
-    # Overrided, saves logs with our step number
-    # (otherwise every .fit() will start writing from 0th step)
-    def on_epoch_end(self, epoch, logs=None):
-        self.update_stats(**logs)
-
-    # Overrided
-    # We train for one batch only, no need to save anything at epoch end
-    def on_batch_end(self, batch, logs=None):
-        pass
-
-    # Overrided, so won't close writer
-    def on_train_end(self, _):
-        pass
-
-    # Custom method for saving own metrics
-    # Creates writer, writes custom metrics and closes writer
-    def update_stats(self, **stats):
-        self._write_logs(stats, self.step)

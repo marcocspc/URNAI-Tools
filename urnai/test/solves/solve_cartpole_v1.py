@@ -34,11 +34,11 @@ def main(unused_argv):
 
 
         # dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, 
-        #                          gamma=0.99, learning_rate=0.001, epsilon_decay=0.995, epsilon_min=0.01, 
-        #                          build_model=helper.get_model_layout(), memory_maxlen=500)
+        #                           gamma=0.99, learning_rate=0.001, epsilon_decay=0.995, epsilon_min=0.01, 
+        #                           build_model=helper.get_model_layout(), memory_maxlen=500)
 
         dq_network = DQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, 
-                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.9997, epsilon_min=0.01, memory_maxlen=50000, min_memory_size=1000)
+                           gamma=0.99, learning_rate=0.001, epsilon_decay=0.9997, epsilon_min=0.01, memory_maxlen=50000, min_memory_size=1000)
 
         #dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
 
@@ -46,9 +46,9 @@ def main(unused_argv):
 
         # Cartpole-v1 is solved when avg. reward over 100 episodes is greater than or equal to 475
         #test_params = TestParams(num_matches=100, steps_per_test=100, max_steps=500, reward_threshold=500)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v1_dqn_sentdex", save_every=100, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=1000, max_steps=500, reward_from_env=True)
-        trainer.play(num_matches=100, max_steps=500, reward_from_env=True)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v1_dqn_sentdex", save_every=200, enable_save=True, relative_path=True)
+        trainer.train(num_episodes=1000, max_steps=500, reward_from_agent=True)
+        trainer.play(num_matches=100, max_steps=500, reward_from_agent=True)
     except KeyboardInterrupt:
         pass
 

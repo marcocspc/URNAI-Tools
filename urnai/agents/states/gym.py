@@ -54,7 +54,7 @@ class PureState(StateBuilder):
 class GymState(StateBuilder):
     def __init__(self, state_dim):
         #you can get observation_space from gym_env.env_instance.observation_space.shape[0]
-        self.state_dim = env.env_instance.observation_space.shape[0]
+        self.state_dim = state_dim
 
     def build_state(self, obs):
         state = obs[np.newaxis, :]
