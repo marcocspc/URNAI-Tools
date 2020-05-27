@@ -1,10 +1,9 @@
-import tensorflow as tf
 import numpy as np
 import random
 import os
 import time
 from collections import deque
-from keras.models import Sequential
+from keras import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
 from keras.callbacks import TensorBoard
@@ -31,7 +30,6 @@ class DQNKeras(LearningModel):
         self.memory_maxlen = memory_maxlen
         self.min_memory_size = min_memory_size
         self.batch_size = batch_size
-
 
     def make_model(self):
         model = Sequential()
