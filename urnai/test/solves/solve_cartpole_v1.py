@@ -4,11 +4,6 @@ parentdir = os.path.dirname(currentdir)
 parentdir = os.path.dirname(parentdir)
 sys.path.insert(0,parentdir)
 
-# # Forcing keras to use CPU instead of GPU
-# import os
-# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
 from absl import app
 from envs.gym import GymEnv
 from trainers.trainer import Trainer
@@ -19,6 +14,7 @@ from agents.rewards.default import PureReward
 from agents.states.gym import PureState
 from agents.states.gym import GymState
 from models.dql_keras_mem import DQNKerasMem
+from models.dql_keras import DQNKeras
 from models.pg_keras import PGKeras
 from models.model_builder import ModelBuilder
 
@@ -41,13 +37,16 @@ def main(unused_argv):
         #                          gamma=0.99, learning_rate=0.001, epsilon_decay=0.995, epsilon_min=0.01, 
         #                          build_model=helper.get_model_layout(), memory_maxlen=500)
 
-        dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
+        dq_network = DQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, 
+                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.9997, epsilon_min=0.01, memory_maxlen=50000, min_memory_size=1000)
+
+        #dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
 
         agent = GenericAgent(dq_network, PureReward())
 
         # Cartpole-v1 is solved when avg. reward over 100 episodes is greater than or equal to 475
         #test_params = TestParams(num_matches=100, steps_per_test=100, max_steps=500, reward_threshold=500)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v1_pg_helper", save_every=500, enable_save=True, relative_path=True)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v1_dqn_sentdex", save_every=100, enable_save=True, relative_path=True)
         trainer.train(num_episodes=1000, max_steps=500, reward_from_env=True)
         trainer.play(num_matches=100, max_steps=500, reward_from_env=True)
     except KeyboardInterrupt:

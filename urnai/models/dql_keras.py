@@ -2,87 +2,161 @@ import tensorflow as tf
 import numpy as np
 import random
 import os
+import time
 from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
+from keras.callbacks import TensorBoard
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
-from urnai.utils.error import DeprecatedCodeException 
+from urnai.utils.error import DeprecatedCodeException
 
 class DQNKeras(LearningModel):
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.95,
-                    name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32, memory_size=50000):
-        super(DQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, name)
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.99,
+                    name='DQNKeras', epsilon_start=1.0, epsilon_min=0.1, epsilon_decay=0.995, per_episode_epsilon_decay=False, update_target_every=5, 
+                    batch_size=64, memory_maxlen=50000, min_memory_size=1000):
+        super(DQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay, per_episode_epsilon_decay, name)
 
-        #This code is too old and need to be updated to tensorflow 2.0
-        error1 = 'DQLTF is not supported anymore, use DQLKERASMEM instead.'
-        raise DeprecatedCodeException(error1) 
+        # Main model, trained every step
+        self.model = self.make_model()
+        # Target model, used in .predict every step (does not get update every step)
+        self.target_model = self.make_model()
+        self.target_model.set_weights(self.model.get_weights())
+        self.target_update_counter = 0
+        self.update_target_every = update_target_every
 
-        self.epsilon = epsilon
-        self.epsilon_min = epsilon_min
-        self.epsilon_decay = epsilon_decay
-        self.n_resets = n_resets
+        self.memory = deque(maxlen=memory_maxlen)
+        self.memory_maxlen = memory_maxlen
+        self.min_memory_size = min_memory_size
         self.batch_size = batch_size
 
-        self.model = self.__build_model()
-        self.memory = deque(maxlen=memory_size)
-        #self.load()
+        self.tensorboard = ModifiedTensorBoard(log_dir=f"logs/{self.name}-{int(time.time())}")
 
 
-    def __build_model(self):
+    def make_model(self):
         model = Sequential()
-        model.add(Dense(12, activation='relu', input_dim=self.state_size))
-        model.add(Dense(12, activation='relu'))
-        model.add(Dense(12, activation='relu'))
-        model.add(Dense(self.action_size))
-        model.compile(Adam(lr=self.learning_rate), 'mse')
+        model.add(Dense(25, activation='relu', input_dim=self.state_size))
+        
+        model.add(Dense(25, activation='relu'))
+
+        model.add(Dense(self.action_size, activation='linear'))
+        model.compile(optimizer=Adam(lr=self.learning_rate), loss='mse', metrics=['accuracy'])
 
         return model
-    
+
+    def memorize(self, state, action, reward, next_state, done):
+        self.memory.append((state, action, reward, next_state, done))
 
     def learn(self, s, a, r, s_, done, is_last_step):
-        self.__record(s, a, r, s_, done)
+        self.memorize(s, a, r, s_, done)
+        if len(self.memory) < self.min_memory_size:
+            return
 
-        # self.__replay()
-
-        if is_last_step or done:
-            self.__replay()
-
-
-    def __replay(self):
-        if len(self.memory) < self.batch_size:
-            return 0
-        
         minibatch = random.sample(self.memory, self.batch_size)
-        for s, a, r, s_, done in minibatch:
-            target = r
 
+        current_states = np.array([transition[0] for transition in minibatch])
+        current_states = current_states[:, 0, :]
+        current_qs_list = self.model.predict(current_states)
+
+        next_current_states = np.array([transition[3] for transition in minibatch])
+        next_current_states = next_current_states[:, 0, :]
+        next_qs_list = self.target_model.predict(next_current_states)
+
+        inputs = []
+        targets = []
+
+        for index, (state, action, reward, next_state, done) in enumerate(minibatch):
             if not done:
-                target = (r + self.gamma * np.amax(self.model.predict(s_)[0]))
-            
-            target_f = self.model.predict(s)
-            target_f[0][a] = target
-            self.model.fit(s, target_f, epochs=1, verbose=0)
+                max_next_q = np.max(next_qs_list[index])
+                new_q = reward + self.gamma * max_next_q
+            else:
+                new_q = reward
 
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
+            current_qs = current_qs_list[index]
+            current_qs[action] = new_q
 
-    
-    def __record(self, s, a, r, s_, done):
-        self.memory.append((s, a, r, s_, done))
+            inputs.append(state)
+            targets.append(current_qs)
 
+        np_inputs = np.squeeze(np.array(inputs))
+        np_targets = np.array(targets)
+
+        self.model.fit(np_inputs, np_targets, batch_size=self.batch_size, 
+        verbose=0, shuffle=False)
+
+        # If it's the end of an episode, increase the target update counter
+        if done:
+            self.target_update_counter += 1
+
+        # If our target update counter is greater than update_target_every we will update the weights in our target model
+        if self.target_update_counter > self.update_target_every:
+            self.target_model.set_weights(self.model.get_weights())
+            self.target_update_counter = 0
+
+        # if our epsilon rate decay is set to be done every step, we simply decay it. Otherwise, this will only be done
+        # at the end of every episode, on self.ep_reset() which is in our LearningModel base class
+        if not self.per_episode_epsilon_decay:
+            self.decay_epsilon()
 
     def choose_action(self, state, excluded_actions=[]):
-        if np.random.rand() <= self.epsilon:
-            action = random.choice(self.actions)
-            return action
-        return self.predict(state)
-
-    def predict(self, state):
+        if np.random.rand() <= self.epsilon_greedy:
+            random_action = random.choice(self.actions)
+            # Removing excluded actions
+            while random_action in excluded_actions:
+                random_action = random.choice(self.actions)
+            return random_action
+        else:
+            return self.predict(state)
+    
+    def predict(self, state, excluded_actions=[]):
         '''
         model.predict returns an array of arrays, containing the Q-Values for the actions. This function should return the
         corresponding action with the highest Q-Value.
         '''
-        return self.actions[int(np.argmax(self.model.predict(state)[0]))]
+        #return self.model.predict(np.array(state).reshape(-1, *state.shape))[0]
+        return int(np.argmax(self.model.predict(state)[0]))
+
+    def save_extra(self, persist_path):
+        self.model.save_weights(self.get_full_persistance_path(persist_path)+".h5")
+
+    def load_extra(self, persist_path):
+        exists = os.path.isfile(self.get_full_persistance_path(persist_path)+".h5")
+
+        if(exists):
+            self.model = self.make_model()
+            self.model.load_weights(self.get_full_persistance_path(persist_path)+".h5")
+
+# Daniel Kukieła's Tensorboard class
+class ModifiedTensorBoard(TensorBoard):
+
+    # Overriding init to set initial step and writer (we want one log file for all .fit() calls)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.step = 1
+        self.writer = tf.summary.create_file_writer(self.log_dir)
+        
+
+    # Overriding this method to stop creating default log writer
+    def set_model(self, model):
+        pass
+
+    # Overrided, saves logs with our step number
+    # (otherwise every .fit() will start writing from 0th step)
+    def on_epoch_end(self, epoch, logs=None):
+        self.update_stats(**logs)
+
+    # Overrided
+    # We train for one batch only, no need to save anything at epoch end
+    def on_batch_end(self, batch, logs=None):
+        pass
+
+    # Overrided, so won't close writer
+    def on_train_end(self, _):
+        pass
+
+    # Custom method for saving own metrics
+    # Creates writer, writes custom metrics and closes writer
+    def update_stats(self, **stats):
+        self._write_logs(stats, self.step)

@@ -1,15 +1,3 @@
-'''
-This is the exact same model as our DQNKeras class, except that this one has a memory system in place:
-
-During training the model will select an action (either randomly or through the weights)
-and then store the state, action, reward and previous state tuple in the memory (s, a, r, s_).
-
-Right after that the model will randomly sample a batch from the memory and train from that.
-
-Remember that the model's memory has a limited size, to avoid performance issues and to make it so
-that the model always trains with relatively recent memories.
-'''
-
 import tensorflow as tf
 import numpy as np
 import random
@@ -27,11 +15,12 @@ from urnai.utils.error import IncoherentBuildModelError
 class DQNKerasMem(LearningModel):
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.002, gamma=0.95, 
-                name='DQN', epsilon=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32,
+                name='DQN', epsilon_start=1.0, epsilon_min=0.1, epsilon_decay=0.995, n_resets=0, batch_size=32, batch_training=False,
                 memory_maxlen=2000, use_memory=True, per_episode_epsilon_decay=False, build_model = ModelBuilder.DEFAULT_BUILD_MODEL):
-        super(DQNKerasMem, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon, epsilon_min, epsilon_decay, per_episode_epsilon_decay, name)
+        super(DQNKerasMem, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay, per_episode_epsilon_decay, name)
         self.n_resets = n_resets
         self.batch_size = batch_size
+        self.batch_training = batch_training
 
         self.build_model = build_model
         self.model = self.make_model()
@@ -88,13 +77,35 @@ class DQNKerasMem(LearningModel):
 
     def replay(self):
         minibatch = random.sample(self.memory, self.batch_size)
-        for state, action, reward, next_state, done in minibatch:
-            target = reward
-            if not done:
-                target = (reward + self.gamma * np.amax(self.model.predict(next_state)[0]))
-            target_f = self.model.predict(state)
-            target_f[0][action] = target
-            self.model.fit(state, target_f, epochs=1, verbose=0)
+        if not hasattr(self, 'batch_training') or not self.batch_training:
+            for state, action, reward, next_state, done in minibatch:
+                target = reward
+                if not done:
+                    target = (reward + self.gamma * np.amax(self.model.predict(next_state)[0]))
+                target_f = self.model.predict(state)
+                target_f[0][action] = target
+                self.model.fit(state, target_f, epochs=1, verbose=0)
+        else:
+            inputs = np.zeros((len(minibatch), self.state_size))
+            targets = np.zeros((len(minibatch), self.action_size))
+            i=0
+
+            for state, action, reward, next_state, done in minibatch:
+                q_current_state = self.model.predict(state)[0]
+                q_next_state = self.model.predict(next_state)[0]
+
+                inputs[i] = state
+                targets[i] = q_current_state
+
+                if done:
+                    targets[i,np.argmax(action)] = reward
+                else:
+                    targets[i,np.argmax(action)] = reward + self.gamma * np.max(q_next_state)
+
+                i+=1
+
+            loss = self.model.train_on_batch(inputs, targets)
+
         #Epsilon decay operation was here, moved it to "decay_epsilon()" and to "learn()"
 
     def no_memory_learning(self, s, a, r, s_, done, is_last_step):
