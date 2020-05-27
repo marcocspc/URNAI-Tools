@@ -13,8 +13,8 @@ from agents.actions.gym_wrapper import GymWrapper
 from agents.rewards.default import PureReward
 from agents.states.gym import PureState
 from agents.states.gym import GymState
-from models.dql_keras_mem import DQNKerasMem
 from models.dql_keras import DQNKeras
+from models.ddqn_keras import DDQNKeras
 from models.pg_keras import PGKeras
 from models.model_builder import ModelBuilder
 
@@ -33,12 +33,12 @@ def main(unused_argv):
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
 
-        # dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, 
-        #                           gamma=0.99, learning_rate=0.001, epsilon_decay=0.995, epsilon_min=0.01, 
-        #                           build_model=helper.get_model_layout(), memory_maxlen=500)
+        # dq_network = DQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, 
+        #                         gamma=0.99, learning_rate=0.001, epsilon_decay=0.9995, epsilon_min=0.01, 
+        #                         build_model=helper.get_model_layout(), memory_maxlen=5000)
 
-        dq_network = DQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, 
-                           gamma=0.99, learning_rate=0.001, epsilon_decay=0.9997, epsilon_min=0.01, memory_maxlen=50000, min_memory_size=1000)
+        dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, 
+                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.9997, epsilon_min=0.01, memory_maxlen=50000, min_memory_size=1000)
 
         #dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
 
@@ -46,7 +46,7 @@ def main(unused_argv):
 
         # Cartpole-v1 is solved when avg. reward over 100 episodes is greater than or equal to 475
         #test_params = TestParams(num_matches=100, steps_per_test=100, max_steps=500, reward_threshold=500)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v1_dqn", save_every=500, enable_save=True, relative_path=True)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v1_ddqn_confirmation_test", save_every=100, enable_save=True, relative_path=True)
         trainer.train(num_episodes=1000, max_steps=500, reward_from_agent=True)
         trainer.play(num_matches=100, max_steps=500, reward_from_agent=True)
     except KeyboardInterrupt:
