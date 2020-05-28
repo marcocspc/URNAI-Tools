@@ -17,6 +17,7 @@ from agents.states.sc2 import Simple64State
 from models.dql_tf import DQLTF
 from models.pg_keras import PGKeras
 from models.dql_keras_mem import DQNKerasMem
+from models.dql_keras import DQNKeras
 from utils.functions import query_yes_no
 from models.model_builder import ModelBuilder
 
@@ -50,6 +51,7 @@ def main(unused_argv):
         # dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, 
         #                         build_model=helper.get_model_layout(), per_episode_epsilon_decay = True)
 
+        
 
         dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
         
