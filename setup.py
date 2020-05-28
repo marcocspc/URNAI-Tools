@@ -5,7 +5,7 @@ def is_optional_enabled(optional):
     return os.environ.get(optional, None) is not None
 
 # Dependencies versions
-VERSION_TF = "==2.1.0"
+VERSION_TF = "==2.2.0"
 VERSION_VIZDOOM = "==1.1.7"
 VERSION_DRTS = "stable"
 VERSION_PLE = "3dbe79d"
