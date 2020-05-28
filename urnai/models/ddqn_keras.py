@@ -4,20 +4,23 @@ import random
 import os
 from collections import deque
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten 
+from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activation
 from keras.optimizers import Adam
 from keras import backend as K
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 from .model_builder import ModelBuilder
-from .dql_keras_mem import DQNKerasMem 
+from urnai.utils.error import IncoherentBuildModelError
+from urnai.utils.error import UnsupportedBuildModelLayerTypeError
 
 class DDQNKeras(LearningModel):
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.99,
                     name='DDQN', epsilon_start=1.0, epsilon_min=0.1, epsilon_decay=0.995, per_episode_epsilon_decay=False, update_target_every=5, 
-                    batch_size=64, memory_maxlen=50000, min_memory_size=1000):
+                    batch_size=64, memory_maxlen=50000, min_memory_size=1000, build_model = ModelBuilder.DEFAULT_BUILD_MODEL):
         super(DDQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay, per_episode_epsilon_decay, name)
+
+        self.build_model = build_model
 
         # Main model, trained every step
         self.model = self.make_model()
@@ -34,13 +37,50 @@ class DDQNKeras(LearningModel):
 
     def make_model(self):
         model = Sequential()
-        model.add(Dense(25, activation='relu', input_dim=self.state_size))
-        
-        model.add(Dense(25, activation='relu'))
 
-        model.add(Dense(self.action_size, activation='linear'))
+        if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
+            self.build_model[0]['shape'] = [None, self.state_size]
+            self.build_model[-1]['length'] = self.action_size
+
+        for idx, (layer_model) in enumerate(self.build_model):
+            if layer_model['type'] == ModelBuilder.LAYER_INPUT: 
+                if self.build_model.index(layer_model) == 0:
+                    model.add(Dense(layer_model['nodes'], input_dim=layer_model['shape'][1], activation='relu'))
+                else:
+                    raise IncoherentBuildModelError("Input Layer must be the first one.") 
+
+            elif layer_model['type'] == ModelBuilder.LAYER_FULLY_CONNECTED:
+                # if previous layer is convolutional, add a Flatten layer before the fully connected
+                if self.build_model[idx]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
+                    model.add(Flatten())
+
+                model.add(Dense(layer_model['nodes'], activation='relu'))
+
+            elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
+                # if previous layer is convolutional, add a Flatten layer before the fully connected
+                if self.build_model[idx]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
+                    model.add(Flatten())
+
+                model.add(Dense(layer_model['length'], activation='linear'))
+
+            elif layer_model['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
+                # if convolutional layer is the first, it's going to have the input shape and be treated as the input layer
+                if self.build_model.index(layer_model) == 0:
+                    model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
+                              padding=layer_model['padding'], activation='relu', input_shape=layer_model['input_shape']))
+                    model.add(Activation('relu'))
+                    model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
+                    model.add(Dropout(0.2))
+                else:
+                    model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
+                              padding=layer_model['padding'], activation='relu'))
+                    model.add(Activation('relu'))
+                    model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
+                    model.add(Dropout(0.2))
+            else:
+                raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
+
         model.compile(optimizer=Adam(lr=self.learning_rate), loss='mse', metrics=['accuracy'])
-
         return model
 
     def memorize(self, state, action, reward, next_state, done):
@@ -56,13 +96,13 @@ class DDQNKeras(LearningModel):
         # array of initial states from the minibatch
         current_states = np.array([transition[0] for transition in minibatch])
         # removing undesirable dimension created by np.array
-        current_states = current_states[:, 0, :]
+        current_states = np.squeeze(current_states)
         # array of Q-Values for our initial states
         current_qs_list = self.model.predict(current_states)
 
         # array of states after step from the minibatch
         next_current_states = np.array([transition[3] for transition in minibatch])
-        next_current_states = next_current_states[:, 0, :]
+        next_current_states = np.squeeze(next_current_states)
         # array of Q-values for our next states
         next_qs_list = self.target_model.predict(next_current_states)
 

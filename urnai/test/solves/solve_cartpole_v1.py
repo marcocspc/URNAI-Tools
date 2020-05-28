@@ -6,6 +6,7 @@ sys.path.insert(0,parentdir)
 
 from absl import app
 from envs.gym import GymEnv
+import gym
 from trainers.trainer import Trainer
 from trainers.trainer import TestParams
 from agents.generic_agent import GenericAgent
@@ -27,8 +28,7 @@ def main(unused_argv):
         state_builder = GymState(env.env_instance.observation_space.shape[0])
 
         helper = ModelBuilder()
-        helper.add_input_layer(int(state_builder.get_state_dim()))
-        helper.add_fullyconn_layer(25)
+        helper.add_input_layer(int(state_builder.get_state_dim()), nodes=25)
         helper.add_fullyconn_layer(25)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
@@ -38,7 +38,7 @@ def main(unused_argv):
         #                         build_model=helper.get_model_layout(), memory_maxlen=5000)
 
         dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, 
-                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.9997, epsilon_min=0.01, memory_maxlen=50000, min_memory_size=1000)
+                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.9997, epsilon_min=0.01, memory_maxlen=50000, min_memory_size=1000, build_model=helper.get_model_layout())
 
         #dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
 
