@@ -337,7 +337,7 @@ def build_structure_raw_pt(obs, building_type, building_action, base_top_left, m
         target = [random.randint(0,63), random.randint(ybrange, ytrange)]
     else:
         target = targets[building_amount]
-        if not base_top_left: target = (63-target[0]-6, 63-target[1]+6)
+        if not base_top_left: target = (63-target[0]-5, 63-target[1]+5)
 
     if building_amount < max_amount:
         action_one, last_worker = build_structure_by_type(obs, building_action, player_race, target)

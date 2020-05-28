@@ -21,11 +21,14 @@ from models.ddqn_keras import DDQNKeras
 from utils.functions import query_yes_no
 from models.model_builder import ModelBuilder
 
+from urnai.tdd.reporter import Reporter as rp
+
 """ Change "sc2_local_path" to your local SC2 installation path. 
 If you used the default installation path, you may ignore this step.
 For more information consult https://github.com/deepmind/pysc2#get-starcraft-ii 
 """
 sc2_local_path = "D:/Program Files (x86)/StarCraft II"
+rp.VERBOSITY_LEVEL = 1
 
 def main(unused_argv):
     try:
@@ -35,7 +38,7 @@ def main(unused_argv):
 
         ## Initializing our StarCraft 2 environment
         players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
-        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=128)
+        env = SC2Env(map_name="Simple64", players=players, render=True, step_mul=16)
         
         action_wrapper = TerranWrapper()
         state_builder = Simple64State()
@@ -60,8 +63,8 @@ def main(unused_argv):
 
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_dql", save_every=50, enable_save=True)
         trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn", save_every=2, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=1000, max_steps=800)
-        trainer.play(num_matches=100, max_steps=800)
+        trainer.train(num_episodes=1000, max_steps=2000)
+        trainer.play(num_matches=100, max_steps=2000)
 
     except KeyboardInterrupt:
         pass
