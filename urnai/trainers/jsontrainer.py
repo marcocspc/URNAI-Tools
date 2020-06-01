@@ -7,6 +7,7 @@ class JSONTrainer(Trainer):
 
     def __init__(self, json_path):
         with open(json_path, "r") as json_file:
+            self.pickle_black_list = []
             self.trainings = json.loads(json_file.read())
 
     def start_training(self):

@@ -21,7 +21,7 @@ class GeneralizedFindaAndDefeatScenario(GeneralizedCollectablesScenario):
     GAME_STARCRAFT_II = "sc2" 
     SCII_HOR_THRESHOLD = 2
     SCII_VER_THRESHOLD = 2
-    MAXIMUM_ATTACK_RANGE = 9
+    MAXIMUM_ATTACK_RANGE = 3
 
     def __init__(self, game = GeneralizedFindaAndDefeatScenario.GAME_DEEP_RTS, render=False):
         self.game = game
