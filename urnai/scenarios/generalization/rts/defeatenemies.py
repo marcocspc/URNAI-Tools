@@ -6,7 +6,7 @@ parentdir = os.path.dirname(parentdir)
 sys.path.insert(0,parentdir) 
 
 from urnai.scenarios.base.abscenario import ABScenario
-from .collectables import GeneralizedCollectablesScenario
+from .findanddefeat import GeneralizedFindaAndDefeatScenario 
 from urnai.utils.error import EnvironmentNotSupportedError
 from agents.actions.base.abwrapper import ActionWrapper
 from pysc2.lib import actions, features, units
@@ -16,8 +16,7 @@ import numpy as np
 from pysc2.env import sc2_env
 
 
-
-class GeneralizedFindaAndDefeatScenario(GeneralizedCollectablesScenario):
+class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
 
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
@@ -25,14 +24,8 @@ class GeneralizedFindaAndDefeatScenario(GeneralizedCollectablesScenario):
     SCII_VER_THRESHOLD = 2
     MAXIMUM_ATTACK_RANGE = 3
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="26x14-find_and_defeat.json", sc2_map="FindAndDefeatZerglings"):
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="10x8-collect_twenty.json", sc2_map="DefeatRoaches"):
         super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map)
-
-    def start(self):
-        if (self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS):
-            for i in range(25):
-                self.random_spawn_unit(7, self.env.game, 1)
-        super().start()
 
 
     def step(self, action):
@@ -202,4 +195,4 @@ class StarcraftIIActionWrapper(ActionWrapper):
             self.pending_actions.append(actions.RAW_FUNCTIONS.Attack_pt("now", unit.tag, [enemy_unit.x, enemy_unit.y]))
 
     def attack_(self, obs):
-        self.attack_nearest_inside_radius(obs, GeneralizedFindaAndDefeatScenario.MAXIMUM_ATTACK_RANGE)
+        self.attack_nearest_inside_radius(obs, GeneralizedDefeatEnemiesScenario.MAXIMUM_ATTACK_RANGE)

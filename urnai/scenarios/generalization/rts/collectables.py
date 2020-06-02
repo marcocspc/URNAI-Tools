@@ -5,13 +5,16 @@ parentdir = os.path.dirname(parentdir)
 parentdir = os.path.dirname(parentdir)
 sys.path.insert(0,parentdir) 
 
-from scenario.base.abscenario import ABScenario
-from util.error import EnvironmentNotSupportedError
+from urnai.scenarios.base.abscenario import ABScenario
+from urnai.utils.error import EnvironmentNotSupportedError
 from agents.actions.base.abwrapper import ActionWrapper
 from pysc2.lib import actions, features, units
 from agents.actions import sc2 as scaux
 from agents.rewards.default import PureReward
 import numpy as np
+from pysc2.env import sc2_env
+from urnai.envs.sc2 import SC2Env
+from absl import flags
 
 
 class GeneralizedCollectablesScenario(ABScenario):
@@ -21,17 +24,20 @@ class GeneralizedCollectablesScenario(ABScenario):
     SCII_HOR_THRESHOLD = 2
     SCII_VER_THRESHOLD = 2
 
-    def __init__(self, game = GeneralizedCollectablesScenario.GAME_DEEP_RTS, render=False):
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="10x8-collect_twenty.json", sc2_map="CollectMineralShards"):
+        FLAGS = flags.FLAGS
+        FLAGS(sys.argv)
         self.game = game
         if game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
-            self.env = DeepRTSEnv(render=render, map='10x8-collect_twenty.json', updates_per_action = 12)
+            self.env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = 12)
             self.collectables_map = self.set_collectable_map() 
         elif game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
-            self.env = SC2Env(map_name="CollectMineralShards", render=render, step_mul=32, players=players)
+            players = [sc2_env.Agent(sc2_env.Race.terran)]
+            self.env = SC2Env(map_name=sc2_map, render=render, step_mul=32, players=players)
         else:
-            err = '''Collectables only supports the following environments:
+            err = '''{} only supports the following environments:
     GeneralizedCollectablesScenario.GAME_DEEP_RTS
-    GeneralizedCollectablesScenario.GAME_STARCRAFT_II'''
+    GeneralizedCollectablesScenario.GAME_STARCRAFT_II'''.format(self.__class__.__name__)
             raise EnvironmentNotSupportedError(err)
 
     def start(self):
@@ -73,7 +79,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         #    builder = StarcraftIIRewardBuilder()
         return builder
 
-     def get_default_action_wrapper(self):
+    def get_default_action_wrapper(self):
         wrapper = None
 
         if self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
