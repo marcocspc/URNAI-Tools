@@ -3,16 +3,19 @@ from pysc2.env import sc2_env
 from urnai.envs.sc2 import SC2Env
 from pysc2.lib import actions, features, units
 from urnai.agents.actions import sc2 as scaux
+from urnai.utils.error import NoEnemyArmyError
 from statistics import mean
+import math
 
-HOR_THRESHOLD = 5
-VER_THRESHOLD = 5
+HOR_THRESHOLD = 2
+VER_THRESHOLD = 2
+MAXIMUM_ATTACK_RANGE = 9
 
-
+global PENDING_ACTIONS
 PENDING_ACTIONS = []
 #USING THRESHOLDS = 2
-#Map walkable size 10 (H) x 8 (V)
-#corners coordinates: [22, 28] (UP LEFT), [22, 42] (DOWN LEFT), [43, 43] (DOWN RIGHT), [43, 28] (UP RIGHT)
+#Map walkable size 24 (H) x 12 (V)
+
 
 def print_army_mean(obs):
     army = scaux.select_army(obs, sc2_env.Race.terran)
@@ -63,19 +66,51 @@ def move_up(obs):
     new_army_y = int(mean(ys)) - VER_THRESHOLD
 
     for unit in army:
-        print("appending unit {} to go up".format(unit))
         PENDING_ACTIONS.append(actions.RAW_FUNCTIONS.Move_pt("now", unit.tag, [new_army_x, new_army_y]))
 
 def no_op():
     PENDING_ACTIONS.append(actions.RAW_FUNCTIONS.no_op())
+
+def get_nearest_enemy_unit_inside_radius(x, y, obs, radius):
+    enemy_army = [unit for unit in obs.raw_units if unit.owner != 1] 
+
+    closest_dist = 9999999999999 
+    closest_unit = None
+    for unit in enemy_army:
+        xaux = unit.x
+        yaux = unit.y
+
+        dist = abs(math.hypot(x - xaux, y - yaux))
+        print("dist "+str(dist))
+
+        if dist <= closest_dist and dist <= radius:
+            closest_dist = dist
+            closest_unit = unit
+
+    if closest_unit is not None:
+        return closest_unit
+
+def attack_nearest_inside_radius(obs, radius):
+    #get army coordinates
+    army = scaux.select_army(obs, sc2_env.Race.terran)
+    xs = [unit.x for unit in army]
+    ys = [unit.y for unit in army]
+    army_x = int(mean(xs))
+    army_y = int(mean(ys)) - VER_THRESHOLD
+
+    #get nearest unit
+    enemy_unit = get_nearest_enemy_unit_inside_radius(army_x, army_y, obs, radius)
+
+    #tell each unit in army to attack nearest enemy
+    for unit in army:
+        PENDING_ACTIONS.append(actions.RAW_FUNCTIONS.Attack_pt("now", unit.tag, [enemy_unit.x, enemy_unit.y]))
+
 
 def set_collectable_list(width, height):
     map = np.zeros((height, width)) 
 
     for i in range(width):
         for j in range(height):
-            print('i' + str(i))
-            print('j' + str(j))
             map[i][j] = random.randint(0, 1)
 
             if np.sum(map) > 20:
@@ -90,7 +125,7 @@ def main():
     episodes = 100
     steps = 1000 
     players = [sc2_env.Agent(sc2_env.Race.terran)]
-    scii = SC2Env(map_name="FindAndDefeatZerglings", render=True, step_mul=32, players=players)
+    scii = SC2Env(map_name="FindAndDefeatZerglings", render=True, step_mul=48, players=players)
 
     for ep in range(episodes):
         print("Episode " + str(ep + 1))
@@ -108,7 +143,8 @@ def main():
                     2 - Down
                     3 - Left
                     4 - Right
-                    5 - No-op
+                    5 - Attack Nearest Unit 
+                    6 - No-Op
             '''
 
             action = None
@@ -116,7 +152,7 @@ def main():
             try:
                 action = int(input(text))
             except ValueError:
-                action = 5
+                action = 6
 
             #move it to desired direction
             if state is not None:
@@ -129,16 +165,17 @@ def main():
                 elif action == 4:
                     move_right(state)
                 elif action == 5:
-                    no_op()
+                    try:
+                        attack_nearest_inside_radius(state, MAXIMUM_ATTACK_RANGE)
+                    except NoEnemyArmyError:
+                        print("No enemies inside defined attack range.")
 
             if len(PENDING_ACTIONS) > 0:
-                print("len pend {}".format(len(PENDING_ACTIONS)))
                 state, reward, done = scii.step([PENDING_ACTIONS.pop()])
-                PENDING_ACTIONS = PENDING_ACTIONS[:-1]
             else:
                 state, reward, done = scii.step([actions.RAW_FUNCTIONS.no_op()])
 
-            #Reward is 1 for every mineral shard collected 
+            #Reward is 1 for every roach killed 
             #Reward is not cumulative
             print("Reward: {r}".format(r=reward))
 

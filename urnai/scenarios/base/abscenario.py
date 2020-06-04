@@ -1,13 +1,9 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-parentdir = os.path.dirname(parentdir)
-sys.path.insert(0,parentdir) 
+from abc import abstractmethod
+from urnai.envs.base.abenv import Env
+from urnai.agents.rewards.abreward import RewardBuilder
+from urnai.agents.actions.base.abwrapper import ActionWrapper 
 
-from abc import ABC, abstractmethod
-from envs.base.abenv import ABEnv
-
-class ABScenario(ABC, ABEnv):
+class ABScenario(Env):
     '''
         Abstract class for all Scenarios supported. A Scenario works like an environment, but uses it
         as a base to create a trainment pattern. For example, for an environment like DeepRTS, one can train an agent

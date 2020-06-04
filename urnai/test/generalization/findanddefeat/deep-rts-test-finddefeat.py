@@ -69,10 +69,24 @@ def set_collectable_list(width, height):
 
     return map
 
+def random_spawn_unit(drts_unit, drts_game, player):
+    tile_map_len = len(drts_game.tilemap.tiles) 
+    tile = drts_game.tilemap.tiles[random.randint(0, tile_map_len - 1)]
+
+    while not tile.is_buildable():
+        tile = drts_game.tilemap.tiles[random.randint(0, tile_map_len - 1)]
+
+    drts_game.players[player].spawn_unit(drts.constants.Unit.Archer, tile)
+
+
+
+
+
+
 episodes = 100
 steps = 1000 
 #drts = DeepRTSEnv(map = DeepRTSEnv.MAP_BIG,render=True, updates_per_action = 12, start_oil=99999, start_gold=99999, start_lumber=99999, start_food=99999)
-drts = DeepRTSEnv(map = "10x10-2v2-custom.json",render=True, updates_per_action = 12, start_oil=99999, start_gold=99999, start_lumber=99999, start_food=99999)
+drts = DeepRTSEnv(map = "26x14-find_and_defeat.json",render=True, updates_per_action = 12, start_oil=99999, start_gold=99999, start_lumber=99999, start_food=99999, number_of_players=2)
 
 drts.engine_config.set_footman(False)
 drts.engine_config.set_archer(True)
@@ -86,6 +100,10 @@ for ep in range(episodes):
 
     for step in range(steps):
         print("Step " + str(step + 1))
+
+        if step == 0:
+            for i in range(5):
+                random_spawn_unit(7, drts.game, 1)
         
         text = '''
             Choose:
@@ -107,6 +125,7 @@ for ep in range(episodes):
                 NoAction = 16
                 AutoBuildArcher = 17
                 BuildArcher = 18
+                AutoBuildFootman = 19
         '''
 
         action = None
@@ -129,6 +148,12 @@ for ep in range(episodes):
 
             drts.players[0].spawn_unit(drts.constants.Unit.Archer, drts.game.tilemap.get_tile(x, y))
             state, done = drts.step(15)
+        elif action == 18:
+            # build archer
+            print("Trying to build footman")
+            drts.players[0].spawn_unit_around_spawn_point(drts.constants.Unit.Footman)
+
+            state, done = drts.step(15)
         else:
             state, done = drts.step(action)
 
@@ -144,11 +169,8 @@ for ep in range(episodes):
         reward = 0
         epi_reward += reward
 
-        if (reward > 0):
-            collectables_map[unit_y - 1, unit_x - 1] = 0
-
-        #print("Current state: ")
-        #print(state)
+        print("Current state: ")
+        print(state)
         print("Player 1 selected unit:")
         print_unit(drts.players[0].get_targeted_unit())
         print("Unit coordinates: {x}, {y}".format(x=unit_x,y=unit_y))

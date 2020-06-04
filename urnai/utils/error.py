@@ -27,3 +27,7 @@ class UnsupportedVizDoomRes(Exception):
 
 class ClassNotFoundError(Exception):
     pass
+
+class NoEnemyArmyError(Exception):
+    pass
+
