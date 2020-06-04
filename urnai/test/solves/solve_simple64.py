@@ -12,7 +12,7 @@ from trainers.trainer import TestParams
 from agents.sc2_agent import SC2Agent
 from agents.actions.sc2_wrapper import SC2Wrapper, TerranWrapper, ProtossWrapper
 from agents.rewards.sc2 import KilledUnitsReward, GeneralReward
-from agents.states.sc2 import Simple64State_1
+from agents.states.sc2 import Simple64StateFullRes
 from agents.states.sc2 import Simple64State
 from models.dql_tf import DQLTF
 from models.pg_keras import PGKeras
@@ -38,10 +38,11 @@ def main(unused_argv):
 
         ## Initializing our StarCraft 2 environment
         players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
-        env = SC2Env(map_name="Simple64", players=players, render=True, step_mul=16)
+        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=24)
         
         action_wrapper = TerranWrapper()
         state_builder = Simple64State()
+        #state_builder = Simple64StateFullRes()
         
         helper = ModelBuilder()
         helper.add_input_layer(int(state_builder.get_state_dim()), nodes=300)
@@ -52,8 +53,8 @@ def main(unused_argv):
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
 
-        dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, 
-                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.9997, epsilon_min=0.01, memory_maxlen=50000, min_memory_size=1000)
+        dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False,
+                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.997, epsilon_min=0.001, memory_maxlen=50000, min_memory_size=1000)
 
         #dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
         
@@ -61,10 +62,10 @@ def main(unused_argv):
         agent = SC2Agent(dq_network, GeneralReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())
 
 
-        #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_dql", save_every=50, enable_save=True)
+        #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn", save_every=100, enable_save=True)
         trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn", save_every=2, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=1000, max_steps=2000)
-        trainer.play(num_matches=100, max_steps=2000)
+        trainer.train(num_episodes=1000, max_steps=1200)
+        trainer.play(num_matches=100, max_steps=1200)
 
     except KeyboardInterrupt:
         pass
