@@ -70,13 +70,13 @@ class DDQNKeras(LearningModel):
                               padding=layer_model['padding'], activation='relu', input_shape=layer_model['input_shape']))
                     model.add(Activation('relu'))
                     model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
-                    model.add(Dropout(0.2))
+                    model.add(Dropout(layer_model['dropout']))
                 else:
                     model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
                               padding=layer_model['padding'], activation='relu'))
                     model.add(Activation('relu'))
                     model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
-                    model.add(Dropout(0.2))
+                    model.add(Dropout(layer_model['dropout']))
             else:
                 raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
 
@@ -86,7 +86,7 @@ class DDQNKeras(LearningModel):
     def memorize(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
 
-    def learn(self, s, a, r, s_, done, is_last_step):
+    def learn(self, s, a, r, s_, done):
         self.memorize(s, a, r, s_, done)
         if len(self.memory) < self.min_memory_size:
             return
