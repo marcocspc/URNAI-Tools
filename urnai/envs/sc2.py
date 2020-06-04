@@ -31,11 +31,13 @@ class SC2Env(Env):
         self.game_steps_per_ep = game_steps_per_ep
         self.spatial_dim = spatial_dim
         self.players = players
+        self.done = False
 
         self.start()
 
     
     def start(self):
+        self.done = False
         if self.env_instance is None:
             # Lazy loading pysc2 env
             from pysc2.env import sc2_env
@@ -61,7 +63,9 @@ class SC2Env(Env):
     
     def step(self, action):
         timestep = self.env_instance.step(action)
-        return self.parse_timestep(timestep)    #obs, reward, done
+        obs, reward, done = self.parse_timestep(timestep)
+        self.done = done
+        return obs, reward, done
 
 
     def reset(self):
