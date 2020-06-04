@@ -93,7 +93,7 @@ class Simple64State(StateBuilder):
             new_state.append(get_units_amount(obs, units.Zerg.SpineCrawler))
             new_state.append(get_units_amount(obs, units.Zerg.Spire))
             new_state.append(get_units_amount(obs, units.Zerg.SporeCrawler))
-            
+
 
         m0 = obs.feature_minimap[0]     # Feature layer of the map's terrain (elevation and shape)
         m0 = m0/10
@@ -146,8 +146,11 @@ class Simple64State(StateBuilder):
     
 class Simple64StateFullRes(StateBuilder):
 
-    def __init__(self):
-        self._state_size = 1957
+    def __init__(self, reduction_factor=2):
+        #self._state_size = 1957
+
+        self.reduction_factor = reduction_factor
+        self._state_size = int(22 + (44/self.reduction_factor)**2)
         self.player_race = 0
 
     def build_state(self, obs):
@@ -246,6 +249,9 @@ class Simple64StateFullRes(StateBuilder):
         combined_minimap = trim_feature_minimap(combined_minimap)
         combined_minimap = np.array(combined_minimap)                                   # Tranforming combined_minimap into a np array so tensor flow can interpret it
         combined_minimap = combined_minimap/combined_minimap.max()                      # Normalizing between 0 and 1
+
+        # Lowering the featuremap's resolution
+        lowered_minimap = lower_featuremap_resolution(combined_minimap, self.reduction_factor)
         
         # Rotating observation depending on Agent's location on the map so that we get a consistent, generalized, observation
         if not self.base_top_left: 
@@ -257,11 +263,12 @@ class Simple64StateFullRes(StateBuilder):
 
 
         # Displaying the agent's vision in a heatmap using matplotlib every 200 steps (just for debug purpuses, probably will be removed later)
-        # if (obs.game_loop[0]/16)%300 == 0:
-        #     # Displaying Agent's vision
-        #     plt.figure()
-        #     plt.imshow(combined_minimap)
-        #     plt.show()
+        if (obs.game_loop[0]/16)%50 == 0:
+            # Displaying Agent's vision
+            plt.figure()
+            plt.imshow(lowered_minimap)
+            
+            plt.show()
 
         return final_state
 
@@ -330,7 +337,7 @@ class Simple64State_1(StateBuilder):
 
 def trim_feature_minimap(feature_minimap):
     feature_minimap = np.delete(feature_minimap, np.s_[0:12:1], 0)
-    feature_minimap = np.delete(feature_minimap, np.s_[45:63:1], 0)
+    feature_minimap = np.delete(feature_minimap, np.s_[44:63:1], 0)
     feature_minimap = np.delete(feature_minimap, np.s_[0:8:1], 1)
-    feature_minimap = np.delete(feature_minimap, np.s_[43:63:1], 1)
+    feature_minimap = np.delete(feature_minimap, np.s_[44:63:1], 1)
     return feature_minimap

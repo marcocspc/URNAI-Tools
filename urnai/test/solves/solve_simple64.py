@@ -41,15 +41,15 @@ def main(unused_argv):
         env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=24)
         
         action_wrapper = TerranWrapper()
-        state_builder = Simple64State()
-        #state_builder = Simple64StateFullRes()
+        #state_builder = Simple64State()
+        state_builder = Simple64StateFullRes()
         
         helper = ModelBuilder()
-        helper.add_input_layer(int(state_builder.get_state_dim()), nodes=300)
+        helper.add_input_layer(int(state_builder.get_state_dim()), nodes=400)
         # helper.add_convolutional_layer(filters=32, input_shape=(state_builder._state_size/2, state_builder._state_size/2, 1)) #1 means grayscale images 
         # helper.add_convolutional_layer(filters=16)
         helper.add_fullyconn_layer(300)
-        helper.add_fullyconn_layer(300)
+        helper.add_fullyconn_layer(200)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
 
