@@ -36,10 +36,10 @@ class Agent(Savable):
         self.action_wrapper.reset()
         self.model.ep_reset()
 
-    def learn(self, obs, reward, done, is_last_step: bool):
+    def learn(self, obs, reward, done):
         if self.previous_state is not None:
             next_state = self.build_state(obs)
-            self.model.learn(self.previous_state, self.previous_action, reward, next_state, done, is_last_step)
+            self.model.learn(self.previous_state, self.previous_action, reward, next_state, done)
 
 
     '''

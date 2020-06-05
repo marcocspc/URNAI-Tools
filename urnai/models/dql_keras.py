@@ -105,7 +105,7 @@ class DQNKeras(LearningModel):
 
         #Epsilon decay operation was here, moved it to "decay_epsilon()" and to "learn()"
 
-    def no_memory_learning(self, s, a, r, s_, done, is_last_step):
+    def no_memory_learning(self, s, a, r, s_, done):
             target = r 
             if not done:
                 target = (r + self.gamma * np.amax(self.model.predict(s_)[0]))
@@ -113,13 +113,13 @@ class DQNKeras(LearningModel):
             target_f[0][a] = target
             self.model.fit(s, target_f, epochs=1, verbose=0)
 
-    def learn(self, s, a, r, s_, done, is_last_step: bool):
+    def learn(self, s, a, r, s_, done):
         if self.use_memory:
             self.memorize(s, a, r, s_, done)
             if(len(self.memory) > self.batch_size):
                 self.replay()
         else:
-            self.no_memory_learning(s, a, r, s_, done, is_last_step)
+            self.no_memory_learning(s, a, r, s_, done)
 
         if not self.per_episode_epsilon_decay:
             self.decay_epsilon()

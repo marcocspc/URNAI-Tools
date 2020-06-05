@@ -88,11 +88,11 @@ class Trainer(Savable):
                 if step >= max_steps:
                     break
 
-                is_last_step = step == max_steps - 1
-
                 # Choosing an action and passing it to our env.step() in order to act on our environment
                 action = self.agent.step(obs, step_reward, done)
                 obs, default_reward, done = self.env.step(action)
+
+                is_last_step = step == max_steps - 1
                 done = done or is_last_step
 
                 # Checking whether or not to use the reward from the reward builder so we can pass that to the agent
@@ -102,7 +102,7 @@ class Trainer(Savable):
                     step_reward = default_reward
 
                 # Making the agent learn
-                self.agent.learn(obs, step_reward, done, is_last_step)
+                self.agent.learn(obs, step_reward, done)
 
                 # Adding our step reward to the total count of the episode's reward
                 ep_reward += step_reward

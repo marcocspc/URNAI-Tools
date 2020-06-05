@@ -39,3 +39,7 @@ class Game2048Reward(RewardBuilder):
     #standard reward provided by the gym environment    
     def std_reward(self, obs, reward, done):
         return reward
+
+class Game2048StdReward(RewardBuilder):
+    def get_reward(self, obs, reward, done):
+        return reward

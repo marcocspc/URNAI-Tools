@@ -101,10 +101,10 @@ class PGKeras(LearningModel):
         self.action_memory.append(action)
         self.reward_memory.append(reward)
 
-    def learn(self, s, a, r, s_, done, is_last_step: bool):
+    def learn(self, s, a, r, s_, done):
         self.memorize(s, a, r)
 
-        if done or is_last_step:
+        if done:
             state_memory = np.array(self.state_memory)
             state_memory = state_memory[:, 0, :]
             action_memory = np.array(self.action_memory)
