@@ -10,7 +10,7 @@ class JSONTrainer(Trainer):
         with open(json_path, "r") as json_file:
             self.trainings = json.loads(json_file.read())
 
-    def start_training(self):
+    def start_training(self, play_only=False):
         for training in self.trainings:
             env_cls = get_cls("urnai", "envs", training["env"]["class"])
             env = env_cls(**training["env"]["params"])
@@ -32,10 +32,11 @@ class JSONTrainer(Trainer):
 
             self.setup(env, agent, **training["trainer"]["params"])
 
-            try:
-                self.train(**training["json_trainer"]["train"])
-            except KeyError as ke:
-                if 'train' in str(ke): pass
+            if not play_only:
+                try:
+                    self.train(**training["json_trainer"]["train"])
+                except KeyError as ke:
+                    if 'train' in str(ke): pass
 
             try:
                 self.play(**training["json_trainer"]["play"])
