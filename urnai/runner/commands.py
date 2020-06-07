@@ -85,7 +85,6 @@ class TrainerRunner(Runner):
     OPT_COMMANDS = [
             {'command': '--json-file', 'help': 'JSON solve file, with all the parameters to start the training.', 'type' : str, 'metavar' : 'JSON_FILE_PATH', 'action' : 'store'},
 #TODO            {'command': '--build-training-file', 'help': 'Helper to build a solve json-file.', 'action' : 'store_true'},
-            {'command': '--play', 'help': 'JSON solve file, with all the parameters to start the training.', 'type' : str, 'metavar' : 'JSON_FILE_PATH', 'action' : 'store'},
             {'command': '--play', 'help': 'Test agent, without training it, it will ignore train entry on json file.', 'action' : 'store_true'},
             ]
 
