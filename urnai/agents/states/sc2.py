@@ -255,20 +255,20 @@ class Simple64StateFullRes(StateBuilder):
         
         # Rotating observation depending on Agent's location on the map so that we get a consistent, generalized, observation
         if not self.base_top_left: 
-            combined_minimap = np.rot90(combined_minimap, 2)
+            lowered_minimap = np.rot90(lowered_minimap, 2)
         
-        new_state.extend(combined_minimap.flatten())   
+        new_state.extend(lowered_minimap.flatten())   
         final_state = np.array(new_state)
         final_state = np.expand_dims(final_state, axis=0)
 
 
         # Displaying the agent's vision in a heatmap using matplotlib every 200 steps (just for debug purpuses, probably will be removed later)
-        if (obs.game_loop[0]/16)%50 == 0:
-            # Displaying Agent's vision
-            plt.figure()
-            plt.imshow(lowered_minimap)
+        # if (obs.game_loop[0]/16)%50 == 0:
+        #     # Displaying Agent's vision
+        #     plt.figure()
+        #     plt.imshow(lowered_minimap)
             
-            plt.show()
+        #     plt.show()
 
         return final_state
 

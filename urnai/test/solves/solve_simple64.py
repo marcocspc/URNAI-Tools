@@ -63,7 +63,7 @@ def main(unused_argv):
 
 
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn", save_every=100, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn", save_every=2, enable_save=True, relative_path=True)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_6hl", save_every=4, enable_save=True, relative_path=True)
         trainer.train(num_episodes=1000, max_steps=1200)
         trainer.play(num_matches=100, max_steps=1200)
 
