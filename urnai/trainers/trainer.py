@@ -39,7 +39,7 @@ class Trainer(Savable):
         self.pickle_black_list.append("agent")
         rp.VERBOSITY_LEVEL = debug_level
 
-        self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
+        self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
 
         if(relative_path):
             self.full_save_path = parentdir + os.path.sep + self.save_path + os.path.sep + self.file_name
@@ -64,7 +64,7 @@ class Trainer(Savable):
         
         rp.report("> Training")
         if self.logger.ep_count == 0:
-            self.logger = Logger(num_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
+            self.logger = Logger(num_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
 
         if test_params != None:
             test_params.logger = self.logger
@@ -147,7 +147,7 @@ class Trainer(Savable):
     def play(self, num_matches, max_steps=float('inf'), test_params=None, reward_from_agent = True):
         rp.report("\n\n> Playing")
 
-        self.logger = Logger(num_matches, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
+        self.logger = Logger(num_matches, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
 
         for match in itertools.count():
             if match >= num_matches:
@@ -202,7 +202,9 @@ class Trainer(Savable):
 
         #We need to save playing status as well 
         if self.enable_save:
-            self.save(self.full_save_play_path)
+            self.logger.save(self.full_save_play_path)
+            rp.save(self.full_save_play_path)
+            #self.save(self.full_save_play_path)
 
     def save_extra(self, save_path):
         self.env.save(save_path)

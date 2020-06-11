@@ -10,12 +10,14 @@ import pickle
 import os
 from matplotlib.ticker import PercentFormatter
 from urnai.tdd.reporter import Reporter as rp
+from models.model_builder import ModelBuilder
 
 class Logger(Savable):
-    def __init__(self, ep_total, agent_name, model_name, action_wrapper_name, state_builder_name, reward_builder_name, env_name, is_episodic=True, render=True):
+    def __init__(self, ep_total, agent_name, model_name, model_builder:ModelBuilder, action_wrapper_name, state_builder_name, reward_builder_name, env_name, is_episodic=True, render=True):
         #Training information
         self.agent_name = agent_name
         self.model_name = model_name
+        self.model_builder = model_builder
         self.action_wrapper_name = action_wrapper_name
         self.state_builder_name = state_builder_name
         self.reward_builder_name = reward_builder_name
@@ -50,7 +52,9 @@ class Logger(Savable):
         self.is_episodic = is_episodic
 
         self.avg_reward_graph = None 
+        self.inst_reward_graph = None
         self.avg_steps_graph = None
+        
 
         #Training report
         self.training_report = ""
@@ -95,12 +99,18 @@ class Logger(Savable):
         self.play_rewards_avg.append(sum(play_rewards) / num_matches)
 
     def log_training_start_information(self):
-        text = ("    Agent: {}\n".format(self.agent_name)
-                + "        Model: {}\n".format(self.model_name)
-                + "        ActionWrapper: {}\n".format(self.action_wrapper_name)
-                + "        StateBuilder: {}\n".format(self.state_builder_name)
-                + "        RewardBuilder: {}\n".format(self.reward_builder_name)
-                + "    Environment: {}\n".format (self.env_name))
+        text = ("\n   Agent: {}\n".format(self.agent_name)
+              + "   ActionWrapper: {}\n".format(self.action_wrapper_name)
+              + "   StateBuilder: {}\n".format(self.state_builder_name)
+              + "   RewardBuilder: {}\n".format(self.reward_builder_name)
+              + "   Environment: {}\n".format (self.env_name)
+              + "   Model: {}\n".format(self.model_name))
+
+        for idx, (layer) in enumerate(self.model_builder):
+            if(layer['type'] == 'output'):
+                text += "       Layer {}: type={} | length={} \n".format(idx+1, layer['type'], layer['length'])
+            else:
+                text += "       Layer {}: type={} | nodes={} \n".format(idx+1, layer['type'], layer['nodes'])
 
         self.training_report += text 
 
@@ -108,8 +118,8 @@ class Logger(Savable):
 
     def log_ep_stats(self):
         if self.ep_count > 0:
-            rp.report("Episode: {}/{} | Episode Avg. Reward: {:10.6f} | Episode Steps: {:10.6f} | Best Reward was {} on episode: {} | Agent info: {}"
-            .format(self.ep_count, self.ep_total, self.ep_avg_rewards[-1], self.ep_steps_count[-1], self.best_reward, self.best_reward_episode, self.agent_info[-1]), end="\r")
+            rp.report("Episode: {}/{} | Episode Avg. Reward: {:10.6f} | Episode Steps: {:10.6f} | Episode Reward: {:10.6f} | Best Reward was {} on episode: {} | Agent info: {}"
+            .format(self.ep_count, self.ep_total, self.ep_avg_rewards[-1], self.ep_steps_count[-1], self.ep_rewards[-1], self.best_reward, self.best_reward_episode, self.agent_info[-1]), end="\r")
         else:
             rp.report("There are no recorded episodes!")
 
@@ -146,6 +156,11 @@ class Logger(Savable):
         return self.__plot_curve(range(self.ep_count), self.ep_avg_steps, 'Episode Count',
                             'Avg. Steps', r'Steps avg. over training')
 
+    def plot_instant_reward_graph(self):
+        # Plotting average reward graph
+        return self.__plot_curve(range(self.ep_count), self.ep_rewards, 'Episode Count',
+                            'Ep Reward', r'Episode Reward over training')
+
     def plot_win_rate_percentage_over_play_testing_graph(self):
         # Plotting win rate over play testing graph
         return self.__plot_bar(self.play_ep_count, [self.play_win_rates], ['Play'], 'Episode', 'Win rate (%)', 'Win rate percentage over play testing', format_percent=True)
@@ -155,21 +170,28 @@ class Logger(Savable):
         return self.__plot_bar(self.play_ep_count, [self.play_rewards_avg], ['Play'], 'Episode', 'Reward avg.', 'Reward avg. over play testing')
 
     def save_extra(self, persist_path):
-        if self.avg_reward_graph is None or self.avg_steps_graph is None:
+        if self.avg_reward_graph is None or self.avg_steps_graph is None or self.inst_reward_graph is None:
              self.render = False
 
              self.avg_reward_graph = self.plot_average_reward_graph()
-             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_reward_graph_bar.png")
-             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_reward_graph_bar.pdf")
+             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_reward_graph.png")
+             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_reward_graph.pdf")
              plt.close(self.avg_reward_graph)
              self.avg_reward_graph = None
 
 
              self.avg_steps_graph = self.plot_average_steps_graph() 
-             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_steps_graph_bar.png")
-             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_steps_graph_bar.pdf")
+             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_steps_graph.png")
+             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_steps_graph.pdf")
              plt.close(self.avg_steps_graph)
              self.avg_steps_graph = None
+
+
+             self.inst_reward_graph = self.plot_instant_reward_graph()
+             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_reward_graph.png")
+             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_reward_graph.pdf")
+             plt.close(self.inst_reward_graph)
+             self.inst_reward_graph = None
 
              self.render = True 
 
