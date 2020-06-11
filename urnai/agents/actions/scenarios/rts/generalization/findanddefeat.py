@@ -16,16 +16,18 @@ class FindAndDefeatDeepRTSActionWrapper(CollectablesDeepRTSActionWrapper):
         self.final_actions = list(set(self.actions) - set(self.excluded_actions))
         self.action_queue = []
 
-    def get_player_units(self, player):
+    def get_player_units(self, player, obs):
         units = []
         for unit in obs["units"]:
             if unit.get_player() == player:
                 units.append(unit)
 
+        return units
+
     def enqueue_action_for_player_units(self, obs, action):
-        for i in range(len(self.get_player_units(obs["players"][0]))):
+        for i in range(len(self.get_player_units(obs["players"][0], obs))):
             self.action_queue.append(action)
-            self.action_queue.append(self.next_unit)
+            self.action_queue.append(self.nextunit)
 
     def is_action_done(self):
         return len(self.action_queue) == 0 
@@ -50,7 +52,7 @@ class FindAndDefeatDeepRTSActionWrapper(CollectablesDeepRTSActionWrapper):
             self.attack_(obs)
 
     def get_actions(self):
-        return self.action_queue
+        return self.final_actions
 
     def move_up(self, obs):
         self.enqueue_action_for_player_units(obs, self.moveup)
