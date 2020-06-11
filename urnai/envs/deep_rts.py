@@ -123,14 +123,23 @@ class DeepRTSEnv(Env):
         else:
             state = self.game.get_state()
 
+        #create a dict with all useful data from env
+        state = {"state" : state}
+        state["players"] = self.game.players
+        state["tilemap"] = self.game.tilemap
+        state["tiles"] = self.game.tilemap.tiles
+        state["units"] = self.game.units
+
         #make game update its internal graphics
         #and show windows, if it was configured to
         self.game.render()
         if self.render:
             self.game.view()
 
+        reward = 0
+
         #Return observation and done
-        return state, self.done
+        return state, reward, self.done
 
     def close(self):
         #Stop DeepRTS

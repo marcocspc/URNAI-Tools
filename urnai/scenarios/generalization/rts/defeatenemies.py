@@ -29,6 +29,7 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
     def step(self, action):
         if (self.game == GeneralizedDefeatEnemiesScenario.GAME_DEEP_RTS):
             state, reward, done = self.env.step(action)
+            return state, reward, done 
 
         elif (self.game == GeneralizedDefeatEnemiesScenario.GAME_STARCRAFT_II):
             return self.env.step(action)

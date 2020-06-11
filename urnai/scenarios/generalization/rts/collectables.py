@@ -9,8 +9,10 @@ from agents.rewards.default import PureReward
 import numpy as np
 from pysc2.env import sc2_env
 from urnai.envs.sc2 import SC2Env
+from urnai.envs.deep_rts import DeepRTSEnv
 from absl import flags
 from statistics import mean
+import random
 
 
 class GeneralizedCollectablesScenario(ABScenario):
@@ -40,7 +42,7 @@ class GeneralizedCollectablesScenario(ABScenario):
 
     def step(self, action):
         if (self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS):
-            state, done = self.env.step(action)
+            state, reward, done = self.env.step(action)
 
             unit_x = self.env.players[0].get_targeted_unit().tile.x
             unit_y = self.env.players[0].get_targeted_unit().tile.y

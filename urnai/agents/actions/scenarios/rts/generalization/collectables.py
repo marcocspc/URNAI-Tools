@@ -8,12 +8,33 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
     def __init__(self):
         self.move_number = 0
 
-        moveleft = 2
-        moveright = 3
-        moveup = 4
-        movedown = 5
+        self.previousunit = 0 
+        self.nextunit = 1
+        self.moveleft = 2
+        self.moveright = 3
+        self.moveup = 4
+        self.movedown = 5
+        self.moveupleft = 6
+        self.moveupright = 7
+        self.movedownleft = 8
+        self.movedownright = 9
+        self.attack = 10
+        self.harvest = 11
+        self.build0 = 12
+        self.build1 = 13
+        self.build2 = 14
+        self.noaction = 15
 
-        self.actions = [moveleft, moveright, moveup, movedown] 
+        self.actions = [self.previousunit, self.nextunit, self.moveleft, self.moveright, self.moveup, self.movedown,
+                self.moveupleft, self.moveupright, self.movedownleft, self.movedownright, self.attack, self.harvest,
+                self.build0, self.build1, self.build2, self.noaction] 
+
+        self.excluded_actions = [self.previousunit, self.nextunit, 
+                self.moveupleft, self.moveupright, self.movedownleft, 
+                self.movedownright, self.attack, self.harvest,
+                self.build0, self.build1, self.build2, self.noaction] 
+
+        self.final_actions = list(set(self.actions) - set(self.excluded_actions))
 
     def is_action_done(self):
         return True
@@ -22,13 +43,13 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
         self.move_number = 0
 
     def get_actions(self):
-        return self.actions
+        return self.final_actions
     
     def get_excluded_actions(self, obs):        
         return []
 
     def get_action(self, action_idx, obs):
-        return self.actions[action_idx]
+        return self.final_actions[action_idx]
 
 class CollectablesStarcraftIIActionWrapper(ActionWrapper):
 
