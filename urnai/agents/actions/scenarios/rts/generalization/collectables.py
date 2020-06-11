@@ -50,6 +50,12 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
 
     def get_action(self, action_idx, obs):
         return self.final_actions[action_idx]
+    
+    def get_action_name_str_by_int(self, action_int):
+        for attrstr in dir(self):
+            attr = getattr(self, attrstr)
+            if action_int == attr:
+                return attrstr 
 
 class CollectablesStarcraftIIActionWrapper(ActionWrapper):
 

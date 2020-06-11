@@ -8,8 +8,8 @@ action_wrapper = env.get_default_action_wrapper()
 
 text = "Choose:\n"
 cont = 0
-for function in action_wrapper.get_actions():
-    text += "\t{} - {}\n".format(action_wrapper.get_actions().index(function), function.__name__)
+for action in action_wrapper.get_actions():
+    text += "\t{} - {}\n".format(action, action_wrapper.get_action_name_str_by_int(action))
 
 for ep in range(episodes):
     reward = 0

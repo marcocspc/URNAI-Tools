@@ -22,8 +22,12 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="10x8-collect_twenty.json", sc2_map="DefeatRoaches"):
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="26x14-find_and_defeat.json", sc2_map="DefeatRoaches"):
         super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map)
+        self.setup_map()
+
+    def setup_map(self):
+        pass
 
 
     def step(self, action):
