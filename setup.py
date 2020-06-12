@@ -5,18 +5,31 @@ def is_optional_enabled(optional):
     return os.environ.get(optional, None) is not None
 
 # Dependencies versions
-VERSION_TF = "==2.2.0"
-VERSION_VIZDOOM = "==1.1.7"
+# VERSION_TF = "==2.2.0"
+# VERSION_VIZDOOM = "==1.1.7"
+# VERSION_DRTS = "stable"
+# VERSION_PLE = "3dbe79d"
+# VERSION_2048 = "==0.2.6"
+# VERSION_ABSL = "==0.9.0"
+# VERSION_GYM = "==0.10.11"
+# VERSION_NUMPY = "==1.18.4"
+# VERSION_MATPLOTLIB = "==3.2.0"
+# VERSION_KERAS = "==2.3.1"
+# VERSION_PYSC2 = "==3.0.0"
+# VERSION_PANDAS = "==1.0.1"
+
+VERSION_TF = ""
+VERSION_VIZDOOM = ""
 VERSION_DRTS = "stable"
-VERSION_PLE = "3dbe79d"
-VERSION_2048 = "==0.2.6"
-VERSION_ABSL = "==0.9.0"
-VERSION_GYM = "==0.10.11"
-VERSION_NUMPY = "==1.18.4"
-VERSION_MATPLOTLIB = "==3.2.0"
-VERSION_KERAS = "==2.3.1"
-VERSION_PYSC2 = "==3.0.0"
-VERSION_PANDAS = "==1.0.1"
+VERSION_PLE = ""
+VERSION_2048 = ""
+VERSION_ABSL = ""
+VERSION_GYM = ""
+VERSION_NUMPY = ""
+VERSION_MATPLOTLIB = ""
+VERSION_KERAS = ""
+VERSION_PYSC2 = ""
+VERSION_PANDAS = ""
 
 
 VIZDOOM = 'URNAI_VIZDOOM'
