@@ -15,13 +15,14 @@ class GeneralizedFindaAndDefeatScenario(GeneralizedCollectablesScenario):
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="26x14-find_and_defeat.json", sc2_map="FindAndDefeatZerglings"):
-        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map)
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="26x14-find_and_defeat.json", sc2_map="FindAndDefeatZerglings", drts_number_of_players=1):
+        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=drts_number_of_players)
+
+    def setup_map(self):
+        for i in range(25):
+            self.random_spawn_unit(7, self.env.game, 1)
 
     def start(self):
-        if (self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS):
-            for i in range(25):
-                self.random_spawn_unit(7, self.env.game, 1)
         super().start()
 
 

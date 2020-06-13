@@ -10,7 +10,7 @@ class DefeatEnemiesStarcraftIIActionWrapper(FindAndDefeatStarcraftIIActionWrappe
     def __init__(self):
         super().__init__()
 
-        self.ver_threshold = 5
-        self.hor_threshold = 5
+        self.ver_threshold = 2
+        self.hor_threshold = 2
 
     pass

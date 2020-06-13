@@ -107,3 +107,4 @@ venv.bak/
 .vscode/
 *.swp
 _vizdoom.ini
+*.swo
