@@ -20,13 +20,12 @@ class GeneralizedCollectablesScenario(ABScenario):
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="10x8-collect_twenty.json", sc2_map="CollectMineralShards"):
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="10x8-collect_twenty.json", sc2_map="CollectMineralShards", drts_number_of_players=1):
         FLAGS = flags.FLAGS
         FLAGS(sys.argv)
         self.game = game
         if game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
-            self.env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = 12)
-            self.collectables_map = self.set_collectable_map() 
+            self.env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = 12, number_of_players=drts_number_of_players)
         elif game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
             players = [sc2_env.Agent(sc2_env.Race.terran)]
             self.env = SC2Env(map_name=sc2_map, render=render, step_mul=32, players=players)
@@ -36,7 +35,12 @@ class GeneralizedCollectablesScenario(ABScenario):
     GeneralizedCollectablesScenario.GAME_STARCRAFT_II'''.format(self.__class__.__name__)
             raise EnvironmentNotSupportedError(err)
 
+    def setup_map(self):
+        if (self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS):
+            self.collectables_map = self.set_collectable_map() 
+
     def start(self):
+        self.setup_map()
         self.env.start()
         self.done = self.env.done
 

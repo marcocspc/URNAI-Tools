@@ -108,6 +108,21 @@ URNAI_TF_CPU=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/
 ```
 set "URNAI_TF_CPU=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
 ```
+
+#### Latest Dependencies 
+
+By default, URNAI fixes all dependencies' versions. If you need to install those dependencies in theirs latest versions, use: 
+
+- On Unix:
+```
+URNAI_LATEST_DEPS=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+```
+
+- On Windows:
+```
+set "URNAI_LATEST_DEPS=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+```
+
 ### Running the examples
 
 From version 0.0.2+ you can use json-files:

@@ -1,10 +1,15 @@
-from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario
+from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario as Scenario
+#from urnai.scenarios.generalization.rts.findanddefeat import GeneralizedFindaAndDefeatScenario as Scenario
+#from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario as Scenario
+import numpy as np
+import sys
 
 episodes = 100
-steps = 1000
+steps = 99999999999 
 
-env = GeneralizedDefeatEnemiesScenario(game = GeneralizedDefeatEnemiesScenario.GAME_STARCRAFT_II, render = True)
+env = Scenario(game = GeneralizedDefeatEnemiesScenario.GAME_STARCRAFT_II, render = True)
 action_wrapper = env.get_default_action_wrapper()
+np.set_printoptions(threshold=sys.maxsize)
 
 for ep in range(episodes):
     reward = 0
@@ -36,6 +41,8 @@ for ep in range(episodes):
             action = action_wrapper.get_action(action, state)
 
             state, reward, done = env.step(action)
+
+            print("Map shape: {}".format(state.feature_minimap[4].shape))
 
             print("Reward: {r}".format(r=reward))
 

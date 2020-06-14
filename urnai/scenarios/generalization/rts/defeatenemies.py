@@ -23,12 +23,10 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
     GAME_STARCRAFT_II = "sc2" 
 
     def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="26x14-find_and_defeat.json", sc2_map="DefeatRoaches"):
-        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map)
-        self.setup_map()
+        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=2)
 
     def setup_map(self):
         pass
-
 
     def step(self, action):
         if (self.game == GeneralizedDefeatEnemiesScenario.GAME_DEEP_RTS):
@@ -37,15 +35,6 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
 
         elif (self.game == GeneralizedDefeatEnemiesScenario.GAME_STARCRAFT_II):
             return self.env.step(action)
-
-    def random_spawn_unit(self, drts_unit, drts_game, player):
-        tile_map_len = len(drts_game.tilemap.tiles)
-        tile = drts_game.tilemap.tiles[random.randint(0, tile_map_len - 1)]
-
-        while not tile.is_buildable():
-            tile = drts_game.tilemap.tiles[random.randint(0, tile_map_len - 1)]
-
-        drts_game.players[player].spawn_unit(drts.constants.Unit.Archer, tile)
 
     def get_default_action_wrapper(self):
         wrapper = None
@@ -56,4 +45,3 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
             wrapper = DefeatEnemiesStarcraftIIActionWrapper()
 
         return wrapper 
-

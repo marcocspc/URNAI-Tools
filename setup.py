@@ -18,16 +18,30 @@ VERSION_KERAS = "==2.3.1"
 VERSION_PYSC2 = "==3.0.0"
 VERSION_PANDAS = "==1.0.1"
 
-
 VIZDOOM = 'URNAI_VIZDOOM'
 TF_CPU = 'URNAI_TF_CPU'
 G2048 = 'URNAI_2048'
 DEEPRTS = 'URNAI_DEEPRTS'
+LATEST_DEPS = 'URNAI_LATEST_DEPS'
 
 git_url = '{package} @ git+https://github.com/{user}/{repo}@{branch}#egg={package}'
 dep_links = []
 dep_list = []
 tf = 'tensorflow-gpu' + VERSION_TF
+
+if is_optional_enabled(LATEST_DEPS):
+    print("Dependencies will be installed in theirs latest versions.")
+    VERSION_TF = ""
+    VERSION_VIZDOOM = ""
+    VERSION_2048 = ""
+    VERSION_ABSL = ""
+    VERSION_GYM = ""
+    VERSION_NUMPY = ""
+    VERSION_MATPLOTLIB = ""
+    VERSION_KERAS = ""
+    VERSION_PYSC2 = ""
+    VERSION_PANDAS = ""
+
 
 if is_optional_enabled(DEEPRTS):
     print("DeepRTS installation enabled.")
