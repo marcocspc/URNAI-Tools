@@ -12,7 +12,9 @@ class DeepRTSRunner(Runner):
 
     COMMAND = 'drts' 
     OPT_COMMANDS = [
-            {'command': '--drts-map', 'help': 'Map to install, uninstall or use on DeepRTS.', 'type' : str, 'metavar' : 'MAP_PATH', 'action' : 'store'},
+            {'command': '--drts-map', 'help': 'Map to work with when using drts command.', 'type' : str, 'metavar' : 'MAP_PATH', 'action' : 'store'},
+            {'command': '--extract-specs', 'help': 'This will export every map layer to a csv file. Other userful information will be on a JSON file.', 'action' : 'store_true'},
+            {'command': '--build-map', 'help': 'This will build a map based on files inside current directory. For a template, you should use --extract-specs first. URNAI you generate the needed files from an existint DeepRTS map. ', 'action' : 'store_true'},
             {'command': '--install', 'help': 'Install map on DeepRTS.', 'action' : 'store_true'},
             {'command': '--uninstall', 'help': 'Uninstall map on DeepRTS.', 'action' : 'store_true'},
             {'command': '--show-available-maps', 'help': 'Show installed maps on DeepRTS.', 'action' : 'store_true'},
@@ -22,10 +24,7 @@ class DeepRTSRunner(Runner):
         super().__init__(parser, args)
 
     def run(self):
-        from envs.deep_rts import DeepRTSEnv
-        import DeepRTS as drts
 
-        drts_map_dir = os.path.dirname(os.path.realpath(drts.python.__file__)) + '/assets/maps' 
 
         if self.args.show_available_maps:
             self.show_available_maps(drts_map_dir);
@@ -51,7 +50,6 @@ class DeepRTSRunner(Runner):
                         time.sleep(1)
                 except KeyboardInterrupt:
                     rp.report("Bye!")
-                        
         else:
             raise argparse.ArgumentError(message="--drts-map not informed.")
         
