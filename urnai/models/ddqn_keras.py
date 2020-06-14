@@ -8,17 +8,19 @@ from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activati
 from keras.optimizers import Adam
 from keras import backend as K
 from .base.abmodel import LearningModel
+from models.dql_keras import DQNKeras
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 from .model_builder import ModelBuilder
 from urnai.utils.error import IncoherentBuildModelError
 from urnai.utils.error import UnsupportedBuildModelLayerTypeError
 
-class DDQNKeras(LearningModel):
+class DDQNKeras(DQNKeras):
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.99,
                     name='DDQN', epsilon_start=1.0, epsilon_min=0.1, epsilon_decay=0.995, per_episode_epsilon_decay=False, update_target_every=5, 
-                    batch_size=64, memory_maxlen=50000, min_memory_size=1000, build_model = ModelBuilder.DEFAULT_BUILD_MODEL):
-        super(DDQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay, per_episode_epsilon_decay, name)
+                    batch_size=64, use_memory=True, memory_maxlen=50000, min_memory_size=1000, build_model = ModelBuilder.DEFAULT_BUILD_MODEL):
+        super(DDQNKeras, self).__init__(action_wrapper, state_builder, learning_rate=learning_rate, gamma=gamma, epsilon_start=epsilon_start, use_memory=use_memory,
+                                        epsilon_min=epsilon_min, epsilon_decay=epsilon_decay, per_episode_epsilon_decay=per_episode_epsilon_decay, name=name)
 
         self.build_model = build_model
 
@@ -30,63 +32,19 @@ class DDQNKeras(LearningModel):
         self.target_update_counter = 0
         self.update_target_every = update_target_every
 
-        self.memory = deque(maxlen=memory_maxlen)
-        self.memory_maxlen = memory_maxlen
-        self.min_memory_size = min_memory_size
-        self.batch_size = batch_size
-
-    def make_model(self):
-        model = Sequential()
-
-        if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
-            self.build_model[0]['shape'] = [None, self.state_size]
-            self.build_model[-1]['length'] = self.action_size
-
-        for idx, (layer_model) in enumerate(self.build_model):
-            if layer_model['type'] == ModelBuilder.LAYER_INPUT: 
-                if self.build_model.index(layer_model) == 0:
-                    model.add(Dense(layer_model['nodes'], input_dim=layer_model['shape'][1], activation='relu'))
-                else:
-                    raise IncoherentBuildModelError("Input Layer must be the first one.") 
-
-            elif layer_model['type'] == ModelBuilder.LAYER_FULLY_CONNECTED:
-                # if previous layer is convolutional, add a Flatten layer before the fully connected
-                if self.build_model[idx]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
-                    model.add(Flatten())
-
-                model.add(Dense(layer_model['nodes'], activation='relu'))
-
-            elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
-                # if previous layer is convolutional, add a Flatten layer before the fully connected
-                if self.build_model[idx]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
-                    model.add(Flatten())
-
-                model.add(Dense(layer_model['length'], activation='linear'))
-
-            elif layer_model['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
-                # if convolutional layer is the first, it's going to have the input shape and be treated as the input layer
-                if self.build_model.index(layer_model) == 0:
-                    model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
-                              padding=layer_model['padding'], activation='relu', input_shape=layer_model['input_shape']))
-                    model.add(Activation('relu'))
-                    model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
-                    model.add(Dropout(layer_model['dropout']))
-                else:
-                    model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
-                              padding=layer_model['padding'], activation='relu'))
-                    model.add(Activation('relu'))
-                    model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
-                    model.add(Dropout(layer_model['dropout']))
-            else:
-                raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
-
-        model.compile(optimizer=Adam(lr=self.learning_rate), loss='mse', metrics=['accuracy'])
-        return model
-
-    def memorize(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
+        if self.use_memory:
+            self.memory = deque(maxlen=memory_maxlen)
+            self.memory_maxlen = memory_maxlen
+            self.min_memory_size = min_memory_size
+            self.batch_size = batch_size
 
     def learn(self, s, a, r, s_, done):
+        if self.use_memory:
+            self.memory_learn(s, a, r, s_, done)
+        else:
+            self.no_memory_learn(s, a, r, s_, done)
+
+    def memory_learn(self, s, a, r, s_, done):
         self.memorize(s, a, r, s_, done)
         if len(self.memory) < self.min_memory_size:
             return
@@ -146,25 +104,44 @@ class DDQNKeras(LearningModel):
         if not self.per_episode_epsilon_decay:
             self.decay_epsilon()
 
-    def choose_action(self, state, excluded_actions=[]):
-        if np.random.rand() <= self.epsilon_greedy:
-            random_action = random.choice(self.actions)
-            # Removing excluded actions
-            while random_action in excluded_actions:
-                random_action = random.choice(self.actions)
-            return random_action
-        else:
-            return self.predict(state)
-    
-    def predict(self, state, excluded_actions=[]):
-        '''
-        model.predict returns an array of arrays, containing the Q-Values for the actions. This function should return the
-        corresponding action with the highest Q-Value.
-        '''
-        return int(np.argmax(self.model.predict(state)[0]))
 
-    def save_extra(self, persist_path):
-        self.model.save_weights(self.get_full_persistance_path(persist_path)+".h5")
+    def no_memory_learn(self, s, a, r, s_, done):
+
+        # Q-Value for our initial states
+        current_qs = self.model.predict(s)
+
+        # Q-value for our next states
+        next_qs_list = self.target_model.predict(s_)
+
+        # if this step is not the last, we calculate the new Q-Value based on the next_state
+        if not done:
+            max_next_q = np.max(next_qs_list[0])
+            # new Q-value is equal to the reward at that step + discount factor * the max q-value for the next_state
+            new_q = r + self.gamma * max_next_q
+        else:
+            # if this is the last step, there is no future max q value, so we the new_q is just the reward
+            new_q = r
+
+        current_qs[0][a] = new_q
+
+        inputs = s
+        targets = current_qs
+
+        self.model.fit(inputs, targets, verbose=0)
+
+        # If it's the end of an episode, increase the target update counter
+        if done:
+            self.target_update_counter += 1
+
+        # If our target update counter is greater than update_target_every we will update the weights in our target model
+        if self.target_update_counter > self.update_target_every:
+            self.target_model.set_weights(self.model.get_weights())
+            self.target_update_counter = 0
+
+        # if our epsilon rate decay is set to be done every step, we simply decay it. Otherwise, this will only be done
+        # at the end of every episode, on self.ep_reset() which is in our LearningModel base class
+        if not self.per_episode_epsilon_decay:
+            self.decay_epsilon()
 
     def load_extra(self, persist_path):
         exists = os.path.isfile(self.get_full_persistance_path(persist_path)+".h5")
