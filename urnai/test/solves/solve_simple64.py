@@ -12,8 +12,9 @@ from trainers.trainer import TestParams
 from agents.sc2_agent import SC2Agent
 from agents.actions.sc2_wrapper import SC2Wrapper, TerranWrapper, ProtossWrapper
 from agents.rewards.sc2 import KilledUnitsReward, GeneralReward
-from agents.states.sc2 import Simple64StateFullRes
 from agents.states.sc2 import Simple64State
+from agents.states.sc2 import Simple64StateFullRes
+from agents.states.sc2 import Simple64GridState
 from models.dql_tf import DQLTF
 from models.pg_keras import PGKeras
 from models.dql_keras import DQNKeras
@@ -38,23 +39,22 @@ def main(unused_argv):
 
         ## Initializing our StarCraft 2 environment
         players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
-        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=128)
+        env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=16)
         
         action_wrapper = TerranWrapper()
         #state_builder = Simple64State()
-        state_builder = Simple64StateFullRes()
+        #state_builder = Simple64StateFullRes()
+        state_builder = Simple64GridState(grid_size=4)
         
         helper = ModelBuilder()
-        helper.add_input_layer(int(state_builder.get_state_dim()), nodes=400)
-        # helper.add_convolutional_layer(filters=32, input_shape=(state_builder._state_size/2, state_builder._state_size/2, 1)) #1 means grayscale images 
-        # helper.add_convolutional_layer(filters=16)
-        helper.add_fullyconn_layer(300)
-        helper.add_fullyconn_layer(200)
+        helper.add_input_layer(int(state_builder.get_state_dim()), nodes=100)
+        helper.add_fullyconn_layer(100)
+        helper.add_fullyconn_layer(100)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
 
         dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False,
-                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.997, epsilon_min=0.001, memory_maxlen=50000, min_memory_size=1000)
+                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=80000, min_memory_size=2000)
 
         #dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
         
@@ -63,9 +63,9 @@ def main(unused_argv):
 
 
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn", save_every=100, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_test4", save_every=2, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=2, max_steps=1200)
-        trainer.play(num_matches=2, max_steps=1200)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_test8", save_every=2, enable_save=True, relative_path=True)
+        trainer.train(num_episodes=1000, max_steps=1200)
+        trainer.play(num_matches=100, max_steps=1200)
 
     except KeyboardInterrupt:
         pass

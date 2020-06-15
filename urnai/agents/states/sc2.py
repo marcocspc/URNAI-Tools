@@ -277,62 +277,145 @@ class Simple64StateFullRes(StateBuilder):
         return self._state_size
 
 
-class Simple64State_1(StateBuilder):
+class Simple64GridState(StateBuilder):
+    def __init__(self, grid_size=4):
+
+        self.grid_size = grid_size
+        self._state_size = int(22 + 2*(self.grid_size**2))
+        self.player_race = 0
+
     def build_state(self, obs):
-        
         if obs.game_loop[0] == 0:
-            command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
-            self.base_top_left = (command_center.x < 32)
 
-        # Whether or not our supply depot was built
-        supply_depot_count = get_units_amount(obs, units.Terran.SupplyDepot)
+            commandcenter = get_my_units_by_type(obs, units.Terran.CommandCenter)
+            nexus = get_my_units_by_type(obs, units.Protoss.Nexus)
+            hatchery = get_my_units_by_type(obs, units.Zerg.Hatchery)
+            if len(commandcenter)>0: 
+                townhall = commandcenter[0]
+                self.player_race = sc2_env.Race.terran
+            if len(nexus)>0:
+                townhall = nexus[0]
+                self.player_race = sc2_env.Race.protoss
+            if len(hatchery)>0:
+                townhall = hatchery[0]
+                self.player_race = sc2_env.Race.zerg
 
-        # Whether or not our barracks were built
-        barracks_count = get_units_amount(obs, units.Terran.Barracks)
+            self.base_top_left = (townhall.x < 32)
 
-        army_count = len(select_army(obs, sc2_env.Race.terran))
+        new_state = []
+        new_state.append(obs.player.minerals/6000)
+        new_state.append(obs.player.vespene/4000)
+        new_state.append(obs.player.food_cap/200)
+        new_state.append(obs.player.food_used/200)
+        new_state.append(obs.player.food_army/200)
+        new_state.append(obs.player.food_workers/200)
+        new_state.append((obs.player.food_cap - obs.player.food_used)/200)
+        new_state.append(obs.player.army_count/200)
+        new_state.append(obs.player.idle_worker_count/200)
 
-        # The supply limit
-        supply_limit = obs.player[4]
-        # The army supply
-        supply_army = obs.player[5]
-        # Free supply
-        supply_free = get_free_supply(obs)
+        if self.player_race == sc2_env.Race.terran:
+            new_state.append(get_units_amount(obs, units.Terran.CommandCenter)+
+                            get_units_amount(obs, units.Terran.OrbitalCommand)+
+                            get_units_amount(obs, units.Terran.PlanetaryFortress)/2)
+            new_state.append(get_units_amount(obs, units.Terran.SupplyDepot)/8)
+            new_state.append(get_units_amount(obs, units.Terran.Refinery)/4)
+            new_state.append(get_units_amount(obs, units.Terran.EngineeringBay))
+            new_state.append(get_units_amount(obs, units.Terran.Armory))
+            new_state.append(get_units_amount(obs, units.Terran.MissileTurret)/8)
+            new_state.append(get_units_amount(obs, units.Terran.SensorTower)/3)
+            new_state.append(get_units_amount(obs, units.Terran.Bunker)/5)
+            new_state.append(get_units_amount(obs, units.Terran.FusionCore))
+            new_state.append(get_units_amount(obs, units.Terran.GhostAcademy))
+            new_state.append(get_units_amount(obs, units.Terran.Barracks)/3)
+            new_state.append(get_units_amount(obs, units.Terran.Factory)/2)
+            new_state.append(get_units_amount(obs, units.Terran.Starport)/2)
 
-        # Defining our state, considering our enemies' positions.
-        current_state = np.zeros(22)
-        current_state[0] = supply_depot_count
-        current_state[1] = barracks_count
-        current_state[2] = supply_limit
-        current_state[3] = supply_army
-        current_state[4] = supply_free
-        current_state[5] = army_count
-        
+        elif self.player_race == sc2_env.Race.protoss:
+            new_state.append(get_units_amount(obs, units.Protoss.Nexus))
+            new_state.append(get_units_amount(obs, units.Protoss.Pylon))
+            new_state.append(get_units_amount(obs, units.Protoss.Assimilator))
+            new_state.append(get_units_amount(obs, units.Protoss.Forge))
+            new_state.append(get_units_amount(obs, units.Protoss.Gateway))
+            new_state.append(get_units_amount(obs, units.Protoss.CyberneticsCore))
+            new_state.append(get_units_amount(obs, units.Protoss.PhotonCannon))
+            new_state.append(get_units_amount(obs, units.Protoss.RoboticsFacility))
+            new_state.append(get_units_amount(obs, units.Protoss.Stargate))
+            new_state.append(get_units_amount(obs, units.Protoss.TwilightCouncil))
+            new_state.append(get_units_amount(obs, units.Protoss.RoboticsBay))
+            new_state.append(get_units_amount(obs, units.Protoss.TemplarArchive))
+            new_state.append(get_units_amount(obs, units.Protoss.DarkShrine))
+            
+        elif self.player_race == sc2_env.Race.zerg:
+            new_state.append(get_units_amount(obs, units.Zerg.BanelingNest))
+            new_state.append(get_units_amount(obs, units.Zerg.EvolutionChamber))
+            new_state.append(get_units_amount(obs, units.Zerg.Extractor))
+            new_state.append(get_units_amount(obs, units.Zerg.Hatchery))
+            new_state.append(get_units_amount(obs, units.Zerg.HydraliskDen))
+            new_state.append(get_units_amount(obs, units.Zerg.InfestationPit))
+            new_state.append(get_units_amount(obs, units.Zerg.LurkerDen))
+            new_state.append(get_units_amount(obs, units.Zerg.NydusNetwork))
+            new_state.append(get_units_amount(obs, units.Zerg.RoachWarren))
+            new_state.append(get_units_amount(obs, units.Zerg.SpawningPool))
+            new_state.append(get_units_amount(obs, units.Zerg.SpineCrawler))
+            new_state.append(get_units_amount(obs, units.Zerg.Spire))
+            new_state.append(get_units_amount(obs, units.Zerg.SporeCrawler))     
 
         # Insteading of making a vector for all coordnates on the map, we'll discretize our enemy space
-        # and use a 16x16 grid to store enemy positions by marking a square as 1 if there's any enemy on it.
-        hot_squares = np.zeros(16)
+        # and use a 4x4 grid to store enemy positions by marking a square as 1 if there's any enemy on it.
+        # enemy_grid = np.zeros((4,4))
+        # player_grid = np.zeros((4,4))
+
+        # enemy_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.ENEMY]
+        # player_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.SELF]
+        
+        # for i in range(0, len(enemy_units)):
+        #     y = int(math.ceil((enemy_units[i].x + 1) / 16))
+        #     x = int(math.ceil((enemy_units[i].y + 1) / 16))
+        #     #enemy_grid[((y - 1) * 4) + (x - 1)] += 1
+        #     enemy_grid[x-1][y-1] += 1
+
+        # for i in range(0, len(player_units)):
+        #     y = int(math.ceil((player_units[i].x + 1) / 16))
+        #     x = int(math.ceil((player_units[i].y + 1) / 16))
+        #     #enemy_grid[((y - 1) * 4) + (x - 1)] += 1
+        #     player_grid[x-1][y-1] += 1
+
+        # if not self.base_top_left:
+        #     enemy_grid = np.rot90(enemy_grid, 2)
+        #     player_grid = np.rot90(player_grid, 2)
+        #     #enemy_grid = enemy_grid[::-1]
+
+        enemy_grid = np.zeros((self.grid_size,self.grid_size))
+        player_grid = np.zeros((self.grid_size,self.grid_size))
+
         enemy_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.ENEMY]
+        player_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.SELF]
         
         for i in range(0, len(enemy_units)):
-            y = int(math.ceil((enemy_units[i].x + 1) / 16))
-            x = int(math.ceil((enemy_units[i].y + 1) / 16))
+            y = int(math.ceil((enemy_units[i].x + 1) / 64/self.grid_size))
+            x = int(math.ceil((enemy_units[i].y + 1) / 64/self.grid_size))
+            #enemy_grid[((y - 1) * 4) + (x - 1)] += 1
+            enemy_grid[x-1][y-1] += 1
 
-            hot_squares[((y - 1) * 4) + (x - 1)] = 1
+        for i in range(0, len(player_units)):
+            y = int(math.ceil((player_units[i].x + 1) / (64/self.grid_size)))
+            x = int(math.ceil((player_units[i].y + 1) / (64/self.grid_size)))
+            #enemy_grid[((y - 1) * 4) + (x - 1)] += 1
+            player_grid[x-1][y-1] += 1
 
         if not self.base_top_left:
-            hot_squares = hot_squares[::-1]
-
-        for i in range(0, 16):
-            # Adds 4 to account for supply_depot_count, barracks_count, supply_limit and army_supply
-            current_state[i + 6] = hot_squares[i]
+            enemy_grid = np.rot90(enemy_grid, 2)
+            player_grid = np.rot90(player_grid, 2)
+            #enemy_grid = enemy_grid[::-1]
         
-        current_state = np.expand_dims(current_state, axis=0)
-        return current_state
-
+        new_state.extend(enemy_grid.flatten())
+        new_state.extend(player_grid.flatten())
+        final_state = np.array(new_state)
+        final_state = np.expand_dims(new_state, axis=0)
+        return final_state
 
     def get_state_dim(self):
-        return 22
+        return self._state_size
 
 
 def trim_feature_minimap(feature_minimap):

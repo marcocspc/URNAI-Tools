@@ -38,7 +38,8 @@ class Logger(Savable):
         self.ep_avg_steps = []
 
         # Win rate count
-        self.victories = 0
+        self.ep_victories = []
+        self.ep_avg_victories = []
 
         # Play testing count
         self.play_ep_count = []
@@ -54,6 +55,7 @@ class Logger(Savable):
         self.avg_reward_graph = None 
         self.inst_reward_graph = None
         self.avg_steps_graph = None
+        self.avg_winrate_graph = None
         
 
         #Training report
@@ -72,7 +74,8 @@ class Logger(Savable):
         self.ep_steps_count = []
         self.ep_avg_steps = []
 
-        self.victories = 0
+        self.ep_victories = []
+        self.ep_avg_victories = []
 
     def record_episode(self, ep_reward, has_won, steps_count, agent_info):
         self.ep_count += 1
@@ -87,8 +90,10 @@ class Logger(Savable):
             self.best_reward = ep_reward
             self.best_reward_episode = self.ep_count
 
-        if self.is_episodic and has_won:
-            self.victories += 1
+        if self.is_episodic:
+            victory = 1 if has_won else 0
+            self.ep_victories.append(victory)
+            self.ep_avg_victories.append(sum(self.ep_victories)/ self.ep_count)
 
         self.agent_info.append(agent_info)
 
@@ -118,8 +123,8 @@ class Logger(Savable):
 
     def log_ep_stats(self):
         if self.ep_count > 0:
-            rp.report("Episode: {}/{} | Episode Avg. Reward: {:10.6f} | Episode Steps: {:10.6f} | Episode Reward: {:10.6f} | Best Reward was {} on episode: {} | Agent info: {}"
-            .format(self.ep_count, self.ep_total, self.ep_avg_rewards[-1], self.ep_steps_count[-1], self.ep_rewards[-1], self.best_reward, self.best_reward_episode, self.agent_info[-1]), end="\r")
+            rp.report("Episode: {}/{} | Outcome: {} | Episode Avg. Reward: {:10.6f} | Episode Reward: {:10.6f} | Episode Steps: {:10.6f} | Best Reward was {} on episode: {} | Agent info: {}"
+            .format(self.ep_count, self.ep_total, self.ep_victories[-1], self.ep_avg_rewards[-1], self.ep_rewards[-1], self.ep_steps_count[-1], self.best_reward, self.best_reward_episode, self.agent_info[-1]), end="\r")
         else:
             rp.report("There are no recorded episodes!")
 
@@ -127,7 +132,7 @@ class Logger(Savable):
         if self.ep_count > 0:
             text = ("\n"
             + "Current Reward Avg.: {}".format(sum(self.ep_rewards) / self.ep_count)
-            + " Win rate: {:10.3f}%".format((self.victories / self.ep_count) * 100)
+            + " Win rate: {:10.3f}%".format((sum(self.ep_victories)/ self.ep_count) * 100)
             + " Avg number of steps: {}".format(sum(self.ep_avg_steps)/ self.ep_count)
             + "\n")
 
@@ -161,6 +166,11 @@ class Logger(Savable):
         return self.__plot_curve(range(self.ep_count), self.ep_rewards, 'Episode Count',
                             'Ep Reward', r'Episode Reward over training')
 
+    def plot_win_rate_graph(self):
+        # Plotting average reward graph
+        return self.__plot_curve(range(self.ep_count), self.ep_avg_victories, 'Episode Count',
+                            'Avg. Win Rate', r'Average Win Rate over training')
+
     def plot_win_rate_percentage_over_play_testing_graph(self):
         # Plotting win rate over play testing graph
         return self.__plot_bar(self.play_ep_count, [self.play_win_rates], ['Play'], 'Episode', 'Win rate (%)', 'Win rate percentage over play testing', format_percent=True)
@@ -192,6 +202,12 @@ class Logger(Savable):
              plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_reward_graph.pdf")
              plt.close(self.inst_reward_graph)
              self.inst_reward_graph = None
+
+             self.avg_winrate_graph = self.plot_win_rate_graph()
+             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_winrate_graph.png")
+             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_winrate_graph.pdf")
+             plt.close(self.avg_winrate_graph)
+             self.avg_winrate_graph = None
 
              self.render = True 
 
