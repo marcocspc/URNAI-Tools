@@ -1,12 +1,9 @@
-import os, argparse, time 
-import sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
-
 from .base.runner import Runner
 from shutil import copyfile
-from tdd.reporter import Reporter as rp 
+from urnai.tdd.reporter import Reporter as rp 
+from urnai.utils import drts_utils
+import os
+import argparse
 
 class DeepRTSRunner(Runner):
 
@@ -14,7 +11,8 @@ class DeepRTSRunner(Runner):
     OPT_COMMANDS = [
             {'command': '--drts-map', 'help': 'Map to work with when using drts command.', 'type' : str, 'metavar' : 'MAP_PATH', 'action' : 'store'},
             {'command': '--extract-specs', 'help': 'This will export every map layer to a csv file. Other userful information will be on a JSON file.', 'action' : 'store_true'},
-            {'command': '--build-map', 'help': 'This will build a map based on files inside current directory. For a template, you should use --extract-specs first. URNAI you generate the needed files from an existint DeepRTS map. ', 'action' : 'store_true'},
+            {'command': '--drts-map-specs', 'help': 'Directory to work with when building a drts map.', 'type' : str, 'metavar' : 'DRTS_MAP_SPEC_PATH', 'action' : 'store'},
+            {'command': '--build-map', 'help': 'This will build a map inside the directory informed with --drts-map-specs. If you need a template, you should use --extract-specs first. URNAI will generate the needed files from an existing DeepRTS map.', 'action' : 'store_true'},
             {'command': '--install', 'help': 'Install map on DeepRTS.', 'action' : 'store_true'},
             {'command': '--uninstall', 'help': 'Uninstall map on DeepRTS.', 'action' : 'store_true'},
             {'command': '--show-available-maps', 'help': 'Show installed maps on DeepRTS.', 'action' : 'store_true'},
@@ -24,20 +22,31 @@ class DeepRTSRunner(Runner):
         super().__init__(parser, args)
 
     def run(self):
-
-
         if self.args.show_available_maps:
-            self.show_available_maps(drts_map_dir);
+            drts_utils.show_available_maps();
         elif self.args.drts_map is not None:
             map_name = os.path.basename(self.args.drts_map)
             full_map_path = os.path.abspath(map_name)
 
             if self.args.install:
-                self.install_map(full_map_path, drts_map_dir)
+                drts_utils.install_map(full_map_path)
             elif self.args.uninstall:
-                self.uninstall_map(full_map_path, drts_map_dir)
+                drts_utils.uninstall_map(full_map_path)
+            elif self.args.extract_specs:
+                if len(os.listdir(".")) > 0:
+                    answer = ""
+                    while not (answer.lower() == "y" or answer.lower() == "n") :
+                        answer = input("Current directory is not empty. Do you wish to continue? [y/n]")
+
+                    if answer.lower() == "y":
+                        rp.report("Extracting {map} features...".format(map=map_name))
+                        drts_utils.extract_specs(map_name)
+                else:
+                    rp.report("Extracting {map} features...".format(map=map_name))
+                    drts_utils.extract_specs(map_name)
+            
             else:
-                self.install_map(full_map_path, drts_map_dir, force=True)
+                drts_utils.install_map(full_map_path, force=True)
 
                 rp.report("Starting DeepRTS using map " + map_name)
                 drts = DeepRTSEnv(render=True,map=map_name)
@@ -50,32 +59,17 @@ class DeepRTSRunner(Runner):
                         time.sleep(1)
                 except KeyboardInterrupt:
                     rp.report("Bye!")
+        elif self.args.build_map:
+            if self.args.drts_map_specs is not None:
+                if len(os.listdir(self.args.drts_map_specs)) > 0:
+                    drts_utils.build_map(self.args.drts_map_specs)
+                else:
+                    rp.report("DeepRTSMapSpecs directory is empty.")
+            else:
+                rp.report("--drts-map-specs weren't informed.")
         else:
             raise argparse.ArgumentError(message="--drts-map not informed.")
-        
 
-    def is_map_installed(self, drts_map_dir, map_name):
-        return os.path.exists(drts_map_dir + os.sep + map_name)
-
-    def install_map(self, map_path, drts_map_dir, force=False):
-        if force or not self.is_map_installed(drts_map_dir, os.path.basename(map_path)):
-            if not force:
-                rp.report("{map} is not installed, installing on DeepRTS...".format(map=os.path.basename(map_path)))
-            copyfile(map_path, drts_map_dir + os.sep + os.path.basename(map_path))
-        else:
-            rp.report("{map} is already installed.".format(map=os.path.basename(map_path)))
-
-
-    def uninstall_map(self, map_path, drts_map_dir):
-        if self.is_map_installed(drts_map_dir, os.path.basename(map_path)):
-            os.remove(drts_map_dir + os.sep + os.path.basename(map_path))
-            rp.report("{map} was removed.".format(map=os.path.basename(map_path)))
-        else:
-            rp.report("{map} is not installed.".format(map=os.path.basename(map_path)))
-            
-    def show_available_maps(self, drts_map_dir):
-        rp.report('Available maps on DeepRTS:')
-        rp.report(os.listdir(drts_map_dir))
 
 class TrainerRunner(Runner):
 

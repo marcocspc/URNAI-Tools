@@ -31,3 +31,5 @@ class ClassNotFoundError(Exception):
 class NoEnemyArmyError(Exception):
     pass
 
+class IncorrectDeepRTSMapDataError(Exception):
+    pass
