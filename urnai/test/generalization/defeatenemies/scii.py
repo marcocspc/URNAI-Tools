@@ -7,7 +7,7 @@ import sys
 episodes = 100
 steps = 99999999999 
 
-env = Scenario(game = GeneralizedDefeatEnemiesScenario.GAME_STARCRAFT_II, render = True)
+env = Scenario(game = Scenario.GAME_STARCRAFT_II, render = True)
 action_wrapper = env.get_default_action_wrapper()
 np.set_printoptions(threshold=sys.maxsize)
 

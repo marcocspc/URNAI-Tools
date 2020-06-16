@@ -2,7 +2,8 @@ from .base.runner import Runner
 from shutil import copyfile
 from urnai.tdd.reporter import Reporter as rp 
 from urnai.utils import drts_utils
-import os
+from urnai.utils import sc2_utils
+import os, sys
 import argparse
 
 class DeepRTSRunner(Runner):
@@ -10,7 +11,7 @@ class DeepRTSRunner(Runner):
     COMMAND = 'drts' 
     OPT_COMMANDS = [
             {'command': '--drts-map', 'help': 'Map to work with when using drts command.', 'type' : str, 'metavar' : 'MAP_PATH', 'action' : 'store'},
-            {'command': '--extract-specs', 'help': 'This will export every map layer to a csv file. Other userful information will be on a JSON file.', 'action' : 'store_true'},
+            {'command': '--extract-specs', 'help': 'This will export every map layer to a csv file. Other userful information will be on a JSON file. This switch works with both sc2 and drts commands.', 'action' : 'store_true'},
             {'command': '--drts-map-specs', 'help': 'Directory to work with when building a drts map.', 'type' : str, 'metavar' : 'DRTS_MAP_SPEC_PATH', 'action' : 'store'},
             {'command': '--build-map', 'help': 'This will build a map inside the directory informed with --drts-map-specs. If you need a template, you should use --extract-specs first. URNAI will generate the needed files from an existing DeepRTS map.', 'action' : 'store_true'},
             {'command': '--install', 'help': 'Install map on DeepRTS.', 'action' : 'store_true'},
@@ -96,3 +97,35 @@ class TrainerRunner(Runner):
         #elif self.args.build_training_file:
         else:
             raise argparse.ArgumentError(message="You must specify at least a JSON file path to start training.")
+
+class SC2Runner(Runner):
+
+    COMMAND = 'sc2'
+    OPT_COMMANDS = [
+            {'command': '--sc2-map', 'help': 'Map to use on Starcraft II.', 'type' : str, 'metavar' : 'MAP_FILE_PATH', 'action' : 'store'},
+            ]
+
+    def run (self):
+        #remove all args from sys.argv
+        #this is needed to run sc2 env without errors
+        for arg in self.args.__dict__.keys():
+            arg = "--{}".format(arg.replace("_", "-"))
+            if arg in sys.argv: sys.argv.remove(arg)
+
+
+        if self.args.sc2_map is not None:
+            if self.args.extract_specs:
+                map_name = self.args.sc2_map
+                if len(os.listdir(".")) > 0:
+                    answer = ""
+                    while not (answer.lower() == "y" or answer.lower() == "n") :
+                        answer = input("Current directory is not empty. Do you wish to continue? [y/n]")
+
+                    if answer.lower() == "y":
+                        rp.report("Extracting {map} features...".format(map=map_name))
+                        sc2_utils.extract_specs(map_name)
+                else:
+                    rp.report("Extracting {map} features...".format(map=map_name))
+                    sc2_utils.extract_specs(map_name)
+        else:
+            rp.report("--sc2-map not informed.")

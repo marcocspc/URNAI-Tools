@@ -1,8 +1,8 @@
-from .commands import DeepRTSRunner, TrainerRunner
+from .commands import DeepRTSRunner, TrainerRunner, SC2Runner
 
 class RunnerBuilder():
 
-    COMMANDS = [DeepRTSRunner, TrainerRunner]
+    COMMANDS = [DeepRTSRunner, TrainerRunner, SC2Runner]
 
     @staticmethod
     def build(parser, args):
