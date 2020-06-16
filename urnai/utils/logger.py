@@ -111,11 +111,11 @@ class Logger(Savable):
               + "   Environment: {}\n".format (self.env_name)
               + "   Model: {}\n".format(self.model_name))
 
-        for idx, (layer) in enumerate(self.model_builder):
-            if(layer['type'] == 'output'):
-                text += "       Layer {}: type={} | length={} \n".format(idx+1, layer['type'], layer['length'])
-            else:
-                text += "       Layer {}: type={} | nodes={} \n".format(idx+1, layer['type'], layer['nodes'])
+        # for idx, (layer) in enumerate(self.model_builder):
+        #     if(layer['type'] == 'output'):
+        #         text += "       Layer {}: type={} | length={} \n".format(idx+1, layer['type'], layer['length'])
+        #     else:
+        #         text += "       Layer {}: type={} | nodes={} \n".format(idx+1, layer['type'], layer['nodes'])
 
         self.training_report += text 
 
