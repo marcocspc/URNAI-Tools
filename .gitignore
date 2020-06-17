@@ -108,3 +108,4 @@ venv.bak/
 *.swp
 _vizdoom.ini
 *.swo
+.fuse_hidden*

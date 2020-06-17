@@ -20,7 +20,7 @@ class GeneralizedCollectablesScenario(ABScenario):
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="10x8-collect_twenty.json", sc2_map="CollectMineralShards", drts_number_of_players=1):
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-Playable-21x15-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1):
         FLAGS = flags.FLAGS
         FLAGS(sys.argv)
         self.game = game

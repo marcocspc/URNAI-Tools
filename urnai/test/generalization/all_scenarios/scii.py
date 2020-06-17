@@ -11,6 +11,8 @@ env = Scenario(game = Scenario.GAME_STARCRAFT_II, render = True)
 action_wrapper = env.get_default_action_wrapper()
 np.set_printoptions(threshold=sys.maxsize)
 
+np.set_printoptions(threshold=sys.maxsize)
+
 for ep in range(episodes):
     reward = 0
     done = False
@@ -43,6 +45,7 @@ for ep in range(episodes):
             state, reward, done = env.step(action)
 
             print("Map shape: {}".format(state.feature_minimap[4].shape))
+            print("Map: {}".format(state.feature_minimap[4]))
 
             print("Reward: {r}".format(r=reward))
 
