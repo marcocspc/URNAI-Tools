@@ -29,7 +29,7 @@ If you used the default installation path, you may ignore this step.
 For more information consult https://github.com/deepmind/pysc2#get-starcraft-ii 
 """
 sc2_local_path = "D:/Program Files (x86)/StarCraft II"
-rp.VERBOSITY_LEVEL = 1
+rp.VERBOSITY_LEVEL = 0
 
 def main(unused_argv):
     try:

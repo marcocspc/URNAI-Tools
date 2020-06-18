@@ -35,20 +35,6 @@ SC2LE is already marked as dependency, so it will be automatically installed by 
 
 [How to install Starcraft II and Maps](https://github.com/deepmind/pysc2#get-starcraft-ii) 
 
-#### 2048 Support
-
-To install urnai with gym-2048 support, use:
-
-- On Unix:
-```
-URNAI_2048=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
-```
-
-- On Windows:
-```
-set "URNAI_2048=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
-```
-
 #### VizDoom
 
 Before setting urnai to install vizdoom, please see if you have all dependencies installed.
