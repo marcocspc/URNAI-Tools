@@ -59,7 +59,7 @@ def main(unused_argv):
         #dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
         
         # Terran agent
-        agent = SC2Agent(dq_network, GeneralReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())
+        agent = SC2Agent(dq_network, KilledUnitsReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())
 
 
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn", save_every=100, enable_save=True)
