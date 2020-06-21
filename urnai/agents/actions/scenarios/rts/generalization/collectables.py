@@ -35,22 +35,62 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
                 self.build0, self.build1, self.build2, self.noaction] 
 
         self.final_actions = list(set(self.actions) - set(self.excluded_actions))
+        self.action_queue = []
+
+    def get_player_units(self, player, obs):
+        units = []
+        for unit in obs["units"]:
+            if unit.get_player() == player:
+                units.append(unit)
+
+        return units
+
+    def enqueue_action_for_player_units(self, obs, action):
+        for i in range(len(self.get_player_units(obs["players"][0], obs))):
+            self.action_queue.append(action)
+            self.action_queue.append(self.nextunit)
+
+    def get_action(self, action_idx, obs):
+        if len(self.action_queue) == 0:
+            self.solve_action(action_idx, obs)
+            return self.noaction
+        else:
+            return self.action_queue.pop() 
+
+    def solve_action(self, action_idx, obs):
+        if action_idx == self.moveleft:
+            self.move_left(obs)
+        elif action_idx == self.moveright:
+            self.move_right(obs)
+        elif action_idx == self.moveup:
+            self.move_up(obs)
+        elif action_idx == self.movedown:
+            self.move_down(obs)
 
     def is_action_done(self):
-        return True
+        return len(self.action_queue) == 0 
 
     def reset(self):
         self.move_number = 0
 
     def get_actions(self):
         return self.final_actions
-    
-    def get_excluded_actions(self, obs):        
-        return []
 
-    def get_action(self, action_idx, obs):
-        return self.final_actions[action_idx]
-    
+    def move_up(self, obs):
+        self.enqueue_action_for_player_units(obs, self.moveup)
+
+    def move_down(self, obs):
+        self.enqueue_action_for_player_units(obs, self.movedown)
+
+    def move_left(self, obs):
+        self.enqueue_action_for_player_units(obs, self.moveleft)
+
+    def move_right(self, obs):
+        self.enqueue_action_for_player_units(obs, self.moveright)
+   
+    def get_excluded_actions(self, obs):        
+        return self.excluded_actions
+
     def get_action_name_str_by_int(self, action_int):
         for attrstr in dir(self):
             attr = getattr(self, attrstr)

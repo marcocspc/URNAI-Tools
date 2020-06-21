@@ -9,39 +9,51 @@ from urnai.agents.rewards.default import PureReward
 import numpy as np
 from pysc2.env import sc2_env
 from statistics import mean
+import random
+import DeepRTS as drts
 
 class GeneralizedFindaAndDefeatScenario(GeneralizedCollectablesScenario):
 
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="26x14-find_and_defeat.json", sc2_map="FindAndDefeatZerglings", drts_number_of_players=1):
-        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=drts_number_of_players)
-
-    def setup_map(self):
-        for i in range(25):
-            self.random_spawn_unit(7, self.env.game, 1)
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-43x31-findanddefeat.json", sc2_map="FindAndDefeatZerglings", drts_number_of_players=2, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999):
+        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=drts_number_of_players, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food)
+        self.steps = 0
 
     def start(self):
         super().start()
 
-
     def step(self, action):
         if (self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS):
+            if self.steps == 0:
+                tiles = self.env.game.tilemap.tiles
+                player = 1
+                for i in range(len(tiles)):
+                    if self.env.game.players[player].num_archer > 23: break
+                    self.random_spawn_archer(player)
+
             state, reward, done = self.env.step(action)
+            self.steps += 1
             return state, reward, done 
 
         elif (self.game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II):
+            self.steps += 1
             return self.env.step(action)
 
-    def random_spawn_unit(self, drts_unit, drts_game, player):
-        tile_map_len = len(drts_game.tilemap.tiles)
-        tile = drts_game.tilemap.tiles[random.randint(0, tile_map_len - 1)]
+    def random_tile(self):
+        tiles_len = len(self.env.game.tilemap.tiles)
 
-        while not tile.is_buildable():
-            tile = drts_game.tilemap.tiles[random.randint(0, tile_map_len - 1)]
+        return self.env.game.tilemap.tiles[random.randint(0, tiles_len-1)]
 
-        drts_game.players[player].spawn_unit(drts.constants.Unit.Archer, tile)
+    def random_spawn_archer(self, player):
+        tile = self.random_tile()
+
+        while not tile.is_buildable:
+            tile = self.random_tile()
+
+        if self.env.game.players[player].num_archer < 23:
+            self.env.game.players[player].spawn_unit(self.env.constants.Unit.Archer, tile)
 
     def get_default_action_wrapper(self):
         wrapper = None

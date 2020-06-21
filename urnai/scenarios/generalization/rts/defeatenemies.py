@@ -15,18 +15,31 @@ from urnai.agents.rewards.default import PureReward
 import numpy as np
 from pysc2.env import sc2_env
 from statistics import mean
+import random
 
 
 class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
 
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
+    MAP_1 = "total-64x64-playable-21x13-defeatenemies_1.json"
+    MAP_2 = "total-64x64-playable-21x13-defeatenemies_2.json"
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="26x14-find_and_defeat.json", sc2_map="DefeatRoaches"):
-        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=2)
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-21x13-defeatenemies_1.json", sc2_map="DefeatRoaches", drts_start_oil=999999, drts_start_gold=999999, drts_start_lumber=999999, drts_start_food=999999):
+        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=2, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food)
+        self.map = GeneralizedDefeatEnemiesScenario.MAP_1
 
     def setup_map(self):
-        pass
+        if self.game == GeneralizedDefeatEnemiesScenario.GAME_DEEP_RTS:
+            choice = random.randint(0, 1)
+
+            if choice == 0:
+                self.map = GeneralizedDefeatEnemiesScenario.MAP_1
+            else:
+                self.map = GeneralizedDefeatEnemiesScenario.MAP_2
+
+            if self.env.map != self.map:
+                self.env.change_map(self.map)
 
     def step(self, action):
         if (self.game == GeneralizedDefeatEnemiesScenario.GAME_DEEP_RTS):
