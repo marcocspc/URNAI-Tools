@@ -149,30 +149,15 @@ class SC2Wrapper(ActionWrapper):
         ]
 
         '''
-        We're splitting the minimap into a 4x4 grid because the marine's effective range is able to cover
-        the entire map from just this number of cells. For each (x, y) grid cell, we're defining an action called
-        ACTION_ATTACK_x_y. When this actions is selected, we parse this string to retrieve this coordinate info
-        and pass it as a parameter to the actual PySC2 action.
+        This is an outdated method of creating a 4x4 grid for attack actions. This is not currently being used, since we went for a more simplistic method
+        of only four attack actions, but this could be adapted and reused in the future. For each (x, y) grid cell, we're defining an action called
+        ACTION_ATTACK_x_y. When this actions is selected, we parse this string to retrieve this coordinate info and pass it as a parameter to the actual PySC2 action.
         '''
         # for mm_x in range(0, 64):
         #     for mm_y in range(0, 64):
         #         if (mm_x + 1) % 32 == 0 and (mm_y + 1) % 32 == 0:
         #             self.named_actions.append(ACTION_ATTACK + '_' + str(mm_x - 16) + '_' + str(mm_y - 16))
    
-        '''
-        In URNAI, the models can only return action indices. This index is passed by the agent to an ActionWrapper like this
-        so that it decides what to do with the current action. For a complicated game like StarCraft 2 we can't just return an action,
-        because most of them require extra parameters. So the get_action action of this wrapper is responsible for:
-        1) Receiving an action index from the agent
-        2) Selecting a named_action from the actions by using this index.
-        3) Returning the PySC2 action that is equivalent to this named_action
-
-        EX: 
-        0) Agent receives action index 3 from its model
-        1) Agent calls action_wrapper.get_action(3)
-        2) get_action selects ACTION_BUILD_BARRACKS from its set of named actions
-        3) get_action returns select_random_scv()
-        '''
         self.action_indices = [idx for idx in range(len(self.named_actions))]
 
     def is_action_done(self):
@@ -184,6 +169,8 @@ class SC2Wrapper(ActionWrapper):
     def get_actions(self):
         return self.action_indices
     
+    # Method that splits a "ACTION_ATTACK_x_y" string into three different variables
+    # However, this method is currently not in use
     def split_action(self, smart_action):
         '''Breaks out (x, y) coordinates from a named action, if there are any.'''
         x = 0
@@ -1010,6 +997,109 @@ class TerranWrapper(SC2Wrapper):
 
         return no_op()
 
+class SimpleTerranWrapper(TerranWrapper):
+    def __init__(self):
+        SC2Wrapper.__init__(self)       # Imports self variables from SC2Wrapper
+
+        self.named_actions = [
+            ACTION_DO_NOTHING,
+
+            ACTION_BUILD_COMMAND_CENTER,
+            ACTION_BUILD_SUPPLY_DEPOT,
+            ACTION_BUILD_REFINERY,
+            # ACTION_BUILD_ENGINEERINGBAY,
+            # ACTION_BUILD_ARMORY,
+            # ACTION_BUILD_MISSILETURRET,
+            # ACTION_BUILD_SENSORTOWER,
+            # ACTION_BUILD_BUNKER,
+            # ACTION_BUILD_FUSIONCORE,
+            # ACTION_BUILD_GHOSTACADEMY,
+            ACTION_BUILD_BARRACKS,
+            ACTION_BUILD_FACTORY,
+            ACTION_BUILD_STARPORT,
+            # ACTION_BUILD_TECHLAB_BARRACKS,
+            # ACTION_BUILD_TECHLAB_FACTORY,
+            # ACTION_BUILD_TECHLAB_STARPORT,
+            ACTION_BUILD_REACTOR_BARRACKS,
+            ACTION_BUILD_REACTOR_FACTORY,
+            ACTION_BUILD_REACTOR_STARPORT,
+
+            # ENGINEERING BAY RESEARCH
+            # ACTION_RESEARCH_INF_WEAPONS,
+            # ACTION_RESEARCH_INF_ARMOR,
+            # ACTION_RESEARCH_HISEC_AUTOTRACKING,
+            # ACTION_RESEARCH_NEOSTEEL_FRAME,
+            # ACTION_RESEARCH_STRUCTURE_ARMOR,
+            
+            # ARMORY RESEARCH
+            # ACTION_RESEARCH_SHIPS_WEAPONS,
+            # ACTION_RESEARCH_VEHIC_WEAPONS,
+            # ACTION_RESEARCH_SHIPVEHIC_PLATES,
+
+            # GHOST ACADEMY RESEARCH
+            # ACTION_RESEARCH_GHOST_CLOAK,
+
+            # BARRACKS RESEARCH
+            # ACTION_RESEARCH_STIMPACK,
+            # ACTION_RESEARCH_COMBATSHIELD,
+            # ACTION_RESEARCH_CONCUSSIVESHELL,
+
+            # FACTORY RESEARCH
+            # ACTION_RESEARCH_INFERNAL_PREIGNITER,
+            # ACTION_RESEARCH_DRILLING_CLAWS,
+            # ACTION_RESEARCH_CYCLONE_LOCKONDMG,
+            # ACTION_RESEARCH_CYCLONE_RAPIDFIRE,
+
+            # STARPORT RESEARCH
+            # ACTION_RESEARCH_HIGHCAPACITYFUEL,
+            # ACTION_RESEARCH_CORVIDREACTOR,
+            # ACTION_RESEARCH_BANSHEECLOAK,
+            # ACTION_RESEARCH_BANSHEEHYPERFLIGHT,
+            # ACTION_RESEARCH_ADVANCEDBALLISTICS,
+
+            # FUSION CORE RESEARCH
+            # ACTION_RESEARCH_BATTLECRUISER_WEAPONREFIT,
+
+            # ACTION_EFFECT_STIMPACK,
+
+            ACTION_TRAIN_SCV,
+
+            ACTION_TRAIN_MARINE,
+            ACTION_TRAIN_MARAUDER,
+            ACTION_TRAIN_REAPER,
+            ACTION_TRAIN_GHOST,
+
+            ACTION_TRAIN_HELLION,
+            ACTION_TRAIN_HELLBAT,
+            ACTION_TRAIN_SIEGETANK,
+            ACTION_TRAIN_CYCLONE,
+            # ACTION_TRAIN_WIDOWMINE,
+            ACTION_TRAIN_THOR,
+
+            ACTION_TRAIN_VIKING,
+            ACTION_TRAIN_MEDIVAC,
+            ACTION_TRAIN_LIBERATOR,
+            ACTION_TRAIN_RAVEN,
+            ACTION_TRAIN_BANSHEE,
+            ACTION_TRAIN_BATTLECRUISER,
+
+            ACTION_HARVEST_MINERALS_IDLE,
+            ACTION_HARVEST_MINERALS_FROM_GAS,
+            ACTION_HARVEST_GAS_FROM_MINERALS,
+
+            ACTION_ATTACK_ENEMY_BASE,
+            ACTION_ATTACK_ENEMY_SECOND_BASE,
+            ACTION_ATTACK_MY_BASE,
+            ACTION_ATTACK_MY_SECOND_BASE,
+            ACTION_ATTACK_DISTRIBUTE_ARMY,
+        ]
+        self.action_indices = [idx for idx in range(len(self.named_actions))]
+    
+    def get_excluded_actions(self, obs):
+
+        excluded_actions = []
+
+        return excluded_actions
 
 class ProtossWrapper(SC2Wrapper):
     def __init__(self):

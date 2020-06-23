@@ -92,4 +92,7 @@ class KilledUnitsReward(RewardBuilder):
         if done:
             self.reset()
 
+        if reward == 1:
+            new_reward = 5000
+
         return new_reward

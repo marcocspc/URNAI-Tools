@@ -407,6 +407,9 @@ class Simple64GridState(StateBuilder):
             enemy_grid = np.rot90(enemy_grid, 2)
             player_grid = np.rot90(player_grid, 2)
             #enemy_grid = enemy_grid[::-1]
+
+        enemy_grid = enemy_grid/enemy_grid.max()
+        player_grid = player_grid/player_grid.max()
         
         new_state.extend(enemy_grid.flatten())
         new_state.extend(player_grid.flatten())

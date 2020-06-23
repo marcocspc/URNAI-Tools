@@ -6,7 +6,6 @@ sys.path.insert(0,parentdir)
 from agents.actions.sc2_wrapper import SC2Wrapper, TerranWrapper, ProtossWrapper
 from agents.states.sc2 import Simple64State
 
-from models.dql_tf_flexible import DqlTfFlexible
 from models.model_builder import ModelBuilder
 
 from utils.logger import Logger
@@ -32,7 +31,6 @@ print("Loading b")
 b.load(".")
 print(b.ep_total)
 
-a = DqlTfFlexible(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.9, build_model=helper.get_model_layout())
 
 print(a.build_model)
 print(a.model_layers)
