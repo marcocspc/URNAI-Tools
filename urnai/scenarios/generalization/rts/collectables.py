@@ -13,6 +13,7 @@ from urnai.envs.deep_rts import DeepRTSEnv
 from absl import flags
 from statistics import mean
 import random
+import sys, os
 
 
 class GeneralizedCollectablesScenario(ABScenario):
@@ -46,7 +47,7 @@ class GeneralizedCollectablesScenario(ABScenario):
     def get_player_units(self, player):
         units = []
         for unit in self.env.game.units:
-            if unit.get_player() == player:
+            if unit.get_player().get_id() == player:
                 units.append(unit)
 
         return units
@@ -64,18 +65,18 @@ class GeneralizedCollectablesScenario(ABScenario):
 
             reward = 0
 
-            for unit in self.get_player_units(0):
+            player = 0
+            tile_value = 0
+            for unit in self.get_player_units(player):
                 unit_x = unit.tile.x
                 unit_y = unit.tile.y
 
-                map_i = unit_x
-                map_j = unit_y
-
-                tile_value += self.collectables_map[map_i, map_j]
+                tile_value += self.collectables_map[unit_y, unit_x]
                 if (tile_value > 0):
                     reward += tile_value 
-                    self.collectables_map[map_i, map_j] = 0
+                    self.collectables_map[unit_y, unit_x] = 0
 
+            np.savetxt(os.path.expanduser("~") + "/collectables_map_units_pos_current_step.csv", self.collectables_map, fmt='%i',delimiter=",")
             self.steps += 1
             return state, reward, done
         elif (self.game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II):
@@ -119,12 +120,13 @@ class GeneralizedCollectablesScenario(ABScenario):
 
             for i in range(width):
                 for j in range(height):
-                    if self.env.game.tilemap.get_tile(i, j).is_walkable():
-                        map_[j][i] = random.randint(0, 1)
+                    if self.env.game.tilemap.get_tile(j, i).is_walkable():
+                        map_[i][j] = random.randint(0, 1)
                         if np.sum(map_) > 20:
                             break
                 else:
                     continue
                 break
 
+        np.savetxt(os.path.expanduser("~") + "/collectables_map_default.csv", map_, fmt='%i',delimiter=",")
         return map_
