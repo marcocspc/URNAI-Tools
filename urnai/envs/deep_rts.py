@@ -4,13 +4,7 @@ import DeepRTS as drts
 from DeepRTS import Engine
 from DeepRTS.Engine import Constants, UnitManager 
 from DeepRTS.python import Config, Game 
-
-import sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
-
-from utils.error import MapNotFoundError  
+from urnai.utils.error import MapNotFoundError, DeepRTSEnvError 
 
 #TODO: add enemy AI
 
@@ -158,3 +152,18 @@ class DeepRTSEnv(Env):
     def is_map_installed(self, map_name):
         drts_map_dir = os.path.dirname(os.path.realpath(drts.python.__file__)) + '/assets/maps' 
         return os.path.exists(drts_map_dir + os.sep + map_name)
+
+    def change_map(self, map_name):
+        if self.done:
+            self.map = map_name
+            self.game = Game(
+                self.map,
+                n_players = self.number_of_players,
+                engine_config = self.engine_config,
+                gui_config = self.gui_config,
+                terminal_signal = False
+            )
+        else:
+            raise DeepRTSEnvError("Cannot change map while DeepRTS is running.")
+
+

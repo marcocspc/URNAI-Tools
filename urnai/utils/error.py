@@ -10,9 +10,6 @@ class CommandsNotUniqueError(Exception):
 class EnvironmentNotSupportedError(Exception):
     pass
 
-class MapNotFoundError(Exception):
-    pass
-
 class WadNotFoundError(Exception):
     pass
 
@@ -32,4 +29,10 @@ class NoEnemyArmyError(Exception):
     pass
 
 class IncorrectDeepRTSMapDataError(Exception):
+    pass
+
+class DeepRTSEnvError(Exception):
+    pass
+
+class MapNotFoundError(Exception):
     pass
