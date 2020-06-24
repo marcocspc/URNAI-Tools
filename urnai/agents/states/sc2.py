@@ -408,8 +408,9 @@ class Simple64GridState(StateBuilder):
             player_grid = np.rot90(player_grid, 2)
             #enemy_grid = enemy_grid[::-1]
 
-        enemy_grid = enemy_grid/enemy_grid.max()
-        player_grid = player_grid/player_grid.max()
+        # Normalizing the values to always be between 0 and 1 (since the max amount of units in SC2 is 200)
+        enemy_grid = enemy_grid/200
+        player_grid = player_grid/200
         
         new_state.extend(enemy_grid.flatten())
         new_state.extend(player_grid.flatten())
