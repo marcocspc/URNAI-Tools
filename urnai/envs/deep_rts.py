@@ -152,18 +152,3 @@ class DeepRTSEnv(Env):
     def is_map_installed(self, map_name):
         drts_map_dir = os.path.dirname(os.path.realpath(drts.python.__file__)) + '/assets/maps' 
         return os.path.exists(drts_map_dir + os.sep + map_name)
-
-    def change_map(self, map_name):
-        if self.done:
-            self.map = map_name
-            self.game = Game(
-                self.map,
-                n_players = self.number_of_players,
-                engine_config = self.engine_config,
-                gui_config = self.gui_config,
-                terminal_signal = False
-            )
-        else:
-            raise DeepRTSEnvError("Cannot change map while DeepRTS is running.")
-
-
