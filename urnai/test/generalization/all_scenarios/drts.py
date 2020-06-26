@@ -5,7 +5,7 @@ import numpy as np
 import sys,os
 
 episodes = 100
-steps = 5
+steps = 1000
 print_map = True
 
 env = Scenario(game = Scenario.GAME_DEEP_RTS, render = True)
