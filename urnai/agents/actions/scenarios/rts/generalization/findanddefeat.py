@@ -8,12 +8,14 @@ import math
 class FindAndDefeatDeepRTSActionWrapper(CollectablesDeepRTSActionWrapper):
     def __init__(self):
         super().__init__()
-        self.excluded_actions = [self.previousunit, 
+        self.excluded_actions = [self.previousunit, self.nextunit, 
                 self.moveupleft, self.moveupright, self.movedownleft, 
                 self.movedownright, self.harvest,
-                self.build0, self.build1, self.build2] 
+                self.build0, self.build1, self.build2,
+                self.noaction] 
 
         self.final_actions = list(set(self.actions) - set(self.excluded_actions))
+        print(self.final_actions)
 
     
     def solve_action(self, action_idx, obs):
@@ -28,7 +30,7 @@ class FindAndDefeatDeepRTSActionWrapper(CollectablesDeepRTSActionWrapper):
 class FindAndDefeatStarcraftIIActionWrapper(CollectablesStarcraftIIActionWrapper):
     def __init__(self):
         super().__init__()
-        self.maximum_attack_range = 3
+        self.maximum_attack_range = 2
         self.attack = 4
         self.actions = [self.moveleft, self.moveright, self.moveup, self.movedown, self.attack] 
 
