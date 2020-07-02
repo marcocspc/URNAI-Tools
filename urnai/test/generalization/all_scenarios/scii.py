@@ -29,7 +29,8 @@ for ep in range(episodes):
                     3 - Up 
                     4 - Down 
                     5 - Attack Nearest Unit 
-                    6 - No-Op
+                    6 - Run 
+                    7 - No-Op
             '''
 
             action = None
@@ -37,7 +38,7 @@ for ep in range(episodes):
             try:
                 action = int(input(text))
             except ValueError:
-                action = 6
+                action = 7
 
             action -= 1
             action = action_wrapper.get_action(action, state)

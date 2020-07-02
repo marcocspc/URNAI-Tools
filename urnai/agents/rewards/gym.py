@@ -1,7 +1,7 @@
 '''
 This file is a repository with reward classes for all gym games we've solved.
 '''
-from .abreward import RewardBuilder
+from urnai.agents.rewards.abreward import RewardBuilder
 import numpy as np
 
 class FrozenlakeReward(RewardBuilder):

@@ -1,10 +1,7 @@
 import argparse
-from .runnerbuilder import RunnerBuilder  
+from urnai.runnerbuilder import RunnerBuilder  
 import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
-from utils.error import *
+from urnai.utils.error import *
 
 class ParserBuilder():
 

@@ -1,4 +1,4 @@
-from .base.runner import Runner
+from urnai.base.runner import Runner
 from shutil import copyfile
 from urnai.tdd.reporter import Reporter as rp 
 from urnai.utils import drts_utils

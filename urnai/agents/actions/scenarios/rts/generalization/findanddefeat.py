@@ -64,21 +64,36 @@ class FindAndDefeatStarcraftIIActionWrapper(CollectablesStarcraftIIActionWrapper
         if closest_unit is not None:
             return closest_unit
 
-    def attack_nearest_inside_radius(self, obs, radius):
-        #get army coordinates
-        army = scaux.select_army(obs, sc2_env.Race.terran)
-        xs = [unit.x for unit in army]
-        ys = [unit.y for unit in army]
+    def get_race_unit_avg(self, obs, race):
+        army = scaux.select_army(obs, race)
+
+        xs, ys = [], []
+        for unit in army:
+            try: 
+                xs.append(unit.x)
+                ys.append(unit.y)
+            except AttributeError as ae:
+                if not "'str' object has no attribute" in str(ae):
+                    raise
+
         army_x = int(mean(xs))
         army_y = int(mean(ys))
+        return army_x, army_y
+
+    def attack_nearest_inside_radius(self, obs, radius):
+        #get army coordinates
+        race = sc2_env.Race.terran 
+        army_x, army_y = self.get_race_unit_avg(obs, race) 
 
         #get nearest unit
         enemy_unit = self.get_nearest_enemy_unit_inside_radius(army_x, army_y, obs, radius)
 
         #tell each unit in army to attack nearest enemy
         if enemy_unit is not None:
+            army = scaux.select_army(obs, race)
             for unit in army:
-                self.pending_actions.append(actions.RAW_FUNCTIONS.Attack_pt("now", unit.tag, [enemy_unit.x, enemy_unit.y]))
+                #self.pending_actions.append(actions.RAW_FUNCTIONS.Attack_pt("now", unit.tag, [enemy_unit.x, enemy_unit.y]))
+                self.pending_actions.append(actions.RAW_FUNCTIONS.Attack_unit("now", unit.tag, enemy_unit.tag))
 
     def attack_(self, obs):
         self.attack_nearest_inside_radius(obs, self.maximum_attack_range)

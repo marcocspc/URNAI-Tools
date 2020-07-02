@@ -1,21 +1,15 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-parentdir = os.path.dirname(parentdir)
-sys.path.insert(0,parentdir)
-
 from absl import app
-from envs.gym import GymEnv
-from trainers.trainer import Trainer
-from trainers.trainer import TestParams
-from agents.generic_agent import GenericAgent
-from agents.actions.gym_wrapper import GymWrapper
-from agents.rewards.default import PureReward
-from agents.states.gym import PureState
-from agents.states.gym import GymState
-from models.pg_keras import PGKeras
-from models.dql_keras_mem import DQNKerasMem
-from models.model_builder import ModelBuilder
+from urnai.envs.gym import GymEnv
+from urnai.trainers.trainer import Trainer
+from urnai.trainers.trainer import TestParams
+from urnai.agents.generic_agent import GenericAgent
+from urnai.agents.actions.gym_wrapper import GymWrapper
+from urnai.agents.rewards.default import PureReward
+from urnai.agents.states.gym import PureState
+from urnai.agents.states.gym import GymState
+from urnai.models.pg_keras import PGKeras
+from urnai.models.dql_keras_mem import DQNKerasMem
+from urnai.models.model_builder import ModelBuilder
 
 def main(unused_argv):
 

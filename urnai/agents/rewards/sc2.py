@@ -1,7 +1,7 @@
 '''
 This file is a repository with reward classes for all StarCraft 2 games/minigames we've solved.
 '''
-from .abreward import RewardBuilder
+from urnai.agents.rewards.abreward import RewardBuilder
 
 class SparseReward(RewardBuilder):
     def get_reward(self, obs, reward, done):

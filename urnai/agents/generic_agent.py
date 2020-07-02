@@ -1,6 +1,6 @@
-from agents.base.abagent import Agent
-from models.base.abmodel import LearningModel
-from agents.rewards.abreward import RewardBuilder
+from urnai.agents.base.abagent import Agent
+from urnai.models.base.abmodel import LearningModel
+from urnai.agents.rewards.abreward import RewardBuilder
 
 
 class GenericAgent(Agent):
