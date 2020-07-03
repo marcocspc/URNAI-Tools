@@ -15,9 +15,7 @@ class FindAndDefeatDeepRTSActionWrapper(CollectablesDeepRTSActionWrapper):
                 self.noaction] 
 
         self.final_actions = list(set(self.actions) - set(self.excluded_actions))
-        print(self.final_actions)
 
-    
     def solve_action(self, action_idx, obs):
         if action_idx == self.attack:
             self.attack_(obs)
