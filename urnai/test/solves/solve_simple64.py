@@ -38,7 +38,7 @@ def main(unused_argv):
         #     os.environ["SC2PATH"] = sc2_local_path
 
         ## Initializing our StarCraft 2 environment
-        players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
+        players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.medium)]
         env = SC2Env(map_name="Simple64", players=players, render=False, step_mul=16)
         
         action_wrapper = SimpleTerranWrapper()
@@ -47,9 +47,9 @@ def main(unused_argv):
         state_builder = Simple64GridState(grid_size=4)
         
         helper = ModelBuilder()
-        helper.add_input_layer(int(state_builder.get_state_dim()), nodes=100)
-        helper.add_fullyconn_layer(100)
-        helper.add_fullyconn_layer(100)
+        helper.add_input_layer(int(state_builder.get_state_dim()), nodes=50)
+        helper.add_fullyconn_layer(50)
+        #helper.add_fullyconn_layer(100)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
 
@@ -63,9 +63,9 @@ def main(unused_argv):
 
 
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn", save_every=100, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_test11", save_every=4, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=1000, max_steps=1000)
-        trainer.play(num_matches=100, max_steps=1000)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_test13", save_every=5, enable_save=True, relative_path=True)
+        trainer.train(num_episodes=3000, max_steps=1200)
+        trainer.play(num_matches=100, max_steps=1200)
 
     except KeyboardInterrupt:
         pass
