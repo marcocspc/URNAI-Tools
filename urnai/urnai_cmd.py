@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from .runner.runnerbuilder import RunnerBuilder
-from .runner.parserbuilder import ParserBuilder
+from urnai.runner.runnerbuilder import RunnerBuilder
+from urnai.runner.parserbuilder import ParserBuilder
 import os
 
 def main():

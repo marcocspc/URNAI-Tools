@@ -1,7 +1,10 @@
 '''
 This file is a repository with reward classes for all StarCraft 2 games/minigames we've solved.
 '''
-from .abreward import RewardBuilder
+from urnai.agents.rewards.abreward import RewardBuilder
+from urnai.agents.actions.sc2 import *
+#import urnai.agents.actions.sc2 as sc2
+from pysc2.lib import units
 
 class SparseReward(RewardBuilder):
     def get_reward(self, obs, reward, done):
@@ -57,13 +60,26 @@ class KilledUnitsReward(RewardBuilder):
         self._previous_killed_unit_score = 0
         self._previous_killed_building_score = 0
 
-        self._kill_unit_reward = 2
-        self._kill_building_reward = 5
+        self._has_barracks = False
+        self._has_factory = False
+        self._has_starport = False
+
+        self._trained_tank = False
+        self._trained_medivac = False
+        self._trained_hellion = False
 
     # When the episode is over, the values we use to compute our reward should be reset.
     def reset(self):
         self._previous_killed_unit_score = 0
         self._previous_killed_building_score = 0
+
+        self._has_barracks = False
+        self._has_factory = False
+        self._has_starport = False
+
+        self._trained_tank = False
+        self._trained_medivac = False
+        self._trained_hellion = False
 
     def get_reward(self, obs, reward, done):
         # Getting values from PySC2's cumulative score system
@@ -83,6 +99,31 @@ class KilledUnitsReward(RewardBuilder):
         # self._previous_killed_building_score = current_killed_building_score
 
         new_reward = 0
+
+        if building_exists(obs, units.Terran.Barracks) and not self._has_barracks:
+            new_reward += 200
+            self._has_barracks = True
+
+        if building_exists(obs, units.Terran.Factory) and not self._has_factory:
+            new_reward += 200
+            self._has_factory = True
+
+        if building_exists(obs, units.Terran.Starport) and not self._has_starport:
+            new_reward += 200
+            self._has_starport = True
+
+        if building_exists(obs, units.Terran.SiegeTank) and not self._trained_tank:
+            new_reward += 50
+            self._trained_tank = True
+
+        if building_exists(obs, units.Terran.Medivac) and not self._trained_medivac:
+            new_reward += 50
+            self._trained_medivac = True
+
+        if building_exists(obs, units.Terran.Hellion) and not self._trained_hellion:
+            new_reward += 20
+            self._trained_hellion = True
+
         new_reward += (obs.score_cumulative.killed_value_units - self._previous_killed_unit_score)
         new_reward += (obs.score_cumulative.killed_value_structures - self._previous_killed_building_score)
 

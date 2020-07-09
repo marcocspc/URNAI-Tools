@@ -22,13 +22,13 @@ class GeneralizedCollectablesScenario(ABScenario):
     GAME_STARCRAFT_II = "sc2" 
 
     def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-Playable-21x15-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999):
-        FLAGS = flags.FLAGS
-        FLAGS(sys.argv)
         self.game = game
+        self.steps = 0
         if game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
             self.env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = 12, number_of_players=drts_number_of_players, start_oil=drts_start_oil, start_gold=drts_start_gold, start_lumber=drts_start_lumber, start_food=drts_start_food)
-            self.env.engine_config.set_archer(True)
         elif game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
+            FLAGS = flags.FLAGS
+            FLAGS(sys.argv)
             players = [sc2_env.Agent(sc2_env.Race.terran)]
             self.env = SC2Env(map_name=sc2_map, render=render, step_mul=32, players=players)
         else:
@@ -76,7 +76,6 @@ class GeneralizedCollectablesScenario(ABScenario):
                     reward += tile_value 
                     self.collectables_map[unit_y, unit_x] = 0
 
-            np.savetxt(os.path.expanduser("~") + "/collectables_map_units_pos_current_step.csv", self.collectables_map, fmt='%i',delimiter=",")
             self.steps += 1
             return state, reward, done
         elif (self.game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II):
@@ -89,6 +88,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         self.done = self.env.done
 
     def reset(self):
+        self.steps = 0
         return self.env.reset()
 
     def restart(self):
@@ -128,5 +128,4 @@ class GeneralizedCollectablesScenario(ABScenario):
                     continue
                 break
 
-        np.savetxt(os.path.expanduser("~") + "/collectables_map_default.csv", map_, fmt='%i',delimiter=",")
         return map_
