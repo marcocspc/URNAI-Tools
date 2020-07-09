@@ -1,5 +1,5 @@
 import argparse
-from urnai.runnerbuilder import RunnerBuilder  
+from urnai.runner.runnerbuilder import RunnerBuilder  
 import os,sys,inspect
 from urnai.utils.error import *
 

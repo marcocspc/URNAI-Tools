@@ -1,4 +1,4 @@
-from urnai.commands import DeepRTSRunner, TrainerRunner, SC2Runner
+from urnai.runner.commands import DeepRTSRunner, TrainerRunner, SC2Runner
 
 class RunnerBuilder():
 
