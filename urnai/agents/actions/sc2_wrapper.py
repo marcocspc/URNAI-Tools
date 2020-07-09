@@ -148,6 +148,19 @@ class SC2Wrapper(ActionWrapper):
             ACTION_ATTACK_DISTRIBUTE_ARMY,
         ]
 
+        self.building_positions = {
+            'command_center' : [[18, 15], [41, 21]],
+            'supply_depot' : [[21, 25], [23, 25], [25, 25], [22,26], [24,26], [26,26], [26.7,26]],
+            'barracks' : [[25, 18], [25, 22], [28, 24]],
+            'factory' : [[39, 26], [43, 26]],
+            'starport' : [[37, 29], [41, 29]],
+
+            'engineering_bay' : [[18,28]],
+            'armory' : [[20,29]],
+            'fusion_core' : [[38, 23]],
+            'ghost_academy' : [[36, 23]],
+        }
+
         '''
         This is an outdated method of creating a 4x4 grid for attack actions. This is not currently being used, since we went for a more simplistic method
         of only four attack actions, but this could be adapted and reused in the future. For each (x, y) grid cell, we're defining an action called
@@ -628,7 +641,7 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD COMMAND CENTER
         if named_action == ACTION_BUILD_COMMAND_CENTER:
-            targets = [[18, 15], [41, 21]]
+            targets = self.building_positions['command_center']
             actions = build_structure_raw_pt(obs, units.Terran.CommandCenter, sc2._BUILD_COMMAND_CENTER, 
                                                 self.base_top_left, max_amount=2, targets=targets)
             action, self.actions_queue = organize_queue(actions, self.actions_queue)
@@ -636,7 +649,7 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD SUPPLY DEPOT
         if named_action == ACTION_BUILD_SUPPLY_DEPOT:
-            targets = [[21, 25], [23, 25], [25, 25], [22,26], [24,26], [26,26], [26.7,26]]
+            targets = self.building_positions['supply_depot']
             actions = build_structure_raw_pt(obs, units.Terran.SupplyDepot, sc2._BUILD_SUPPLY_DEPOT, 
                                                 self.base_top_left, max_amount=8, targets=targets)
             action, self.actions_queue = organize_queue(actions, self.actions_queue)
@@ -650,7 +663,7 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD ENGINEERINGBAY
         if named_action == ACTION_BUILD_ENGINEERINGBAY:
-            targets = [[18,28]]
+            targets = self.building_positions['engineering_bay']
             actions = build_structure_raw_pt(obs, units.Terran.EngineeringBay, sc2._BUILD_ENGINEERINGBAY,
                                                 self.base_top_left, max_amount=1, targets=targets)
             action, self.actions_queue = organize_queue(actions, self.actions_queue)
@@ -658,7 +671,7 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD ARMORY
         if named_action == ACTION_BUILD_ARMORY:
-            targets = [[20,29]]
+            targets = self.building_positions['armory']
             actions = build_structure_raw_pt(obs, units.Terran.Armory, sc2._BUILD_ARMORY, 
                                                 self.base_top_left, max_amount = 1, targets=targets)
             action, self.actions_queue = organize_queue(actions, self.actions_queue)
@@ -684,7 +697,7 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD FUSIONCORE
         if named_action == ACTION_BUILD_FUSIONCORE:
-            targets = [[38, 23]]
+            targets = self.building_positions['fusion_core']
             actions = build_structure_raw_pt(obs, units.Terran.FusionCore, sc2._BUILD_FUSIONCORE, 
                                                 self.base_top_left, max_amount = 1, targets=targets)
             action, self.actions_queue = organize_queue(actions, self.actions_queue)
@@ -692,7 +705,7 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD GHOSTACADEMY
         if named_action == ACTION_BUILD_GHOSTACADEMY:
-            targets = [[36, 23]]
+            targets = self.building_positions['ghost_academy']
             actions = build_structure_raw_pt(obs, units.Terran.GhostAcademy, sc2._BUILD_GHOSTACADEMY, 
                                                 self.base_top_left, max_amount = 1, targets=targets)
             action, self.actions_queue = organize_queue(actions, self.actions_queue)
@@ -700,7 +713,7 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD BARRACKS
         if named_action == ACTION_BUILD_BARRACKS:
-            targets = [[25, 18], [25, 22], [28, 24]]
+            targets = self.building_positions['barracks']
             actions = build_structure_raw_pt(obs, units.Terran.Barracks, sc2._BUILD_BARRACKS,
                                                 self.base_top_left, max_amount = 3, targets=targets)
             action, self.actions_queue = organize_queue(actions, self.actions_queue)
@@ -708,7 +721,7 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD FACTORY
         if named_action == ACTION_BUILD_FACTORY:
-            targets = [[39, 26], [43, 26]]
+            targets = self.building_positions['factory']
             actions = build_structure_raw_pt(obs, units.Terran.Factory, sc2._BUILD_FACTORY,
                                                 self.base_top_left, max_amount = 2, targets=targets)
             action, self.actions_queue = organize_queue(actions, self.actions_queue)
@@ -716,7 +729,7 @@ class TerranWrapper(SC2Wrapper):
 
         # BUILD STARPORT
         if named_action == ACTION_BUILD_STARPORT:
-            targets = [[37, 29], [41, 29]]
+            targets = self.building_positions['starport']
             actions = build_structure_raw_pt(obs, units.Terran.Starport, sc2._BUILD_STARPORT,
                                                 self.base_top_left, max_amount = 2, targets=targets)
             action, self.actions_queue = organize_queue(actions, self.actions_queue)
@@ -1094,6 +1107,19 @@ class SimpleTerranWrapper(TerranWrapper):
             ACTION_ATTACK_DISTRIBUTE_ARMY,
         ]
         self.action_indices = [idx for idx in range(len(self.named_actions))]
+
+        self.building_positions = {
+            'command_center' : [[18, 15], [41, 21]],
+            'supply_depot' : [[21, 25], [23, 25], [25, 25], [22,26], [24,26], [26,26], [26.7,26]],
+            'barracks' : [[25, 18], [22, 22], [26, 22]],
+            'factory' : [[16, 28], [19, 28]],
+            'starport' : [[35, 18], [35, 23]],
+
+            'engineering_bay' : [[18,28]],
+            'armory' : [[20,29]],
+            'fusion_core' : [[38, 23]],
+            'ghost_academy' : [[36, 23]],
+        }
     
     def get_excluded_actions(self, obs):
 
