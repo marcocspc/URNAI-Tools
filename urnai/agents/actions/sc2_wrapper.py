@@ -181,6 +181,9 @@ class SC2Wrapper(ActionWrapper):
 
     def get_actions(self):
         return self.action_indices
+
+    def get_named_actions(self):
+        return self.named_actions
     
     # Method that splits a "ACTION_ATTACK_x_y" string into three different variables
     # However, this method is currently not in use
@@ -1126,6 +1129,7 @@ class SimpleTerranWrapper(TerranWrapper):
         excluded_actions = []
 
         return excluded_actions
+
 
 class ProtossWrapper(SC2Wrapper):
     def __init__(self):

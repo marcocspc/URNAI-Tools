@@ -6,6 +6,7 @@ sys.path.insert(0,parentdir)
 
 import itertools
 import time
+import numpy as np
 from urnai.utils.logger import Logger
 from urnai.base.savable import Savable 
 from urnai.tdd.reporter import Reporter as rp
@@ -39,7 +40,7 @@ class Trainer(Savable):
         self.pickle_black_list.append("agent")
         rp.VERBOSITY_LEVEL = debug_level
 
-        self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
+        self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
 
         if(relative_path):
             self.full_save_path = parentdir + os.path.sep + self.save_path + os.path.sep + self.file_name
@@ -54,6 +55,7 @@ class Trainer(Savable):
         elif self.enable_save:
             rp.report("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
             os.makedirs(self.full_save_path)
+            os.makedirs(self.full_save_path + os.path.sep + "action_graphs")
             os.makedirs(self.full_save_play_path)
         else:
             rp.report("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
@@ -64,7 +66,7 @@ class Trainer(Savable):
         
         rp.report("> Training")
         if self.logger.ep_count == 0:
-            self.logger = Logger(num_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
+            self.logger = Logger(num_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
 
         if test_params != None:
             test_params.logger = self.logger
@@ -83,6 +85,8 @@ class Trainer(Savable):
 
             ep_reward = 0
             victory = False
+
+            ep_actions = np.zeros(self.agent.action_wrapper.get_action_space_dim())
 
             for step in itertools.count():
                 if step >= max_steps:
@@ -107,6 +111,8 @@ class Trainer(Savable):
                 # Adding our step reward to the total count of the episode's reward
                 ep_reward += step_reward
 
+                ep_actions[self.agent.previous_action] += 1
+
                 if done:
                     victory = default_reward == 1
                     agent_info = {
@@ -114,7 +120,7 @@ class Trainer(Savable):
                             "Gamma" : self.agent.model.gamma,
                             "Epsilon" : self.agent.model.epsilon_greedy,
                             }
-                    self.logger.record_episode(ep_reward, victory, step + 1, agent_info)
+                    self.logger.record_episode(ep_reward, victory, step + 1, agent_info, ep_actions)
                     break
             
             self.logger.log_ep_stats()
@@ -147,7 +153,7 @@ class Trainer(Savable):
     def play(self, num_matches, max_steps=float('inf'), test_params=None, reward_from_agent = True):
         rp.report("\n\n> Playing")
 
-        self.logger = Logger(num_matches, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
+        self.logger = Logger(num_matches, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
 
         for match in itertools.count():
             if match >= num_matches:
@@ -164,6 +170,8 @@ class Trainer(Savable):
             ep_reward = 0
             victory = False
 
+            ep_actions = np.zeros(self.agent.action_wrapper.get_action_space_dim())
+
             for step in itertools.count():
                 if step >= max_steps:
                     break
@@ -179,6 +187,8 @@ class Trainer(Savable):
 
                 ep_reward += step_reward
 
+                ep_actions[self.agent.previous_action] += 1
+
                 is_last_step = step == max_steps - 1
                 done = done or is_last_step
                 # If done (if we're dead) : finish episode
@@ -189,7 +199,7 @@ class Trainer(Savable):
                             "Gamma" : self.agent.model.gamma,
                             "Epsilon" : self.agent.model.epsilon_greedy,
                             }
-                    self.logger.record_episode(ep_reward, victory, step + 1, agent_info)
+                    self.logger.record_episode(ep_reward, victory, step + 1, agent_info, ep_actions)
                     break
 
             self.logger.log_ep_stats()

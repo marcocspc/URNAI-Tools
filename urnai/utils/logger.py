@@ -5,6 +5,7 @@ sys.path.insert(0,parentdir)
 from base.savable import Savable 
 
 import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
 import numpy as np
 import pickle
 import os
@@ -13,7 +14,7 @@ from urnai.tdd.reporter import Reporter as rp
 from models.model_builder import ModelBuilder
 
 class Logger(Savable):
-    def __init__(self, ep_total, agent_name, model_name, model_builder:ModelBuilder, action_wrapper_name, state_builder_name, reward_builder_name, env_name, is_episodic=True, render=True):
+    def __init__(self, ep_total, agent_name, model_name, model_builder:ModelBuilder, action_wrapper_name, agent_action_size, agent_action_names, state_builder_name, reward_builder_name, env_name, is_episodic=True, render=True):
         #Training information
         self.agent_name = agent_name
         self.model_name = model_name
@@ -40,6 +41,11 @@ class Logger(Savable):
         # Win rate count
         self.ep_victories = []
         self.ep_avg_victories = []
+
+        # Agent Action count
+        self.agent_action_names = agent_action_names
+        self.agent_action_size = agent_action_size
+        self.ep_agent_actions = [ [] for i in range(agent_action_size) ]
 
         # Play testing count
         self.play_ep_count = []
@@ -77,7 +83,10 @@ class Logger(Savable):
         self.ep_victories = []
         self.ep_avg_victories = []
 
-    def record_episode(self, ep_reward, has_won, steps_count, agent_info):
+    def record_episode(self, ep_reward, has_won, steps_count, agent_info, ep_actions):
+        for i in range(self.agent_action_size):
+            self.ep_agent_actions[i].append(ep_actions[i])
+
         self.ep_count += 1
 
         self.ep_rewards.append(ep_reward)
@@ -151,6 +160,10 @@ class Logger(Savable):
             self.plot_win_rate_percentage_over_play_testing_graph()
             self.plot_reward_average_over_play_testing_graph()
 
+    def generalized_curve_plot(self, to_plot, label, title):
+        return self.__plot_curve(range(self.ep_count), to_plot, 'Episode Count',
+                            label, title)
+
     def plot_average_reward_graph(self):
         # Plotting average reward graph
         return self.__plot_curve(range(self.ep_count), self.ep_avg_rewards, 'Episode Count',
@@ -181,38 +194,72 @@ class Logger(Savable):
 
     def save_extra(self, persist_path):
         if self.avg_reward_graph is None or self.avg_steps_graph is None or self.inst_reward_graph is None:
-             self.render = False
+            self.render = False
 
-             self.avg_reward_graph = self.plot_average_reward_graph()
-             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_reward_graph.png")
-             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_reward_graph.pdf")
-             plt.close(self.avg_reward_graph)
-             self.avg_reward_graph = None
-
-
-             self.avg_steps_graph = self.plot_average_steps_graph() 
-             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_steps_graph.png")
-             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_steps_graph.pdf")
-             plt.close(self.avg_steps_graph)
-             self.avg_steps_graph = None
+            self.avg_reward_graph = self.plot_average_reward_graph()
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_reward_graph.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_reward_graph.pdf")
+            plt.close(self.avg_reward_graph)
+            self.avg_reward_graph = None
 
 
-             self.inst_reward_graph = self.plot_instant_reward_graph()
-             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_reward_graph.png")
-             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_reward_graph.pdf")
-             plt.close(self.inst_reward_graph)
-             self.inst_reward_graph = None
+            self.avg_steps_graph = self.plot_average_steps_graph() 
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_steps_graph.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_steps_graph.pdf")
+            plt.close(self.avg_steps_graph)
+            self.avg_steps_graph = None
 
-             self.avg_winrate_graph = self.plot_win_rate_graph()
-             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_winrate_graph.png")
-             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_winrate_graph.pdf")
-             plt.close(self.avg_winrate_graph)
-             self.avg_winrate_graph = None
 
-             self.render = True 
+            self.inst_reward_graph = self.plot_instant_reward_graph()
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_reward_graph.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_reward_graph.pdf")
+            plt.close(self.inst_reward_graph)
+            self.inst_reward_graph = None
 
-             with open(persist_path + os.path.sep + self.get_default_save_stamp() + "overall_report.txt", "w") as output:
-                 output.write(self.training_report)
+            self.avg_winrate_graph = self.plot_win_rate_graph()
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_winrate_graph.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_winrate_graph.pdf")
+            plt.close(self.avg_winrate_graph)
+            self.avg_winrate_graph = None
+
+            # Plotting the rate of occurrence of each action in a different graph
+            for i in range(self.agent_action_size):
+                if self.agent_action_names != None:
+                    action_graph = self.generalized_curve_plot(self.ep_agent_actions[i], self.agent_action_names[i], "Plot for action " + self.agent_action_names[i])
+                    plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + self.agent_action_names[i] + ".png")
+                else:
+                    action_graph = self.generalized_curve_plot(self.ep_agent_actions[i], "Action "+i, "Plot for action " + i)
+                    plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "Action" + i + ".png")
+
+                plt.close(action_graph)
+
+            # Plotting the rate of occurrence of all actions in one single graph
+            all_actions_graph = self.__plot_curves(range(self.ep_count), self.ep_agent_actions, 'Episode Count', "Actions per Ep.", self.agent_action_names, "Título")
+            plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "all_actions.png")
+            plt.close(all_actions_graph)
+
+            self.render = True 
+
+            with open(persist_path + os.path.sep + self.get_default_save_stamp() + "overall_report.txt", "w") as output:
+                output.write(self.training_report)
+
+    def __plot_curves(self, x, ys, x_label, y_label, y_labels, title):
+        fig, ax = plt.subplots()
+        for i in range(len(ys)):
+            ax.plot(x, ys[i], label=y_labels[i])
+
+        ax.set(xlabel=x_label, ylabel=y_label, title=title)
+        ax.grid()
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.6, box.height])
+        ax.legend(bbox_to_anchor=(1.02,1), loc="upper left", ncol=2, prop={'size': 6})
+
+        if self.render: 
+            plt.ion()
+            plt.show()
+            plt.pause(0.001)
+
+        return fig
 
     def __plot_curve(self, x, y, x_label, y_label, title):
         fig, ax = plt.subplots()
