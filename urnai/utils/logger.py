@@ -222,15 +222,16 @@ class Logger(Savable):
             plt.close(self.avg_winrate_graph)
             self.avg_winrate_graph = None
 
+            # Populating self.agent_action_names with filler names if it wasn't provided by the agent's action wrapper
+            if self.agent_action_names == None:
+                self.agent_action_names = []
+                for i in range(self.agent_action_size):
+                    self.agent_action_names.append("Action "+str(i))
             # Plotting the rate of occurrence of each action in a different graph
             for i in range(self.agent_action_size):
                 if self.agent_action_names != None:
                     action_graph = self.generalized_curve_plot(self.ep_agent_actions[i], self.agent_action_names[i], "Plot for action " + self.agent_action_names[i])
                     plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + self.agent_action_names[i] + ".png")
-                else:
-                    action_graph = self.generalized_curve_plot(self.ep_agent_actions[i], "Action "+i, "Plot for action " + i)
-                    plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "Action" + i + ".png")
-
                 plt.close(action_graph)
 
             # Plotting the rate of occurrence of all actions in one single graph

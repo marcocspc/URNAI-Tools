@@ -57,6 +57,7 @@ class Trainer(Savable):
             os.makedirs(self.full_save_path)
             os.makedirs(self.full_save_path + os.path.sep + "action_graphs")
             os.makedirs(self.full_save_play_path)
+            os.makedirs(self.full_save_play_path + os.path.sep + "action_graphs")
         else:
             rp.report("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
