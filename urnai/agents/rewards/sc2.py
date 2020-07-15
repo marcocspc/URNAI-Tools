@@ -57,9 +57,79 @@ class GeneralReward(RewardBuilder):
 class KilledUnitsReward(RewardBuilder):
     def __init__(self):
 
-        self.construction_reward = 200
-        self.big_unit_reward = 50
-        self.small_unit_reward = 20
+        # Properties keep track of the change of values used in our reward system
+        self._previous_killed_unit_score = 0
+        self._previous_killed_building_score = 0
+
+        self._has_barracks = False
+        self._has_factory = False
+        self._has_starport = False
+
+        self._trained_tank = False
+        self._trained_medivac = False
+        self._trained_hellion = False
+
+    # When the episode is over, the values we use to compute our reward should be reset.
+    def reset(self):
+        self._previous_killed_unit_score = 0
+        self._previous_killed_building_score = 0
+
+        self._has_barracks = False
+        self._has_factory = False
+        self._has_starport = False
+
+        self._trained_tank = False
+        self._trained_medivac = False
+        self._trained_hellion = False
+
+    def get_reward(self, obs, reward, done):
+
+        new_reward = 0
+
+        if building_exists(obs, units.Terran.Barracks) and not self._has_barracks:
+            new_reward += 200
+            self._has_barracks = True
+
+        if building_exists(obs, units.Terran.Factory) and not self._has_factory:
+            new_reward += 200
+            self._has_factory = True
+
+        if building_exists(obs, units.Terran.Starport) and not self._has_starport:
+            new_reward += 200
+            self._has_starport = True
+
+        if building_exists(obs, units.Terran.SiegeTank) and not self._trained_tank:
+            new_reward += 50
+            self._trained_tank = True
+
+        if building_exists(obs, units.Terran.Medivac) and not self._trained_medivac:
+            new_reward += 50
+            self._trained_medivac = True
+
+        if building_exists(obs, units.Terran.Hellion) and not self._trained_hellion:
+            new_reward += 20
+            self._trained_hellion = True
+
+        new_reward += (obs.score_cumulative.killed_value_units - self._previous_killed_unit_score)
+        new_reward += (obs.score_cumulative.killed_value_structures - self._previous_killed_building_score)
+
+        self._previous_killed_unit_score = obs.score_cumulative.killed_value_units
+        self._previous_killed_building_score = obs.score_cumulative.killed_value_structures
+
+        if done:
+            self.reset()
+
+        if reward == 1:
+            new_reward = 5000
+
+        return new_reward
+
+class KilledUnitsRewardBoosted(RewardBuilder):
+    def __init__(self):
+
+        self.construction_reward = 1000
+        self.big_unit_reward = 300
+        self.small_unit_reward = 200
 
         # Properties keep track of the change of values used in our reward system
         self._previous_killed_unit_score = 0
@@ -127,11 +197,3 @@ class KilledUnitsReward(RewardBuilder):
             new_reward = 5000
 
         return new_reward
-
-class KilledUnitsRewardBoosted(KilledUnitsReward):
-    def __init__(self):
-        KilledUnitsReward.__init__(self)
-
-        self.construction_reward = 1000
-        self.big_unit_reward = 300
-        self.small_unit_reward = 200
