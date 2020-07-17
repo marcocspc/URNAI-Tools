@@ -1,7 +1,7 @@
 #from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario as Scenario
 #from urnai.scenarios.generalization.rts.findanddefeat import GeneralizedFindaAndDefeatScenario as Scenario
-#from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario as Scenario
-from urnai.scenarios.generalization.rts.buildunits import GeneralizedBuildUnitsScenario as Scenario
+from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario as Scenario
+#from urnai.scenarios.generalization.rts.buildunits import GeneralizedBuildUnitsScenario as Scenario
 import numpy as np
 import sys,os
 
@@ -59,7 +59,10 @@ Food: {f}
 Number of archers: {na}'''.format(player=idx+1,o=player.oil,g=player.gold,l=player.lumber,f=player.food,na=player.num_archer)
                 print(player_stats)
 
-            print("Reward: {r}".format(r=reward))
+            if reward == 0: 
+                print("Reward: {r}".format(r=reward))
+            else:
+                print("YAY!!!!!!!  Reward: {r} !!!!!!!!!".format(r=reward))
             print("Total Episode Reward: {r}".format(r=total_ep_reward))
 
             if done: break

@@ -25,6 +25,12 @@ class FindAndDefeatDeepRTSActionWrapper(CollectablesDeepRTSActionWrapper):
     def attack_(self, obs):
         self.enqueue_action_for_player_units(obs, self.attack)
 
+    def enqueue_action_for_player_units(self, obs, action):
+        for i in range(len(self.get_player_units(obs["players"][0], obs))):
+            self.action_queue.append(action)
+            self.action_queue.append(self.nextunit)
+
+
 class FindAndDefeatStarcraftIIActionWrapper(CollectablesStarcraftIIActionWrapper):
     def __init__(self):
         super().__init__()

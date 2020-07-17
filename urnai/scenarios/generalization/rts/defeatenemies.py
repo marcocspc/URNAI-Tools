@@ -81,15 +81,16 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
                 self.setup_map()
                 self.spawn_army()
 
+            ###########################
             state, reward, done = None, None, None 
-            if action == 10:
+            if action == self.drts_action_attack:
                 self.attack_closest_enemy()
-                no_action = 15
-                state, reward, done = self.env.step(no_action)
+                state, reward, done = self.env.step(self.drts_action_noaction)
             else:
                 state, reward, done = self.env.step(action)
             self.steps += 1
             return state, reward, done 
+        ##############################
 
         elif (self.game == GeneralizedDefeatEnemiesScenario.GAME_STARCRAFT_II):
             self.steps += 1
@@ -104,22 +105,6 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
                 self.map_spawn = GeneralizedDefeatEnemiesScenario.MAP_1
             else:
                 self.map_spawn = GeneralizedDefeatEnemiesScenario.MAP_2
-
-    def get_army_mean(self, player):
-        xs = []
-        ys = []
-
-        for unit in self.get_player_units(player):
-            try: 
-                xs.append(unit.tile.x)
-                ys.append(unit.tile.y)
-            except AttributeError as ae:
-                if not "'NoneType' object has no attribute 'x'" in str(ae):
-                    raise 
-
-        army_x = int(mean(xs))
-        army_y = int(mean(ys))
-        return army_x, army_y
 
 
     def get_abs_dist(self, x1, y1, x2, y2):

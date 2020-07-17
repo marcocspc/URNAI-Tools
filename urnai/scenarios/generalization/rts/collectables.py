@@ -21,9 +21,28 @@ class GeneralizedCollectablesScenario(ABScenario):
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-Playable-21x15-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999):
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-16x22-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999):
         self.game = game
         self.steps = 0
+        self.drts_hor_threshold = 3
+        self.drts_ver_threshold = 3
+        self.drts_action_previousunit = 0 
+        self.drts_action_nextunit = 1
+        self.drts_action_moveleft = 2
+        self.drts_action_moveright = 3
+        self.drts_action_moveup = 4
+        self.drts_action_movedown = 5
+        self.drts_action_moveupleft = 6
+        self.drts_action_moveupright = 7
+        self.drts_action_movedownleft = 8
+        self.drts_action_movedownright = 9
+        self.drts_action_attack = 10
+        self.drts_action_harvest = 11
+        self.drts_action_build0 = 12
+        self.drts_action_build1 = 13
+        self.drts_action_build2 = 14
+        self.drts_action_noaction = 15
+
         if game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
             self.env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = 12, number_of_players=drts_number_of_players, start_oil=drts_start_oil, start_gold=drts_start_gold, start_lumber=drts_start_lumber, start_food=drts_start_food)
         elif game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
@@ -39,6 +58,72 @@ class GeneralizedCollectablesScenario(ABScenario):
 
         self.start()
         self.steps = 0
+
+    def get_army_mean(self, player):
+        xs = []
+        ys = []
+
+        for unit in self.get_player_units(player):
+            try:
+                xs.append(unit.tile.x)
+                ys.append(unit.tile.y)
+            except AttributeError as ae:
+                if not "'NoneType' object has no attribute 'x'" in str(ae):
+                    raise
+
+        army_x = int(mean(xs))
+        army_y = int(mean(ys))
+        return army_x, army_y
+
+    def move_troops(self, player, direction):
+        if direction == self.drts_action_moveup:
+            self.move_troops_up(player)
+        elif direction == self.drts_action_movedown:
+            self.move_troops_down(player)
+        elif direction == self.drts_action_moveleft:
+            self.move_troops_left(player)
+        elif direction == self.drts_action_moveright:
+            self.move_troops_right(player)
+
+    def move_troops_up(self, player):
+        cur_x, cur_y = self.get_army_mean(player)
+
+        new_x = cur_x
+        new_y = cur_y - self.drts_ver_threshold
+
+        for unit in self.get_player_units(player):
+            tile = self.env.game.tilemap.get_tile(new_x, new_y)
+            unit.right_click(tile)
+
+    def move_troops_down(self, player):
+        cur_x, cur_y = self.get_army_mean(player)
+
+        new_x = cur_x
+        new_y = cur_y + self.drts_ver_threshold
+
+        for unit in self.get_player_units(player):
+            tile = self.env.game.tilemap.get_tile(new_x, new_y)
+            unit.right_click(tile)
+
+    def move_troops_left(self, player):
+        cur_x, cur_y = self.get_army_mean(player)
+
+        new_x = cur_x - self.hor_threshold
+        new_y = cur_y
+
+        for unit in self.get_player_units(player):
+            tile = self.env.game.tilemap.get_tile(new_x, new_y)
+            unit.right_click(tile)
+
+    def move_troops_right(self, player):
+        cur_x, cur_y = self.get_army_mean(player)
+
+        new_x = cur_x + self.hor_threshold
+        new_y = cur_y
+
+        for unit in self.get_player_units(player):
+            tile = self.env.game.tilemap.get_tile(new_x, new_y)
+            unit.right_click(tile)
 
     def setup_map(self):
         if (self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS):
@@ -61,11 +146,12 @@ class GeneralizedCollectablesScenario(ABScenario):
             if self.steps == 0:
                 self.setup_map()
 
-            state, reward, done = self.env.step(action)
+            state, reward, done = self.env.step(self.drts_action_noaction)
+            player = 0
+            direction = action
+            self.move_troops(player, direction)
 
             reward = 0
-
-            player = 0
             tile_value = 0
             for unit in self.get_player_units(player):
                 unit_x = unit.tile.x
