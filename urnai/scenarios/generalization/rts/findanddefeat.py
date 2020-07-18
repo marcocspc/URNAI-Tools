@@ -40,11 +40,6 @@ class GeneralizedFindaAndDefeatScenario(GeneralizedCollectablesScenario):
             self.steps += 1
             return self.env.step(action)
 
-    def random_tile(self):
-        tiles_len = len(self.env.game.tilemap.tiles)
-
-        return self.env.game.tilemap.tiles[random.randint(0, tiles_len-1)]
-
     def random_spawn_archer(self, player):
         tile = self.random_tile()
 

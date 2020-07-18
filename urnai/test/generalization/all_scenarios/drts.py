@@ -7,7 +7,7 @@ import sys,os
 
 episodes = 100
 steps = 1000
-print_map = True
+print_collectables_map = True
 
 env = Scenario(game = Scenario.GAME_DEEP_RTS, render = True)
 action_wrapper = env.get_default_action_wrapper()
@@ -58,6 +58,11 @@ Lumber: {l}
 Food: {f}
 Number of archers: {na}'''.format(player=idx+1,o=player.oil,g=player.gold,l=player.lumber,f=player.food,na=player.num_archer)
                 print(player_stats)
+
+            if print_collectables_map:
+                if 'collectables_map' in env.__dict__.keys():
+                    a = env.collectables_map.astype(int)
+                    np.savetxt(os.path.expanduser('~') + os.path.sep + 'curr_coll_map.csv', a, fmt='%i',delimiter=",")
 
             if reward == 0: 
                 print("Reward: {r}".format(r=reward))

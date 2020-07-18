@@ -198,20 +198,32 @@ class GeneralizedCollectablesScenario(ABScenario):
 
         return wrapper 
 
+    def random_tile(self):
+        tiles_len = len(self.env.game.tilemap.tiles)
+        return self.env.game.tilemap.tiles[random.randint(0, tiles_len-1)]
+
     def set_collectable_map(self):
         if self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
             width = self.env.game.map.map_width
             height = self.env.game.map.map_height
             map_ = np.zeros((width, height)) 
 
-            for i in range(width):
-                for j in range(height):
-                    if self.env.game.tilemap.get_tile(j, i).is_walkable():
-                        map_[i][j] = random.randint(0, 1)
-                        if np.sum(map_) > 20:
-                            break
-                else:
-                    continue
-                break
+            while np.sum(map_) <= 20:
+                tile = self.random_tile()
 
-        return map_
+                while not tile.is_walkable() or map_[tile.y, tile.x] != 0:
+                    tile = self.random_tile()
+
+                map_[tile.y, tile.x] = 1
+
+            #for i in range(width):
+            #    for j in range(height):
+            #        if self.env.game.tilemap.get_tile(j, i).is_walkable():
+            #            map_[i][j] = random.randint(0, 1)
+            #            if np.sum(map_) > 20:
+            #                break
+            #    else:
+            #        continue
+            #    break
+
+            return map_
