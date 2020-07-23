@@ -1,10 +1,3 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-parentdir = os.path.dirname(parentdir)
-parentdir = os.path.dirname(parentdir)
-sys.path.insert(0,parentdir) 
-
 from urnai.scenarios.base.abscenario import ABScenario
 from .findanddefeat import GeneralizedFindaAndDefeatScenario 
 from urnai.utils.error import EnvironmentNotSupportedError
@@ -17,6 +10,7 @@ from pysc2.env import sc2_env
 from statistics import mean
 import random, math
 from urnai.envs.deep_rts import DeepRTSEnv
+from sys import maxsize as maxint
 
 
 class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
@@ -74,6 +68,7 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
 
     def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-21x13-defeatenemies.json", sc2_map="DefeatRoaches", drts_number_of_players=2, drts_start_oil=999999, drts_start_gold=999999, drts_start_lumber=999999, drts_start_food=999999):
         super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=drts_number_of_players, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food)
+        self.drts_attack_radius = maxint
 
     def step(self, action):
         if (self.game == GeneralizedDefeatEnemiesScenario.GAME_DEEP_RTS):
@@ -81,16 +76,11 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
                 self.setup_map()
                 self.spawn_army()
 
-            ###########################
-            state, reward, done = None, None, None 
-            if action == self.drts_action_attack:
-                self.attack_closest_enemy()
-                state, reward, done = self.env.step(self.drts_action_noaction)
-            else:
-                state, reward, done = self.env.step(action)
+            self.solve_action(action)
+            state, reward, done = self.env.step(self.drts_action_noaction)
+
             self.steps += 1
             return state, reward, done 
-        ##############################
 
         elif (self.game == GeneralizedDefeatEnemiesScenario.GAME_STARCRAFT_II):
             self.steps += 1
@@ -99,48 +89,11 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
     def setup_map(self):
         if self.game == GeneralizedDefeatEnemiesScenario.GAME_DEEP_RTS:
             choice = random.randint(0, 1)
-            #choice = 1 
 
             if choice == 0:
                 self.map_spawn = GeneralizedDefeatEnemiesScenario.MAP_1
             else:
                 self.map_spawn = GeneralizedDefeatEnemiesScenario.MAP_2
-
-
-    def get_abs_dist(self, x1, y1, x2, y2):
-        return abs(math.sqrt((x2 - x1)**2 + (y2 - y1)**2))
-
-    def get_closest_enemy_unit(self, player):
-        closest_unit = None
-        closest_dist = None
-        army_x, army_y = self.get_army_mean(player)
-
-        for enemy in self.env.game.players:
-            if enemy.get_id() != player:
-                for unit in self.get_player_units(enemy.get_id()):
-                    try:
-                        unit_x = unit.tile.x
-                        unit_y = unit.tile.y
-                        dist = self.get_abs_dist(army_x, army_y, unit_x, unit_y)
-                        if closest_dist == None:
-                            closest_dist = dist
-                            closest_unit = unit
-                        elif dist < closest_dist:
-                            closest_dist = dist
-                            closest_unit = unit
-                    except AttributeError as ae:
-                        if not "'NoneType' object has no attribute 'x'" in str(ae):
-                            raise 
-
-        return closest_unit
-
-    def attack_closest_enemy(self):
-        player = 0
-        closest_unit = self.get_closest_enemy_unit(player)
-        x = closest_unit.tile.x
-        y = closest_unit.tile.y
-        self.env.game.players[player].right_click(x, y)
-    
 
     def spawn_army(self):
         for coords in GeneralizedDefeatEnemiesScenario.MAP_PLAYER_LOCATIONS[self.map_spawn]:

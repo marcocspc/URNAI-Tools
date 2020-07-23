@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from urnai.scenarios.base.abscenario import ABScenario
 from urnai.utils.error import EnvironmentNotSupportedError
 from urnai.agents.actions.base.abwrapper import ActionWrapper
@@ -13,7 +13,6 @@ from urnai.envs.deep_rts import DeepRTSEnv
 from absl import flags
 from statistics import mean
 import random
-import sys, os
 
 
 class GeneralizedCollectablesScenario(ABScenario):
@@ -75,15 +74,23 @@ class GeneralizedCollectablesScenario(ABScenario):
         army_y = int(mean(ys))
         return army_x, army_y
 
-    def move_troops(self, player, direction):
-        if direction == self.drts_action_moveup:
+    def solve_action(self, action):
+        player = 0
+        if action == self.drts_action_moveup:
             self.move_troops_up(player)
-        elif direction == self.drts_action_movedown:
+            return True
+        elif action == self.drts_action_movedown:
             self.move_troops_down(player)
-        elif direction == self.drts_action_moveleft:
+            return True
+        elif action == self.drts_action_moveleft:
             self.move_troops_left(player)
-        elif direction == self.drts_action_moveright:
+            return True
+        elif action == self.drts_action_moveright:
             self.move_troops_right(player)
+            return True
+        else:
+            return False
+
 
     def move_troops_up(self, player):
         cur_x, cur_y = self.get_army_mean(player)
@@ -91,9 +98,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         new_x = cur_x
         new_y = cur_y - self.drts_ver_threshold
 
-        for unit in self.get_player_units(player):
-            tile = self.env.game.tilemap.get_tile(new_x, new_y)
-            unit.right_click(tile)
+        self.env.game.players[player].right_click(new_x, new_y)
 
     def move_troops_down(self, player):
         cur_x, cur_y = self.get_army_mean(player)
@@ -101,29 +106,23 @@ class GeneralizedCollectablesScenario(ABScenario):
         new_x = cur_x
         new_y = cur_y + self.drts_ver_threshold
 
-        for unit in self.get_player_units(player):
-            tile = self.env.game.tilemap.get_tile(new_x, new_y)
-            unit.right_click(tile)
+        self.env.game.players[player].right_click(new_x, new_y)
 
     def move_troops_left(self, player):
         cur_x, cur_y = self.get_army_mean(player)
 
-        new_x = cur_x - self.hor_threshold
+        new_x = cur_x - self.drts_hor_threshold
         new_y = cur_y
 
-        for unit in self.get_player_units(player):
-            tile = self.env.game.tilemap.get_tile(new_x, new_y)
-            unit.right_click(tile)
+        self.env.game.players[player].right_click(new_x, new_y)
 
     def move_troops_right(self, player):
         cur_x, cur_y = self.get_army_mean(player)
 
-        new_x = cur_x + self.hor_threshold
+        new_x = cur_x + self.drts_hor_threshold
         new_y = cur_y
 
-        for unit in self.get_player_units(player):
-            tile = self.env.game.tilemap.get_tile(new_x, new_y)
-            unit.right_click(tile)
+        self.env.game.players[player].right_click(new_x, new_y)
 
     def setup_map(self):
         if (self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS):
@@ -146,10 +145,12 @@ class GeneralizedCollectablesScenario(ABScenario):
             if self.steps == 0:
                 self.setup_map()
 
-            state, reward, done = self.env.step(self.drts_action_noaction)
+            if self.solve_action(action):
+                state, reward, done = self.env.step(self.drts_action_noaction)
+            else:
+                state, reward, done = self.env.step(action)
+
             player = 0
-            direction = action
-            self.move_troops(player, direction)
 
             reward = 0
             tile_value = 0
@@ -215,15 +216,5 @@ class GeneralizedCollectablesScenario(ABScenario):
                     tile = self.random_tile()
 
                 map_[tile.y, tile.x] = 1
-
-            #for i in range(width):
-            #    for j in range(height):
-            #        if self.env.game.tilemap.get_tile(j, i).is_walkable():
-            #            map_[i][j] = random.randint(0, 1)
-            #            if np.sum(map_) > 20:
-            #                break
-            #    else:
-            #        continue
-            #    break
 
             return map_

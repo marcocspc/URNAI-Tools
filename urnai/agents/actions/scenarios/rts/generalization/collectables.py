@@ -46,7 +46,9 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
         return units
 
     def enqueue_action_for_player_units(self, obs, action):
-        self.action_queue.append(action)
+        for i in range(len(self.get_player_units(obs["players"][0], obs))):
+            self.action_queue.append(action)
+            self.action_queue.append(self.nextunit)
 
     def get_action(self, action_idx, obs):
         if len(self.action_queue) == 0:
