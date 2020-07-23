@@ -141,14 +141,21 @@ class DQNKeras(LearningModel):
                 random_action = random.choice(self.actions)
             return random_action
         else:
-            return self.predict(state)
+            return self.predict(state, excluded_actions)
         
     def predict(self, state, excluded_actions=[]):
         '''
         model.predict returns an array of arrays, containing the Q-Values for the actions. This function should return the
         corresponding action with the highest Q-Value.
         '''
-        return int(np.argmax(self.model.predict(state)[0]))
+        q_values = self.model.predict(state)[0]
+        action_idx = int(np.argmax(q_values))
+
+        while action_idx in excluded_actions:
+            q_values = np.delete(q_values, action_idx)
+            action_idx = int(np.argmax(q_values))
+
+        return action_idx
 
     def save_extra(self, persist_path):
         self.model.save_weights(self.get_full_persistance_path(persist_path)+".h5")
