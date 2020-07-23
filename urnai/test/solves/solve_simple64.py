@@ -54,7 +54,7 @@ def main(unused_argv):
 
 
         dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False,
-                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.0001, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=2000)
+                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=2000)
 
         #dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
         
