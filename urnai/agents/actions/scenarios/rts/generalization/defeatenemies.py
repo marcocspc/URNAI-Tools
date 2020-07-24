@@ -7,11 +7,11 @@ from pysc2.env import sc2_env
 class DefeatEnemiesDeepRTSActionWrapper(FindAndDefeatDeepRTSActionWrapper):
     def __init__(self):
         super().__init__()
-        self.run = 16
+        self.run = 17
 
         self.actions = [self.previousunit, self.nextunit, self.moveleft, self.moveright, self.moveup, self.movedown,
                 self.moveupleft, self.moveupright, self.movedownleft, self.movedownright, self.attack, self.harvest,
-                self.build0, self.build1, self.build2, self.noaction, self.run] 
+                self.build0, self.build1, self.build2, self.noaction, self.cancel, self.run] 
 
         self.excluded_actions = [self.previousunit, self.nextunit, self.moveleft, self.moveright, self.moveup, self.movedown,
                 self.moveupleft, self.moveupright, self.movedownleft, self.movedownright, self.harvest,
@@ -22,8 +22,8 @@ class DefeatEnemiesDeepRTSActionWrapper(FindAndDefeatDeepRTSActionWrapper):
     def solve_action(self, action_idx, obs):
         if action_idx == self.run:
             self.run_(obs)
-        elif action_idx == self.attack:
-            self.attack_(obs)
+        else:
+            super().solve_action(action_idx, obs)
 
     def get_army_mean(self, player, obs):
         xs = []
@@ -42,19 +42,21 @@ class DefeatEnemiesDeepRTSActionWrapper(FindAndDefeatDeepRTSActionWrapper):
         return army_x, army_y
 
     def run_(self, obs):
+        self.enqueue_action_for_player_units(obs, self.run)
+
         #its not this simple
-        p_army_x, p_army_y = self.get_army_mean(0, obs)
-        e_army_x, e_army_y = self.get_army_mean(1, obs)
+        #p_army_x, p_army_y = self.get_army_mean(0, obs)
+        #e_army_x, e_army_y = self.get_army_mean(1, obs)
 
-        if p_army_x - e_army_x < 0:
-            self.enqueue_action_for_player_units(obs, self.moveleft)
-        else:
-            self.enqueue_action_for_player_units(obs, self.moveright)
+        #if p_army_x - e_army_x < 0:
+        #    self.enqueue_action_for_player_units(obs, self.moveleft)
+        #else:
+        #    self.enqueue_action_for_player_units(obs, self.moveright)
 
-        if p_army_y - e_army_y < 0:
-            self.enqueue_action_for_player_units(obs, self.moveup)
-        else:
-            self.enqueue_action_for_player_units(obs, self.movedown)
+        #if p_army_y - e_army_y < 0:
+        #    self.enqueue_action_for_player_units(obs, self.moveup)
+        #else:
+        #    self.enqueue_action_for_player_units(obs, self.movedown)
 
 
 class DefeatEnemiesStarcraftIIActionWrapper(FindAndDefeatStarcraftIIActionWrapper):

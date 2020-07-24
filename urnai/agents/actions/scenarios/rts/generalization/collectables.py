@@ -51,11 +51,13 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
             self.action_queue.append(self.nextunit)
 
     def get_action(self, action_idx, obs):
+        action = None
         if len(self.action_queue) == 0:
-            self.solve_action(action_idx, obs)
-            return self.noaction
+            action = self.noaction
         else:
-            return self.action_queue.pop() 
+            action = self.action_queue.pop() 
+        self.solve_action(action_idx, obs)
+        return action
 
     def solve_action(self, action_idx, obs):
         if action_idx == self.moveleft:

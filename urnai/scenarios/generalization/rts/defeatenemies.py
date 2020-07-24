@@ -69,22 +69,9 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
     def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-21x13-defeatenemies.json", sc2_map="DefeatRoaches", drts_number_of_players=2, drts_start_oil=999999, drts_start_gold=999999, drts_start_lumber=999999, drts_start_food=999999):
         super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=drts_number_of_players, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food)
         self.drts_attack_radius = maxint
-
-    def step(self, action):
-        if (self.game == GeneralizedDefeatEnemiesScenario.GAME_DEEP_RTS):
-            if self.steps == 0:
-                self.setup_map()
-                self.spawn_army()
-
-            self.solve_action(action)
-            state, reward, done = self.env.step(self.drts_action_noaction)
-
-            self.steps += 1
-            return state, reward, done 
-
-        elif (self.game == GeneralizedDefeatEnemiesScenario.GAME_STARCRAFT_II):
-            self.steps += 1
-            return self.env.step(action)
+        self.drts_hor_threshold = 1
+        self.drts_ver_threshold = 1
+        self.drts_action_run = 17
 
     def setup_map(self):
         if self.game == GeneralizedDefeatEnemiesScenario.GAME_DEEP_RTS:
@@ -94,6 +81,39 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
                 self.map_spawn = GeneralizedDefeatEnemiesScenario.MAP_1
             else:
                 self.map_spawn = GeneralizedDefeatEnemiesScenario.MAP_2
+
+            self.spawn_army()
+
+    def solve_action(self, action):
+        if (action == self.drts_action_run):
+            self.run_away()
+            return True
+        else:
+            return super().solve_action(action)
+
+    def run_away(self):
+        player = 0
+        enemy = 1
+        p_army_x, p_army_y = self.get_army_mean(player)
+        e_army_x, e_army_y = self.get_army_mean(enemy)
+        hor_threshold = 0
+        ver_threshold = 0
+
+        if p_army_x - e_army_x < 0:
+            hor_threshold = self.drts_hor_threshold
+        else:
+            hor_threshold = -self.drts_hor_threshold
+
+        if p_army_y - e_army_y < 0:
+            ver_threshold = -self.drts_ver_threshold
+        else:
+            ver_threshold = self.drts_ver_threshold
+
+        new_x = p_army_x + hor_threshold
+        new_y = p_army_y + ver_threshold
+
+        self.env.game.players[player].right_click(new_x, new_y)
+
 
     def spawn_army(self):
         for coords in GeneralizedDefeatEnemiesScenario.MAP_PLAYER_LOCATIONS[self.map_spawn]:

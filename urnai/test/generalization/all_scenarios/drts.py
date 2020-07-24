@@ -1,5 +1,5 @@
-#from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario as Scenario
-from urnai.scenarios.generalization.rts.findanddefeat import GeneralizedFindaAndDefeatScenario as Scenario
+from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario as Scenario
+#from urnai.scenarios.generalization.rts.findanddefeat import GeneralizedFindaAndDefeatScenario as Scenario
 #from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario as Scenario
 #from urnai.scenarios.generalization.rts.buildunits import GeneralizedBuildUnitsScenario as Scenario
 import numpy as np
