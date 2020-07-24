@@ -64,8 +64,9 @@ class GeneralizedCollectablesScenario(ABScenario):
 
         for unit in self.get_player_units(player):
             try:
-                xs.append(unit.tile.x)
-                ys.append(unit.tile.y)
+                if unit.id != 1 and unit.id != 2:
+                    xs.append(unit.tile.x)
+                    ys.append(unit.tile.y)
             except AttributeError as ae:
                 if not "'NoneType' object has no attribute 'x'" in str(ae):
                     raise
