@@ -1,0 +1,30 @@
+@startuml
+' Allow elements from other diagrams to be mixed here.
+' In this case I mix "frame" from class diagram and "node" from deployment diagram.
+allow_mixing
+
+' Agent part.
+frame Agent {
+	node Agent
+	node Observation
+	node Reward
+	node Model
+	node Action
+}
+
+' Environment Part
+frame Environment {
+	node EnvironmentWrapper
+	node Environment
+}
+
+' Connections between nodes
+Agent -up- Observation
+Agent -up- Reward
+Agent -down- Action
+Agent -left- Model
+Agent <-right-> EnvironmentWrapper
+EnvironmentWrapper -right- Environment
+
+@enduml
+
