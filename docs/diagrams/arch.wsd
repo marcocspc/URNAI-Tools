@@ -15,16 +15,21 @@ frame Agent {
 ' Environment Part
 frame Environment {
 	node EnvironmentWrapper
-	node Environment
+	node OpenAIGym
+    node StarcraftII
+    node VizDoom
+    node DeepRTS
 }
 
 ' Connections between nodes
+Agent -up- Model
 Agent -up- Observation
 Agent -up- Reward
-Agent -down- Action
-Agent -left- Model
-Agent <-right-> EnvironmentWrapper
-EnvironmentWrapper -right- Environment
+Agent -up- Action
+Agent <-down-> EnvironmentWrapper
+EnvironmentWrapper -down- OpenAIGym 
+EnvironmentWrapper -down- StarcraftII 
+EnvironmentWrapper -down- VizDoom 
+EnvironmentWrapper -down- DeepRTS 
 
 @enduml
-
