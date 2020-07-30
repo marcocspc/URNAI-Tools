@@ -78,7 +78,8 @@ class DeepRTSEnv(Env):
             n_players = self.number_of_players,
             engine_config = self.engine_config,
             gui_config = self.gui_config,
-            terminal_signal = False
+            terminal_signal = False,
+            fit_to_screen=fit_to_screen
         )
         self.game.set_max_fps(self.max_fps)
         self.game.set_max_ups(self.max_ups)
