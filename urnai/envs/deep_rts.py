@@ -31,7 +31,8 @@ class DeepRTSEnv(Env):
             max_fps = 1000000, max_ups = 1000000, play_audio = False, 
             number_of_players = 1, updates_per_action = 1, flatten_state = True,
             drts_engine_config = None,
-            start_oil=0, start_gold=1500, start_lumber=750, start_food = 1):
+            start_oil=0, start_gold=1500, start_lumber=750, start_food = 1,
+            fit_to_screen=False):
 
         if self.is_map_installed(map):
             self.map = map

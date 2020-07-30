@@ -1,6 +1,6 @@
-from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario as Scenario
+#from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario as Scenario
 #from urnai.scenarios.generalization.rts.findanddefeat import GeneralizedFindaAndDefeatScenario as Scenario
-#from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario as Scenario
+from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario as Scenario
 #from urnai.scenarios.generalization.rts.buildunits import GeneralizedBuildUnitsScenario as Scenario
 import numpy as np
 import sys,os
@@ -9,7 +9,7 @@ episodes = 100
 steps = 1000
 print_collectables_map = False 
 
-env = Scenario(game = Scenario.GAME_DEEP_RTS, render = True)
+env = Scenario(game = Scenario.GAME_DEEP_RTS, render = True, fit_to_screen=True)
 action_wrapper = env.get_default_action_wrapper()
 np.set_printoptions(threshold=sys.maxsize)
 

@@ -20,7 +20,7 @@ class GeneralizedCollectablesScenario(ABScenario):
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-16x22-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999):
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-16x22-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999, fit_to_screen=False):
         self.game = game
         self.steps = 0
         self.drts_hor_threshold = 3
@@ -43,7 +43,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         self.drts_action_noaction = 15
 
         if game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
-            self.env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = 12, number_of_players=drts_number_of_players, start_oil=drts_start_oil, start_gold=drts_start_gold, start_lumber=drts_start_lumber, start_food=drts_start_food)
+            self.env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = 12, number_of_players=drts_number_of_players, start_oil=drts_start_oil, start_gold=drts_start_gold, start_lumber=drts_start_lumber, start_food=drts_start_food, fit_to_screen=fit_to_screen)
         elif game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
             FLAGS = flags.FLAGS
             FLAGS(sys.argv)
