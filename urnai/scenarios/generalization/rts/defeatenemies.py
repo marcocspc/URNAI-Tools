@@ -66,6 +66,12 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
                 ],
             }
 
+    MAP_X_CORNER_LEFT = 21
+    MAP_X_CORNER_RIGHT = 44
+    MAP_Y_CORNER_UP = 27
+    MAP_Y_CORNER_DOWN = 50
+
+
     def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-24x24-defeatenemies.json", sc2_map="DefeatRoaches", drts_number_of_players=2, drts_start_oil=999999, drts_start_gold=999999, drts_start_lumber=999999, drts_start_food=999999, fit_to_screen=False):
         super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=drts_number_of_players, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food, fit_to_screen=fit_to_screen)
         self.drts_attack_radius = maxint
@@ -96,21 +102,19 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
         enemy = 1
         p_army_x, p_army_y = self.get_army_mean(player)
         e_army_x, e_army_y = self.get_army_mean(enemy)
-        hor_threshold = 0
-        ver_threshold = 0
+
+        new_x = 0
+        new_y = 0
 
         if p_army_x - e_army_x < 0:
-            hor_threshold = self.drts_hor_threshold
+            new_x = GeneralizedDefeatEnemiesScenario.MAP_X_CORNER_LEFT 
         else:
-            hor_threshold = -self.drts_hor_threshold
+            new_x = GeneralizedDefeatEnemiesScenario.MAP_X_CORNER_RIGHT
 
         if p_army_y - e_army_y < 0:
-            ver_threshold = self.drts_ver_threshold
+            new_y = GeneralizedDefeatEnemiesScenario.MAP_Y_CORNER_UP
         else:
-            ver_threshold = -self.drts_ver_threshold
-
-        new_x = p_army_x + hor_threshold
-        new_y = p_army_y + ver_threshold
+            new_y = GeneralizedDefeatEnemiesScenario.MAP_Y_CORNER_DOWN
 
         self.env.game.players[player].right_click(new_x, new_y)
 
