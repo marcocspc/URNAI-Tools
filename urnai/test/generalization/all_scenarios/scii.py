@@ -1,5 +1,5 @@
 from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario as Scenario
-from urnai.scenarios.generalization.rts.buildunits import GeneralizedBuildUnitsScenario as Scenario
+#from urnai.scenarios.generalization.rts.buildunits import GeneralizedBuildUnitsScenario as Scenario
 #from urnai.scenarios.generalization.rts.findanddefeat import GeneralizedFindaAndDefeatScenario as Scenario
 #from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario as Scenario
 import numpy as np
@@ -31,7 +31,8 @@ for ep in range(episodes):
                     4 - Down 
                     5 - Attack Nearest Unit 
                     6 - Run 
-                    7 - No-Op
+                    7 - Stop 
+                    8 - No-Op
             '''
 
             action = None
@@ -39,7 +40,7 @@ for ep in range(episodes):
             try:
                 action = int(input(text))
             except ValueError:
-                action = 7
+                action = 8
 
             action -= 1
             action = action_wrapper.get_action(action, state)

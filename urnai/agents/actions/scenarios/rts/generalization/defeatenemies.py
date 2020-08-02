@@ -60,6 +60,12 @@ class DefeatEnemiesDeepRTSActionWrapper(FindAndDefeatDeepRTSActionWrapper):
 
 
 class DefeatEnemiesStarcraftIIActionWrapper(FindAndDefeatStarcraftIIActionWrapper):
+
+    MAP_X_CORNER_LEFT = 21
+    MAP_X_CORNER_RIGHT = 44
+    MAP_Y_CORNER_UP = 27
+    MAP_Y_CORNER_DOWN = 50
+
     def __init__(self):
         super().__init__()
 
@@ -68,33 +74,37 @@ class DefeatEnemiesStarcraftIIActionWrapper(FindAndDefeatStarcraftIIActionWrappe
         self.hor_threshold = 3
 
         self.run = 5
-        self.actions = [self.attack, self.run]
+        self.stop = 6
+        self.actions = [self.attack, self.run, self.stop]
 
     def solve_action(self, action_idx, obs):
         if action_idx == self.attack:
             self.attack_(obs)
-        if action_idx == self.run:
+        elif action_idx == self.run:
             self.run_(obs)
+        elif action_idx == self.stop:
+            self.pending_actions.clear()
         
     def run_(self, obs):
         #TODO
         #get player x and y avg
-        avg_p_x, avg_p_y = self.get_race_unit_avg(obs, sc2_env.Race.terran)
+        p_army_x, p_army_y = self.get_race_unit_avg(obs, sc2_env.Race.terran)
         #get enemy x and y avg
-        avg_e_x, avg_e_y = self.get_race_unit_avg(obs, sc2_env.Race.zerg)
+        e_army_x, e_army_y = self.get_race_unit_avg(obs, sc2_env.Race.zerg)
 
-        final_x = 0
-        final_y = 0
-        if avg_p_x - avg_e_x < 0:
-            final_x = avg_p_x - self.hor_threshold
-        else:
-            final_x = avg_p_x + self.hor_threshold
+        new_x = 0
+        new_y = 0
 
-        if avg_p_y - avg_e_y < 0:
-            final_y = avg_p_y - self.ver_threshold
+        if p_army_x - e_army_x < 0:
+            new_x = DefeatEnemiesStarcraftIIActionWrapper.MAP_X_CORNER_LEFT
         else:
-            final_y = avg_p_y + self.ver_threshold
+            new_x = DefeatEnemiesStarcraftIIActionWrapper.MAP_X_CORNER_RIGHT
+
+        if p_army_y - e_army_y < 0:
+            new_y = DefeatEnemiesStarcraftIIActionWrapper.MAP_Y_CORNER_UP
+        else:
+            new_y = DefeatEnemiesStarcraftIIActionWrapper.MAP_Y_CORNER_DOWN
 
         army = scaux.select_army(obs, sc2_env.Race.terran)
         for unit in army:
-            self.pending_actions.append(actions.RAW_FUNCTIONS.Move_pt("now", unit.tag, [final_x, final_y]))
+            self.pending_actions.append(actions.RAW_FUNCTIONS.Move_pt("now", unit.tag, [new_x, new_y]))
