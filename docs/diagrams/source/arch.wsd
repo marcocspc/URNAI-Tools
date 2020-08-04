@@ -4,29 +4,38 @@
 allow_mixing
 
 ' Agent part.
-frame Agent {
+frame Core {
 	node Agent
 	node Observation
 	node Reward
 	node Model
 	node Action
+	node EnvironmentWrapper
+    node Trainer
 }
 
 ' Environment Part
-frame Environment {
-	node EnvironmentWrapper
+frame Environments {
 	node OpenAIGym
     node StarcraftII
     node VizDoom
     node DeepRTS
 }
 
+frame Libraries {
+    node Keras
+    node Tensorflow
+}
+
 ' Connections between nodes
+Keras -up- Tensorflow 
+Model -up- Keras
 Agent -up- Model
 Agent -up- Observation
 Agent -up- Reward
 Agent -up- Action
-Agent <-down-> EnvironmentWrapper
+Agent -down- Trainer 
+Trainer -down- EnvironmentWrapper
 EnvironmentWrapper -down- OpenAIGym 
 EnvironmentWrapper -down- StarcraftII 
 EnvironmentWrapper -down- VizDoom 
