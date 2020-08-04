@@ -28,10 +28,10 @@ frame Libraries {
 }
 
 ' Connections between nodes
+Agent -up- Observation
 Keras -up- Tensorflow 
 Model -up- Keras
 Agent -up- Model
-Agent -up- Observation
 Agent -up- Reward
 Agent -up- Action
 Agent -down- Trainer 
