@@ -128,11 +128,13 @@ class CollectablesStarcraftIIActionWrapper(ActionWrapper):
         return []
 
     def get_action(self, action_idx, obs):
-        if len(self.pending_actions) > 0:
-            return [self.pending_actions.pop()]
+        action = None
+        if len(self.pending_actions) == 0:
+            action = [actions.RAW_FUNCTIONS.no_op()]
         else:
-            self.solve_action(action_idx, obs)
-            return [actions.RAW_FUNCTIONS.no_op()]
+            action = [self.pending_actions.pop()]
+        self.solve_action(action_idx, obs)
+        return action
 
     def solve_action(self, action_idx, obs):
         if action_idx == self.moveleft:
