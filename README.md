@@ -151,28 +151,31 @@ To integrate a new environment, you might want to check the readme in the [urnai
 Here you'll find all the things that we plan to do in this project. **Bold** items are work in progress.
 
 * [ ] Documentation
-  * [ ] Core codebase documentation/commenting
+  * [ ] **Core codebase documentation/commenting**
   * [ ] **Documentation for each of the main modules (env, agents, models etc)**
-  * [ ] Statistics for solved problems
+  * [ ] **Statistics for solved problems**
 * [ ] Support for new environments
   * [ ] [Arcade Learning Environment](https://github.com/mgbellemare/Arcade-Learning-Environment)
   * [ ] [Gym Retro](https://github.com/openai/retro)
   * [X] [Vizdoom](https://github.com/mwydmuch/ViZDoom)
+  * [X] [DeepRTS](https://github.com/cair/deep-rts)
 * [ ] More Deep RL algorithms
   * [X] Policy Gradient
+  * [X] Double Deep Q-Learning
   * [ ] **A3C**
   * [ ] Curiosity-Driven Learning
   * [ ] Proximal Policy Optimization
 * [X] Core codebase improvements
   * [X] Logger class
-  * [X] Save model parameters (currently saves only the weights)
+  * [X] Save model parameters
+  * [X] Persistance of training parameters (saving / loading)
+  * [X] Automatic generation of training graphs (avg. reward, avg. win rate etc.)
 * [ ] Solve more problems
   * [X] Frozenlake
   * [X] Cartpole-V0
   * [X] Cartpole-V1
-  * [ ] Flappy Bird
-  * [ ] **StarCraft II - Simple 64 Map - Very Easy difficulty**
-
+  * [X] StarCraft II - Simple 64 Map - Very Easy difficulty
+  * [ ] **StarCraft II - Simple 64 Map - Easy Difficulty**
 
 
 ## Authors
