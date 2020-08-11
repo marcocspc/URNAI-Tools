@@ -45,12 +45,12 @@ To install urnai with vizdoom support, use:
 
 - On Unix:
 ```
-URNAI_VIZDOOM=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+URNAI_VIZDOOM=1 pip3 install git+https://github.com/marcocspc/URNAI-Tools/ 
 ```
 
 - On Windows:
 ```
-set "URNAI_VIZDOOM=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+set "URNAI_VIZDOOM=1" && pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
 #### DeepRTS 
@@ -59,12 +59,12 @@ To install urnai with DeepRTS support, use:
 
 - On Unix:
 ```
-URNAI_DEEPRTS=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+URNAI_DEEPRTS=1 pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
 - On Windows:
 ```
-set "URNAI_DEEPRTS=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+set "URNAI_DEEPRTS=1" && pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
 #### Full Install (with all optional environments)
@@ -73,12 +73,12 @@ To install urnai with all optional environments, use:
 
 - On Unix:
 ```
-URNAI_DEEPRTS=1 URNAI_VIZDOOM=1 URNAI_2048=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+URNAI_DEEPRTS=1 URNAI_VIZDOOM=1 URNAI_2048=1 pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
 - On Windows:
 ```
-set "URNAI_DEEPRTS=1" && set "URNAI_VIZDOOM=1" && set "URNAI_2048=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+set "URNAI_DEEPRTS=1" && set "URNAI_VIZDOOM=1" && pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
 #### Tensorflow CPU
@@ -87,12 +87,12 @@ By default, urnai depdens on tensorflow-gpu, to use tf-cpu instead, use:
 
 - On Unix:
 ```
-URNAI_TF_CPU=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+URNAI_TF_CPU=1 pip3 install git+https://github.com/marcocspc/URNAI-Tools/ 
 ```
 
 - On Windows:
 ```
-set "URNAI_TF_CPU=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+set "URNAI_TF_CPU=1" && pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
 #### Latest Dependencies 
@@ -101,12 +101,12 @@ By default, URNAI fixes all dependencies' versions. If you need to install those
 
 - On Unix:
 ```
-URNAI_LATEST_DEPS=1 pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+URNAI_LATEST_DEPS=1 pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
 - On Windows:
 ```
-set "URNAI_LATEST_DEPS=1" && pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+set "URNAI_LATEST_DEPS=1" && pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
 ### Running the examples
@@ -178,3 +178,4 @@ Here you'll find all the things that we plan to do in this project. **Bold** ite
 ## Authors
 
 * **Francisco de Paiva Marques Netto** - *Initial work* - [pvnetto](https://github.com/pvnetto)
+* **Luiz Paulo de Carvalho Alves** - *Integration and experimentation with StarCraft II* - [lpdcalves](https://github.com/lpdcalves)
