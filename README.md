@@ -39,7 +39,7 @@ SC2LE is already marked as dependency, so it will be automatically installed by 
 
 Before setting urnai to install vizdoom, please see if you have all dependencies installed.
 
-Go [here] first.(https://github.com/mwydmuch/ViZDoom/blob/master/doc/Building.md#deps)
+Go [here](https://github.com/mwydmuch/ViZDoom/blob/master/doc/Building.md#deps) first.
 
 To install urnai with vizdoom support, use:
 
