@@ -83,7 +83,7 @@ set "URNAI_DEEPRTS=1" && set "URNAI_VIZDOOM=1" && pip3 install git+https://githu
 
 #### Tensorflow CPU
 
-By default, urnai depdens on tensorflow-gpu, to use tf-cpu instead, use:
+By default, urnai depends on tensorflow-gpu, to use tf-cpu instead, use:
 
 - On Unix:
 ```
@@ -118,6 +118,9 @@ git clone https://github.com/marcocspc/URNAI-Tools
 cd 'URNAI-Tools/urnai/test/solves'
 urnai train --json-file=solve_x.json
 ```
+
+The Alternative to using JSON files is to run one of our solve_x.py files in your Python interpreter. These files are used to instantiate and train an AI agent.
+There are a few files to choose from. To see the solve files for games and scenarios that we have already solved (achieved a reasonable level of success) check the [solves directory] (https://github.com/marcocspc/URNAI-Tools/tree/master/urnai/solves). To see the solve files that are currently being worked on, and that we haven't yet found a successful solving strategy, check out the [test/solves directory] (https://github.com/marcocspc/URNAI-Tools/tree/master/urnai/test/solves)
 
 ## Command line
 
