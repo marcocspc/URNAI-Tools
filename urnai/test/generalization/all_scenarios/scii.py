@@ -1,9 +1,11 @@
-from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario as Scenario
-#from urnai.scenarios.generalization.rts.buildunits import GeneralizedBuildUnitsScenario as Scenario
+#from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario as Scenario
+from urnai.scenarios.generalization.rts.buildunits import GeneralizedBuildUnitsScenario as Scenario
 #from urnai.scenarios.generalization.rts.findanddefeat import GeneralizedFindaAndDefeatScenario as Scenario
 #from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario as Scenario
 import numpy as np
 import sys
+
+PRINT_MAP = False
 
 episodes = 100
 steps = 99999999999 
@@ -32,7 +34,11 @@ for ep in range(episodes):
                     5 - Attack Nearest Unit 
                     6 - Run 
                     7 - Stop 
-                    8 - No-Op
+                    8 - Collect Minerals 
+                    9 - Build Supply Depot
+                    10 - Build Barrack
+                    11 - Train Marine 
+                    12 - No-Op
             '''
 
             action = None
@@ -47,8 +53,9 @@ for ep in range(episodes):
 
             state, reward, done = env.step(action)
 
-            print("Map shape: {}".format(state.feature_minimap[4].shape))
-            print("Map: {}".format(state.feature_minimap[4]))
+            if PRINT_MAP:
+                print("Map shape: {}".format(state.feature_minimap[4].shape))
+                print("Map: {}".format(state.feature_minimap[4]))
 
             print("Reward: {r}".format(r=reward))
 
