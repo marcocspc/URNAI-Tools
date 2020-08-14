@@ -20,6 +20,8 @@ class Agent(Savable):
         self.previous_state = None
         self.reward_builder = reward_builder
 
+        self.pickle_black_list = ["model", "action_wrapper", "state_builder", "reward_builder"]
+
 
     def build_state(self, obs):
         return self.state_builder.build_state(obs)

@@ -4,33 +4,35 @@ from pysc2.lib import actions
 from pysc2.lib import features
 from pysc2.lib import protocol
 from pysc2.env.environment import StepType
+from pysc2.env import sc2_env
 
-# TODO: Add actions for specific races
-# Keys that can be passed do SC2Env constructor to add specific actions.
-# 'minigames': Adds actions used in all minigames
-# 'minigames_all': Adds additional actions for minigames, which are not necessary to solve them
-# 'all': Adds all actions, including outdated/unusable to current race/usable in certain situations
-ACTIONS_MINIGAMES, ACTIONS_MINIGAMES_ALL, ACTIONS_ALL = 'minigames', 'minigames_all', 'all'
+players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
 
 class SC2Env(Env):
     def __init__(
         self,
         map_name='Simple64',
         players=None,
+        player_race = 'terran',
+        enemy_race = 'random',
+        difficulty = 'very_easy',
         render=False,
         reset_done=True,
         spatial_dim=16,
         step_mul=8,
         game_steps_per_ep=0,
         obs_features=None,
-        action_ids=ACTIONS_ALL    # action_ids is passed to the constructor as a key for the actions that the agent can use, but is converted to a list of IDs for these actions
+        #action_ids=ACTIONS_ALL    # action_ids is passed to the constructor as a key for the actions that the agent can use, but is converted to a list of IDs for these actions
     ):
         super().__init__(map_name, render, reset_done)
 
         self.step_mul = step_mul
         self.game_steps_per_ep = game_steps_per_ep
         self.spatial_dim = spatial_dim
-        self.players = players
+        self.player_race = eval("sc2_env.Race."+player_race)
+        self.enemy_race = eval("sc2_env.Race."+enemy_race)
+        self.difficulty = eval("sc2_env.Difficulty."+difficulty)
+        self.players = [sc2_env.Agent(self.player_race), sc2_env.Bot(self.enemy_race, self.difficulty)]
         self.done = False
 
         self.start()
@@ -40,7 +42,7 @@ class SC2Env(Env):
         self.done = False
         if self.env_instance is None:
             # Lazy loading pysc2 env
-            from pysc2.env import sc2_env
+            #from pysc2.env import sc2_env
 
 
             self.env_instance = sc2_env.SC2Env(
