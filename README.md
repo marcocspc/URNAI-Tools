@@ -1,9 +1,9 @@
 # URNAI-Tools
-URNAI Tools is a modular Deep Reinforcement Learning library that supports multiple environments, such as [PySC2](https://github.com/deepmind/pysc2), [OpenAI Gym](https://github.com/openai/gym), and [PyGame Learning Environment](https://github.com/ntasfi/PyGame-Learning-Environment). The main goal of URNAI Tools is to provide an easy way to develop DRL agents in a way that allows the developer to reuse as much code as possible when developing different agents, and that also allows him to reuse previously implemented models in different environments and to integrate new environments easily when necessary. The main advantage of using URNAI Tools is that the models you make for one environment will also work in other environments, so you can prototype new agents for different environments very easily.
+URNAI Tools is a modular Deep Reinforcement Learning (DRL) toolkit that supports multiple environments, such as [PySC2](https://github.com/deepmind/pysc2), [OpenAI Gym](https://github.com/openai/gym), [ViZDoom](https://github.com/mwydmuch/ViZDoom) and [DeepRTS](https://github.com/cair/deep-rts). The main goal of URNAI Tools is to provide an easy-to-use modular platform for the development of DRL agents. Each part of a typical Reinforcement Learning scenario, such as the action space, state representation, reward function, algorithm etc, is considered a module in URNAI, and can be swaped by other action spaces, state representations etc. To supply that need, URNAI comes with a series of out-of-the-box DRL algorithms, environment wrappers, action wrappers, reward functions and state representations, allowing developers to easily assemble different learning configurations and to quickly iterate through them.
 
 ## Getting Started
 
-Follow these instructions to get a working copy of the project on your PC. It's a good idea to use the 'solve_x.py' files as a base to start developing your own agents.
+Follow these instructions to get a working copy of the toolkit on your PC. It's a good idea to use the 'solve_x.py' files as a base to start developing your own agents.
 
 ### Prerequisites
 
