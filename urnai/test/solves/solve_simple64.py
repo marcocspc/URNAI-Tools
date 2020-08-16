@@ -38,12 +38,9 @@ def main(unused_argv):
         #     os.environ["SC2PATH"] = sc2_local_path
 
         ## Initializing our StarCraft 2 environment
-        #players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
-        env = SC2Env(map_name="Simple64", render=False, step_mul=16, player_race="terran", enemy_race="terran", difficulty="very_easy")
+        env = SC2Env(map_name="Simple64", render=False, step_mul=16, player_race="terran", enemy_race="protoss", difficulty="very_easy")
         
         action_wrapper = SimpleTerranWrapper()
-        #state_builder = Simple64State()
-        #state_builder = Simple64StateFullRes()
         state_builder = Simple64GridState(grid_size=4)
         
         helper = ModelBuilder()
@@ -59,7 +56,7 @@ def main(unused_argv):
         #dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
         
         # Terran agent
-        agent = SC2Agent(dq_network, KilledUnitsReward(), env.env_instance.observation_spec(), env.env_instance.action_spec())
+        agent = SC2Agent(dq_network, KilledUnitsReward())
 
 
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_krpb_ss_sar_2x50_easy", save_every=100, enable_save=True)

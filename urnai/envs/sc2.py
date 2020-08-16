@@ -1,12 +1,13 @@
+import sys
 import numpy as np
+from utils.sc2_utils import get_sc2_race, get_sc2_difficulty
+from absl import flags
 from .base.abenv import Env
 from pysc2.lib import actions
 from pysc2.lib import features
 from pysc2.lib import protocol
 from pysc2.env.environment import StepType
 from pysc2.env import sc2_env
-
-players = [sc2_env.Agent(sc2_env.Race.terran), sc2_env.Bot(sc2_env.Race.random, sc2_env.Difficulty.very_easy)]
 
 class SC2Env(Env):
     def __init__(
@@ -22,16 +23,18 @@ class SC2Env(Env):
         step_mul=8,
         game_steps_per_ep=0,
         obs_features=None,
-        #action_ids=ACTIONS_ALL    # action_ids is passed to the constructor as a key for the actions that the agent can use, but is converted to a list of IDs for these actions
     ):
         super().__init__(map_name, render, reset_done)
+
+        FLAGS = flags.FLAGS
+        FLAGS(sys.argv)
 
         self.step_mul = step_mul
         self.game_steps_per_ep = game_steps_per_ep
         self.spatial_dim = spatial_dim
-        self.player_race = eval("sc2_env.Race."+player_race)
-        self.enemy_race = eval("sc2_env.Race."+enemy_race)
-        self.difficulty = eval("sc2_env.Difficulty."+difficulty)
+        self.player_race = get_sc2_race(player_race)
+        self.enemy_race = get_sc2_race(enemy_race)
+        self.difficulty = get_sc2_difficulty(difficulty)
         self.players = [sc2_env.Agent(self.player_race), sc2_env.Bot(self.enemy_race, self.difficulty)]
         self.done = False
 
@@ -41,9 +44,6 @@ class SC2Env(Env):
     def start(self):
         self.done = False
         if self.env_instance is None:
-            # Lazy loading pysc2 env
-            #from pysc2.env import sc2_env
-
 
             self.env_instance = sc2_env.SC2Env(
                 map_name=self.id,

@@ -13,15 +13,11 @@ from utils import error
 
 
 class SC2Agent(Agent):
-    def __init__(self, model: LearningModel, reward_builder: RewardBuilder, observation_spec, action_spec):
+    def __init__(self, model: LearningModel, reward_builder: RewardBuilder):
         super(SC2Agent, self).__init__(model, reward_builder)
-        self.obs_spec = observation_spec
-        self.action_spec = action_spec
         self.reward = 0
         self.episodes = 0
         self.steps = 0
-        self.obs_spec = None
-        self.action_spec = None
 
     def reset(self):
         super(SC2Agent, self).reset()
