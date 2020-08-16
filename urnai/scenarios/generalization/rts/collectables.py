@@ -137,6 +137,23 @@ class GeneralizedCollectablesScenario(ABScenario):
 
         return units
 
+    def get_player_specific_type_units(self, player, unit_id):
+        all_units = self.get_player_units(player)
+        specific_units = []
+
+        for unit in all_units:
+            if unit.id = unit_id: specific_units.append(unit)
+
+        return specific_units
+
+    def get_tiles_by_id(self, tile_id):
+        tiles = []
+
+        for tile in self.env.game.tilemap.tiles: 
+            if tile.get_type_id() == tile_id: tiles.append(tile)
+
+        return tiles
+
     def start(self):
         self.env.start()
         self.done = self.env.done

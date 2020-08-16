@@ -8,15 +8,19 @@ import random
 class BuildUnitsDeepRTSActionWrapper(DefeatEnemiesDeepRTSActionWrapper):
     def __init__(self):
         super().__init__()
-        self.run = 16
+        self.collect_gold = 17
+        self.build_farm = 18
+        self.build_barrack = 19
+        self.build_footman = 20
 
         self.actions = [self.previousunit, self.nextunit, self.moveleft, self.moveright, self.moveup, self.movedown,
                 self.moveupleft, self.moveupright, self.movedownleft, self.movedownright, self.attack, self.harvest,
-                self.build0, self.build1, self.build2, self.noaction, self.run] 
+                self.build0, self.build1, self.build2, self.noaction, self.run, self.collect_gold, self.build_farm, 
+                self.build_barrack, self.build_footman] 
 
         self.excluded_actions = [self.previousunit, self.nextunit, self.moveleft, self.moveright, self.moveup, self.movedown,
-                self.moveupleft, self.moveupright, self.movedownleft, self.movedownright, self.harvest,
-                self.build0, self.build1, self.build2, self.noaction] 
+                self.moveupleft, self.moveupright, self.movedownleft, self.movedownright, self.attack, self.harvest,
+                self.build0, self.build1, self.build2, self.noaction, self.run] 
 
         self.final_actions = list(set(self.actions) - set(self.excluded_actions))
 
@@ -25,22 +29,6 @@ class BuildUnitsDeepRTSActionWrapper(DefeatEnemiesDeepRTSActionWrapper):
             self.run_(obs)
         elif action_idx == self.attack:
             self.attack_(obs)
-
-    def get_army_mean(self, player, obs):
-        xs = []
-        ys = []
-
-        for unit in self.get_player_units(obs["players"][player], obs):
-            try:
-                xs.append(unit.tile.x)
-                ys.append(unit.tile.y)
-            except AttributeError as ae:
-                if not "'NoneType' object has no attribute 'x'" in str(ae):
-                    raise
-
-        army_x = int(mean(xs))
-        army_y = int(mean(ys))
-        return army_x, army_y
 
     def run_(self, obs):
         #its not this simple
