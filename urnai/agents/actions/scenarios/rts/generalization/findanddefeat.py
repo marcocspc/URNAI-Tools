@@ -22,9 +22,10 @@ class FindAndDefeatDeepRTSActionWrapper(CollectablesDeepRTSActionWrapper):
         self.final_actions = list(set(self.actions) - set(self.excluded_actions))
 
     def solve_action(self, action_idx, obs):
-        if action_idx == self.attack:
+        i = action_idx 
+        if self.final_actions[i] == self.attack:
             self.attack_(obs)
-        elif action_idx == self.cancel:
+        elif self.final_actions[i] == self.cancel:
             self.action_queue.clear()
         else:
             super().solve_action(action_idx, obs)

@@ -60,13 +60,14 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
         return action
 
     def solve_action(self, action_idx, obs):
-        if action_idx == self.moveleft:
+        i = action_idx 
+        if self.final_actions[i] == self.moveleft:
             self.move_left(obs)
-        elif action_idx == self.moveright:
+        elif self.final_actions[i] == self.moveright:
             self.move_right(obs)
-        elif action_idx == self.moveup:
+        elif self.final_actions[i] == self.moveup:
             self.move_up(obs)
-        elif action_idx == self.movedown:
+        elif self.final_actions[i] == self.movedown:
             self.move_down(obs)
 
     def is_action_done(self):
@@ -96,7 +97,8 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
     def get_action_name_str_by_int(self, action_int):
         for attrstr in dir(self):
             attr = getattr(self, attrstr)
-            if action_int == attr:
+            action = self.final_actions[action_int]
+            if action == attr:
                 return attrstr 
 
 class CollectablesStarcraftIIActionWrapper(ActionWrapper):

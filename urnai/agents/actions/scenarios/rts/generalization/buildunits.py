@@ -1,4 +1,4 @@
-from urnai.agents.actions import sc2 as scaux
+from urnai.agents.actions iwg-watchdog.shmport sc2 as scaux
 from .defeatenemies import DefeatEnemiesDeepRTSActionWrapper, DefeatEnemiesStarcraftIIActionWrapper  
 from pysc2.lib import actions, features, units
 from statistics import mean
@@ -24,10 +24,11 @@ class BuildUnitsDeepRTSActionWrapper(DefeatEnemiesDeepRTSActionWrapper):
 
         self.final_actions = list(set(self.actions) - set(self.excluded_actions))
 
-    def solve_action(self, action_idx, obs):
-        if action_idx == self.run:
+    def solve_action(self, self.final_actions[i], obs):
+        i = action_idx 
+        if self.final_actions[i] == self.run:
             self.run_(obs)
-        elif action_idx == self.attack:
+        elif self.final_actions[i] == self.attack:
             self.attack_(obs)
 
     def run_(self, obs):

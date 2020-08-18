@@ -20,7 +20,8 @@ class DefeatEnemiesDeepRTSActionWrapper(FindAndDefeatDeepRTSActionWrapper):
         self.final_actions = list(set(self.actions) - set(self.excluded_actions))
 
     def solve_action(self, action_idx, obs):
-        if action_idx == self.run:
+        i = action_idx 
+        if self.final_actions[i] == self.run:
             self.run_(obs)
         else:
             super().solve_action(action_idx, obs)

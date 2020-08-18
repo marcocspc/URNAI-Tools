@@ -20,7 +20,10 @@ class GeneralizedCollectablesScenario(ABScenario):
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-16x22-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999, fit_to_screen=False):
+    TRAINING_METHOD_SINGLE_ENV = "single_environment"
+    TRAINING_METHOD_MULTIPLE_ENV = "multiple_environment"
+
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-16x22-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV):
         self.game = game
         self.steps = 0
         self.drts_hor_threshold = 3
@@ -42,21 +45,43 @@ class GeneralizedCollectablesScenario(ABScenario):
         self.drts_action_build2 = 14
         self.drts_action_noaction = 15
 
-        if game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
-            self.env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = 12, number_of_players=drts_number_of_players, start_oil=drts_start_oil, start_gold=drts_start_gold, start_lumber=drts_start_lumber, start_food=drts_start_food, fit_to_screen=fit_to_screen)
-        elif game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
-            FLAGS = flags.FLAGS
-            FLAGS(sys.argv)
-            players = [sc2_env.Agent(sc2_env.Race.terran)]
-            self.env = SC2Env(map_name=sc2_map, render=render, step_mul=32, players=players)
-        else:
-            err = '''{} only supports the following environments:
-    GeneralizedCollectablesScenario.GAME_DEEP_RTS
-    GeneralizedCollectablesScenario.GAME_STARCRAFT_II'''.format(self.__class__.__name__)
-            raise EnvironmentNotSupportedError(err)
+        self.envs = None
 
+        if method == TRAINING_METHOD_SINGLE_ENV: 
+            if game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
+                self.env = self.get_drts_env(self, render, drts_map, drts_number_of_players, 
+                        drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
+                        fit_to_screen)
+            elif game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
+                self.env = self.get_starcraft_env(sc2_map, render)
+            else:
+                err = '''{} only supports the following environments:
+        GeneralizedCollectablesScenario.GAME_DEEP_RTS
+        GeneralizedCollectablesScenario.GAME_STARCRAFT_II'''.format(self.__class__.__name__)
+                raise EnvironmentNotSupportedError(err)
+        elif method == TRAINING_METHOD_MULTIPLE_ENV:
+            env_drts = self.get_drts_env(self, render, drts_map, drts_number_of_players, 
+                    drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
+                    fit_to_screen)
+            env_sc2  = self.get_starcraft_env(sc2_map, render)
+            self.envs = [env_drts, env_sc2]
+            self.env = self.envs[random.randint(0, 1)]
+            
         self.start()
         self.steps = 0
+
+    def get_drts_env(self, render, drts_map, drts_number_of_players, 
+            drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
+            fit_to_screen):
+        env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = 12, number_of_players=drts_number_of_players, start_oil=drts_start_oil, start_gold=drts_start_gold, start_lumber=drts_start_lumber, start_food=drts_start_food, fit_to_screen=fit_to_screen)
+        return env
+
+    def get_starcraft_env(self, sc2_map, render):
+        FLAGS = flags.FLAGS
+        FLAGS(sys.argv)
+        players = [sc2_env.Agent(sc2_env.Race.terran)]
+        env = SC2Env(map_name=sc2_map, render=render, step_mul=32, players=players)
+        return env
 
     def get_army_mean(self, player):
         xs = []
@@ -154,7 +179,15 @@ class GeneralizedCollectablesScenario(ABScenario):
 
         return tiles
 
+    def alternate_envs(self):
+        if self.envs is not None:
+            if self.env == self.envs[0]:
+                self.env = self.envs[1]
+            else:
+                self.env = self.envs[0]
+
     def start(self):
+        self.alternate_envs()
         self.env.start()
         self.done = self.env.done
 

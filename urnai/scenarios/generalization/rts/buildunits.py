@@ -15,6 +15,10 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
 
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
+
+    TRAINING_METHOD_SINGLE_ENV = "single_environment"
+    TRAINING_METHOD_MULTIPLE_ENV = "multiple_environment"
+
     MAP_1 = "map1"
     MAP_2 = "map2"
 
@@ -66,8 +70,8 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
     ACTION_DRTS_BUILD_BARRACK = 19
     ACTION_DRTS_BUILD_FOOTMAN = 20
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-22x16-buildunits.json", sc2_map="BuildMarines", drts_start_oil=999999, drts_start_gold=999999, drts_start_lumber=999999, drts_start_food=999999, fit_to_screen=False):
-        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=1, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food, fit_to_screen=fit_to_screen)
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-22x16-buildunits.json", sc2_map="BuildMarines", drts_start_oil=999999, drts_start_gold=999999, drts_start_lumber=999999, drts_start_food=999999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV):
+        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=1, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food, fit_to_screen=fit_to_screen, method=method)
 
     def step(self, action):
         if (self.game == GeneralizedBuildUnitsScenario.GAME_DEEP_RTS):
