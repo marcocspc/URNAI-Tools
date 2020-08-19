@@ -77,6 +77,7 @@ pip3 install gym[atari]
 ```
 
 - On Windows:
+
 Unfortunately, this package tends to have problems when installed on a Windows system. A workaround can be found in this unofficial [atari-py](https://github.com/Kojoley/atari-py) repository.
 
 #### Full Install (with all optional environments)
