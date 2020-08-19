@@ -69,7 +69,7 @@ set "URNAI_DEEPRTS=1" && pip3 install git+https://github.com/marcocspc/URNAI-Too
 
 #### Gym Atari Games
 
-Gym doesn't come with Atari games by default. To use them, a Gym subpackage that simulates Atari games through [ALE](https://github.com/mgbellemare/Arcade-Learning-Environment) needs to be installed:
+Gym doesn't come with Atari games by default. To use them, a Gym subpackage needs to be installed:
 
 - On Unix:
 ```
