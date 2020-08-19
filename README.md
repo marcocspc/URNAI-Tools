@@ -67,6 +67,19 @@ URNAI_DEEPRTS=1 pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 set "URNAI_DEEPRTS=1" && pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
+#### Gym Atari Games
+
+Gym doesn't come with Atari games by default. To use them, a Gym subpackage needs to be installed:
+
+- On Unix:
+```
+pip3 install gym[atari]
+```
+
+- On Windows:
+
+Unfortunately, this package tends to have problems when installed on a Windows system. A workaround can be found in this unofficial [atari-py](https://github.com/Kojoley/atari-py) repository.
+
 #### Full Install (with all optional environments)
 
 To install urnai with all optional environments, use:
