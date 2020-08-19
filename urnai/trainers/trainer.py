@@ -92,7 +92,7 @@ class Trainer(Savable):
             for step in itertools.count():
                 if step >= max_steps:
                     break
-
+                
                 # Choosing an action and passing it to our env.step() in order to act on our environment
                 action = self.agent.step(obs, step_reward, done)
                 obs, default_reward, done = self.env.step(action)
@@ -192,7 +192,7 @@ class Trainer(Savable):
 
                 is_last_step = step == max_steps - 1
                 done = done or is_last_step
-                # If done (if we're dead) : finish episode
+                # If done: finish episode
                 if done:
                     victory = default_reward == 1
                     agent_info = {

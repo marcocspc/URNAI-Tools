@@ -1,4 +1,4 @@
-from envs.sc2 import SC2Env
+#from envs.sc2 import SC2Env
 from pysc2.env import sc2_env
 
 sc2_races = {

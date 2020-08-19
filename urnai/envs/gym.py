@@ -27,6 +27,8 @@ class GymEnv(Env):
     
     def step(self, action):
         obs, reward, done, _ = self.env_instance.step(action)
+        if self.render:
+            self.env_instance.render()
         return obs, reward, done
 
 
