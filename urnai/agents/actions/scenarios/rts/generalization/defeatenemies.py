@@ -20,11 +20,12 @@ class DefeatEnemiesDeepRTSActionWrapper(FindAndDefeatDeepRTSActionWrapper):
         self.final_actions = list(set(self.actions) - set(self.excluded_actions))
 
     def solve_action(self, action_idx, obs):
-        i = action_idx 
-        if self.final_actions[i] == self.run:
-            self.run_(obs)
-        else:
-            super().solve_action(action_idx, obs)
+        if action_idx != self.noaction:
+            i = action_idx 
+            if self.final_actions[i] == self.run:
+                self.run_(obs)
+            else:
+                super().solve_action(action_idx, obs)
 
     def get_army_mean(self, player, obs):
         xs = []
@@ -79,12 +80,14 @@ class DefeatEnemiesStarcraftIIActionWrapper(FindAndDefeatStarcraftIIActionWrappe
         self.actions = [self.attack, self.run, self.stop]
 
     def solve_action(self, action_idx, obs):
-        if action_idx == self.attack:
-            self.attack_(obs)
-        elif action_idx == self.run:
-            self.run_(obs)
-        elif action_idx == self.stop:
-            self.pending_actions.clear()
+        if action_idx != self.noaction:
+            action = self.actions[action_idx]
+            if action == self.attack:
+                self.attack_(obs)
+            elif action == self.run:
+                self.run_(obs)
+            elif action == self.stop:
+                self.pending_actions.clear()
         
     def run_(self, obs):
         #TODO

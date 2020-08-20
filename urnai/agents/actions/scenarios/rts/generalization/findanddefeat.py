@@ -22,13 +22,14 @@ class FindAndDefeatDeepRTSActionWrapper(CollectablesDeepRTSActionWrapper):
         self.final_actions = list(set(self.actions) - set(self.excluded_actions))
 
     def solve_action(self, action_idx, obs):
-        i = action_idx 
-        if self.final_actions[i] == self.attack:
-            self.attack_(obs)
-        elif self.final_actions[i] == self.cancel:
-            self.action_queue.clear()
-        else:
-            super().solve_action(action_idx, obs)
+        if action_idx != self.noaction:
+            i = action_idx 
+            if self.final_actions[i] == self.attack:
+                self.attack_(obs)
+            elif self.final_actions[i] == self.cancel:
+                self.action_queue.clear()
+            else:
+                super().solve_action(action_idx, obs)
     
     def attack_(self, obs):
         self.enqueue_action_for_player_units(obs, self.attack)
@@ -41,16 +42,18 @@ class FindAndDefeatStarcraftIIActionWrapper(CollectablesStarcraftIIActionWrapper
         self.actions = [self.moveleft, self.moveright, self.moveup, self.movedown, self.attack] 
 
     def solve_action(self, action_idx, obs):
-        if action_idx == self.moveleft:
-            self.move_left(obs)
-        elif action_idx == self.moveright:
-            self.move_right(obs)
-        elif action_idx == self.moveup:
-            self.move_up(obs)
-        elif action_idx == self.movedown:
-            self.move_down(obs)
-        elif action_idx == self.attack:
-            self.attack_(obs)
+        if action_idx != self.noaction:
+            action = self.actions[action_idx]
+            if action == self.moveleft:
+                self.move_left(obs)
+            elif action == self.moveright:
+                self.move_right(obs)
+            elif action == self.moveup:
+                self.move_up(obs)
+            elif action == self.movedown:
+                self.move_down(obs)
+            elif action == self.attack:
+                self.attack_(obs)
     
     def get_nearest_enemy_unit_inside_radius(self, x, y, obs, radius):
         enemy_army = [unit for unit in obs.raw_units if unit.owner != 1] 

@@ -60,15 +60,16 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
         return action
 
     def solve_action(self, action_idx, obs):
-        i = action_idx 
-        if self.final_actions[i] == self.moveleft:
-            self.move_left(obs)
-        elif self.final_actions[i] == self.moveright:
-            self.move_right(obs)
-        elif self.final_actions[i] == self.moveup:
-            self.move_up(obs)
-        elif self.final_actions[i] == self.movedown:
-            self.move_down(obs)
+        if action_idx != self.noaction:
+            i = action_idx 
+            if self.final_actions[i] == self.moveleft:
+                self.move_left(obs)
+            elif self.final_actions[i] == self.moveright:
+                self.move_right(obs)
+            elif self.final_actions[i] == self.moveup:
+                self.move_up(obs)
+            elif self.final_actions[i] == self.movedown:
+                self.move_down(obs)
 
     def is_action_done(self):
         return len(self.action_queue) == 0 
@@ -94,16 +95,25 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
     def get_excluded_actions(self, obs):        
         return self.excluded_actions
 
+
     def get_action_name_str_by_int(self, action_int):
+        action_str = ""
         for attrstr in dir(self):
             attr = getattr(self, attrstr)
-            action = self.final_actions[action_int]
+            action = self.actions[action_int]
             if action == attr:
-                return attrstr 
+                action_str = attrstr 
+
+        return action_str
+
+    def get_no_action(self):
+        return self.noaction 
+
 
 class CollectablesStarcraftIIActionWrapper(ActionWrapper):
 
     def __init__(self):
+        self.noaction = 15
         self.move_number = 0
 
         self.hor_threshold = 2
@@ -139,14 +149,16 @@ class CollectablesStarcraftIIActionWrapper(ActionWrapper):
         return action
 
     def solve_action(self, action_idx, obs):
-        if action_idx == self.moveleft:
-            self.move_left(obs)
-        elif action_idx == self.moveright:
-            self.move_right(obs)
-        elif action_idx == self.moveup:
-            self.move_up(obs)
-        elif action_idx == self.movedown:
-            self.move_down(obs)
+        if action_idx != self.noaction:
+            action = self.actions[action_idx]
+            if action == self.moveleft:
+                self.move_left(obs)
+            elif action == self.moveright:
+                self.move_right(obs)
+            elif action == self.moveup:
+                self.move_up(obs)
+            elif action == self.movedown:
+                self.move_down(obs)
     
     def move_left(self, obs):
         army = scaux.select_army(obs, sc2_env.Race.terran)
@@ -192,3 +204,15 @@ class CollectablesStarcraftIIActionWrapper(ActionWrapper):
         for unit in army:
             self.pending_actions.append(actions.RAW_FUNCTIONS.Move_pt("now", unit.tag, [new_army_x, new_army_y]))
 
+    def get_action_name_str_by_int(self, action_int):
+        action_str = ""
+        for attrstr in dir(self):
+            attr = getattr(self, attrstr)
+            action = self.actions[action_int]
+            if action == attr:
+                action_str = attrstr 
+
+        return action_str
+
+    def get_no_action(self):
+        return self.noaction

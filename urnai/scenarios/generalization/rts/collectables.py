@@ -47,9 +47,9 @@ class GeneralizedCollectablesScenario(ABScenario):
 
         self.envs = None
 
-        if method == TRAINING_METHOD_SINGLE_ENV: 
+        if method == GeneralizedCollectablesScenario.TRAINING_METHOD_SINGLE_ENV: 
             if game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
-                self.env = self.get_drts_env(self, render, drts_map, drts_number_of_players, 
+                self.env = self.get_drts_env(render, drts_map, drts_number_of_players, 
                         drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
                         fit_to_screen)
             elif game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
@@ -59,16 +59,22 @@ class GeneralizedCollectablesScenario(ABScenario):
         GeneralizedCollectablesScenario.GAME_DEEP_RTS
         GeneralizedCollectablesScenario.GAME_STARCRAFT_II'''.format(self.__class__.__name__)
                 raise EnvironmentNotSupportedError(err)
-        elif method == TRAINING_METHOD_MULTIPLE_ENV:
-            env_drts = self.get_drts_env(self, render, drts_map, drts_number_of_players, 
+        elif method == GeneralizedCollectablesScenario.TRAINING_METHOD_MULTIPLE_ENV:
+            env_drts = self.get_drts_env(render, drts_map, drts_number_of_players, 
                     drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
                     fit_to_screen)
             env_sc2  = self.get_starcraft_env(sc2_map, render)
-            self.envs = [env_drts, env_sc2]
-            self.env = self.envs[random.randint(0, 1)]
+            self.envs = {GeneralizedCollectablesScenario.GAME_DEEP_RTS : env_drts, GeneralizedCollectablesScenario.GAME_STARCRAFT_II : env_sc2}
+            if random.randint(0, 1) == 0:
+                self.env = self.envs[GeneralizedCollectablesScenario.GAME_DEEP_RTS]
+                self.game = GeneralizedCollectablesScenario.GAME_DEEP_RTS
+            else:
+                self.env = self.envs[GeneralizedCollectablesScenario.GAME_STARCRAFT_II]
+                self.game = GeneralizedCollectablesScenario.GAME_STARCRAFT_II
             
         self.start()
         self.steps = 0
+
 
     def get_drts_env(self, render, drts_map, drts_number_of_players, 
             drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
@@ -167,7 +173,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         specific_units = []
 
         for unit in all_units:
-            if unit.id = unit_id: specific_units.append(unit)
+            if unit.id == unit_id: specific_units.append(unit)
 
         return specific_units
 
@@ -181,10 +187,12 @@ class GeneralizedCollectablesScenario(ABScenario):
 
     def alternate_envs(self):
         if self.envs is not None:
-            if self.env == self.envs[0]:
-                self.env = self.envs[1]
+            if self.env == self.envs[GeneralizedCollectablesScenario.GAME_DEEP_RTS]:
+                self.env = self.envs[GeneralizedCollectablesScenario.GAME_STARCRAFT_II]
+                self.game = GeneralizedCollectablesScenario.GAME_STARCRAFT_II
             else:
-                self.env = self.envs[0]
+                self.env = self.envs[GeneralizedCollectablesScenario.GAME_DEEP_RTS]
+                self.game = GeneralizedCollectablesScenario.GAME_DEEP_RTS
 
     def start(self):
         self.alternate_envs()
@@ -227,7 +235,8 @@ class GeneralizedCollectablesScenario(ABScenario):
 
     def reset(self):
         self.steps = 0
-        return self.env.reset()
+        self.env.reset()
+        self.alternate_envs()
 
     def restart(self):
         self.reset()

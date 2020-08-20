@@ -25,11 +25,12 @@ class BuildUnitsDeepRTSActionWrapper(DefeatEnemiesDeepRTSActionWrapper):
         self.final_actions = list(set(self.actions) - set(self.excluded_actions))
 
     def solve_action(self, self.final_actions[i], obs):
-        i = action_idx 
-        if self.final_actions[i] == self.run:
-            self.run_(obs)
-        elif self.final_actions[i] == self.attack:
-            self.attack_(obs)
+        if action_idx != self.noaction:
+            i = action_idx 
+            if self.final_actions[i] == self.run:
+                self.run_(obs)
+            elif self.final_actions[i] == self.attack:
+                self.attack_(obs)
 
     def run_(self, obs):
         #its not this simple
@@ -64,16 +65,18 @@ class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
         self.actions = [self.collect_minerals, self.build_supply_depot, self.build_barrack, self.build_marine, self.stop]
 
     def solve_action(self, action_idx, obs):
-        if action_idx == self.collect_minerals:
-            self.collect(obs)
-        elif action_idx == self.build_supply_depot:
-            self.build_supply_depot_(obs)
-        elif action_idx == self.build_barrack:
-            self.build_barrack_(obs)
-        elif action_idx == self.build_marine:
-            self.build_marine_(obs)
-        elif action_idx == self.stop:
-            self.pending_actions.clear()
+        if action_idx != self.noaction:
+            action = self.actions[action_idx]
+            if action == self.collect_minerals:
+                self.collect(obs)
+            elif action == self.build_supply_depot:
+                self.build_supply_depot_(obs)
+            elif action == self.build_barrack:
+                self.build_barrack_(obs)
+            elif action == self.build_marine:
+                self.build_marine_(obs)
+            elif action == self.stop:
+                self.pending_actions.clear()
 
     def collect(self, obs):
         #get SCV list

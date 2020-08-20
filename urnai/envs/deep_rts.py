@@ -86,6 +86,7 @@ class DeepRTSEnv(Env):
         self.game.set_max_ups(self.max_ups)
  
         self.players = self.game.players
+        self.done = False
 
     def start(self):
         #Set done
