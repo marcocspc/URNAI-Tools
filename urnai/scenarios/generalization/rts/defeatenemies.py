@@ -74,7 +74,7 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
     TRAINING_METHOD_SINGLE_ENV = "single_environment"
     TRAINING_METHOD_MULTIPLE_ENV = "multiple_environment"
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-24x24-defeatenemies.json", sc2_map="DefeatRoaches", drts_number_of_players=2, drts_start_oil=999999, drts_start_gold=999999, drts_start_lumber=999999, drts_start_food=999999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV):
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-22x16-defeatenemies.json", sc2_map="DefeatRoaches", drts_number_of_players=2, drts_start_oil=999999, drts_start_gold=999999, drts_start_lumber=999999, drts_start_food=999999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV):
         super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=drts_number_of_players, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food, fit_to_screen=fit_to_screen, method=method)
         self.drts_attack_radius = maxint
         self.drts_hor_threshold = 1
@@ -129,13 +129,3 @@ class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
         for coords in GeneralizedDefeatEnemiesScenario.MAP_ENEMY_LOCATIONS[self.map_spawn]:
             tile = self.env.game.tilemap.get_tile(coords['x'], coords['y'])
             self.env.game.players[1].spawn_unit(self.env.constants.Unit.Archer, tile)
-
-    def get_default_action_wrapper(self):
-        wrapper = None
-
-        if self.game == GeneralizedDefeatEnemiesScenario.GAME_DEEP_RTS:
-            wrapper = DefeatEnemiesDeepRTSActionWrapper() 
-        elif self.game == GeneralizedDefeatEnemiesScenario.GAME_STARCRAFT_II:
-            wrapper = DefeatEnemiesStarcraftIIActionWrapper()
-
-        return wrapper 

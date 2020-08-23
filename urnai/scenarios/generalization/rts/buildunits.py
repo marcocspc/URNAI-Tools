@@ -80,19 +80,19 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
                 self.spawn_army()
 
             state, reward, done = None, None, None 
-            if action == ACTION_DRTS_COLLECT_GOLD:
+            if action == GeneralizedBuildUnitsScenario.ACTION_DRTS_COLLECT_GOLD:
                 self.collect_gold()
                 no_action = 15
                 state, reward, done = self.env.step(no_action)
-            elif action == ACTION_DRTS_BUILD_FARM:
+            elif action == GeneralizedBuildUnitsScenario.ACTION_DRTS_BUILD_FARM:
                 self.build_farm()
                 no_action = 15
                 state, reward, done = self.env.step(no_action)
-            elif action == ACTION_DRTS_BUILD_BARRACK:
+            elif action == GeneralizedBuildUnitsScenario.ACTION_DRTS_BUILD_BARRACK:
                 self.build_barrack()
                 no_action = 15
                 state, reward, done = self.env.step(no_action)
-            elif action == ACTION_DRTS_BUILD_FOOTMAN:
+            elif action == GeneralizedBuildUnitsScenario.ACTION_DRTS_BUILD_FOOTMAN:
                 self.build_footman()
                 no_action = 15
                 state, reward, done = self.env.step(no_action)
@@ -112,7 +112,7 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
             tile = self.env.game.tilemap.get_tile(coords['x'], coords['y'])
             self.env.game.players[0].spawn_unit(self.env.constants.Unit.Peasant, tile)
 
-        tile = self.env.game.tilemap.get_tile(MAP_PLAYER_TOWNHALL_X, MAP_PLAYER_TOWNHALL_Y)
+        tile = self.env.game.tilemap.get_tile(GeneralizedBuildUnitsScenario.MAP_PLAYER_TOWNHALL_X, GeneralizedBuildUnitsScenario.MAP_PLAYER_TOWNHALL_Y)
         self.env.game.players[0].spawn_unit(self.env.constants.Unit.TownHall, tile)
 
     def collect_gold(self):
@@ -132,11 +132,11 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
                 peasant.right_click(gold_tile)
 
     def build_farm(self):
-        tile = self.env.game.tilemap.get_tile(MAP_PLAYER_FARM_X, MAP_PLAYER_FARM_Y)
+        tile = self.env.game.tilemap.get_tile(GeneralizedBuildUnitsScenario.MAP_PLAYER_FARM_X, GeneralizedBuildUnitsScenario.MAP_PLAYER_FARM_Y)
         self.env.game.players[0].spawn_unit(self.env.constants.Unit.Farm, tile)
 
     def build_barrack(self):
-        tile = self.env.game.tilemap.get_tile(MAP_PLAYER_BARRACK_X, MAP_PLAYER_BARRACK_Y)
+        tile = self.env.game.tilemap.get_tile(GeneralizedBuildUnitsScenario.MAP_PLAYER_BARRACK_X, GeneralizedBuildUnitsScenario.MAP_PLAYER_BARRACK_Y)
         self.env.game.players[0].spawn_unit(self.env.constants.Unit.Barracks, tile)
 
     def build_footman(self):
@@ -144,13 +144,3 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
         barracks_list = self.get_player_specific_type_units(player, self.env.constants.Unit.Barracks)
         for barracks in barracks_list:
             barracks.build(0)
-
-    def get_default_action_wrapper(self):
-        wrapper = None
-
-        if self.game == GeneralizedBuildUnitsScenario.GAME_DEEP_RTS:
-            wrapper = BuildUnitsDeepRTSActionWrapper() 
-        elif self.game == GeneralizedBuildUnitsScenario.GAME_STARCRAFT_II:
-            wrapper = BuildUnitsStarcraftIIActionWrapper()
-
-        return wrapper 

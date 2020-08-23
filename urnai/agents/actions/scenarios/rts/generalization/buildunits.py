@@ -1,4 +1,4 @@
-from urnai.agents.actions iwg-watchdog.shmport sc2 as scaux
+from urnai.agents.actions import sc2 as scaux
 from .defeatenemies import DefeatEnemiesDeepRTSActionWrapper, DefeatEnemiesStarcraftIIActionWrapper  
 from pysc2.lib import actions, features, units
 from statistics import mean
@@ -13,18 +13,9 @@ class BuildUnitsDeepRTSActionWrapper(DefeatEnemiesDeepRTSActionWrapper):
         self.build_barrack = 19
         self.build_footman = 20
 
-        self.actions = [self.previousunit, self.nextunit, self.moveleft, self.moveright, self.moveup, self.movedown,
-                self.moveupleft, self.moveupright, self.movedownleft, self.movedownright, self.attack, self.harvest,
-                self.build0, self.build1, self.build2, self.noaction, self.run, self.collect_gold, self.build_farm, 
-                self.build_barrack, self.build_footman] 
+        self.final_actions = [self.collect_gold, self.build_farm, self.build_barrack, self.build_footman] 
 
-        self.excluded_actions = [self.previousunit, self.nextunit, self.moveleft, self.moveright, self.moveup, self.movedown,
-                self.moveupleft, self.moveupright, self.movedownleft, self.movedownright, self.attack, self.harvest,
-                self.build0, self.build1, self.build2, self.noaction, self.run] 
-
-        self.final_actions = list(set(self.actions) - set(self.excluded_actions))
-
-    def solve_action(self, self.final_actions[i], obs):
+    def solve_action(self, action_idx, obs):
         if action_idx != self.noaction:
             i = action_idx 
             if self.final_actions[i] == self.run:
@@ -62,7 +53,7 @@ class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
         self.build_supply_depot = 8
         self.build_barrack = 9
         self.build_marine = 10
-        self.actions = [self.collect_minerals, self.build_supply_depot, self.build_barrack, self.build_marine, self.stop]
+        self.actions = [self.collect_minerals, self.build_supply_depot, self.build_barrack, self.build_marine]
 
     def solve_action(self, action_idx, obs):
         if action_idx != self.noaction:

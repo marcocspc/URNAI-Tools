@@ -100,11 +100,11 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
         action_str = ""
         for attrstr in dir(self):
             attr = getattr(self, attrstr)
-            action = self.actions[action_int]
-            if action == attr:
+            if action_int == attr:
                 action_str = attrstr 
 
         return action_str
+
 
     def get_no_action(self):
         return self.noaction 
@@ -113,7 +113,7 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
 class CollectablesStarcraftIIActionWrapper(ActionWrapper):
 
     def __init__(self):
-        self.noaction = 15
+        self.noaction = [actions.RAW_FUNCTIONS.no_op()]
         self.move_number = 0
 
         self.hor_threshold = 2
@@ -208,8 +208,7 @@ class CollectablesStarcraftIIActionWrapper(ActionWrapper):
         action_str = ""
         for attrstr in dir(self):
             attr = getattr(self, attrstr)
-            action = self.actions[action_int]
-            if action == attr:
+            if action_int == attr:
                 action_str = attrstr 
 
         return action_str

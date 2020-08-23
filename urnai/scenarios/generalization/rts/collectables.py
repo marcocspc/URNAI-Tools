@@ -1,8 +1,9 @@
 import sys, os
 from urnai.scenarios.base.abscenario import ABScenario
-from urnai.utils.error import EnvironmentNotSupportedError
+from urnai.utils.error import EnvironmentNotSupportedError, UnsupportedTrainingMethodError
 from urnai.agents.actions.base.abwrapper import ActionWrapper
 from urnai.agents.actions.scenarios.rts.generalization.collectables import CollectablesDeepRTSActionWrapper, CollectablesStarcraftIIActionWrapper 
+from urnai.agents.actions.scenarios.rts.generalization.all_scenarios import MultipleScenarioActionWrapper  
 from pysc2.lib import actions, features, units
 from agents.actions import sc2 as scaux
 from agents.rewards.default import PureReward
@@ -20,8 +21,8 @@ class GeneralizedCollectablesScenario(ABScenario):
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
 
-    TRAINING_METHOD_SINGLE_ENV = "single_environment"
-    TRAINING_METHOD_MULTIPLE_ENV = "multiple_environment"
+    TRAINING_METHOD_SINGLE_ENV = "single"
+    TRAINING_METHOD_MULTIPLE_ENV = "multiple"
 
     def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-16x22-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV):
         self.game = game
@@ -47,6 +48,7 @@ class GeneralizedCollectablesScenario(ABScenario):
 
         self.envs = None
 
+        self.method = method
         if method == GeneralizedCollectablesScenario.TRAINING_METHOD_SINGLE_ENV: 
             if game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
                 self.env = self.get_drts_env(render, drts_map, drts_number_of_players, 
@@ -65,12 +67,22 @@ class GeneralizedCollectablesScenario(ABScenario):
                     fit_to_screen)
             env_sc2  = self.get_starcraft_env(sc2_map, render)
             self.envs = {GeneralizedCollectablesScenario.GAME_DEEP_RTS : env_drts, GeneralizedCollectablesScenario.GAME_STARCRAFT_II : env_sc2}
-            if random.randint(0, 1) == 0:
+            if game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
                 self.env = self.envs[GeneralizedCollectablesScenario.GAME_DEEP_RTS]
                 self.game = GeneralizedCollectablesScenario.GAME_DEEP_RTS
-            else:
+            elif game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
                 self.env = self.envs[GeneralizedCollectablesScenario.GAME_STARCRAFT_II]
                 self.game = GeneralizedCollectablesScenario.GAME_STARCRAFT_II
+            else:
+                err = '''{} only supports the following environments:
+        GeneralizedCollectablesScenario.GAME_DEEP_RTS
+        GeneralizedCollectablesScenario.GAME_STARCRAFT_II'''.format(self.__class__.__name__)
+                raise EnvironmentNotSupportedError(err)
+        else:
+            raise UnsupportedTrainingMethodError("You should use only '{metA}' or '{metB}' as training method.".format(
+                    metA=GeneralizedCollectablesScenario.TRAINING_METHOD_SINGLE_ENV,
+                    metB=GeneralizedCollectablesScenario.TRAINING_METHOD_MULTIPLE_ENV
+                ))
             
         self.start()
         self.steps = 0
@@ -195,7 +207,6 @@ class GeneralizedCollectablesScenario(ABScenario):
                 self.game = GeneralizedCollectablesScenario.GAME_DEEP_RTS
 
     def start(self):
-        self.alternate_envs()
         self.env.start()
         self.done = self.env.done
 
@@ -235,28 +246,18 @@ class GeneralizedCollectablesScenario(ABScenario):
 
     def reset(self):
         self.steps = 0
-        self.env.reset()
         self.alternate_envs()
+        self.env.reset()
 
     def restart(self):
         self.reset()
 
     def get_default_reward_builder(self):
         builder = PureReward() 
-        #if self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
-        #    builder = DeepRTSRewardBuilder()
-        #elif self.game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
-        #    builder = StarcraftIIRewardBuilder()
         return builder
 
     def get_default_action_wrapper(self):
-        wrapper = None
-
-        if self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
-            wrapper = CollectablesDeepRTSActionWrapper() 
-        elif self.game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
-            wrapper = CollectablesStarcraftIIActionWrapper()
-
+        wrapper = MultipleScenarioActionWrapper(self.__class__.__name__, self.game, self.method)
         return wrapper 
 
     def random_tile(self):

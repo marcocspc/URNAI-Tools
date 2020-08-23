@@ -36,3 +36,6 @@ class DeepRTSEnvError(Exception):
 
 class MapNotFoundError(Exception):
     pass
+
+class UnsupportedTrainingMethodError(Exception):
+    pass

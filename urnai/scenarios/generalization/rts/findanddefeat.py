@@ -106,14 +106,3 @@ class GeneralizedFindaAndDefeatScenario(GeneralizedCollectablesScenario):
 
         if self.env.game.players[player].num_archer < 23:
             self.env.game.players[player].spawn_unit(self.env.constants.Unit.Archer, tile)
-
-    def get_default_action_wrapper(self):
-        wrapper = None
-
-        if self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
-            wrapper = FindAndDefeatDeepRTSActionWrapper() 
-        elif self.game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
-            wrapper = FindAndDefeatStarcraftIIActionWrapper()
-
-        return wrapper 
-
