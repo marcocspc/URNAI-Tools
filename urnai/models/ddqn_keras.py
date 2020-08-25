@@ -8,7 +8,7 @@ from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activati
 from keras.optimizers import Adam
 from keras import backend as K
 from .base.abmodel import LearningModel
-from models.dql_keras import DQNKeras
+from models.dqn_keras import DQNKeras
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 from .model_builder import ModelBuilder

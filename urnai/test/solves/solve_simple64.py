@@ -16,7 +16,7 @@ from agents.states.sc2 import Simple64State
 from agents.states.sc2 import Simple64StateFullRes
 from agents.states.sc2 import Simple64GridState
 from models.pg_keras import PGKeras
-from models.dql_keras import DQNKeras
+from models.dqn_keras import DQNKeras
 from models.ddqn_keras import DDQNKeras
 from utils.functions import query_yes_no
 from models.model_builder import ModelBuilder
@@ -38,7 +38,7 @@ def main(unused_argv):
         #     os.environ["SC2PATH"] = sc2_local_path
 
         ## Initializing our StarCraft 2 environment
-        env = SC2Env(map_name="Simple64", render=False, step_mul=16, player_race="terran", enemy_race="protoss", difficulty="very_easy")
+        env = SC2Env(map_name="Simple64", render=False, step_mul=16, player_race="terran", enemy_race="random", difficulty="very_easy")
         
         action_wrapper = SimpleTerranWrapper()
         state_builder = Simple64GridState(grid_size=4)
@@ -60,9 +60,9 @@ def main(unused_argv):
 
 
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_krpb_ss_sar_2x50_easy", save_every=100, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_blacklist_test3", save_every=100, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=3000, max_steps=1200)
-        trainer.play(num_matches=100, max_steps=1200)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_100matches train", save_every=5, enable_save=True, relative_path=True)
+        trainer.train(num_episodes=100, max_steps=1200)
+        trainer.play(num_matches=10, max_steps=1200)
 
     except KeyboardInterrupt:
         pass

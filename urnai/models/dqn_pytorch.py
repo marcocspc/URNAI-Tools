@@ -2,9 +2,15 @@ import numpy as np
 import random
 import os
 from collections import deque
-from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activation
-from keras.optimizers import Adam
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# from keras.models import Sequential
+# from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activation
+# from keras.optimizers import Adam
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
@@ -12,25 +18,27 @@ from .model_builder import ModelBuilder
 from urnai.utils.error import IncoherentBuildModelError
 from urnai.utils.error import UnsupportedBuildModelLayerTypeError
 
-class DQNKeras(LearningModel):
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.002, gamma=0.95, 
-                name='DQN', epsilon_start=1.0, epsilon_min=0.1, epsilon_decay=0.995, batch_size=32, batch_training=False,
-                memory_maxlen=2000, use_memory=True, per_episode_epsilon_decay=False, build_model = ModelBuilder.DEFAULT_BUILD_MODEL):
-        super(DQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay, per_episode_epsilon_decay, name)
+class DQNPytorch(LearningModel, nn.Module):
+
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.99, 
+                name='DQNPytorch', epsilon_start=1.0, epsilon_min=0.1, epsilon_decay=0.995, batch_size=64, batch_training=False,
+                memory_maxlen=50000, per_episode_epsilon_decay=False, build_model = ModelBuilder.DEFAULT_BUILD_MODEL):
+        super(DQNPytorch, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay, per_episode_epsilon_decay, name)
         self.batch_size = batch_size
         self.batch_training = batch_training
 
         self.build_model = build_model
         self.model = self.make_model()
-        self.use_memory = use_memory
-
-        if self.use_memory:
-            self.memory = deque(maxlen=memory_maxlen)
-            self.memory_maxlen = memory_maxlen
         
     def make_model(self):
-        model = Sequential()
+        @classmethod
+        def forward(self, x):
+            for i in range(eval("self.number_layers - 1")) :
+                x = F.relu(eval("self.layer"+str(i)+"(x)"))
+            return eval("self.layer"+str(i+1)+"(x)")
+
+        model_layers = []
 
         if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
             self.build_model[0]['shape'] = [None, self.state_size]
@@ -39,43 +47,41 @@ class DQNKeras(LearningModel):
         for idx, (layer_model) in enumerate(self.build_model):
             if layer_model['type'] == ModelBuilder.LAYER_INPUT: 
                 if self.build_model.index(layer_model) == 0:
-                    model.add(Dense(layer_model['nodes'], input_dim=layer_model['shape'][1], activation='relu'))
+                    model_layers = [nn.Linear(self.state_size, layer_model['nodes'])]
                 else:
                     raise IncoherentBuildModelError("Input Layer must be the first one.") 
-
             elif layer_model['type'] == ModelBuilder.LAYER_FULLY_CONNECTED:
-                # if previous layer is convolutional, add a Flatten layer before the fully connected
-                if self.build_model[idx]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
-                    model.add(Flatten())
-
-                model.add(Dense(layer_model['nodes'], activation='relu'))
+                model_layers.append(nn.Linear(self.build_model[idx]['nodes'], layer_model['nodes']))
 
             elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
-                # if previous layer is convolutional, add a Flatten layer before the fully connected
-                if self.build_model[idx]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
-                    model.add(Flatten())
-
-                model.add(Dense(layer_model['length'], activation='linear'))
-
+                model_layers.append(nn.Linear(self.build_model[idx]['length'], self.action_size))
             elif layer_model['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
-                # if convolutional layer is the first, it's going to have the input shape and be treated as the input layer
                 if self.build_model.index(layer_model) == 0:
-                    model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
-                              padding=layer_model['padding'], activation='relu', input_shape=layer_model['input_shape']))
-                    model.add(Activation('relu'))
-                    model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
-                    model.add(Dropout(layer_model['dropout']))
+                    model_layers.append(nn.Sequential(
+                        nn.Conv2d(in_channels=layer_model['input_shape'][2], out_channels=layer_model['filters'], kernel_size=layer_model['filter_shape'], stride=1, padding=2),
+                        nn.ReLU(),
+                        nn.MaxPool2d(kernel_size=layer_model['max_pooling_pool_size_shape'], stride=2)
+                    ))
                 else:
-                    model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
-                              padding=layer_model['padding'], activation='relu'))
-                    model.add(Activation('relu'))
-                    model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
-                    model.add(Dropout(layer_model['dropout']))
+                    model_layers.append(nn.Sequential(
+                        nn.Conv2d(in_channels=self.build_model[idx]['filters'], out_channels=layer_model['filters'], kernel_size=layer_model['filter_shape'], stride=1, padding=2),
+                        nn.ReLU(),
+                        nn.MaxPool2d(kernel_size=layer_model['max_pooling_pool_size_shape'], stride=2)
+                    ))
+                    if ModelBuilder.is_last_conv_layer(layer_model, self.build_model):
+                        model_layers.append(nn.Dropout())
             else:
                 raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
 
-        model.compile(optimizer=Adam(lr=self.learning_rate), loss='mse', metrics=['accuracy'])
+        attributes = {'number_layers': len(model_layers)}
+        for idx, layer in enumerate(model_layers):
+            attributes['layer'+ str(idx)] = layer
+
+        model = type('inheritnnModule', (nn.Module,), attributes)
+        model.forward = forward
+
         return model
+
 
     def memorize(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
@@ -113,25 +119,13 @@ class DQNKeras(LearningModel):
 
         #Epsilon decay operation was here, moved it to "decay_epsilon()" and to "learn()"
 
-    def no_memory_learning(self, s, a, r, s_, done):
-            target = r 
-            if not done:
-                target = (r + self.gamma * np.amax(self.model.predict(s_)[0]))
-            target_f = self.model.predict(s)
-            target_f[0][a] = target
-            self.model.fit(s, target_f, epochs=1, verbose=0)
-
     def learn(self, s, a, r, s_, done):
-        if self.use_memory:
-            self.memorize(s, a, r, s_, done)
-            if(len(self.memory) > self.batch_size):
-                self.replay()
-        else:
-            self.no_memory_learning(s, a, r, s_, done)
+        self.memorize(s, a, r, s_, done)
+        if len(self.memory) < self.min_memory_size:
+            return
 
         if not self.per_episode_epsilon_decay:
             self.decay_epsilon()
-
 
     def choose_action(self, state, excluded_actions=[]):
         if np.random.rand() <= self.epsilon_greedy:

@@ -84,7 +84,7 @@ class ModelBuilder():
                     if "default" in layer['name']:
                         cont += 1
 
-            name = ModelBuilder.LAYER_CONVOLUTIONALi + str(cont)
+            name = ModelBuilder.LAYER_CONVOLUTIONAL + str(cont)
 
         if type(filters) == int:
             if type(filter_shape) == tuple:

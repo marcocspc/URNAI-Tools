@@ -17,27 +17,28 @@ from agents.states.gym import GymState
 from models.dqn_keras import DQNKeras
 from models.ddqn_keras import DDQNKeras
 from models.pg_keras import PGKeras
-from models.dqn_pytorch import DQNPytorch
 from models.model_builder import ModelBuilder
 
 def main(unused_argv):
     try:
-        env = GymEnv(id="Breakout-v0", render=True)
+        env = GymEnv(id="Breakout-ram-v0", render=True)
 
         action_wrapper = env.get_action_wrapper()
         #state_builder = PureState(env.env_instance.observation_space)
         state_builder = GymState(env.env_instance.observation_space.shape[0])
 
         helper = ModelBuilder()
-        helper.add_convolutional_layer(filters=32, input_shape=(env.env_instance.observation_space.shape))
-        helper.add_convolutional_layer(filters=16)
+        helper.add_input_layer(int(state_builder.get_state_dim()), nodes=50)
+        helper.add_fullyconn_layer(50)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
-        dq_network = DQNPytorch(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(),
-                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.01, memory_maxlen=100000)
 
-        # dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(),
-        #                     gamma=0.99, learning_rate=0.001, epsilon_decay=0.999997, epsilon_min=0.01, memory_maxlen=100000, min_memory_size=2000)
+        # dq_network = DQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, 
+        #                         gamma=0.99, learning_rate=0.001, epsilon_decay=0.9995, epsilon_min=0.01, 
+        #                         build_model=helper.get_model_layout(), memory_maxlen=5000)
+
+        dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), use_memory=False,
+                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.999997, epsilon_min=0.01, memory_maxlen=100000, min_memory_size=2000)
 
         #dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
 

@@ -8,7 +8,7 @@ from urnai.agents.rewards.default import PureReward
 from urnai.agents.states.gym import PureState
 from urnai.agents.states.gym import GymState
 from urnai.models.pg_keras import PGKeras
-from urnai.models.dql_keras_mem import DQNKerasMem
+from urnai.models.dqn_keras_mem import DQNKerasMem
 from urnai.models.model_builder import ModelBuilder
 
 def main(unused_argv):

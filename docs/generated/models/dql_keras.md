@@ -1,4 +1,4 @@
-# File dql_keras.py
+# File dqn_keras.py
 
 ## Class DQNKeras
 

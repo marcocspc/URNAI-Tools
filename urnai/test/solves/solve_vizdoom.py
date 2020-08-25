@@ -11,7 +11,7 @@ from urnai.agents.actions.vizdoom_wrapper import VizdoomHealthGatheringWrapper
 from urnai.agents.rewards.vizdoom import VizDoomHealthGatheringReward  
 from urnai.agents.states.vizdoom import VizDoomHealthGatheringState
 from urnai.models.ddqn_keras import DDQNKeras 
-from urnai.models.dql_keras_mem import DQNKerasMem
+from urnai.models.dqn_keras_mem import DQNKerasMem
 from urnai.models.model_builder import ModelBuilder
 from urnai.utils.tf_utils import ignore_tensorflow_gpu, allow_memory_growth 
 from datetime import datetime

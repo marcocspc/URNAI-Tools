@@ -14,7 +14,7 @@ from urnai.agents.actions.gym_wrapper import GymWrapper
 from urnai.agents.rewards.default import PureReward
 from urnai.agents.states.gym import PureState
 from urnai.agents.states.gym import GymState
-from urnai.models.dql_keras import DQNKeras
+from urnai.models.dqn_keras import DQNKeras
 from urnai.models.ddqn_keras import DDQNKeras
 from urnai.models.pg_keras import PGKeras
 from urnai.models.model_builder import ModelBuilder

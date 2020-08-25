@@ -21,7 +21,7 @@ from agents.gym_agent import GymAgent
 from agents.actions.gym_wrapper import GymWrapper
 from agents.rewards.default import PureReward
 from agents.states.gym import PureState
-from models.dql_keras import DQNKeras
+from models.dqn_keras import DQNKeras
 
 # Instantiating the State Builder
 state_builder = PureState(env)

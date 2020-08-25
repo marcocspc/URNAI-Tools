@@ -6,7 +6,7 @@ from urnai.agents.generic_agent import GenericAgent
 from urnai.agents.actions.gym_wrapper import GymWrapper
 from urnai.agents.rewards.gym import FrozenlakeReward
 from urnai.agents.states.gym import FrozenLakeState
-from urnai.models.dql_keras_mem import DQNKerasMem
+from urnai.models.dqn_keras_mem import DQNKerasMem
 from urnai.models.ddqn_keras import DDQNKeras 
 from urnai.models.model_builder import ModelBuilder
 from datetime import datetime
