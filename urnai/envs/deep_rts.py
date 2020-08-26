@@ -124,6 +124,7 @@ class DeepRTSEnv(Env):
         state = {"state" : state}
         state["players"] = self.game.players
         state["tilemap"] = self.game.tilemap
+        state["map"] = self.game.map
         state["tiles"] = self.game.tilemap.tiles
         state["units"] = self.game.units
 

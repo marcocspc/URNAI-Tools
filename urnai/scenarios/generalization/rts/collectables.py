@@ -2,8 +2,8 @@ import sys, os
 from urnai.scenarios.base.abscenario import ABScenario
 from urnai.utils.error import EnvironmentNotSupportedError, UnsupportedTrainingMethodError
 from urnai.agents.actions.base.abwrapper import ActionWrapper
-from urnai.agents.actions.scenarios.rts.generalization.collectables import CollectablesDeepRTSActionWrapper, CollectablesStarcraftIIActionWrapper 
 from urnai.agents.actions.scenarios.rts.generalization.all_scenarios import MultipleScenarioActionWrapper  
+from urnai.agents.states.scenarios.rts.generalization.all_scenarios import MultipleScenarioStateBuilder
 from pysc2.lib import actions, features, units
 from agents.actions import sc2 as scaux
 from agents.rewards.default import PureReward
@@ -91,7 +91,7 @@ class GeneralizedCollectablesScenario(ABScenario):
     def get_drts_env(self, render, drts_map, drts_number_of_players, 
             drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
             fit_to_screen):
-        env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = 12, number_of_players=drts_number_of_players, start_oil=drts_start_oil, start_gold=drts_start_gold, start_lumber=drts_start_lumber, start_food=drts_start_food, fit_to_screen=fit_to_screen)
+        env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = 12, number_of_players=drts_number_of_players, start_oil=drts_start_oil, start_gold=drts_start_gold, start_lumber=drts_start_lumber, start_food=drts_start_food, fit_to_screen=fit_to_screen, flatten_state=True)
         return env
 
     def get_starcraft_env(self, sc2_map, render):
@@ -122,18 +122,12 @@ class GeneralizedCollectablesScenario(ABScenario):
         player = 0
         if action == self.drts_action_moveup:
             self.move_troops_up(player)
-            return True
         elif action == self.drts_action_movedown:
             self.move_troops_down(player)
-            return True
         elif action == self.drts_action_moveleft:
             self.move_troops_left(player)
-            return True
         elif action == self.drts_action_moveright:
             self.move_troops_right(player)
-            return True
-        else:
-            return False
 
 
     def move_troops_up(self, player):
@@ -234,6 +228,8 @@ class GeneralizedCollectablesScenario(ABScenario):
                     self.collectables_map[unit_y, unit_x] = 0
 
             self.steps += 1
+            state['collectables_map'] = self.collectables_map
+
             return state, reward, done
         elif (self.game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II):
             self.steps += 1
@@ -259,6 +255,10 @@ class GeneralizedCollectablesScenario(ABScenario):
     def get_default_action_wrapper(self):
         wrapper = MultipleScenarioActionWrapper(self.__class__.__name__, self.game, self.method)
         return wrapper 
+
+    def get_default_state_builder(self):
+        wrapper = MultipleScenarioStateBuilder(self.__class__.__name__)
+        return wrapper
 
     def random_tile(self):
         tiles_len = len(self.env.game.tilemap.tiles)
