@@ -4,6 +4,7 @@ from urnai.utils.error import EnvironmentNotSupportedError, UnsupportedTrainingM
 from urnai.agents.actions.base.abwrapper import ActionWrapper
 from urnai.agents.actions.scenarios.rts.generalization.all_scenarios import MultipleScenarioActionWrapper  
 from urnai.agents.states.scenarios.rts.generalization.all_scenarios import MultipleScenarioStateBuilder
+from urnai.agents.rewards.scenarios.rts.generalization.all_scenarios import MultipleScenarioRewardBuilder
 from pysc2.lib import actions, features, units
 from agents.actions import sc2 as scaux
 from agents.rewards.default import PureReward
@@ -249,8 +250,8 @@ class GeneralizedCollectablesScenario(ABScenario):
         self.reset()
 
     def get_default_reward_builder(self):
-        builder = PureReward() 
-        return builder
+        wrapper = MultipleScenarioRewardBuilder(self.__class__.__name__)
+        return wrapper
 
     def get_default_action_wrapper(self):
         wrapper = MultipleScenarioActionWrapper(self.__class__.__name__, self.game, self.method)
