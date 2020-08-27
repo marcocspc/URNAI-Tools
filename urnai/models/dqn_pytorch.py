@@ -56,7 +56,7 @@ class DQNPytorch(LearningModel):
     Methods
     -------
     learn(s, a, r, s_, done)
-        goes trough the learning process of the DQL algorithm using PyTorches functionalities
+        goes trough the learning process of the DQL algorithm using PyTorche's functionalities
     """
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.99, 
@@ -73,6 +73,8 @@ class DQNPytorch(LearningModel):
         self.memory_maxlen = memory_maxlen
         self.min_memory_size = min_memory_size
         self.batch_size = batch_size
+
+        self.experiences = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
         
     def make_model(self):
         # @classmethod
@@ -138,7 +140,8 @@ class DQNPytorch(LearningModel):
         return model
 
     def memorize(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
+        experience = self.experiences(state, action, reward, next_state, done)
+        self.memory.append(experience)
 
     def learn(self, s, a, r, s_, done):
         self.memorize(s, a, r, s_, done)
@@ -147,7 +150,11 @@ class DQNPytorch(LearningModel):
 
         minibatch = random.sample(self.memory, self.batch_size)
 
-        states, actions, rewards, next_states, dones = minibatch
+        states = torch.from_numpy(np.vstack([e.state for e in minibatch if e is not None])).float().to(device)
+        actions = torch.from_numpy(np.vstack([e.action for e in minibatch if e is not None])).long().to(device)
+        rewards = torch.from_numpy(np.vstack([e.reward for e in minibatch if e is not None])).float().to(device)
+        next_states = torch.from_numpy(np.vstack([e.next_state for e in minibatch if e is not None])).float().to(device)
+        dones = torch.from_numpy(np.vstack([e.done for e in minibatch if e is not None]).astype(np.uint8)).float().to(device)
 
         criterion = torch.nn.MSELoss()
         self.model.train()
@@ -205,33 +212,27 @@ class DQNPytorch(LearningModel):
         self.model.train()
 
         return np.argmax(action_values.cpu().data.numpy())
-        # q_values = self.model.predict(state)[0]
-        # action_idx = int(np.argmax(q_values))
-
-        # while action_idx in excluded_actions:
-        #     q_values = np.delete(q_values, action_idx)
-        #     action_idx = int(np.argmax(q_values))
-
-        # return action_idx
-
+        
     def save_extra(self, persist_path):
-        self.model.save_weights(self.get_full_persistance_path(persist_path)+".h5")
+        torch.save(self.model.state_dict(), self.get_full_persistance_path(persist_path))
 
     def load_extra(self, persist_path):
-        exists = os.path.isfile(self.get_full_persistance_path(persist_path)+".h5")
+        exists = os.path.isfile(self.get_full_persistance_path(persist_path))
 
         if(exists):
             self.model = self.make_model()
-            self.model.load_weights(self.get_full_persistance_path(persist_path)+".h5")
+            self.target_model = self.make_model()
+            self.model.load_state_dict(torch.load(self.get_full_persistance_path(persist_path)))
+            self.target_model.load_state_dict(torch.load(self.get_full_persistance_path(persist_path)))
 
 class QNetwork(nn.Module):
-            def __init__(self, state_size,action_size, fc1_unit=64, fc2_unit = 64):
-                super(QNetwork,self).__init__()
-                self.fc1= nn.Linear(state_size,fc1_unit)
-                self.fc2 = nn.Linear(fc1_unit,fc2_unit)
-                self.fc3 = nn.Linear(fc2_unit,action_size)
-                
-            def forward(self,x):
-                x = F.relu(self.fc1(x))
-                x = F.relu(self.fc2(x))
-                return self.fc3(x)
+    def __init__(self, state_size, action_size, fc1_unit=64, fc2_unit = 64):
+        super(QNetwork,self).__init__()
+        self.fc1= nn.Linear(state_size,fc1_unit)
+        self.fc2 = nn.Linear(fc1_unit,fc2_unit)
+        self.fc3 = nn.Linear(fc2_unit,action_size)
+        
+    def forward(self,x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        return self.fc3(x)

@@ -22,7 +22,7 @@ from models.model_builder import ModelBuilder
 
 def main(unused_argv):
     try:
-        env = GymEnv(id="Breakout-v0", render=True)
+        env = GymEnv(id="Breakout-ram-v0", render=True)
 
         action_wrapper = env.get_action_wrapper()
         #state_builder = PureState(env.env_instance.observation_space)
@@ -43,9 +43,9 @@ def main(unused_argv):
 
         agent = GenericAgent(dq_network, PureReward())
 
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-ram-v0_pg_50x50", save_every=100, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=10000, max_steps=1800)
-        trainer.play(num_matches=100, max_steps=1800)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-ram-v0_dqnpytorch", save_every=100, enable_save=True, relative_path=True)
+        trainer.train(num_episodes=500, max_steps=1200)
+        trainer.play(num_matches=100, max_steps=1200)
     except KeyboardInterrupt:
         pass
 
