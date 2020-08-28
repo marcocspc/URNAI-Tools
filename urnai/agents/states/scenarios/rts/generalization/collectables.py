@@ -33,6 +33,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
             state = self.build_drts_map(obs)
             state += self.build_non_spatial_drts_state(obs)
 
+
         state = list(np.asarray(state).flatten())
 
         return state
@@ -48,6 +49,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
             state += self.build_non_spatial_sc2_state(obs)
 
         state = list(np.asarray(state).flatten())
+
         
         return state
 
@@ -77,9 +79,13 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
     def build_drts_map(self, obs): 
         map_ = self.build_basic_drts_map(obs)
 
+
         for y in range(len(obs['collectables_map'])): 
             for x in range(len(obs['collectables_map'][y])):
-                map_[y][x] = 1000
+                if obs['collectables_map'][y][x] == 1: 
+                    map_[y][x] = 1000
+                if map_[y][x] != 1000 and map_[y][x] != 7: 
+                    map_[y][x] = 0
 
         map_ = self.normalize_map(map_)
 
@@ -93,7 +99,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
             map_[tile.y, tile.x] = tile.get_type_id()
 
         for unit in obs["units"]:
-            map_[unit.tile.y, unit.tile.x] = unit.type
+            map_[unit.tile.y, unit.tile.x] = int(unit.type)
 
         return map_
 

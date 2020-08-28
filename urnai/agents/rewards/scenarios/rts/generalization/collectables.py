@@ -24,12 +24,17 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
             game = self.get_game(obs)
             if game == Games.DRTS:
                 try:
-                    tmp = self.previous_state['collectables_map']
+                    tmp = self.previous_state['units']
                 except KeyError as ke:
                     if "collectables_map" in str(ke):
                         self.previous_state = obs
                 reward = self.get_drts_reward(obs)
             else:
+                try:
+                    tmp = self.previous_state.feature_minimap
+                except AttributeError as ae:
+                    if "feature_minimap" in str(ae):
+                        self.previous_state = obs
                 reward = self.get_sc2_reward(obs)
 
         self.previous_state = obs

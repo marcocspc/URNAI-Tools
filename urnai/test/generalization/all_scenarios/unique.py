@@ -1,7 +1,7 @@
-from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario as Scenario
+#from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario as Scenario
 #from urnai.scenarios.generalization.rts.findanddefeat import GeneralizedFindaAndDefeatScenario as Scenario
 #from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario as Scenario
-#from urnai.scenarios.generalization.rts.buildunits import GeneralizedBuildUnitsScenario as Scenario
+from urnai.scenarios.generalization.rts.buildunits import GeneralizedBuildUnitsScenario as Scenario
 import numpy as np
 import sys,os
 from urnai.utils.numpy_utils import save_iterable_as_csv 
@@ -10,8 +10,8 @@ episodes = 2
 steps = 5
 print_collectables_map = False 
 
-game = Scenario.GAME_DEEP_RTS
-#game = Scenario.GAME_STARCRAFT_II
+#game = Scenario.GAME_DEEP_RTS
+game = Scenario.GAME_STARCRAFT_II
 #method = 'single'
 method = 'multiple'
 PRINT_MAP = False
@@ -109,3 +109,5 @@ for ep in range(episodes):
             print("Total Episode Reward: {r}".format(r=total_ep_reward))
 
             if done: break
+
+exit()
