@@ -41,7 +41,6 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         state = [] 
         if self.method == RTSGeneralization.STATE_MAP:
             state = self.build_sc2_map(obs)
-            state = self.build_sc2_map(obs)
         elif self.method == RTSGeneralization.STATE_NON_SPATIAL:
             state = self.build_non_spatial_sc2_state(obs)
         elif self.method == RTSGeneralization.STATE_BOTH: 
@@ -62,26 +61,24 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
 
     def build_basic_sc2_map(self, obs):
         map_ = np.zeros(obs.feature_minimap[0].shape)
-        for y in len(range(obs.feature_minimap[3])):  
-            for x in len(range(obs.feature_minimap[3][y])):  
-                if obs.feature_minimap[y][x] == 2: map_[y][x] = 270 #drts walkable area 
+        for y in range(len(obs.feature_minimap[3])):  
+            for x in range(len(obs.feature_minimap[3][y])):  
+                if obs.feature_minimap[3][y][x] == 2: map_[y][x] = 270 #drts walkable area 
 
-        for y in len(range(obs.feature_minimap[4])):  
-            for x in len(range(obs.feature_minimap[4][y])):  
-                if obs.feature_minimap[y][x] == 1: map_[y][x] = 1 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
-                elif obs.feature_minimap[y][x] == 2: map_[y][x] = 7 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
-                elif obs.feature_minimap[y][x] == 16: map_[y][x] = 1000 #drts 1000 was chosen for me to represent virtual shards
-                elif obs.feature_minimap[y][x] == 3: map_[y][x] = 102 #drts 102 is gold 
+        for y in range(len(obs.feature_minimap[4])):  
+            for x in range(len(obs.feature_minimap[4][y])):  
+                if obs.feature_minimap[4][y][x] == 1: map_[y][x] = 1 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
+                elif obs.feature_minimap[4][y][x] == 2: map_[y][x] = 7 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
+                elif obs.feature_minimap[4][y][x] == 16: map_[y][x] = 1000 #drts 1000 was chosen for me to represent virtual shards
+                elif obs.feature_minimap[4][y][x] == 3: map_[y][x] = 102 #drts 102 is gold 
 
         return map_
-
-
 
     def build_drts_map(self, obs): 
         map_ = self.build_basic_drts_map(obs)
 
         for y in range(len(obs['collectables_map'])): 
-            for x in range(len(obs['collectables_map'][x])):
+            for x in range(len(obs['collectables_map'][y])):
                 map_[y][x] = 1000
 
         map_ = self.normalize_map(map_)
@@ -101,8 +98,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         return map_
 
     def normalize_map(self, map_):
-        map_ = map_ - map_.mean()
-        map_ = map_ / map_.max()
+        map_ = (map_ - map_.min())/(map_.max() - map_.min())
         return map_
 
     def get_state_dim(self):

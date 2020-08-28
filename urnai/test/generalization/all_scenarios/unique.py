@@ -1,19 +1,19 @@
-#from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario as Scenario
-from urnai.scenarios.generalization.rts.findanddefeat import GeneralizedFindaAndDefeatScenario as Scenario
+from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario as Scenario
+#from urnai.scenarios.generalization.rts.findanddefeat import GeneralizedFindaAndDefeatScenario as Scenario
 #from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario as Scenario
 #from urnai.scenarios.generalization.rts.buildunits import GeneralizedBuildUnitsScenario as Scenario
 import numpy as np
 import sys,os
 from urnai.utils.numpy_utils import save_iterable_as_csv 
 
-episodes = 100
-steps = 500
+episodes = 2
+steps = 5
 print_collectables_map = False 
 
 game = Scenario.GAME_DEEP_RTS
 #game = Scenario.GAME_STARCRAFT_II
-method = 'single'
-#method = 'multiple'
+#method = 'single'
+method = 'multiple'
 PRINT_MAP = False
 SAVE_MAP = True 
 env_state = False
@@ -66,8 +66,8 @@ for ep in range(episodes):
                 action = action_wrapper.get_no_action()
 
             state, reward, done = env.step(action)
-            if not env_state: state = state_builder.build_state(state) 
             if not env_reward: reward = reward_builder.get_reward(state)
+            if not env_state: state = state_builder.build_state(state) 
             total_ep_reward += reward
 
             if env.game == Scenario.GAME_DEEP_RTS:
@@ -96,13 +96,14 @@ for ep in range(episodes):
                     try: os.makedirs(dire)
                     except FileExistsError: pass
                     #save_iterable_as_csv(state["state"], directory=dire)
-                    save_iterable_as_csv(state, directory=dire)
+                    save_iterable_as_csv(state, directory=dire, convert_to_int=False)
                 else:
                     dire = os.path.expanduser("~") + os.path.sep + "urnai_maps" + os.path.sep + "sc2" + os.path.sep + str(step) 
                     try: os.makedirs(dire)
                     except FileExistsError: pass
-                    for layer in state.feature_minimap:
-                        save_iterable_as_csv(layer, file_name="layer" + str(state.feature_minimap.index(layer)),directory=dire) 
+                    #for layer in state.feature_minimap:
+                        #save_iterable_as_csv(layer, file_name="layer" + str(state.feature_minimap.index(layer)),directory=dire) 
+                    save_iterable_as_csv(state, directory=dire, convert_to_int=False) 
 
             print("Reward: {r}".format(r=reward))
             print("Total Episode Reward: {r}".format(r=total_ep_reward))
