@@ -14,6 +14,7 @@ class BuildUnitsDeepRTSActionWrapper(DefeatEnemiesDeepRTSActionWrapper):
         self.build_footman = 20
 
         self.final_actions = [self.collect_gold, self.build_farm, self.build_barrack, self.build_footman] 
+        self.action_indices = range(len(self.final_actions))
 
     def solve_action(self, action_idx, obs):
         if action_idx != self.noaction:
@@ -54,6 +55,7 @@ class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
         self.build_barrack = 9
         self.build_marine = 10
         self.actions = [self.collect_minerals, self.build_supply_depot, self.build_barrack, self.build_marine]
+        self.action_indices = range(len(self.actions))
 
     def solve_action(self, action_idx, obs):
         if action_idx != self.noaction:

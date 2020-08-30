@@ -244,7 +244,7 @@ class GeneralizedCollectablesScenario(ABScenario):
     def reset(self):
         self.steps = 0
         self.alternate_envs()
-        self.env.reset()
+        return self.env.reset()
 
     def restart(self):
         self.reset()

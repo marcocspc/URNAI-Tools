@@ -10,16 +10,8 @@ class FindAndDefeatDeepRTSActionWrapper(CollectablesDeepRTSActionWrapper):
         super().__init__()
         self.cancel = 16
 
-        self.actions = [self.previousunit, self.nextunit, self.moveleft, self.moveright, self.moveup, self.movedown,
-                self.moveupleft, self.moveupright, self.movedownleft, self.movedownright, self.attack, self.harvest,
-                self.build0, self.build1, self.build2, self.noaction, self.cancel] 
-
-        self.excluded_actions = [self.previousunit, self.nextunit, 
-                self.moveupleft, self.moveupright, self.movedownleft, 
-                self.movedownright, self.harvest,
-                self.build0, self.build1, self.build2]
-
-        self.final_actions = list(set(self.actions) - set(self.excluded_actions))
+        self.final_actions = [self.moveleft, self.moveright, self.moveup, self.movedown, self.attack, self.cancel] 
+        self.action_indices = range(len(self.final_actions))
 
     def solve_action(self, action_idx, obs):
         if action_idx != self.noaction:
@@ -39,7 +31,9 @@ class FindAndDefeatStarcraftIIActionWrapper(CollectablesStarcraftIIActionWrapper
         super().__init__()
         self.maximum_attack_range = 2
         self.attack = 4
-        self.actions = [self.moveleft, self.moveright, self.moveup, self.movedown, self.attack] 
+        self.stop = 6
+        self.actions = [self.moveleft, self.moveright, self.moveup, self.movedown, self.attack, self.stop] 
+        self.action_indices = range(len(self.actions))
 
     def solve_action(self, action_idx, obs):
         if action_idx != self.noaction:

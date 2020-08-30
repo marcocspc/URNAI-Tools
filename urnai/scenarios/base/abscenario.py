@@ -2,6 +2,7 @@ from abc import abstractmethod
 from urnai.envs.base.abenv import Env
 from urnai.agents.rewards.abreward import RewardBuilder
 from urnai.agents.actions.base.abwrapper import ActionWrapper 
+from urnai.agents.states.abstate import StateBuilder 
 
 class ABScenario(Env):
     '''
@@ -23,3 +24,9 @@ class ABScenario(Env):
     '''
     @abstractmethod
     def get_default_action_wrapper(self) -> ActionWrapper: ...
+
+    '''
+        Returns the default StateBuilder 
+    '''
+    @abstractmethod
+    def get_default_state_builder(self) -> StateBuilder: ...

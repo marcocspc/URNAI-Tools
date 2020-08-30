@@ -1,9 +1,4 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-parentdir = os.path.dirname(parentdir)
-sys.path.insert(0,parentdir)
-
+import sys,os,inspect
 import itertools
 import time
 import numpy as np
@@ -20,7 +15,6 @@ class TestParams():
         self.current_ep_count = 0
         self.logger = None
         self.reward_threshold = reward_threshold
-
 
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
@@ -42,6 +36,9 @@ class Trainer(Savable):
 
         self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
 
+        currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+        parentdir = os.path.dirname(currentdir)
+        parentdir = os.path.dirname(parentdir)
         if(relative_path):
             self.full_save_path = parentdir + os.path.sep + self.save_path + os.path.sep + self.file_name
         else:

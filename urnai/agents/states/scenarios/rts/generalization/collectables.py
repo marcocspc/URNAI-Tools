@@ -109,5 +109,4 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
 
     def get_state_dim(self):
         if self.method == RTSGeneralization.STATE_MAP:
-            return 64*64
-            state = self.build_drts_map(obs)
+            return 1 

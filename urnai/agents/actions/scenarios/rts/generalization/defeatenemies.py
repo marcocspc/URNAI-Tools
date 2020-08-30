@@ -9,15 +9,10 @@ class DefeatEnemiesDeepRTSActionWrapper(FindAndDefeatDeepRTSActionWrapper):
         super().__init__()
         self.run = 17
 
-        self.actions = [self.previousunit, self.nextunit, self.moveleft, self.moveright, self.moveup, self.movedown,
-                self.moveupleft, self.moveupright, self.movedownleft, self.movedownright, self.attack, self.harvest,
-                self.build0, self.build1, self.build2, self.noaction, self.cancel, self.run] 
+        self.final_actions = [self.attack, self.run, self.cancel]
+        self.action_indices = range(len(self.final_actions))
 
-        self.excluded_actions = [self.previousunit, self.nextunit, self.moveleft, self.moveright, self.moveup, self.movedown,
-                self.moveupleft, self.moveupright, self.movedownleft, self.movedownright, self.harvest,
-                self.build0, self.build1, self.build2, self.noaction] 
 
-        self.final_actions = list(set(self.actions) - set(self.excluded_actions))
 
     def solve_action(self, action_idx, obs):
         if action_idx != self.noaction:
@@ -76,8 +71,8 @@ class DefeatEnemiesStarcraftIIActionWrapper(FindAndDefeatStarcraftIIActionWrappe
         self.hor_threshold = 3
 
         self.run = 5
-        self.stop = 6
         self.actions = [self.attack, self.run, self.stop]
+        self.action_indices = range(len(self.actions))
 
     def solve_action(self, action_idx, obs):
         if action_idx != self.noaction:

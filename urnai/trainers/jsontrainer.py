@@ -1,4 +1,5 @@
 from urnai.utils.module_specialist import get_cls
+from urnai.utils.error import ClassNotFoundError
 from .trainer import Trainer
 import json
 import os
@@ -11,23 +12,35 @@ class JSONTrainer(Trainer):
             self.trainings = json.loads(json_file.read())
 
     def start_training(self, play_only=False):
+        scenario = False
         for training in self.trainings:
-            env_cls = get_cls("urnai", "envs", training["env"]["class"])
-            env = env_cls(**training["env"]["params"])
+            try:
+                env_cls = get_cls("urnai.envs", training["env"]["class"])
+                env = env_cls(**training["env"]["params"])
+            except ClassNotFoundError as cnfe:
+                if "was not found in urnai.envs" in str(cnfe):
+                    env_cls = get_cls("urnai.scenarios", training["env"]["class"])
+                    env = env_cls(**training["env"]["params"])
+                    scenario = True
 
-            action_wrapper_cls = get_cls("urnai.agents", "actions", training["action_wrapper"]["class"])
-            action_wrapper = action_wrapper_cls(**training["action_wrapper"]["params"])
+            if not scenario:
+                action_wrapper_cls = get_cls("urnai.agents.actions", training["action_wrapper"]["class"])
+                action_wrapper = action_wrapper_cls(**training["action_wrapper"]["params"])
 
-            state_builder_cls = get_cls("urnai.agents", "states", training["state_builder"]["class"])
-            state_builder = state_builder_cls(**training["state_builder"]["params"])
+                state_builder_cls = get_cls("urnai.agents.states", training["state_builder"]["class"])
+                state_builder = state_builder_cls(**training["state_builder"]["params"])
 
-            reward_cls = get_cls("urnai.agents", "rewards", training["reward"]["class"])
-            reward = reward_cls(**training["reward"]["params"])
+                reward_cls = get_cls("urnai.agents.rewards", training["reward"]["class"])
+                reward = reward_cls(**training["reward"]["params"])
+            else:
+                action_wrapper = env.get_default_action_wrapper() 
+                state_builder = env.get_default_state_builder() 
+                reward = env.get_default_reward_builder() 
 
-            model_cls = get_cls("urnai", "models", training["model"]["class"])
+            model_cls = get_cls("urnai.models", training["model"]["class"])
             model = model_cls(action_wrapper=action_wrapper, state_builder=state_builder, **training["model"]["params"])
 
-            agent_cls = get_cls("urnai", "agents", training["agent"]["class"])
+            agent_cls = get_cls("urnai.agents", training["agent"]["class"])
             agent = agent_cls(model, reward, **training["agent"]["params"])
 
             self.setup(env, agent, **training["trainer"]["params"])

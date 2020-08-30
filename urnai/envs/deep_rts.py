@@ -95,7 +95,8 @@ class DeepRTSEnv(Env):
         #Start DeepRTS
         self.game.start()
         self.game.reset()
-
+        obs, reward, done = self.step(int(self.constants.Action.NoAction) - 1)
+        return obs
 
     def step(self, action):
         #select first player
@@ -148,10 +149,10 @@ class DeepRTSEnv(Env):
 
     def reset(self):
         self.close()
-        self.start()
+        return self.start()
 
     def restart(self):
-        self.reset()
+        return self.reset()
 
     def is_map_installed(self, map_name):
         drts_map_dir = os.path.dirname(os.path.realpath(drts.python.__file__)) + '/assets/maps' 

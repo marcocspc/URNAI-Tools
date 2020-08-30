@@ -25,16 +25,8 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
         self.build2 = 14
         self.noaction = 15
 
-        self.actions = [self.previousunit, self.nextunit, self.moveleft, self.moveright, self.moveup, self.movedown,
-                self.moveupleft, self.moveupright, self.movedownleft, self.movedownright, self.attack, self.harvest,
-                self.build0, self.build1, self.build2, self.noaction] 
-
-        self.excluded_actions = [self.previousunit, self.nextunit, 
-                self.moveupleft, self.moveupright, self.movedownleft, 
-                self.movedownright, self.attack, self.harvest,
-                self.build0, self.build1, self.build2, self.noaction] 
-
-        self.final_actions = list(set(self.actions) - set(self.excluded_actions))
+        self.final_actions = [self.moveleft, self.moveright, self.moveup, self.movedown] 
+        self.action_indices = range(len(self.final_actions))
         self.action_queue = []
 
     def get_player_units(self, player, obs):
@@ -78,7 +70,7 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
         self.move_number = 0
 
     def get_actions(self):
-        return self.final_actions
+        return self.action_indices
 
     def move_up(self, obs):
         self.enqueue_action_for_player_units(obs, self.moveup)
@@ -125,6 +117,8 @@ class CollectablesStarcraftIIActionWrapper(ActionWrapper):
         self.movedown = 3
 
         self.actions = [self.moveleft, self.moveright, self.moveup, self.movedown] 
+        self.action_indices = range(len(self.actions))
+
         self.pending_actions = []
 
     def is_action_done(self):
@@ -134,7 +128,7 @@ class CollectablesStarcraftIIActionWrapper(ActionWrapper):
         self.move_number = 0
 
     def get_actions(self):
-        return self.actions
+        return self.action_indices
     
     def get_excluded_actions(self, obs):        
         return []

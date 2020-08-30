@@ -91,9 +91,15 @@ class TrainerRunner(Runner):
         super().__init__(parser, args)
 
     def run(self):
+
         if self.args.json_file is not None:
             from urnai.trainers.jsontrainer import JSONTrainer
             trainer = JSONTrainer(self.args.json_file)
+
+            #this is needed in case the environment is starcraft
+            for arg in self.args.__dict__.keys():
+                arg = "--{}".format(arg.replace("_", "-"))
+                if arg in sys.argv: sys.argv.remove(arg)
 
             if self.args.play:
                 trainer.start_training(play_only=True)

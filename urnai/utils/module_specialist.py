@@ -1,41 +1,43 @@
-import os.path, pkgutil
+import os, pkgutil
+import ast
 import importlib
 import inspect
 from .error import ClassNotFoundError
 from urnai.tdd.reporter import Reporter as rp
 
-def get_modules(top_pkg_str, pkg_str):
-    pkg_str_path = os.path.dirname(importlib.import_module(top_pkg_str + "." + pkg_str).__file__)
-    
-    return [name for _, name, _ in pkgutil.walk_packages([pkg_str_path])
-             if not name.endswith('__')]
+def get_class_import_path(pkg_str, classname):
+    module_path = "" 
+    try:
+        mod = importlib.import_module(pkg_str)
+        for module_info in pkgutil.iter_modules(mod.__path__):
+            if module_info.ispkg:
+                module_path += get_class_import_path(pkg_str + "." + module_info.name, classname) 
+            else:
+                file_path = module_info.module_finder.path + os.path.sep + module_info.name + ".py"
+                with open(file_path, 'r') as input_file:
+                    node = ast.parse(input_file.read())
+                    classes = [n for n in node.body if isinstance(n, ast.ClassDef)]
+                    for class_node in classes:
+                        if class_node.name == classname:
+                            module_path += '.'.join([pkg_str,module_info.name,classname])
+    except ModuleNotFoundError as mnfe:
+        pass
+    except NameError as ne:
+        pass
 
-def get_classes(top_pkg_str, pkg_str):
-    class_dict = {}
+    return module_path
 
-    for module_str in get_modules(top_pkg_str, pkg_str):
-        try:
-            aux_str = top_pkg_str + "." + pkg_str + "." + module_str
-            aux_mod = importlib.import_module(aux_str)
-            md = aux_mod.__dict__
-            for key in md:
-                if isinstance(md[key], type): 
-                    if aux_str in str(md[key]):
-                        class_dict[key] = module_str 
-        except ModuleNotFoundError as mnfe:
-            pass
-        except NameError as ne:
-            pass
-
-    return class_dict 
-
-def get_cls(top_pkg_str, pkg_str, classname):
-    class_dict = get_classes(top_pkg_str, pkg_str)
-
-    if classname in class_dict.keys():
-        cls_import_lst = [top_pkg_str,pkg_str,class_dict[classname]]
-        mod = importlib.import_module('.'.join(cls_import_lst))
-        cls = getattr(mod, classname)
-        return cls
+def get_cls(pkg, classname):
+    cls_str_full = get_class_import_path(pkg, classname)
+    if cls_str_full != "":
+        cls_str_full = cls_str_full.split('.')
     else:
-        raise ClassNotFoundError("Class " + classname + " was not found in " + top_pkg_str + "." + pkg_str)
+        raise ClassNotFoundError("{} was not found in {}".format(classname, pkg))
+
+    cls_str = cls_str_full.pop()
+    pkg_str = cls_str_full 
+
+    mod = importlib.import_module('.'.join(pkg_str))
+    cls = getattr(mod, cls_str)
+
+    return cls
