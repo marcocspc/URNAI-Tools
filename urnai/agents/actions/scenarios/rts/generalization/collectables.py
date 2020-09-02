@@ -25,6 +25,8 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
         self.build2 = 14
         self.noaction = 15
 
+        self.excluded_actions = []
+
         self.final_actions = [self.moveleft, self.moveright, self.moveup, self.movedown] 
         self.action_indices = range(len(self.final_actions))
         self.action_queue = []
@@ -52,22 +54,32 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
         return action
 
     def solve_action(self, action_idx, obs):
-        if action_idx != self.noaction:
-            i = action_idx 
-            if self.final_actions[i] == self.moveleft:
-                self.move_left(obs)
-            elif self.final_actions[i] == self.moveright:
-                self.move_right(obs)
-            elif self.final_actions[i] == self.moveup:
-                self.move_up(obs)
-            elif self.final_actions[i] == self.movedown:
-                self.move_down(obs)
+        if action_idx != None:
+            if action_idx != self.noaction:
+                i = action_idx 
+                if self.final_actions[i] == self.moveleft:
+                    self.move_left(obs)
+                elif self.final_actions[i] == self.moveright:
+                    self.move_right(obs)
+                elif self.final_actions[i] == self.moveup:
+                    self.move_up(obs)
+                elif self.final_actions[i] == self.movedown:
+                    self.move_down(obs)
+        else:
+            # if action_idx was None, this means that the actionwrapper
+            # was not resetted properly, so I will reset it here
+            # this is not the best way to fix this
+            # but until we cannot find why the agent is
+            # not resetting the action wrapper properly
+            # i'm gonna leave this here
+            self.reset()
 
     def is_action_done(self):
         return len(self.action_queue) == 0 
 
     def reset(self):
         self.move_number = 0
+        self.action_queue = []
 
     def get_actions(self):
         return self.action_indices
@@ -116,16 +128,19 @@ class CollectablesStarcraftIIActionWrapper(ActionWrapper):
         self.moveup = 2
         self.movedown = 3
 
+        self.excluded_actions = []
+
         self.actions = [self.moveleft, self.moveright, self.moveup, self.movedown] 
         self.action_indices = range(len(self.actions))
 
         self.pending_actions = []
 
     def is_action_done(self):
-        return True
+        return len(self.pending_actions) == 0
 
     def reset(self):
         self.move_number = 0
+        self.pending_actions = []
 
     def get_actions(self):
         return self.action_indices
@@ -143,16 +158,25 @@ class CollectablesStarcraftIIActionWrapper(ActionWrapper):
         return action
 
     def solve_action(self, action_idx, obs):
-        if action_idx != self.noaction:
-            action = self.actions[action_idx]
-            if action == self.moveleft:
-                self.move_left(obs)
-            elif action == self.moveright:
-                self.move_right(obs)
-            elif action == self.moveup:
-                self.move_up(obs)
-            elif action == self.movedown:
-                self.move_down(obs)
+        if action_idx != None:
+            if action_idx != self.noaction:
+                action = self.actions[action_idx]
+                if action == self.moveleft:
+                    self.move_left(obs)
+                elif action == self.moveright:
+                    self.move_right(obs)
+                elif action == self.moveup:
+                    self.move_up(obs)
+                elif action == self.movedown:
+                    self.move_down(obs)
+        else:
+            # if action_idx was None, this means that the actionwrapper
+            # was not resetted properly, so I will reset it here
+            # this is not the best way to fix this
+            # but until we cannot find why the agent is
+            # not resetting the action wrapper properly
+            # i'm gonna leave this here
+            self.reset()
     
     def move_left(self, obs):
         army = scaux.select_army(obs, sc2_env.Race.terran)

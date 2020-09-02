@@ -88,7 +88,6 @@ class GeneralizedCollectablesScenario(ABScenario):
         self.start()
         self.steps = 0
 
-
     def get_drts_env(self, render, drts_map, drts_number_of_players, 
             drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
             fit_to_screen):
@@ -244,7 +243,9 @@ class GeneralizedCollectablesScenario(ABScenario):
     def reset(self):
         self.steps = 0
         self.alternate_envs()
-        return self.env.reset()
+        state = self.env.reset()
+        state['collectables_map'] = self.set_collectable_map()
+        return state 
 
     def restart(self):
         self.reset()

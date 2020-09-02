@@ -15,13 +15,16 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         except AttributeError as ae:
             if "feature_minimap" in str(ae):
                 return Games.DRTS
+            else: raise
 
     def build_state(self, obs):
         game = self.get_game(obs)
         if game == Games.DRTS:
-            return self.build_drts_state(obs)
+            state = self.build_drts_state(obs)
         else:
-            return self.build_sc2_state(obs)
+            state = self.build_sc2_state(obs)
+
+        return state
 
     def build_drts_state(self, obs):
         state = [] 
@@ -78,7 +81,6 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
 
     def build_drts_map(self, obs): 
         map_ = self.build_basic_drts_map(obs)
-
 
         for y in range(len(obs['collectables_map'])): 
             for x in range(len(obs['collectables_map'][y])):

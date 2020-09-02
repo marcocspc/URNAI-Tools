@@ -3,7 +3,7 @@
         "env" : {
             "class" : "GeneralizedCollectablesScenario",
             "params" : {
-                "method" : "single",
+                "method" : "multiple",
                 "game" : "drts",
                 "render" : false
             }
@@ -43,17 +43,14 @@
         "trainer" : {
             "class" : "Trainer",
             "params" : {
-                "save_path" : "urnai/models/saved",
-                "file_name" : "terran_ddqn_vs_random_v_easy",
                 "save_every" : 100,
-                "enable_save" : true,
-                "relative_path" : true
+                "enable_save" : true
             }
         },
         "json_trainer" : {
             "train": {
                 "num_episodes" : 3,
-                "max_steps" : 4 
+                "max_steps" : 3 
             },
             "play" : {
                 "num_matches" : 1,

@@ -149,7 +149,8 @@ class DeepRTSEnv(Env):
 
     def reset(self):
         self.close()
-        return self.start()
+        state = self.start()
+        return state
 
     def restart(self):
         return self.reset()
