@@ -8,7 +8,7 @@ class MultipleScenarioRewardBuilder():
 
     SCENARIOS = {
             "GeneralizedCollectablesScenario" : CollectablesGeneralizedRewardBuilder,
-            "GeneralizedFindaAndDefeatScenario" : FindAndDefeatGeneralizedRewardBuilder,
+            "GeneralizedFindAndDefeatScenario" : FindAndDefeatGeneralizedRewardBuilder,
             "GeneralizedDefeatEnemiesScenario" : DefeatEnemiesGeneralizedRewardBuilder,
             "GeneralizedBuildUnitsScenario" : BuildUnitsGeneralizedRewardBuilder 
         }

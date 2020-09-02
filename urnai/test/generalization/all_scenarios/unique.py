@@ -1,12 +1,12 @@
 from urnai.scenarios.generalization.rts.collectables import GeneralizedCollectablesScenario 
-from urnai.scenarios.generalization.rts.findanddefeat import GeneralizedFindaAndDefeatScenario
+from urnai.scenarios.generalization.rts.findanddefeat import GeneralizedFindAndDefeatScenario
 from urnai.scenarios.generalization.rts.defeatenemies import GeneralizedDefeatEnemiesScenario
 from urnai.scenarios.generalization.rts.buildunits import GeneralizedBuildUnitsScenario
 import numpy as np
 import sys,os
 from urnai.utils.numpy_utils import save_iterable_as_csv 
 
-SCENARIO_LIST = [GeneralizedCollectablesScenario, GeneralizedFindaAndDefeatScenario, GeneralizedDefeatEnemiesScenario, GeneralizedBuildUnitsScenario]
+SCENARIO_LIST = [GeneralizedCollectablesScenario, GeneralizedFindAndDefeatScenario, GeneralizedDefeatEnemiesScenario, GeneralizedBuildUnitsScenario]
 GAME_LIST = [GeneralizedCollectablesScenario.GAME_DEEP_RTS, GeneralizedCollectablesScenario.GAME_STARCRAFT_II]
 
 episodes = 4

@@ -1,5 +1,5 @@
 from urnai.scenarios.base.abscenario import ABScenario
-from .findanddefeat import GeneralizedFindaAndDefeatScenario 
+from .findanddefeat import GeneralizedFindAndDefeatScenario 
 from urnai.utils.error import EnvironmentNotSupportedError
 from urnai.agents.actions.scenarios.rts.generalization.defeatenemies import DefeatEnemiesDeepRTSActionWrapper, DefeatEnemiesStarcraftIIActionWrapper 
 from pysc2.lib import actions, features, units
@@ -13,7 +13,7 @@ from urnai.envs.deep_rts import DeepRTSEnv
 from sys import maxsize as maxint
 
 
-class GeneralizedDefeatEnemiesScenario(GeneralizedFindaAndDefeatScenario):
+class GeneralizedDefeatEnemiesScenario(GeneralizedFindAndDefeatScenario):
 
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 

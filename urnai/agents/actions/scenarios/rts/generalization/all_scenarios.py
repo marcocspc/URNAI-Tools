@@ -15,13 +15,13 @@ class MultipleScenarioActionWrapper():
     SCENARIOS = {
             GAME_DRTS : {
                 "GeneralizedCollectablesScenario" : CollectablesDeepRTSActionWrapper,
-                "GeneralizedFindaAndDefeatScenario" : FindAndDefeatDeepRTSActionWrapper,
+                "GeneralizedFindAndDefeatScenario" : FindAndDefeatDeepRTSActionWrapper,
                 "GeneralizedDefeatEnemiesScenario" : DefeatEnemiesDeepRTSActionWrapper,
                 "GeneralizedBuildUnitsScenario" : BuildUnitsDeepRTSActionWrapper
                 },
             GAME_SC2 : {
                 "GeneralizedCollectablesScenario" : CollectablesStarcraftIIActionWrapper,
-                "GeneralizedFindaAndDefeatScenario" : FindAndDefeatStarcraftIIActionWrapper,
+                "GeneralizedFindAndDefeatScenario" : FindAndDefeatStarcraftIIActionWrapper,
                 "GeneralizedDefeatEnemiesScenario" : DefeatEnemiesStarcraftIIActionWrapper,
                 "GeneralizedBuildUnitsScenario" : BuildUnitsStarcraftIIActionWrapper
             }

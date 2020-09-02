@@ -68,12 +68,22 @@ class GeneralizedCollectablesScenario(ABScenario):
                     fit_to_screen)
             env_sc2  = self.get_starcraft_env(sc2_map, render)
             self.envs = {GeneralizedCollectablesScenario.GAME_DEEP_RTS : env_drts, GeneralizedCollectablesScenario.GAME_STARCRAFT_II : env_sc2}
+            #games are inverted here because of the way
+            #that trainer works
+            #after assigning the scenario to be the env
+            #trainer calls the reset() method which swap environments
+            #so, if what the user wants is the first game to be
+            #deeprts, the chosen game here is starcraft
+            #when trainer calls the reset() method, then 
+            #the environment is replaced with the correct game
+            #this is of course not the most elegant way
+            #to do this, but it works for now
             if game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
-                self.env = self.envs[GeneralizedCollectablesScenario.GAME_DEEP_RTS]
-                self.game = GeneralizedCollectablesScenario.GAME_DEEP_RTS
-            elif game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
                 self.env = self.envs[GeneralizedCollectablesScenario.GAME_STARCRAFT_II]
                 self.game = GeneralizedCollectablesScenario.GAME_STARCRAFT_II
+            elif game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
+                self.env = self.envs[GeneralizedCollectablesScenario.GAME_DEEP_RTS]
+                self.game = GeneralizedCollectablesScenario.GAME_DEEP_RTS
             else:
                 err = '''{} only supports the following environments:
         GeneralizedCollectablesScenario.GAME_DEEP_RTS

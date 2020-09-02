@@ -25,6 +25,10 @@ class GenericAgent(Agent):
         return self.action_wrapper.get_action(self.previous_action, obs)
 
     def play(self, obs):
+        #this is needed because newer python versions
+        #complain about predicted_action_idx being referenced
+        #before assingment
+        predicted_action_idx = None 
         if self.action_wrapper.is_action_done():
             current_state = self.build_state(obs)
             predicted_action_idx = self.model.predict(current_state)

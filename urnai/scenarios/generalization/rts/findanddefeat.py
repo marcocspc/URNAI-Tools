@@ -14,7 +14,7 @@ import DeepRTS as drts
 from sys import maxsize as maxint
 import math
 
-class GeneralizedFindaAndDefeatScenario(GeneralizedCollectablesScenario):
+class GeneralizedFindAndDefeatScenario(GeneralizedCollectablesScenario):
 
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 

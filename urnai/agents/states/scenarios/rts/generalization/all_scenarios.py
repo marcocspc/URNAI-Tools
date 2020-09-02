@@ -8,7 +8,7 @@ class MultipleScenarioStateBuilder():
 
     SCENARIOS = {
             "GeneralizedCollectablesScenario" : CollectablesGeneralizedStatebuilder,
-            "GeneralizedFindaAndDefeatScenario" : FindAndDefeatGeneralizedStatebuilder,
+            "GeneralizedFindAndDefeatScenario" : FindAndDefeatGeneralizedStatebuilder,
             "GeneralizedDefeatEnemiesScenario" : DefeatEnemiesGeneralizedStatebuilder,
             "GeneralizedBuildUnitsScenario" : BuildUnitsGeneralizedStatebuilder 
         }

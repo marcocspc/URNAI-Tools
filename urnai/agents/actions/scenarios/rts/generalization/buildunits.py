@@ -20,10 +20,7 @@ class BuildUnitsDeepRTSActionWrapper(DefeatEnemiesDeepRTSActionWrapper):
         if action_idx != None:
             if action_idx != self.noaction:
                 i = action_idx 
-                if self.final_actions[i] == self.run:
-                    self.run_(obs)
-                elif self.final_actions[i] == self.attack:
-                    self.attack_(obs)
+                return self.final_actions[i]
         else:
             # if action_idx was None, this means that the actionwrapper
             # was not resetted properly, so I will reset it here
@@ -32,22 +29,6 @@ class BuildUnitsDeepRTSActionWrapper(DefeatEnemiesDeepRTSActionWrapper):
             # not resetting the action wrapper properly
             # i'm gonna leave this here
             self.reset()
-
-    def run_(self, obs):
-        #its not this simple
-        p_army_x, p_army_y = self.get_army_mean(0, obs)
-        e_army_x, e_army_y = self.get_army_mean(1, obs)
-
-        if p_army_x - e_army_x < 0:
-            self.enqueue_action_for_player_units(obs, self.moveleft)
-        else:
-            self.enqueue_action_for_player_units(obs, self.moveright)
-
-        if p_army_y - e_army_y < 0:
-            self.enqueue_action_for_player_units(obs, self.moveup)
-        else:
-            self.enqueue_action_for_player_units(obs, self.movedown)
-
 
 class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
 
