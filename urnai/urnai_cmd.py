@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 from urnai.runner.runnerbuilder import RunnerBuilder
 from urnai.runner.parserbuilder import ParserBuilder
-from importlib import reload
-import sys, os
+import os
 
 def main():
     os.environ["TF_CPP_MIN_LOG_LEVEL"]="2"
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
 
     parser = ParserBuilder.DefaultParser()
     args = parser.parse_args()
