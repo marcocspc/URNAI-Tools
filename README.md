@@ -20,7 +20,7 @@ pip3 install urnai
 
 - Or you can install from this repository:
 ```
-pip3 install git+https://github.com/pvnetto/URNAI-Tools/ 
+pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
 The basic installation will install all the *basic* required dependencies, including OpenAI Gym and SC2LE. But for other supported environments, you will need to install them for yourself. We describe how to do this on the next section. 
@@ -171,7 +171,7 @@ Here you'll find all the things that we plan to do in this project. **Bold** ite
   * [ ] **Documentation for each of the main modules (env, agents, models etc)**
   * [ ] **Statistics for solved problems**
 * [ ] Support for new environments
-  * [ ] [Arcade Learning Environment](https://github.com/mgbellemare/Arcade-Learning-Environment)
+  * [X] [Arcade Learning Environment](https://github.com/mgbellemare/Arcade-Learning-Environment) (trough [atari-py](https://github.com/openai/atari-py))
   * [ ] [Gym Retro](https://github.com/openai/retro)
   * [X] [Vizdoom](https://github.com/mwydmuch/ViZDoom)
   * [X] [DeepRTS](https://github.com/cair/deep-rts)
