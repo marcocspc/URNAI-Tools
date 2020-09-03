@@ -1,6 +1,6 @@
 import numpy as np
 import random
-import os
+import os, sys
 from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activation

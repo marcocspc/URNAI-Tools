@@ -37,7 +37,8 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
             state += self.build_non_spatial_drts_state(obs)
 
 
-        state = list(np.asarray(state).flatten())
+        state = np.asarray(state).flatten()
+        state = state.reshape((1, len(state)))
 
         return state
 
@@ -112,4 +113,4 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
 
     def get_state_dim(self):
         if self.method == RTSGeneralization.STATE_MAP:
-            return 1 
+            return 64*64 

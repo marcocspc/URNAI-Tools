@@ -91,7 +91,12 @@ class Trainer(Savable):
                     break
                 
                 # Choosing an action and passing it to our env.step() in order to act on our environment
+#                try:
                 action = self.agent.step(obs, step_reward, done)
+#                except ValueError:
+#                    np.set_printoptions(threshold=sys.maxsize)
+#                    print(obs)
+
                 obs, default_reward, done = self.env.step(action)
 
                 is_last_step = step == max_steps - 1
