@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from urnai.runner.runnerbuilder import RunnerBuilder
 from urnai.runner.parserbuilder import ParserBuilder
+from importlib import reload
 import sys, os
 
 def main():
