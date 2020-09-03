@@ -171,7 +171,7 @@ Here you'll find all the things that we plan to do in this project. **Bold** ite
   * [ ] **Documentation for each of the main modules (env, agents, models etc)**
   * [ ] **Statistics for solved problems**
 * [ ] Support for new environments
-  * [X] [Arcade Learning Environment](https://github.com/mgbellemare/Arcade-Learning-Environment) (trough [atari-py](https://github.com/openai/atari-py))
+  * [X] [Arcade Learning Environment](https://github.com/mgbellemare/Arcade-Learning-Environment) ([atari-py](https://github.com/openai/atari-py))
   * [ ] [Gym Retro](https://github.com/openai/retro)
   * [X] [Vizdoom](https://github.com/mwydmuch/ViZDoom)
   * [X] [DeepRTS](https://github.com/cair/deep-rts)
