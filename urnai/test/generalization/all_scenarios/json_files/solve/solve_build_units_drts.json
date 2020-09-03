@@ -51,11 +51,11 @@
         "json_trainer" : {
             "train": {
                 "num_episodes" : 3000,
-                "max_steps" : 5000 
+"max_steps" : 1000
             },
             "play" : {
                 "num_matches" : 1000,
-                "max_steps" : 5000
+"max_steps" : 1000
             }
         }
     }
