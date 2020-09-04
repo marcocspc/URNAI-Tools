@@ -15,13 +15,16 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         except AttributeError as ae:
             if "feature_minimap" in str(ae):
                 return Games.DRTS
+            else: raise
 
     def build_state(self, obs):
         game = self.get_game(obs)
         if game == Games.DRTS:
-            return self.build_drts_state(obs)
+            state = self.build_drts_state(obs)
         else:
-            return self.build_sc2_state(obs)
+            state = self.build_sc2_state(obs)
+
+        return state
 
     def build_drts_state(self, obs):
         state = [] 
@@ -34,7 +37,8 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
             state += self.build_non_spatial_drts_state(obs)
 
 
-        state = list(np.asarray(state).flatten())
+        state = np.asarray(state).flatten()
+        state = state.reshape((1, len(state)))
 
         return state
 
@@ -71,14 +75,13 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
             for x in range(len(obs.feature_minimap[4][y])):  
                 if obs.feature_minimap[4][y][x] == 1: map_[y][x] = 1 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
                 elif obs.feature_minimap[4][y][x] == 2: map_[y][x] = 7 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
-                elif obs.feature_minimap[4][y][x] == 16: map_[y][x] = 1000 #drts 1000 was chosen for me to represent virtual shards
+                elif obs.feature_minimap[4][y][x] == 16: map_[y][x] = 1000 #drts 1000 was chosen by me to represent virtual shards
                 elif obs.feature_minimap[4][y][x] == 3: map_[y][x] = 102 #drts 102 is gold 
 
         return map_
 
     def build_drts_map(self, obs): 
         map_ = self.build_basic_drts_map(obs)
-
 
         for y in range(len(obs['collectables_map'])): 
             for x in range(len(obs['collectables_map'][y])):
@@ -96,7 +99,8 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         height = obs["map"].map_height
         map_ = np.zeros((width, height)) 
         for tile in obs["tiles"]:
-            map_[tile.y, tile.x] = tile.get_type_id()
+            if int(tile.get_type_id()) == 102: #102 is gold
+                map_[tile.y, tile.x] = tile.get_type_id()
 
         for unit in obs["units"]:
             map_[unit.tile.y, unit.tile.x] = int(unit.type)
@@ -109,4 +113,4 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
 
     def get_state_dim(self):
         if self.method == RTSGeneralization.STATE_MAP:
-            return 1 
+            return 64*64 

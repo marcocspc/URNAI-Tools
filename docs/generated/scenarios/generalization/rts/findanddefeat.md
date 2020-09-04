@@ -1,6 +1,6 @@
 # File findanddefeat.py
 
-## Class GeneralizedFindaAndDefeatScenario
+## Class GeneralizedFindAndDefeatScenario
 
 ## Method __init__()
 

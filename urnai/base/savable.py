@@ -148,6 +148,8 @@ class Savable(ABC):
             except AttributeError as ae:
                 if "Can't pickle" in str(ae):
                     continue
+                elif "object has no attribute '__getstate__'":
+                    continue
                 else:
                     raise
 

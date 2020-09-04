@@ -14,14 +14,23 @@ class FindAndDefeatDeepRTSActionWrapper(CollectablesDeepRTSActionWrapper):
         self.action_indices = range(len(self.final_actions))
 
     def solve_action(self, action_idx, obs):
-        if action_idx != self.noaction:
-            i = action_idx 
-            if self.final_actions[i] == self.attack:
-                self.attack_(obs)
-            elif self.final_actions[i] == self.cancel:
-                self.action_queue.clear()
-            else:
-                super().solve_action(action_idx, obs)
+        if action_idx != None:
+            if action_idx != self.noaction:
+                i = action_idx 
+                if self.final_actions[i] == self.attack:
+                    self.attack_(obs)
+                elif self.final_actions[i] == self.cancel:
+                    self.action_queue.clear()
+                else:
+                    super().solve_action(action_idx, obs)
+        else:
+            # if action_idx was None, this means that the actionwrapper
+            # was not resetted properly, so I will reset it here
+            # this is not the best way to fix this
+            # but until we cannot find why the agent is
+            # not resetting the action wrapper properly
+            # i'm gonna leave this here
+            self.reset()
     
     def attack_(self, obs):
         self.enqueue_action_for_player_units(obs, self.attack)
@@ -36,18 +45,27 @@ class FindAndDefeatStarcraftIIActionWrapper(CollectablesStarcraftIIActionWrapper
         self.action_indices = range(len(self.actions))
 
     def solve_action(self, action_idx, obs):
-        if action_idx != self.noaction:
-            action = self.actions[action_idx]
-            if action == self.moveleft:
-                self.move_left(obs)
-            elif action == self.moveright:
-                self.move_right(obs)
-            elif action == self.moveup:
-                self.move_up(obs)
-            elif action == self.movedown:
-                self.move_down(obs)
-            elif action == self.attack:
-                self.attack_(obs)
+        if action_idx != None:
+            if action_idx != self.noaction:
+                action = self.actions[action_idx]
+                if action == self.moveleft:
+                    self.move_left(obs)
+                elif action == self.moveright:
+                    self.move_right(obs)
+                elif action == self.moveup:
+                    self.move_up(obs)
+                elif action == self.movedown:
+                    self.move_down(obs)
+                elif action == self.attack:
+                    self.attack_(obs)
+        else:
+            # if action_idx was None, this means that the actionwrapper
+            # was not resetted properly, so I will reset it here
+            # this is not the best way to fix this
+            # but until we cannot find why the agent is
+            # not resetting the action wrapper properly
+            # i'm gonna leave this here
+            self.reset()
     
     def get_nearest_enemy_unit_inside_radius(self, x, y, obs, radius):
         enemy_army = [unit for unit in obs.raw_units if unit.owner != 1] 

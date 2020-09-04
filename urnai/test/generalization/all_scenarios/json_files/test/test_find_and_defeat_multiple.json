@@ -1,10 +1,10 @@
 [
     {
         "env" : {
-            "class" : "GeneralizedCollectablesScenario",
+            "class" : "GeneralizedFindAndDefeatScenario",
             "params" : {
                 "method" : "single",
-                "game" : "drts",
+                "game" : "sc2",
                 "render" : false
             }
         },
@@ -43,21 +43,15 @@
         "trainer" : {
             "class" : "Trainer",
             "params" : {
-                "save_path" : "urnai/models/saved",
-                "file_name" : "terran_ddqn_vs_random_v_easy",
+	        "file_name": "agent_multiple_find_and_defeat",
                 "save_every" : 100,
-                "enable_save" : true,
-                "relative_path" : true
+                "enable_save" : true
             }
         },
         "json_trainer" : {
-            "train": {
-                "num_episodes" : 3,
-                "max_steps" : 4 
-            },
             "play" : {
-                "num_matches" : 1,
-                "max_steps" : 1
+                "num_matches" : 1000,
+                "max_steps" : 5000
             }
         }
     }

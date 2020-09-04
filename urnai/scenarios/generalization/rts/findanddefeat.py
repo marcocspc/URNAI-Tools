@@ -14,7 +14,7 @@ import DeepRTS as drts
 from sys import maxsize as maxint
 import math
 
-class GeneralizedFindaAndDefeatScenario(GeneralizedCollectablesScenario):
+class GeneralizedFindAndDefeatScenario(GeneralizedCollectablesScenario):
 
     GAME_DEEP_RTS = "drts" 
     GAME_STARCRAFT_II = "sc2" 
@@ -106,3 +106,10 @@ class GeneralizedFindaAndDefeatScenario(GeneralizedCollectablesScenario):
 
         if self.env.game.players[player].num_archer < 23:
             self.env.game.players[player].spawn_unit(self.env.constants.Unit.Archer, tile)
+
+    def reset(self):
+        self.steps = 0
+        self.alternate_envs()
+        state = self.env.reset()
+        return state 
+

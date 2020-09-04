@@ -1,6 +1,8 @@
 from urnai.agents.base.abagent import Agent
 from urnai.models.base.abmodel import LearningModel
 from urnai.agents.rewards.abreward import RewardBuilder
+import numpy as np 
+import sys
 
 
 class GenericAgent(Agent):
@@ -11,6 +13,7 @@ class GenericAgent(Agent):
 
     def step(self, obs, obs_reward, done):
         if self.action_wrapper.is_action_done():
+            current_action_idx = None
             # Builds current state (happens before executing the action on env)
             current_state = self.build_state(obs)
 
@@ -25,6 +28,10 @@ class GenericAgent(Agent):
         return self.action_wrapper.get_action(self.previous_action, obs)
 
     def play(self, obs):
+        #this is needed because newer python versions
+        #complain about predicted_action_idx being referenced
+        #before assingment
+        predicted_action_idx = None 
         if self.action_wrapper.is_action_done():
             current_state = self.build_state(obs)
             predicted_action_idx = self.model.predict(current_state)

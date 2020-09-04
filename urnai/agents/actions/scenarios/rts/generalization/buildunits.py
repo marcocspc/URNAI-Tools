@@ -17,28 +17,18 @@ class BuildUnitsDeepRTSActionWrapper(DefeatEnemiesDeepRTSActionWrapper):
         self.action_indices = range(len(self.final_actions))
 
     def solve_action(self, action_idx, obs):
-        if action_idx != self.noaction:
-            i = action_idx 
-            if self.final_actions[i] == self.run:
-                self.run_(obs)
-            elif self.final_actions[i] == self.attack:
-                self.attack_(obs)
-
-    def run_(self, obs):
-        #its not this simple
-        p_army_x, p_army_y = self.get_army_mean(0, obs)
-        e_army_x, e_army_y = self.get_army_mean(1, obs)
-
-        if p_army_x - e_army_x < 0:
-            self.enqueue_action_for_player_units(obs, self.moveleft)
+        if action_idx != None:
+            if action_idx != self.noaction:
+                i = action_idx 
+                return self.final_actions[i]
         else:
-            self.enqueue_action_for_player_units(obs, self.moveright)
-
-        if p_army_y - e_army_y < 0:
-            self.enqueue_action_for_player_units(obs, self.moveup)
-        else:
-            self.enqueue_action_for_player_units(obs, self.movedown)
-
+            # if action_idx was None, this means that the actionwrapper
+            # was not resetted properly, so I will reset it here
+            # this is not the best way to fix this
+            # but until we cannot find why the agent is
+            # not resetting the action wrapper properly
+            # i'm gonna leave this here
+            self.reset()
 
 class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
 
@@ -58,18 +48,27 @@ class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
         self.action_indices = range(len(self.actions))
 
     def solve_action(self, action_idx, obs):
-        if action_idx != self.noaction:
-            action = self.actions[action_idx]
-            if action == self.collect_minerals:
-                self.collect(obs)
-            elif action == self.build_supply_depot:
-                self.build_supply_depot_(obs)
-            elif action == self.build_barrack:
-                self.build_barrack_(obs)
-            elif action == self.build_marine:
-                self.build_marine_(obs)
-            elif action == self.stop:
-                self.pending_actions.clear()
+        if action_idx != None:
+            if action_idx != self.noaction:
+                action = self.actions[action_idx]
+                if action == self.collect_minerals:
+                    self.collect(obs)
+                elif action == self.build_supply_depot:
+                    self.build_supply_depot_(obs)
+                elif action == self.build_barrack:
+                    self.build_barrack_(obs)
+                elif action == self.build_marine:
+                    self.build_marine_(obs)
+                elif action == self.stop:
+                    self.pending_actions.clear()
+        else:
+            # if action_idx was None, this means that the actionwrapper
+            # was not resetted properly, so I will reset it here
+            # this is not the best way to fix this
+            # but until we cannot find why the agent is
+            # not resetting the action wrapper properly
+            # i'm gonna leave this here
+            self.reset()
 
     def collect(self, obs):
         #get SCV list
