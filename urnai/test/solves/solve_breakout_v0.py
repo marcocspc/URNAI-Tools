@@ -25,12 +25,13 @@ def main(unused_argv):
         env = GymEnv(id="Breakout-ram-v0", render=True)
 
         action_wrapper = env.get_action_wrapper()
-        #state_builder = PureState(env.env_instance.observation_space)
         state_builder = GymState(env.env_instance.observation_space.shape[0])
 
         helper = ModelBuilder()
-        helper.add_convolutional_layer(filters=32, input_shape=(env.env_instance.observation_space.shape))
-        helper.add_convolutional_layer(filters=16)
+        # helper.add_convolutional_layer(filters=32, input_shape=(env.env_instance.observation_space.shape))
+        # helper.add_convolutional_layer(filters=16)
+        helper.add_input_layer(int(state_builder.get_state_dim()), 50)
+        helper.add_fullyconn_layer(50)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
         dq_network = DQNPytorch(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(),
@@ -43,7 +44,7 @@ def main(unused_argv):
 
         agent = GenericAgent(dq_network, PureReward())
 
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-ram-v0_dqnpytorch", save_every=100, enable_save=True, relative_path=True)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-ram-v0_dqnpytorch_t1", save_every=100, enable_save=True, relative_path=True)
         trainer.train(num_episodes=500, max_steps=1200)
         trainer.play(num_matches=100, max_steps=1200)
     except KeyboardInterrupt:

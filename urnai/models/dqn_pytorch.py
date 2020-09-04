@@ -6,11 +6,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# from keras.models import Sequential
-# from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activation
-# from keras.optimizers import Adam
+
 from .base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
@@ -21,7 +18,7 @@ from urnai.utils.error import UnsupportedBuildModelLayerTypeError
 
 class DQNPytorch(LearningModel):
     """
-    A Deep Q-Network implemented made using PyTorch.
+    A Deep Q-Network implemented using PyTorch.
     This implementation was based on Unnat Singh's Deep Q-Network implementation (https://medium.com/@unnatsingh/deep-q-network-with-pytorch-d1ca6f40bfda)
 
     Attributes
@@ -77,66 +74,7 @@ class DQNPytorch(LearningModel):
         self.experiences = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
         
     def make_model(self):
-        # @classmethod
-        # def new_init(self, model_layers):
-        #     super(self.__class__, self).__init__()
-        #     for i in range(eval("self.number_layers")):
-        #         setattr(self, "layer"+str(i), model_layers[i])
-
-        # @classmethod
-        # def forward(self, x):
-        #     for i in range(eval("self.number_layers - 1")):
-        #         x = F.relu(eval("self.layer"+str(i)+"(x)"))
-        #     return eval("self.layer"+str(i+1)+"(x)")
-
-        # model_layers = []
-
-        # if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
-        #     self.build_model[0]['shape'] = [None, self.state_size]
-        #     self.build_model[-1]['length'] = self.action_size
-
-        # for idx, (layer_model) in enumerate(self.build_model):
-        #     if layer_model['type'] == ModelBuilder.LAYER_INPUT: 
-        #         if self.build_model.index(layer_model) == 0:
-        #             model_layers = [nn.Linear(self.state_size, layer_model['nodes'])]
-        #         else:
-        #             raise IncoherentBuildModelError("Input Layer must be the first one.") 
-        #     elif layer_model['type'] == ModelBuilder.LAYER_FULLY_CONNECTED:
-        #         model_layers.append(nn.Linear(self.build_model[idx]['nodes'], layer_model['nodes']))
-
-        #     elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
-        #         model_layers.append(nn.Linear(self.build_model[idx]['length'], self.action_size))
-        #     elif layer_model['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
-        #         if self.build_model.index(layer_model) == 0:
-        #             model_layers.append(nn.Sequential(
-        #                 nn.Conv2d(in_channels=layer_model['input_shape'][2], out_channels=layer_model['filters'], kernel_size=layer_model['filter_shape'], stride=1, padding=2),
-        #                 nn.ReLU(),
-        #                 nn.MaxPool2d(kernel_size=layer_model['max_pooling_pool_size_shape'], stride=2)
-        #             ))
-        #         else:
-        #             model_layers.append(nn.Sequential(
-        #                 nn.Conv2d(in_channels=self.build_model[idx]['filters'], out_channels=layer_model['filters'], kernel_size=layer_model['filter_shape'], stride=1, padding=2),
-        #                 nn.ReLU(),
-        #                 nn.MaxPool2d(kernel_size=layer_model['max_pooling_pool_size_shape'], stride=2)
-        #             ))
-        #             if ModelBuilder.is_last_conv_layer(layer_model, self.build_model):
-        #                 model_layers.append(nn.Dropout())
-        #     else:
-        #         raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
-
-        # attributes = {
-        #     'number_layers': len(model_layers),
-        #     'forward': forward,
-        #     '__init__': new_init
-        #     }
-        # # for idx, layer in enumerate(model_layers):
-        # #     attributes['layer'+ str(idx)] = layer
-
-        # DQNClassPytorch = type('inheritnnModule', (nn.Module,), attributes)
-        # model = DQNClassPytorch(model_layers).to(device)
-
-        model = QNetwork(self.state_size, self.action_size).to(device)
-
+        model = QNetwork(self.state_size, self.action_size, self.build_model).to(device)
         return model
 
     def memorize(self, state, action, reward, next_state, done):
@@ -144,6 +82,9 @@ class DQNPytorch(LearningModel):
         self.memory.append(experience)
 
     def learn(self, s, a, r, s_, done):
+        """
+        Applies the learn strategy of the DQL algorithm using PyTorche's methods.
+        """
         self.memorize(s, a, r, s_, done)
         if len(self.memory) < self.min_memory_size:
             return
@@ -193,6 +134,10 @@ class DQNPytorch(LearningModel):
             target_param.data.copy_(tau*local_param.data + (1-tau)*target_param.data)
 
     def choose_action(self, state, excluded_actions=[]):
+        """
+        If current epsilon greedy strategy is reached a random action will be returned.
+        If not, self.predict will be called to choose the action with the highest Q-Value.
+        """
         if np.random.rand() <= self.epsilon_greedy:
             random_action = random.choice(self.actions)
             # Removing excluded actions
@@ -203,8 +148,9 @@ class DQNPytorch(LearningModel):
             return self.predict(state, excluded_actions)
         
     def predict(self, state, excluded_actions=[]):
-        '''
-        '''
+        """
+        Gets the action with the highest Q-value from our DQN PyTorch model
+        """
         state = torch.from_numpy(state).float().unsqueeze(0).to(device)
         self.model.eval()
         with torch.no_grad():
@@ -214,9 +160,16 @@ class DQNPytorch(LearningModel):
         return np.argmax(action_values.cpu().data.numpy())
         
     def save_extra(self, persist_path):
+        """
+        Saves the DQN PyTorch model to memory on persist_path
+        """
+    
         torch.save(self.model.state_dict(), self.get_full_persistance_path(persist_path))
 
     def load_extra(self, persist_path):
+        """
+        Loads the DQN PyTorch model from persist_path to both self.model and self.target_model
+        """
         exists = os.path.isfile(self.get_full_persistance_path(persist_path))
 
         if(exists):
@@ -226,13 +179,54 @@ class DQNPytorch(LearningModel):
             self.target_model.load_state_dict(torch.load(self.get_full_persistance_path(persist_path)))
 
 class QNetwork(nn.Module):
-    def __init__(self, state_size, action_size, fc1_unit=64, fc2_unit = 64):
+    """
+    Our dynamic Q-Network Class that inherits from PyTorche's nn.Module. 
+    It receives the build_model, so it can dynamically create layers.
+    """
+    # TO DO: check https://discuss.pytorch.org/t/a-more-elegant-way-of-creating-the-nets-in-pytorch/11959/4
+    # maybe it is a better solution to dynamic instantiation
+    def __init__(self, state_size, action_size, build_model):
         super(QNetwork,self).__init__()
-        self.fc1= nn.Linear(state_size,fc1_unit)
-        self.fc2 = nn.Linear(fc1_unit,fc2_unit)
-        self.fc3 = nn.Linear(fc2_unit,action_size)
+
+        self.model_layers = nn.ModuleList()
+        self.build_model = build_model
+        self.action_size = action_size
+        self.state_size = state_size
+
+        if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
+            self.build_model[0]['shape'] = [None, self.state_size]
+            self.build_model[-1]['length'] = self.action_size
+
+        for idx, (layer_model) in enumerate(self.build_model):
+            if layer_model['type'] == ModelBuilder.LAYER_INPUT: 
+                if self.build_model.index(layer_model) == 0:
+                    self.model_layers.append(nn.Linear(self.state_size, layer_model['nodes']))
+                else:
+                    raise IncoherentBuildModelError("Input Layer must be the first one.") 
+            elif layer_model['type'] == ModelBuilder.LAYER_FULLY_CONNECTED:
+                self.model_layers.append(nn.Linear(self.build_model[idx-1]['nodes'], layer_model['nodes']))
+
+            elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
+                self.model_layers.append(nn.Linear(self.build_model[idx-1]['nodes'], self.action_size))
+            elif layer_model['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
+                if self.build_model.index(layer_model) == 0:
+                    self.model_layers.append(nn.Sequential(
+                        nn.Conv2d(in_channels=layer_model['input_shape'][2], out_channels=layer_model['filters'], kernel_size=layer_model['filter_shape'], stride=1, padding=2),
+                        nn.ReLU(),
+                        nn.MaxPool2d(kernel_size=layer_model['max_pooling_pool_size_shape'], stride=2)
+                    ))
+                else:
+                    self.model_layers.append(nn.Sequential(
+                        nn.Conv2d(in_channels=self.build_model[idx-1]['filters'], out_channels=layer_model['filters'], kernel_size=layer_model['filter_shape'], stride=1, padding=2),
+                        nn.ReLU(),
+                        nn.MaxPool2d(kernel_size=layer_model['max_pooling_pool_size_shape'], stride=2)
+                    ))
+                    if ModelBuilder.is_last_conv_layer(layer_model, self.build_model):
+                        self.model_layers.append(nn.Dropout())
+            else:
+                raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
         
     def forward(self,x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        return self.fc3(x)
+        for i in range(len(self.model_layers) - 1):
+            x = F.relu(self.model_layers[i](x))
+        return self.model_layers[-1](x)
