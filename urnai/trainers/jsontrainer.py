@@ -1,5 +1,6 @@
 from urnai.utils.module_specialist import get_cls
 from urnai.utils.error import ClassNotFoundError
+import urnai.utils.file_util 
 from .trainer import Trainer
 import json
 import os
@@ -10,6 +11,7 @@ class JSONTrainer(Trainer):
         self.pickle_black_list = []
         with open(json_path, "r") as json_file:
             self.trainings = json.loads(json_file.read())
+
 
     def start_training(self, play_only=False):
         scenario = False
@@ -55,6 +57,8 @@ class JSONTrainer(Trainer):
                 self.play(**training["json_trainer"]["play"])
             except KeyError as ke:
                 if 'play' in str(ke): pass
+
+    def load_json_file(self, json_file_path):
 
     def save_extra(self, save_path):
         super().save_extra(save_path)

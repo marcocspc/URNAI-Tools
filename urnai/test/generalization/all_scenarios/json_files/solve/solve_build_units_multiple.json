@@ -44,7 +44,7 @@
             "class" : "Trainer",
             "params" : {
 	        "file_name": "agent_multiple_build_units",
-                "save_every" : 100,
+                "save_every" : 1500,
                 "enable_save" : true
             }
         },
