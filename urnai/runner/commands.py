@@ -82,8 +82,10 @@ class TrainerRunner(Runner):
 
     COMMAND = 'train'
     OPT_COMMANDS = [
-            {'command': '--json-file', 'help': 'JSON solve file, with all the parameters to start the training.', 'type' : str, 'metavar' : 'JSON_FILE_PATH', 'action' : 'store'},
+            {'command': '--train-file', 'help': 'JSON or CSV solve file, with all the parameters to start the training.', 'type' : str, 'metavar' : 'TRAIN_FILE_PATH', 'action' : 'store'},
 #TODO            {'command': '--build-training-file', 'help': 'Helper to build a solve json-file.', 'action' : 'store_true'},
+            {'command': '--convert', 'help': 'Training file to convert. Must be used with --output-format option.', 'action' : 'store'},
+            {'command': '--output-format', 'help': 'Converted file format . Must be used with --convert option. Accepted values are \'CSV\' and \'JSON\'.', 'action' : 'store'},
             {'command': '--play', 'help': 'Test agent, without training it, it will ignore train entry on json file.', 'action' : 'store_true'},
             ]
 
@@ -92,9 +94,9 @@ class TrainerRunner(Runner):
 
     def run(self):
 
-        if self.args.json_file is not None:
-            from urnai.trainers.jsontrainer import JSONTrainer
-            trainer = JSONTrainer(self.args.json_file)
+        if self.args.train_file is not None:
+            from urnai.trainers.filetrainer import FileTrainer
+            trainer = FileTrainer(self.args.train_file)
 
             #this is needed in case the environment is starcraft
             for arg in self.args.__dict__.keys():
@@ -107,8 +109,29 @@ class TrainerRunner(Runner):
                 trainer.start_training()
         #TODO
         #elif self.args.build_training_file:
+        elif self.args.convert is not None:
+            if self.args.output_format is not None:
+                from urnai.trainers.filetrainer import FileTrainer
+                trainer = FileTrainer(self.args.convert)
+                trainer.check_trainings()
+                output_path = os.path.abspath(os.path.dirname(self.args.convert))+ os.path.sep + os.path.splitext(os.path.basename(self.args.convert))[0] + ".file_format"
+                output_text = "{} was converted to {}.".format(
+                        os.path.basename(self.args.convert),
+                        os.path.basename(output_path)
+                        )
+
+                if self.args.output_format == 'CSV':
+                    trainer.save_trainings_as_csv(output_path.replace('.file_format', '.csv'))
+                    rp.report(output_text.replace('.file_format', '.csv'))
+                elif self.args.output_format == 'JSON':
+                    trainer.save_trainings_as_json(output_path.replace('.file_format', '.json'))
+                    rp.report(output_text.replace('.file_format', '.json'))
+                else:
+                    raise Exception("--out-format must be 'CSV' or 'JSON'.")
+            else:
+                raise Exception("You must specify --output-format.")
         else:
-            raise argparse.ArgumentError(message="You must specify at least a JSON file path to start training.")
+            raise Exception("You must specify --train-file or --convert (with --output-format set).")
 
 class SC2Runner(Runner):
 
