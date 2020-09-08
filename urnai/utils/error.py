@@ -39,3 +39,6 @@ class MapNotFoundError(Exception):
 
 class UnsupportedTrainingMethodError(Exception):
     pass
+
+class FileFormatNotSupportedError(Exception):
+    pass

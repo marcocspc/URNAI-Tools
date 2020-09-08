@@ -9,15 +9,13 @@
             }
         },
         "model" : {
-            "class" : "DDQNKeras",
+            "class" : "DqlTensorFlow",
             "params" : {
                 "learning_rate" : 0.001,
                 "gamma" : 0.99,
                 "per_episode_epsilon_decay" : false,
                 "epsilon_decay" : 0.99999, 
                 "epsilon_min" : 0.005,
-                "memory_maxlen" : 100000,
-                "min_memory_size" : 2000,
                 "build_model" : [
                     {
                         "type" : "input", 
