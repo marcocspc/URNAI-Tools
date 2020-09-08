@@ -164,19 +164,19 @@ class DQNPytorch(LearningModel):
         Saves the DQN PyTorch model to memory on persist_path
         """
     
-        torch.save(self.model.state_dict(), self.get_full_persistance_path(persist_path))
+        # torch.save(self.model.state_dict(), self.get_full_persistance_path(persist_path))
 
     def load_extra(self, persist_path):
         """
         Loads the DQN PyTorch model from persist_path to both self.model and self.target_model
         """
-        exists = os.path.isfile(self.get_full_persistance_path(persist_path))
+        # exists = os.path.isfile(self.get_full_persistance_path(persist_path))
 
-        if(exists):
-            self.model = self.make_model()
-            self.target_model = self.make_model()
-            self.model.load_state_dict(torch.load(self.get_full_persistance_path(persist_path)))
-            self.target_model.load_state_dict(torch.load(self.get_full_persistance_path(persist_path)))
+        # if(exists):
+        #     self.model = self.make_model()
+        #     self.target_model = self.make_model()
+        #     self.model.load_state_dict(torch.load(self.get_full_persistance_path(persist_path)))
+        #     self.target_model.load_state_dict(torch.load(self.get_full_persistance_path(persist_path)))
 
 class QNetwork(nn.Module):
     """

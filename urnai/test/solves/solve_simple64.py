@@ -55,7 +55,7 @@ def main(unused_argv):
         agent = SC2Agent(dq_network, KilledUnitsReward())
 
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_v_easy", save_every=100, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_100matches train", save_every=20, enable_save=True, relative_path=True)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_test_persist_path3", save_every=20, enable_save=True, relative_path=True)
         trainer.train(num_episodes=3000, max_steps=1200)
         trainer.play(num_matches=100, max_steps=1200)
 

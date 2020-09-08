@@ -44,9 +44,9 @@ def main(unused_argv):
 
         agent = GenericAgent(dq_network, PureReward())
 
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-ram-v0_dqnpytorch_t1", save_every=100, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=500, max_steps=1200)
-        trainer.play(num_matches=100, max_steps=1200)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved2', file_name="breakout-ram-v0_dqnpytorch_blacklistsave", save_every=100, enable_save=True, relative_path=True)
+        trainer.train(num_episodes=1000, max_steps=800)
+        trainer.play(num_matches=100, max_steps=800)
     except KeyboardInterrupt:
         pass
 
