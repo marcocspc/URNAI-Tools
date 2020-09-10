@@ -2,6 +2,7 @@ from urnai.agents.states.abstate import StateBuilder
 from urnai.utils.constants import RTSGeneralization, Games 
 import numpy as np
 
+
 class CollectablesGeneralizedStatebuilder(StateBuilder):
 
     def __init__(self, method=RTSGeneralization.STATE_MAP):
@@ -36,7 +37,6 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
             state = self.build_drts_map(obs)
             state += self.build_non_spatial_drts_state(obs)
 
-
         state = np.asarray(state).flatten()
         state = state.reshape((1, len(state)))
 
@@ -52,7 +52,8 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
             state = self.build_sc2_map(obs)
             state += self.build_non_spatial_sc2_state(obs)
 
-        state = list(np.asarray(state).flatten())
+        state = np.asarray(state).flatten()
+        state = state.reshape((1, len(state)))
 
         
         return state

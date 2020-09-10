@@ -97,6 +97,7 @@ class GeneralizedCollectablesScenario(ABScenario):
             
         self.start()
         self.steps = 0
+        self.pickle_black_list = ['game']
 
     def get_drts_env(self, render, drts_map, drts_number_of_players, 
             drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
@@ -213,7 +214,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         return tiles
 
     def alternate_envs(self):
-        if self.envs is not None:
+        if self.envs is not None and self.method == GeneralizedCollectablesScenario.TRAINING_METHOD_MULTIPLE_ENV:
             if self.env == self.envs[GeneralizedCollectablesScenario.GAME_DEEP_RTS]:
                 self.env = self.envs[GeneralizedCollectablesScenario.GAME_STARCRAFT_II]
                 self.game = GeneralizedCollectablesScenario.GAME_STARCRAFT_II
