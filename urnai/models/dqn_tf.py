@@ -13,7 +13,7 @@ from .model_builder import ModelBuilder
 
 class DqlTensorFlow(LearningModel):
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, gamma=0.95, name='DQN', build_model = ModelBuilder.DEFAULT_BUILD_MODEL, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False, use_memory=False, memory_maxlen=50000, batch_training=False, batch_size=32):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, gamma=0.95, name='DQN', build_model = ModelBuilder.DEFAULT_BUILD_MODEL, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False, use_memory=False, memory_maxlen=10000, batch_training=False, batch_size=32, min_memory_size=5000):
         super().__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay , per_episode_epsilon_decay ,name)
         # Defining the model's layers. Tensorflow's objects are stored into self.model_layers
         self.build_model = build_model

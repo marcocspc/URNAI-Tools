@@ -42,7 +42,6 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
     def enqueue_action_for_player_units(self, obs, action):
         for i in range(len(self.get_player_units(obs["players"][0], obs))):
             self.action_queue.append(action)
-            self.action_queue.append(self.nextunit)
 
     def get_action(self, action_idx, obs):
         action = None
@@ -51,6 +50,9 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
         else:
             action = self.action_queue.pop() 
         self.solve_action(action_idx, obs)
+#        print(">>>>>>>>>>>>> CHOSEN ACTION IDX: {}".format(action_idx))
+#        print(">>>>>>>>>>>>> SOLVED ACTION: {}".format(action))
+#        print(">>>>>>>>>>>>> FINAL ACTIONS: {}".format(self.final_actions))
         return action
 
     def solve_action(self, action_idx, obs):

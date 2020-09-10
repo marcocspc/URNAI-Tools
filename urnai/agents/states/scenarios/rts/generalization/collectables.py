@@ -75,7 +75,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
             for x in range(len(obs.feature_minimap[4][y])):  
                 if obs.feature_minimap[4][y][x] == 1: map_[y][x] = 1 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
                 elif obs.feature_minimap[4][y][x] == 2: map_[y][x] = 7 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
-                elif obs.feature_minimap[4][y][x] == 16: map_[y][x] = 1000 #drts 1000 was chosen by me to represent virtual shards
+                elif obs.feature_minimap[4][y][x] == 16: map_[y][x] = 100 #drts 1000 was chosen by me to represent virtual shards
                 elif obs.feature_minimap[4][y][x] == 3: map_[y][x] = 102 #drts 102 is gold 
 
         return map_
@@ -86,8 +86,8 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         for y in range(len(obs['collectables_map'])): 
             for x in range(len(obs['collectables_map'][y])):
                 if obs['collectables_map'][y][x] == 1: 
-                    map_[y][x] = 1000
-                if map_[y][x] != 1000 and map_[y][x] != 7: 
+                    map_[y][x] = 100
+                if map_[y][x] != 100 and map_[y][x] != 7: 
                     map_[y][x] = 0
 
         map_ = self.normalize_map(map_)
