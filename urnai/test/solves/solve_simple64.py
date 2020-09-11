@@ -38,7 +38,7 @@ def main(unused_argv):
         #     os.environ["SC2PATH"] = sc2_local_path
 
         ## Initializing our StarCraft 2 environment
-        env = SC2Env(map_name="Simple64", render=False, step_mul=16, player_race="terran", enemy_race="random", difficulty="very_easy")
+        env = SC2Env(map_name="Simple64", render=True, step_mul=1, player_race="terran", enemy_race="random", difficulty="very_easy")
         
         action_wrapper = SimpleTerranWrapper()
         state_builder = Simple64GridState(grid_size=4)
