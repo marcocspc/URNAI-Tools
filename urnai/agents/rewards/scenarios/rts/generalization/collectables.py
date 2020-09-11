@@ -45,9 +45,7 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
         prev = self.previous_state['collectables_map']
         curr = np.count_nonzero(current == 1)
         old = np.count_nonzero(prev == 1)
-#        print(">>>>>>>>>>>> CURR: {}".format(curr))
-#        print(">>>>>>>>>>>> OLD: {}".format(old))
-        return (curr - old) * 1000
+        return (curr - old) * 1000 
 
     def get_sc2_reward(self, obs):
         #layer 4 is units (1 friendly, 2 enemy, 16 mineral shards, 3 neutral 

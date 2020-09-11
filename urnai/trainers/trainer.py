@@ -216,13 +216,9 @@ class Trainer(Savable):
             rp.save(self.full_save_play_path)
 
     def save_extra(self, save_path):
-        #print(">>>>>>>>>>> CALLING SAVE EXTRA")
         self.env.save(save_path)
-        #print(">>>>>>>>>>> ENV SAVED OK")
         self.agent.save(save_path)
-        #print(">>>>>>>>>>> AGENT SAVED OK")
         self.logger.save(save_path)
-        #print(">>>>>>>>>>> LOGGER SAVED OK")
         rp.save(save_path)
 
     def load_extra(self, save_path):
