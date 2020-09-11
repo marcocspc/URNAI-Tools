@@ -2,9 +2,9 @@ import sys,os,inspect
 import itertools
 import time
 import numpy as np
-from urnai.utils.logger import Logger
-from urnai.base.savable import Savable 
-from urnai.tdd.reporter import Reporter as rp
+from utils.logger import Logger
+from base.savable import Savable 
+from tdd.reporter import Reporter as rp
 from datetime import datetime
 
 class TestParams():
@@ -79,7 +79,10 @@ class Trainer(Savable):
             obs = self.env.reset()
             step_reward = 0
             done = False
-            self.agent.reset()
+            # Passing the episode to the agent reset, so that it can be passed to model reset
+            # Allowing the model to track the episode number, and decide if it should diminish the
+            # Learning Rate, depending on the currently selected strategy.
+            self.agent.reset(episode)
 
             ep_reward = 0
             victory = False
@@ -168,7 +171,10 @@ class Trainer(Savable):
             obs = self.env.reset()
             step_reward = 0
             done = False
-            self.agent.reset()
+            # Passing the episode to the agent reset, so that it can be passed to model reset
+            # Allowing the model to track the episode number, and decide if it should diminish the
+            # Learning Rate, depending on the currently selected strategy.
+            self.agent.reset(match)
 
             ep_reward = 0
             victory = False

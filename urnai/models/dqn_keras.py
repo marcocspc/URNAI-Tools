@@ -14,10 +14,13 @@ from urnai.utils.error import UnsupportedBuildModelLayerTypeError
 
 class DQNKeras(LearningModel):
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, gamma=0.99, 
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma=0.99, 
+                learning_rate=0.001, learning_rate_min = 0.0001, learning_rate_decay = 0.99995, learning_rate_decay_ep_cutoff = 0,
                 name='DQN', epsilon_start=1.0, epsilon_min=0.01, epsilon_decay=0.995, batch_size=32, batch_training=False,
                 memory_maxlen=50000, use_memory=True, per_episode_epsilon_decay=False, build_model = ModelBuilder.DEFAULT_BUILD_MODEL):
-        super(DQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, epsilon_start, epsilon_min, epsilon_decay, per_episode_epsilon_decay, name)
+        
+        super(DQNKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, learning_rate_min, learning_rate_decay, 
+                                        epsilon_start, epsilon_min, epsilon_decay, per_episode_epsilon_decay, learning_rate_decay_ep_cutoff, name)
         self.batch_size = batch_size
         self.batch_training = batch_training
 

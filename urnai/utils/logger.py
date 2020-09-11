@@ -10,7 +10,7 @@ import numpy as np
 import pickle
 import os
 from matplotlib.ticker import PercentFormatter
-from urnai.tdd.reporter import Reporter as rp
+from tdd.reporter import Reporter as rp
 from models.model_builder import ModelBuilder
 
 class Logger(Savable):

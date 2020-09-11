@@ -34,19 +34,20 @@ def main(unused_argv):
         helper.add_fullyconn_layer(50)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
-        dq_network = DQNPytorch(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(),
-                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.01, memory_maxlen=100000)
+        # dq_network = DQNPytorch(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(),
+        #                     gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.01, memory_maxlen=100000)
 
-        # dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(),
-        #                     gamma=0.99, learning_rate=0.001, epsilon_decay=0.999997, epsilon_min=0.01, memory_maxlen=100000, min_memory_size=2000)
+        dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(),
+                            gamma=0.99, learning_rate=0.001, learning_rate_min=0.0005, learning_rate_decay=0.99995, learning_rate_decay_ep_cutoff=500,
+                            epsilon_decay=0.99999, epsilon_min=0.01, memory_maxlen=100000, min_memory_size=2000)
 
         #dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
 
         agent = GenericAgent(dq_network, PureReward())
 
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-ram-v0_dqnpytorch_t1", save_every=100, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=500, max_steps=1200)
-        trainer.play(num_matches=100, max_steps=1200)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-ram-v0_lrdecaytest", save_every=100, enable_save=True, relative_path=True)
+        trainer.train(num_episodes=1000, max_steps=700)
+        trainer.play(num_matches=100, max_steps=700)
     except KeyboardInterrupt:
         pass
 
