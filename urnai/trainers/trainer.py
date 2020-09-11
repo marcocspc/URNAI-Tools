@@ -21,6 +21,7 @@ class Trainer(Savable):
 
     def __init__(self, env, agent, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0):
         super().__init__()
+        self.pickle_black_list = ["save_path", "file_name", "full_save_path", "full_save_play_path"]
         self.setup(env, agent, save_path, file_name, enable_save, save_every, relative_path, debug_level)
 
     def setup(self, env, agent, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0):
@@ -94,11 +95,7 @@ class Trainer(Savable):
                     break
                 
                 # Choosing an action and passing it to our env.step() in order to act on our environment
-#                try:
                 action = self.agent.step(obs, step_reward, done)
-#                except ValueError:
-#                    np.set_printoptions(threshold=sys.maxsize)
-#                    print(obs)
 
                 obs, default_reward, done = self.env.step(action)
 
@@ -223,7 +220,6 @@ class Trainer(Savable):
         if self.enable_save:
             self.logger.save(self.full_save_play_path)
             rp.save(self.full_save_play_path)
-            #self.save(self.full_save_play_path)
 
     def save_extra(self, save_path):
         self.env.save(save_path)

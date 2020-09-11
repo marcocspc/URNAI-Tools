@@ -97,6 +97,7 @@ class GeneralizedCollectablesScenario(ABScenario):
             
         self.start()
         self.steps = 0
+        self.pickle_black_list = ['game']
 
     def get_drts_env(self, render, drts_map, drts_number_of_players, 
             drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
@@ -132,12 +133,17 @@ class GeneralizedCollectablesScenario(ABScenario):
         player = 0
         if action == self.drts_action_moveup:
             self.move_troops_up(player)
+            return True
         elif action == self.drts_action_movedown:
             self.move_troops_down(player)
+            return True
         elif action == self.drts_action_moveleft:
             self.move_troops_left(player)
+            return True
         elif action == self.drts_action_moveright:
             self.move_troops_right(player)
+            return True
+        return False
 
 
     def move_troops_up(self, player):
@@ -146,7 +152,8 @@ class GeneralizedCollectablesScenario(ABScenario):
         new_x = cur_x
         new_y = cur_y - self.drts_ver_threshold
 
-        self.env.game.players[player].right_click(new_x, new_y)
+        self.move_troops(new_x, new_y)
+        #self.env.game.players[player].right_click(new_x, new_y)
 
     def move_troops_down(self, player):
         cur_x, cur_y = self.get_army_mean(player)
@@ -154,7 +161,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         new_x = cur_x
         new_y = cur_y + self.drts_ver_threshold
 
-        self.env.game.players[player].right_click(new_x, new_y)
+        self.move_troops(new_x, new_y)
 
     def move_troops_left(self, player):
         cur_x, cur_y = self.get_army_mean(player)
@@ -162,7 +169,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         new_x = cur_x - self.drts_hor_threshold
         new_y = cur_y
 
-        self.env.game.players[player].right_click(new_x, new_y)
+        self.move_troops(new_x, new_y)
 
     def move_troops_right(self, player):
         cur_x, cur_y = self.get_army_mean(player)
@@ -170,7 +177,12 @@ class GeneralizedCollectablesScenario(ABScenario):
         new_x = cur_x + self.drts_hor_threshold
         new_y = cur_y
 
-        self.env.game.players[player].right_click(new_x, new_y)
+        self.move_troops(new_x, new_y)
+
+    def move_troops(self, new_x, new_y):
+        for unit in self.get_player_units(0):
+            tile = self.env.game.tilemap.get_tile(new_x, new_y)
+            unit.right_click(tile)
 
     def setup_map(self):
         if (self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS):
@@ -202,7 +214,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         return tiles
 
     def alternate_envs(self):
-        if self.envs is not None:
+        if self.envs is not None and self.method == GeneralizedCollectablesScenario.TRAINING_METHOD_MULTIPLE_ENV:
             if self.env == self.envs[GeneralizedCollectablesScenario.GAME_DEEP_RTS]:
                 self.env = self.envs[GeneralizedCollectablesScenario.GAME_STARCRAFT_II]
                 self.game = GeneralizedCollectablesScenario.GAME_STARCRAFT_II
@@ -219,7 +231,7 @@ class GeneralizedCollectablesScenario(ABScenario):
             if self.steps == 0:
                 self.setup_map()
 
-            if self.solve_action(action):
+            if not self.solve_action(action):
                 state, reward, done = self.env.step(self.drts_action_noaction)
             else:
                 state, reward, done = self.env.step(action)

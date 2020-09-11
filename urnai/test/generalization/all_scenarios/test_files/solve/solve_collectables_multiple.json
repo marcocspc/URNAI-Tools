@@ -1,7 +1,7 @@
 [
     {
         "env" : {
-            "class" : "GeneralizedBuildUnitsScenario",
+            "class" : "GeneralizedCollectablesScenario",
             "params" : {
                 "method" : "multiple",
                 "game" : "drts",
@@ -43,8 +43,8 @@
         "trainer" : {
             "class" : "Trainer",
             "params" : {
-	        "file_name": "agent_multiple_build_units",
-                "save_every" : 100,
+	        "file_name": "agent_multiple_collectables",
+                "save_every" : 1500,
                 "enable_save" : true
             }
         },

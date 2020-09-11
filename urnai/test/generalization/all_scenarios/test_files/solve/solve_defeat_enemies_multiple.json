@@ -3,7 +3,7 @@
         "env" : {
             "class" : "GeneralizedDefeatEnemiesScenario",
             "params" : {
-                "method" : "single",
+                "method" : "multiple",
                 "game" : "drts",
                 "render" : false
             }
@@ -43,8 +43,8 @@
         "trainer" : {
             "class" : "Trainer",
             "params" : {
-	        "file_name": "agent_drts_only_defeat_enemies",
-                "save_every" : 100,
+	        "file_name": "agent_multiple_defeat_enemies",
+                "save_every" : 1500,
                 "enable_save" : true
             }
         },

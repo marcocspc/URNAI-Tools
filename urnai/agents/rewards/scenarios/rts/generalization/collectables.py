@@ -43,7 +43,9 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
     def get_drts_reward(self, obs):
         current = obs['collectables_map']
         prev = self.previous_state['collectables_map']
-        return np.sum(current != prev) * 1000
+        curr = np.count_nonzero(current == 1)
+        old = np.count_nonzero(prev == 1)
+        return (curr - old) * 1000 
 
     def get_sc2_reward(self, obs):
         #layer 4 is units (1 friendly, 2 enemy, 16 mineral shards, 3 neutral 
