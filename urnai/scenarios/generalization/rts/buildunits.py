@@ -79,10 +79,10 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
             if self.steps == 0:
                 self.setup_map()
                 self.spawn_army()
+                self.collect_gold()
 
             state, reward, done = None, None, None 
             if action == GeneralizedBuildUnitsScenario.ACTION_DRTS_COLLECT_GOLD:
-                self.collect_gold()
                 no_action = 15
                 state, reward, done = self.env.step(no_action)
             elif action == GeneralizedBuildUnitsScenario.ACTION_DRTS_BUILD_FARM:

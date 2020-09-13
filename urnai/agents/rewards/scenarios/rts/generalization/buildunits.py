@@ -16,14 +16,14 @@ class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
         current = self.get_drts_number_of_specific_units(obs, player, barracks) 
         prev = self.get_drts_number_of_specific_units(self.previous_state, player, barracks) 
 
-        rwdB = (current - prev)
+        rwdB = (current - prev) * 10
 
         current = self.get_drts_number_of_specific_units(obs, player, footman) 
         prev = self.get_drts_number_of_specific_units(self.previous_state, player, footman) 
 
-        rwdC = (current - prev)
+        rwdC = (current - prev) * 100
 
-        return (rwdA + rwdB + rwdC) * 1000
+        return (rwdA + rwdB + rwdC)
 
     def get_sc2_reward(self, obs):
         current = self.get_sc2_number_of_supply_depot(obs)
@@ -34,11 +34,11 @@ class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
         current = self.get_sc2_number_of_barracks(obs)
         prev = self.get_sc2_number_of_barracks(self.previous_state)
 
-        rwdB = (current - prev)
+        rwdB = (current - prev) * 10
 
         current = self.get_sc2_number_of_marines(obs)
         prev = self.get_sc2_number_of_marines(self.previous_state)
 
-        rwdC = (current - prev)
+        rwdC = (current - prev) * 100
 
-        return (rwdA + rwdB + rwdC) * 1000
+        return (rwdA + rwdB + rwdC)
