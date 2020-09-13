@@ -1,4 +1,5 @@
 from .defeatenemies import GeneralizedDefeatEnemiesScenario
+from urnai.utils.constants import RTSGeneralization, Games 
 from urnai.utils.error import EnvironmentNotSupportedError
 from urnai.agents.actions.scenarios.rts.generalization.buildunits import BuildUnitsDeepRTSActionWrapper, BuildUnitsStarcraftIIActionWrapper 
 from pysc2.lib import actions, features, units
@@ -70,8 +71,8 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
     ACTION_DRTS_BUILD_BARRACK = 19
     ACTION_DRTS_BUILD_FOOTMAN = 20
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-22x16-buildunits.json", sc2_map="BuildMarines", drts_start_oil=999999, drts_start_gold=999999, drts_start_lumber=999999, drts_start_food=999999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV):
-        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=1, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food, fit_to_screen=fit_to_screen, method=method)
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-22x16-buildunits.json", sc2_map="BuildMarines", drts_start_oil=999999, drts_start_gold=999999, drts_start_lumber=999999, drts_start_food=999999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV, state_builder_method=RTSGeneralization.STATE_MAP):
+        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=1, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food, fit_to_screen=fit_to_screen, method=method, state_builder_method=RTSGeneralization.STATE_MAP)
 
     def step(self, action):
         if (self.game == GeneralizedBuildUnitsScenario.GAME_DEEP_RTS):

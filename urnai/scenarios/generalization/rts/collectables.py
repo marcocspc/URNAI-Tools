@@ -1,6 +1,7 @@
 import sys, os
 from urnai.scenarios.base.abscenario import ABScenario
 from urnai.utils.error import EnvironmentNotSupportedError, UnsupportedTrainingMethodError
+from urnai.utils.constants import RTSGeneralization, Games 
 from urnai.agents.actions.base.abwrapper import ActionWrapper
 from urnai.agents.actions.scenarios.rts.generalization.all_scenarios import MultipleScenarioActionWrapper  
 from urnai.agents.states.scenarios.rts.generalization.all_scenarios import MultipleScenarioStateBuilder
@@ -25,7 +26,8 @@ class GeneralizedCollectablesScenario(ABScenario):
     TRAINING_METHOD_SINGLE_ENV = "single"
     TRAINING_METHOD_MULTIPLE_ENV = "multiple"
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-16x22-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV):
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-16x22-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV, state_builder_method=RTSGeneralization.STATE_MAP):
+        self.state_builder_method = state_builder_method
         self.game = game
         self.steps = 0
         self.drts_hor_threshold = 3
@@ -281,7 +283,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         return wrapper 
 
     def get_default_state_builder(self):
-        wrapper = MultipleScenarioStateBuilder(self.__class__.__name__)
+        wrapper = MultipleScenarioStateBuilder(self.__class__.__name__, self.state_builder_method)
         return wrapper
 
     def random_tile(self):
@@ -294,7 +296,7 @@ class GeneralizedCollectablesScenario(ABScenario):
             height = self.env.game.map.map_height
             map_ = np.zeros((width, height)) 
 
-            while np.sum(map_) <= 20:
+            while np.sum(map_) <= RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS:
                 tile = self.random_tile()
 
                 while not tile.is_walkable() or map_[tile.y, tile.x] != 0:
