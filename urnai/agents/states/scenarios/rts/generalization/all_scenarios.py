@@ -15,7 +15,7 @@ class MultipleScenarioStateBuilder():
 
     def __init__(self, scenario, method=RTSGeneralization.STATE_MAP):
         state_builder_class = self.get_state_builder(scenario)
-        self.state_builder = state_builder_class(method) 
+        self.state_builder = state_builder_class(method=method) 
 
     def get_state_builder(self, scenario):
         for scenario_class in MultipleScenarioStateBuilder.SCENARIOS.keys():

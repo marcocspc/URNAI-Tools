@@ -283,7 +283,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         return wrapper 
 
     def get_default_state_builder(self):
-        wrapper = MultipleScenarioStateBuilder(self.__class__.__name__, self.state_builder_method)
+        wrapper = MultipleScenarioStateBuilder(self.__class__.__name__, method=self.state_builder_method)
         return wrapper
 
     def random_tile(self):

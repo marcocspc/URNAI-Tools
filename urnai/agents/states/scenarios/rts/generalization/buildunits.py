@@ -6,7 +6,7 @@ import urnai.agents.actions.sc2 as sc2aux
 class BuildUnitsGeneralizedStatebuilder(DefeatEnemiesGeneralizedStatebuilder):
 
     def __init__(self, method=RTSGeneralization.STATE_MAP):
-        super().__init__()
+        super().__init__(method=method)
         self.non_spatial_maximums = [
                 RTSGeneralization.STATE_MAXIMUM_GOLD_OR_MINERALS,
                 RTSGeneralization.MAXIMUM_NUMBER_OF_FARM_OR_SUPPLY_DEPOT,

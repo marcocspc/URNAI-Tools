@@ -71,15 +71,17 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
     ACTION_DRTS_BUILD_BARRACK = 19
     ACTION_DRTS_BUILD_FOOTMAN = 20
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-22x16-buildunits.json", sc2_map="BuildMarines", drts_start_oil=999999, drts_start_gold=999999, drts_start_lumber=999999, drts_start_food=999999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV, state_builder_method=RTSGeneralization.STATE_MAP):
-        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=1, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food, fit_to_screen=fit_to_screen, method=method, state_builder_method=RTSGeneralization.STATE_MAP)
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-22x16-buildunits.json", sc2_map="BuildMarines", drts_start_oil=999999, drts_start_gold=0, drts_start_lumber=999999, drts_start_food=999999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV, state_builder_method=RTSGeneralization.STATE_MAP):
+        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=1, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food, fit_to_screen=fit_to_screen, method=method, state_builder_method=state_builder_method)
 
     def step(self, action):
         if (self.game == GeneralizedBuildUnitsScenario.GAME_DEEP_RTS):
             if self.steps == 0:
                 self.setup_map()
                 self.spawn_army()
-                self.collect_gold()
+
+            if self.env.game.players[0].gold == 0: self.collect_gold()
+            print(">>>>>>>>>>>>> GOLD: {}".format(self.env.game.players[0].gold))
 
             state, reward, done = None, None, None 
             if action == GeneralizedBuildUnitsScenario.ACTION_DRTS_COLLECT_GOLD:
@@ -119,7 +121,7 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
     def collect_gold(self):
         player = 0
         peasants = self.get_player_specific_type_units(player, self.env.constants.Unit.Peasant) 
-        gold = 6
+        gold = 102
         gold_tiles = self.get_tiles_by_id(gold)
         how_many_gold_spots = len(gold_tiles)
         n = how_many_gold_spots
@@ -130,6 +132,7 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
             gold_tile = gold_tiles[i]
 
             for peasant in peasant_set:
+                print("Peasant {} right_clicked gold tile at {},{}".format(peasant, gold_tile.x, gold_tile.y))
                 peasant.right_click(gold_tile)
 
     def build_farm(self):
