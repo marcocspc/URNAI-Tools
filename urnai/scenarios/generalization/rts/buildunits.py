@@ -82,8 +82,6 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
             elif self.steps == 1:
                 self.collect_gold()
 
-            print(">>>>>>>>>>>>> GOLD: {}".format(self.env.game.players[0].gold))
-
             state, reward, done = None, None, None 
             if action == GeneralizedBuildUnitsScenario.ACTION_DRTS_COLLECT_GOLD:
                 no_action = 15
@@ -127,16 +125,12 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
         how_many_gold_spots = len(gold_tiles)
         n = how_many_gold_spots
         peasants_sets = [peasants[i * n:(i + 1) * n] for i in range((len(peasants) + n - 1) // n )]
-        print(gold_tiles)
-        print(peasants_sets)
-        print(peasants)
 
         for i in range(len(peasants_sets)):
             peasant_set = peasants_sets[i]
             gold_tile = gold_tiles[i]
 
             for peasant in peasant_set:
-                print("Peasant {} right_clicked gold tile at {},{}".format(peasant, gold_tile.x, gold_tile.y))
                 peasant.right_click(gold_tile)
 
     def build_farm(self):

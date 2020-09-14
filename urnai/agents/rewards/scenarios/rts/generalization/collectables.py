@@ -9,6 +9,7 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
     def __init__(self, method=RTSGeneralization.STATE_MAP):
         self.previous_state = None
         self.method = method
+        self.collectable_counter = 0
 
     def get_game(self, obs):
         try:
@@ -45,7 +46,15 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
         prev = self.previous_state['collectables_map']
         curr = np.count_nonzero(current == 1)
         old = np.count_nonzero(prev == 1)
-        return (curr - old) * 1000 
+        if curr == RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS:
+            self.collectable_counter = 0
+        elif curr - old > 0:
+            self.collectable_counter += 1
+            return 2 ** self.collectable_counter 
+        else:
+            return 0
+        return 0
+        #return (curr - old) * 1000 
 
     def get_sc2_reward(self, obs):
         #layer 4 is units (1 friendly, 2 enemy, 16 mineral shards, 3 neutral 

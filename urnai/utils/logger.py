@@ -12,6 +12,7 @@ import os
 from matplotlib.ticker import PercentFormatter
 from tdd.reporter import Reporter as rp
 from models.model_builder import ModelBuilder
+from time import time
 
 class Logger(Savable):
     def __init__(self, ep_total, agent_name, model_name, model_builder:ModelBuilder, action_wrapper_name, agent_action_size, agent_action_names, state_builder_name, reward_builder_name, env_name, is_episodic=True, render=True):
@@ -63,6 +64,12 @@ class Logger(Savable):
         self.avg_steps_graph = None
         self.avg_winrate_graph = None
         
+        #time and fps part
+        self.training_start = time() 
+        self.episode_duration_list = []
+        self.episode_fps_list = []
+        self.avg_fps_list = []
+        self.episode_temp_start_time = 0
 
         #Training report
         self.training_report = ""
@@ -83,6 +90,9 @@ class Logger(Savable):
         self.ep_victories = []
         self.ep_avg_victories = []
 
+    def record_episode_start(self):
+        self.episode_temp_start_time = time()
+
     def record_episode(self, ep_reward, has_won, steps_count, agent_info, ep_actions):
         for i in range(self.agent_action_size):
             self.ep_agent_actions[i].append(ep_actions[i])
@@ -94,6 +104,12 @@ class Logger(Savable):
         
         self.ep_steps_count.append(steps_count)
         self.ep_avg_steps.append(sum(self.ep_steps_count) / self.ep_count)
+        
+        #time and fps stuff
+        episode_duration = time() - self.episode_temp_start_time
+        self.episode_duration_list.append(round(episode_duration, 1))
+        self.episode_fps_list.append(round(steps_count / episode_duration, 2))
+        self.avg_fps_list.append(round(sum(self.episode_fps_list) / self.ep_count, 2))
 
         if ep_reward > self.best_reward:
             self.best_reward = ep_reward
@@ -132,8 +148,8 @@ class Logger(Savable):
 
     def log_ep_stats(self):
         if self.ep_count > 0:
-            rp.report("Episode: {}/{} | Outcome: {} | Episode Avg. Reward: {:10.6f} | Episode Reward: {:10.6f} | Episode Steps: {:10.6f} | Best Reward was {} on episode: {} | Agent info: {}"
-            .format(self.ep_count, self.ep_total, self.ep_victories[-1], self.ep_avg_rewards[-1], self.ep_rewards[-1], self.ep_steps_count[-1], self.best_reward, self.best_reward_episode, self.agent_info[-1]), end="\r")
+            rp.report("Episode: {}/{} | Outcome: {} | Episode Avg. Reward: {:10.6f} | Episode Reward: {:10.6f} | Episode Steps: {:10.6f} | Best Reward was {} on episode: {} | Episode Duration (seconds): {} | Episode FPS: {} | FPS AVG: {} | Agent info: {}"
+            .format(self.ep_count, self.ep_total, self.ep_victories[-1], self.ep_avg_rewards[-1], self.ep_rewards[-1], self.ep_steps_count[-1], self.best_reward, self.best_reward_episode, self.episode_duration_list[-1], self.episode_fps_list[-1], self.avg_fps_list[-1], self.agent_info[-1]))
         else:
             rp.report("There are no recorded episodes!")
 
@@ -143,6 +159,7 @@ class Logger(Savable):
             + "Current Reward Avg.: {}".format(sum(self.ep_rewards) / self.ep_count)
             + " Win rate: {:10.3f}%".format((sum(self.ep_victories)/ self.ep_count) * 100)
             + " Avg number of steps: {}".format(sum(self.ep_avg_steps)/ self.ep_count)
+            + " Training Duration (seconds): {}".format(round(time() - self.training_start, 2))
             + "\n")
 
             self.training_report += text 
