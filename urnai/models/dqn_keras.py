@@ -67,13 +67,21 @@ class DQNKeras(LearningModel):
                               padding=layer_model['padding'], activation='relu', input_shape=layer_model['input_shape']))
                     model.add(Activation('relu'))
                     model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
-                    model.add(Dropout(layer_model['dropout']))
+                    try:
+                        #this code makes dropout layer optional
+                        model.add(Dropout(layer_model['dropout']))
+                    except KeyError:
+                        pass
                 else:
                     model.add(Conv2D(layer_model['filters'], layer_model['filter_shape'], 
                               padding=layer_model['padding'], activation='relu'))
                     model.add(Activation('relu'))
                     model.add(MaxPooling2D(pool_size=layer_model['max_pooling_pool_size_shape']))
-                    model.add(Dropout(layer_model['dropout']))
+                    try:
+                        #this code makes dropout layer optional
+                        model.add(Dropout(layer_model['dropout']))
+                    except KeyError:
+                        pass
             else:
                 raise UnsupportedBuildModelLayerTypeError("Unsuported Layer Type " + layer_model['type'])
 

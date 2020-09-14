@@ -172,7 +172,7 @@ class PGKeras(LearningModel):
         action = np.random.choice(np.arange(self.action_size), p=action_prob)
         return action
 
-    def ep_reset(self):
+    def ep_reset(self, episode):
         self.state_memory = []
         self.action_memory = []
         self.reward_memory = []
