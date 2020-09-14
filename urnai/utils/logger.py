@@ -239,6 +239,21 @@ class Logger(Savable):
             plt.close(self.avg_winrate_graph)
             self.avg_winrate_graph = None
 
+            temp_fig = self.generalized_curve_plot(self.episode_duration_list, "Episode Duration (Seconds)", "Per Episode Duration In Seconds")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "ep_duration_graph.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "ep_duration_graph.pdf")
+            plt.close(temp_fig)
+
+            temp_fig = self.generalized_curve_plot(self.episode_fps_list, "Episode FPS", "Per Episode FPS")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_ep_fps_graph.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_ep_fps_graph.pdf")
+            plt.close(temp_fig)
+
+            temp_fig = self.generalized_curve_plot(self.episode_fps_list, "Episode Avg. FPS", "Per Episode Avg. FPS")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_ep_fps_graph.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_ep_fps_graph.pdf")
+            plt.close(temp_fig)
+
             # Populating self.agent_action_names with filler names if it wasn't provided by the agent's action wrapper
             if self.agent_action_names == None:
                 self.agent_action_names = []
