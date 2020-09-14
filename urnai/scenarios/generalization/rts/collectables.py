@@ -26,7 +26,7 @@ class GeneralizedCollectablesScenario(ABScenario):
     TRAINING_METHOD_SINGLE_ENV = "single"
     TRAINING_METHOD_MULTIPLE_ENV = "multiple"
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-16x22-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV, state_builder_method=RTSGeneralization.STATE_MAP):
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-16x22-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV, state_builder_method=RTSGeneralization.STATE_MAP, updates_per_action = 12, step_mul=32):
         self.state_builder_method = state_builder_method
         self.game = game
         self.steps = 0
@@ -56,9 +56,9 @@ class GeneralizedCollectablesScenario(ABScenario):
             if game == GeneralizedCollectablesScenario.GAME_DEEP_RTS:
                 self.env = self.get_drts_env(render, drts_map, drts_number_of_players, 
                         drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
-                        fit_to_screen)
+                        fit_to_screen, updates_per_action)
             elif game == GeneralizedCollectablesScenario.GAME_STARCRAFT_II:
-                self.env = self.get_starcraft_env(sc2_map, render)
+                self.env = self.get_starcraft_env(sc2_map, render, step_mul)
             else:
                 err = '''{} only supports the following environments:
         GeneralizedCollectablesScenario.GAME_DEEP_RTS
@@ -67,8 +67,8 @@ class GeneralizedCollectablesScenario(ABScenario):
         elif method == GeneralizedCollectablesScenario.TRAINING_METHOD_MULTIPLE_ENV:
             env_drts = self.get_drts_env(render, drts_map, drts_number_of_players, 
                     drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
-                    fit_to_screen)
-            env_sc2  = self.get_starcraft_env(sc2_map, render)
+                    fit_to_screen, updates_per_action)
+            env_sc2  = self.get_starcraft_env(sc2_map, render, step_mul)
             self.envs = {GeneralizedCollectablesScenario.GAME_DEEP_RTS : env_drts, GeneralizedCollectablesScenario.GAME_STARCRAFT_II : env_sc2}
             #games are inverted here because of the way
             #that trainer works
@@ -103,15 +103,15 @@ class GeneralizedCollectablesScenario(ABScenario):
 
     def get_drts_env(self, render, drts_map, drts_number_of_players, 
             drts_start_oil, drts_start_gold, drts_start_lumber, drts_start_food,
-            fit_to_screen):
-        env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = 12, number_of_players=drts_number_of_players, start_oil=drts_start_oil, start_gold=drts_start_gold, start_lumber=drts_start_lumber, start_food=drts_start_food, fit_to_screen=fit_to_screen, flatten_state=True)
+            fit_to_screen, updates_per_action):
+        env = DeepRTSEnv(render=render, map=drts_map, updates_per_action = updates_per_action, number_of_players=drts_number_of_players, start_oil=drts_start_oil, start_gold=drts_start_gold, start_lumber=drts_start_lumber, start_food=drts_start_food, fit_to_screen=fit_to_screen, flatten_state=True)
         return env
 
-    def get_starcraft_env(self, sc2_map, render):
+    def get_starcraft_env(self, sc2_map, render, step_m):
         FLAGS = flags.FLAGS
         FLAGS(sys.argv)
         players = [sc2_env.Agent(sc2_env.Race.terran)]
-        env = SC2Env(map_name=sc2_map, render=render, step_mul=32, players=players)
+        env = SC2Env(map_name=sc2_map, render=render, players=players, step_mul=step_m)
         return env
 
     def get_army_mean(self, player):
@@ -203,7 +203,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         specific_units = []
 
         for unit in all_units:
-            if unit.id == unit_id: specific_units.append(unit)
+            if unit.type == int(unit_id): specific_units.append(unit)
 
         return specific_units
 
