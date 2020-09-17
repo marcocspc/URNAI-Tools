@@ -50,9 +50,6 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
         else:
             action = self.action_queue.pop() 
         self.solve_action(action_idx, obs)
-#        print(">>>>>>>>>>>>> CHOSEN ACTION IDX: {}".format(action_idx))
-#        print(">>>>>>>>>>>>> SOLVED ACTION: {}".format(action))
-#        print(">>>>>>>>>>>>> FINAL ACTIONS: {}".format(self.final_actions))
         return action
 
     def solve_action(self, action_idx, obs):

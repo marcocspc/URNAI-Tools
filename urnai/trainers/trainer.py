@@ -178,6 +178,7 @@ class Trainer(Savable):
             victory = False
 
             ep_actions = np.zeros(self.agent.action_wrapper.get_action_space_dim())
+            self.logger.record_episode_start()
 
             for step in itertools.count():
                 if step >= max_steps:

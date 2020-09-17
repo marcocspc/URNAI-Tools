@@ -64,11 +64,11 @@ class Logger(Savable):
         self.avg_steps_graph = None
         self.avg_winrate_graph = None
         
-        #time and fps part
+        #time and sps part
         self.training_start = time() 
         self.episode_duration_list = []
-        self.episode_fps_list = []
-        self.avg_fps_list = []
+        self.episode_sps_list = []
+        self.avg_sps_list = []
         self.episode_temp_start_time = 0
 
         #Training report
@@ -105,11 +105,11 @@ class Logger(Savable):
         self.ep_steps_count.append(steps_count)
         self.ep_avg_steps.append(sum(self.ep_steps_count) / self.ep_count)
         
-        #time and fps stuff
+        #time and sps stuff
         episode_duration = time() - self.episode_temp_start_time
         self.episode_duration_list.append(round(episode_duration, 1))
-        self.episode_fps_list.append(round(steps_count / episode_duration, 2))
-        self.avg_fps_list.append(round(sum(self.episode_fps_list) / self.ep_count, 2))
+        self.episode_sps_list.append(round(steps_count / episode_duration, 2))
+        self.avg_sps_list.append(round(sum(self.episode_sps_list) / self.ep_count, 2))
 
         if ep_reward > self.best_reward:
             self.best_reward = ep_reward
@@ -148,8 +148,8 @@ class Logger(Savable):
 
     def log_ep_stats(self):
         if self.ep_count > 0:
-            rp.report("Episode: {}/{} | Outcome: {} | Episode Avg. Reward: {:10.6f} | Episode Reward: {:10.6f} | Episode Steps: {:10.6f} | Best Reward was {} on episode: {} | Episode Duration (seconds): {} | Episode FPS: {} | FPS AVG: {} | Agent info: {}"
-            .format(self.ep_count, self.ep_total, self.ep_victories[-1], self.ep_avg_rewards[-1], self.ep_rewards[-1], self.ep_steps_count[-1], self.best_reward, self.best_reward_episode, self.episode_duration_list[-1], self.episode_fps_list[-1], self.avg_fps_list[-1], self.agent_info[-1]))
+            rp.report("Episode: {}/{} | Outcome: {} | Episode Avg. Reward: {:10.6f} | Episode Reward: {:10.6f} | Episode Steps: {:10.6f} | Best Reward was {} on episode: {} | Episode Duration (seconds): {} | Episode SPS: {} | SPS AVG: {} | Agent info: {}"
+            .format(self.ep_count, self.ep_total, self.ep_victories[-1], self.ep_avg_rewards[-1], self.ep_rewards[-1], self.ep_steps_count[-1], self.best_reward, self.best_reward_episode, self.episode_duration_list[-1], self.episode_sps_list[-1], self.avg_sps_list[-1], self.agent_info[-1]))
         else:
             rp.report("There are no recorded episodes!")
 
@@ -244,14 +244,14 @@ class Logger(Savable):
             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "ep_duration_graph.pdf")
             plt.close(temp_fig)
 
-            temp_fig = self.generalized_curve_plot(self.episode_fps_list, "Episode FPS", "Per Episode FPS")
-            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_ep_fps_graph.png")
-            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_ep_fps_graph.pdf")
+            temp_fig = self.generalized_curve_plot(self.episode_sps_list, "Episode SPS", "Per Episode SPS")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_ep_sps_graph.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_ep_sps_graph.pdf")
             plt.close(temp_fig)
 
-            temp_fig = self.generalized_curve_plot(self.episode_fps_list, "Episode Avg. FPS", "Per Episode Avg. FPS")
-            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_ep_fps_graph.png")
-            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_ep_fps_graph.pdf")
+            temp_fig = self.generalized_curve_plot(self.episode_sps_list, "Episode Avg. SPS", "Per Episode Avg. SPS")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_ep_sps_graph.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_ep_sps_graph.pdf")
             plt.close(temp_fig)
 
             # Populating self.agent_action_names with filler names if it wasn't provided by the agent's action wrapper

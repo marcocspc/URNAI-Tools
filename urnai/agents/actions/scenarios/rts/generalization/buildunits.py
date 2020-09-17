@@ -20,7 +20,7 @@ class BuildUnitsDeepRTSActionWrapper(DefeatEnemiesDeepRTSActionWrapper):
         if action_idx != None:
             if action_idx != self.noaction:
                 i = action_idx 
-                return self.final_actions[i]
+                self.action_queue.append(self.final_actions[i])
         else:
             # if action_idx was None, this means that the actionwrapper
             # was not resetted properly, so I will reset it here
