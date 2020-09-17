@@ -490,7 +490,7 @@ def organize_queue(actions, actions_queue):
 
 # check_unit_validity (should check if the object being received is a proper unit from pysc2)
 
-def select_army(obs, player_race):
+def select_all_race_units(obs, player_race):
     army = []
     if player_race == _PROTOSS:
         army.extend(get_units_by_type(obs, units.Protoss.Adept))
@@ -600,7 +600,6 @@ def select_army(obs, player_race):
         army.extend(get_units_by_type(obs, units.Terran.WidowMine))
         army.extend(get_units_by_type(obs, units.Terran.WidowMineBurrowed))
     elif player_race == _ZERG:
-        army.extend(get_units_by_type(obs, units.Zerg.Zergling))
         army.extend(get_units_by_type(obs, units.Zerg.Roach))
         army.extend(get_units_by_type(obs, units.Zerg.Baneling))
         army.extend(get_units_by_type(obs, units.Zerg.BanelingBurrowed))
@@ -681,7 +680,95 @@ def select_army(obs, player_race):
     if len(army) == 0:
         army = _NO_UNITS
     return army
-    
+
+def select_army(obs, player_race):
+    army = []
+    if player_race == _PROTOSS:
+        army.extend(get_my_units_by_type(obs, units.Protoss.Adept))
+        army.extend(get_my_units_by_type(obs, units.Protoss.AdeptPhaseShift))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Archon))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Carrier))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Colossus))
+        army.extend(get_my_units_by_type(obs, units.Protoss.DarkTemplar))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Disruptor))
+        army.extend(get_my_units_by_type(obs, units.Protoss.DisruptorPhased))
+        army.extend(get_my_units_by_type(obs, units.Protoss.HighTemplar))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Immortal))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Mothership))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Observer))
+        army.extend(get_my_units_by_type(obs, units.Protoss.ObserverSurveillanceMode))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Oracle))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Phoenix))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Sentry))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Stalker))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Tempest))
+        army.extend(get_my_units_by_type(obs, units.Protoss.VoidRay))
+        army.extend(get_my_units_by_type(obs, units.Protoss.Zealot))
+    elif player_race == _TERRAN:
+        army.extend(get_my_units_by_type(obs, units.Terran.Marine))
+        army.extend(get_my_units_by_type(obs, units.Terran.Marauder))
+        army.extend(get_my_units_by_type(obs, units.Terran.Reaper))
+        army.extend(get_my_units_by_type(obs, units.Terran.Ghost))
+        army.extend(get_my_units_by_type(obs, units.Terran.Hellion))
+        army.extend(get_my_units_by_type(obs, units.Terran.Hellbat))
+        army.extend(get_my_units_by_type(obs, units.Terran.SiegeTank))
+        army.extend(get_my_units_by_type(obs, units.Terran.Cyclone))
+        army.extend(get_my_units_by_type(obs, units.Terran.WidowMine))
+        army.extend(get_my_units_by_type(obs, units.Terran.Thor))
+        army.extend(get_my_units_by_type(obs, units.Terran.ThorHighImpactMode))
+        army.extend(get_my_units_by_type(obs, units.Terran.VikingAssault))
+        army.extend(get_my_units_by_type(obs, units.Terran.VikingFighter))
+        army.extend(get_my_units_by_type(obs, units.Terran.Medivac))
+        army.extend(get_my_units_by_type(obs, units.Terran.Liberator))
+        army.extend(get_my_units_by_type(obs, units.Terran.LiberatorAG))
+        army.extend(get_my_units_by_type(obs, units.Terran.Raven))
+        army.extend(get_my_units_by_type(obs, units.Terran.Banshee))
+        army.extend(get_my_units_by_type(obs, units.Terran.Battlecruiser))
+    elif player_race == _ZERG:
+        army.extend(get_my_units_by_type(obs, units.Zerg.Baneling))
+        army.extend(get_my_units_by_type(obs, units.Zerg.BanelingBurrowed))
+        army.extend(get_my_units_by_type(obs, units.Zerg.BanelingCocoon))
+        army.extend(get_my_units_by_type(obs, units.Zerg.BroodLord))
+        army.extend(get_my_units_by_type(obs, units.Zerg.BroodLordCocoon))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Broodling))
+        army.extend(get_my_units_by_type(obs, units.Zerg.BroodlingEscort))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Changeling))
+        army.extend(get_my_units_by_type(obs, units.Zerg.ChangelingMarine))
+        army.extend(get_my_units_by_type(obs, units.Zerg.ChangelingMarineShield))
+        army.extend(get_my_units_by_type(obs, units.Zerg.ChangelingZealot))
+        army.extend(get_my_units_by_type(obs, units.Zerg.ChangelingZergling))
+        army.extend(get_my_units_by_type(obs, units.Zerg.ChangelingZerglingWings))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Corruptor))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Hydralisk))
+        army.extend(get_my_units_by_type(obs, units.Zerg.HydraliskBurrowed))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Infestor))
+        army.extend(get_my_units_by_type(obs, units.Zerg.InfestorBurrowed))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Locust))
+        army.extend(get_my_units_by_type(obs, units.Zerg.LocustFlying))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Lurker))
+        army.extend(get_my_units_by_type(obs, units.Zerg.LurkerBurrowed))
+        army.extend(get_my_units_by_type(obs, units.Zerg.LurkerCocoon))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Mutalisk))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Overseer))
+        army.extend(get_my_units_by_type(obs, units.Zerg.OverseerCocoon))
+        army.extend(get_my_units_by_type(obs, units.Zerg.OverseerOversightMode))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Queen))
+        army.extend(get_my_units_by_type(obs, units.Zerg.QueenBurrowed))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Ravager))
+        army.extend(get_my_units_by_type(obs, units.Zerg.RavagerBurrowed))
+        army.extend(get_my_units_by_type(obs, units.Zerg.RavagerCocoon))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Roach))
+        army.extend(get_my_units_by_type(obs, units.Zerg.RoachBurrowed))
+        army.extend(get_my_units_by_type(obs, units.Zerg.SwarmHost))
+        army.extend(get_my_units_by_type(obs, units.Zerg.SwarmHostBurrowed))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Ultralisk))
+        army.extend(get_my_units_by_type(obs, units.Zerg.UltraliskBurrowed))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Viper))
+        army.extend(get_my_units_by_type(obs, units.Zerg.Zergling))
+        army.extend(get_my_units_by_type(obs, units.Zerg.ZerglingBurrowed))
+    if len(army) == 0:
+        army = _NO_UNITS
+    return army   
 
 def get_unit_race(unit_type):
     if unit_type in units.Terran: 
