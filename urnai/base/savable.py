@@ -165,4 +165,8 @@ class Savable(ABC):
 
     def restore_pickleable_attributes(self, dict_to_restore):
         for attr in dict_to_restore:
-            setattr(self, attr, dict_to_restore[attr])
+            if hasattr(self, "pickle_black_list"):
+                if attr not in self.pickle_black_list:
+                    setattr(self, attr, dict_to_restore[attr])
+            else:
+                setattr(self, attr, dict_to_restore[attr])
