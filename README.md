@@ -152,7 +152,6 @@ Follow these instructions to start developing new stuff using our library.
 
 - Building a PySC2 agent
 - Building an OpenAI Gym agent
-- Building a PyGame Learning Environment agent
 
 ### Building a new DRL model
 
@@ -172,7 +171,6 @@ Here you'll find all the things that we plan to do in this project. **Bold** ite
   * [ ] **Statistics for solved problems**
 * [ ] Support for new environments
   * [X] [Arcade Learning Environment](https://github.com/mgbellemare/Arcade-Learning-Environment) ([atari-py](https://github.com/openai/atari-py))
-  * [ ] [Gym Retro](https://github.com/openai/retro)
   * [X] [Vizdoom](https://github.com/mwydmuch/ViZDoom)
   * [X] [DeepRTS](https://github.com/cair/deep-rts)
 * [ ] More Deep RL algorithms
