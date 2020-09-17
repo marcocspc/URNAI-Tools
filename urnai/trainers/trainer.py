@@ -97,7 +97,6 @@ class Trainer(Savable):
                 
                 # Choosing an action and passing it to our env.step() in order to act on our environment
                 action = self.agent.step(obs, step_reward, done)
-
                 obs, default_reward, done = self.env.step(action)
 
                 is_last_step = step == max_steps - 1
@@ -115,7 +114,8 @@ class Trainer(Savable):
                 # Adding our step reward to the total count of the episode's reward
                 ep_reward += step_reward
 
-                ep_actions[self.agent.previous_action] += 1
+                # commenting this line to test whether or not the creation of action graphs impacts agent performance
+                # ep_actions[self.agent.previous_action] += 1
 
                 if done:
                     victory = default_reward == 1

@@ -19,8 +19,8 @@ class SC2Agent(Agent):
         self.episodes = 0
         self.steps = 0
 
-    def reset(self, episode):
-        super(SC2Agent, self).reset()
+    def reset(self, episode=0):
+        super(SC2Agent, self).reset(episode)
         self.episodes += 1
 
     def step(self, obs, reward, done):

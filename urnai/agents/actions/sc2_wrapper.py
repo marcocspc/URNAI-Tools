@@ -1124,6 +1124,7 @@ class SimpleTerranWrapper(TerranWrapper):
             'ghost_academy' : [[36, 23]],
         }
     
+    """
     def get_excluded_actions(self, obs):
 
         excluded_actions = []
@@ -1444,12 +1445,11 @@ class SimpleTerranWrapper(TerranWrapper):
             id_excluded_actions.append(self.named_actions.index(item))
 
         return id_excluded_actions
+    """
 
-    # def get_excluded_actions(self, obs):
-
-    #     excluded_actions = []
-
-    #     return excluded_actions
+    def get_excluded_actions(self, obs):
+        excluded_actions = []
+        return excluded_actions
 
 
 class ProtossWrapper(SC2Wrapper):

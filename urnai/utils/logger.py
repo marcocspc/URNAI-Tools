@@ -254,22 +254,23 @@ class Logger(Savable):
             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_ep_sps_graph.pdf")
             plt.close(temp_fig)
 
-            # Populating self.agent_action_names with filler names if it wasn't provided by the agent's action wrapper
-            if self.agent_action_names == None:
-                self.agent_action_names = []
-                for i in range(self.agent_action_size):
-                    self.agent_action_names.append("Action "+str(i))
-            # Plotting the rate of occurrence of each action in a different graph
-            for i in range(self.agent_action_size):
-                if self.agent_action_names != None:
-                    action_graph = self.generalized_curve_plot(self.ep_agent_actions[i], self.agent_action_names[i], "Plot for action " + self.agent_action_names[i])
-                    plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + self.agent_action_names[i] + ".png")
-                plt.close(action_graph)
+            # commenting this section to test whether or not the creation of action graphs impacts agent performance
+            # # Populating self.agent_action_names with filler names if it wasn't provided by the agent's action wrapper
+            # if self.agent_action_names == None:
+            #     self.agent_action_names = []
+            #     for i in range(self.agent_action_size):
+            #         self.agent_action_names.append("Action "+str(i))
+            # # Plotting the rate of occurrence of each action in a different graph
+            # for i in range(self.agent_action_size):
+            #     if self.agent_action_names != None:
+            #         action_graph = self.generalized_curve_plot(self.ep_agent_actions[i], self.agent_action_names[i], "Plot for action " + self.agent_action_names[i])
+            #         plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + self.agent_action_names[i] + ".png")
+            #     plt.close(action_graph)
 
-            # Plotting the rate of occurrence of all actions in one single graph
-            all_actions_graph = self.__plot_curves(range(self.ep_count), self.ep_agent_actions, 'Episode Count', "Actions per Ep.", self.agent_action_names, "Título")
-            plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "all_actions.png")
-            plt.close(all_actions_graph)
+            # # Plotting the rate of occurrence of all actions in one single graph
+            # all_actions_graph = self.__plot_curves(range(self.ep_count), self.ep_agent_actions, 'Episode Count', "Actions per Ep.", self.agent_action_names, "Título")
+            # plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "all_actions.png")
+            # plt.close(all_actions_graph)
 
             self.render = True 
 

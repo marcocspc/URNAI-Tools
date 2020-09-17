@@ -38,7 +38,7 @@ def main(unused_argv):
         #     os.environ["SC2PATH"] = sc2_local_path
 
         ## Initializing our StarCraft 2 environment
-        env = SC2Env(map_name="Simple64", render=True, step_mul=1, player_race="terran", enemy_race="random", difficulty="very_easy")
+        env = SC2Env(map_name="Simple64", render=True, step_mul=16, player_race="terran", enemy_race="random", difficulty="very_easy")
         
         action_wrapper = SimpleTerranWrapper()
         state_builder = Simple64GridState(grid_size=4)
@@ -54,10 +54,10 @@ def main(unused_argv):
         # Terran agent
         agent = SC2Agent(dq_network, KilledUnitsReward())
 
-        #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_v_easy", save_every=100, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_newtest", save_every=20, enable_save=True, relative_path=True)
+        trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_v_easy", save_every=20, enable_save=True)
+        #trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_rewardreset_test", save_every=20, enable_save=True, relative_path=True)
         trainer.train(num_episodes=3000, max_steps=1200)
-        trainer.play(num_matches=100, max_steps=1200)
+        trainer.play(num_matches=500, max_steps=1200)
 
     except KeyboardInterrupt:
         pass
