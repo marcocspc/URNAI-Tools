@@ -23,7 +23,9 @@ class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
 
         rwdC = (current - prev) * 100
 
-        return (rwdA + rwdB + rwdC)
+        rwd = rwdA + rwdB + rwdC
+        if rwd > 0: return rwd
+        else: return 0
 
     def get_sc2_reward(self, obs):
         current = self.get_sc2_number_of_supply_depot(obs)
