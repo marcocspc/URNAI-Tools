@@ -76,5 +76,5 @@ class LearningModel(Savable):
         if self.per_episode_epsilon_decay:
             self.decay_epsilon()
 
-        if episode > self.learning_rate_decay_ep_cutoff:
+        if episode > self.learning_rate_decay_ep_cutoff and self.learning_rate_decay_ep_cutoff != 0:
             self.decay_lr()

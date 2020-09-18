@@ -60,7 +60,7 @@ class Agent(Savable):
             self.model.learn(self.previous_state, self.previous_action, reward, next_state, done)
 
     @abstractmethod
-    def step(self, obs, obs_reward, done):
+    def step(self, obs, done):
         '''
         This method should:
         1) Build a State using obs

@@ -23,9 +23,8 @@ class SC2Agent(Agent):
         super(SC2Agent, self).reset(episode)
         self.episodes += 1
 
-    def step(self, obs, reward, done):
+    def step(self, obs, done):
         self.steps += 1
-        self.reward += reward
 
         if self.action_wrapper.is_action_done():
             ## Building our agent's state

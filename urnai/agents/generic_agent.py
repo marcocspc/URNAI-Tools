@@ -11,7 +11,7 @@ class GenericAgent(Agent):
         super(GenericAgent, self).__init__(model, reward_builder)
         self.pickle_black_list=["model"]
 
-    def step(self, obs, obs_reward, done):
+    def step(self, obs, done):
         if self.action_wrapper.is_action_done():
             current_action_idx = None
             # Builds current state (happens before executing the action on env)

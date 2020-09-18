@@ -19,12 +19,12 @@ class TestParams():
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
 
-    def __init__(self, env, agent, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0):
+    def __init__(self, env, agent, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False):
         super().__init__()
         self.pickle_black_list = ["save_path", "file_name", "full_save_path", "full_save_play_path"]
-        self.setup(env, agent, save_path, file_name, enable_save, save_every, relative_path, debug_level)
+        self.setup(env, agent, save_path, file_name, enable_save, save_every, relative_path, debug_level, reset_epsilon)
 
-    def setup(self, env, agent, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0):
+    def setup(self, env, agent, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False):
         self.env = env
         self.agent = agent
         self.save_path = save_path
@@ -33,9 +33,24 @@ class Trainer(Savable):
         self.save_every = save_every
         self.relative_path = relative_path
         self.pickle_black_list.append("agent")
+        self.reset_epsilon = reset_epsilon
         rp.VERBOSITY_LEVEL = debug_level
 
         self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
+
+        # Adding epsilon, learning rate and gamma factors to our pickle black list, 
+        # so that they are not loaded when loading the model's weights.
+        # Making it so that the current training session acts as a brand new training session
+        # (except for the fact that the model's weights may already be somewhat optimized from previous trainings)
+        if self.reset_epsilon:
+            self.agent.model.pickle_black_list.append("epsilon_greedy")
+            self.agent.model.pickle_black_list.append("epsilon_decay_rate")
+            self.agent.model.pickle_black_list.append("epsilon_min")
+            self.agent.model.pickle_black_list.append("gamma")
+            self.agent.model.pickle_black_list.append("learning_rate")
+            self.agent.model.pickle_black_list.append("learning_rate_min")
+            self.agent.model.pickle_black_list.append("learning_rate_decay")
+            self.agent.model.pickle_black_list.append("learning_rate_decay_ep_cutoff")
 
         currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
         parentdir = os.path.dirname(currentdir)
@@ -60,9 +75,9 @@ class Trainer(Savable):
             rp.report("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
 
-    def train(self, num_episodes=float('inf'), max_steps=float('inf'), test_params: TestParams = None, reward_from_agent = True):
+    def train(self, num_episodes=float('inf'), max_steps=float('inf'), test_params: TestParams=None, reward_from_agent=True):
         start_time = time.time()
-        
+
         rp.report("> Training")
         if self.logger.ep_count == 0:
             self.logger = Logger(num_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
@@ -96,7 +111,7 @@ class Trainer(Savable):
                     break
                 
                 # Choosing an action and passing it to our env.step() in order to act on our environment
-                action = self.agent.step(obs, step_reward, done)
+                action = self.agent.step(obs, done)
                 obs, default_reward, done = self.env.step(action)
 
                 is_last_step = step == max_steps - 1
@@ -116,6 +131,9 @@ class Trainer(Savable):
 
                 # commenting this line to test whether or not the creation of action graphs impacts agent performance
                 # ep_actions[self.agent.previous_action] += 1
+
+                # print("EPSILON GREEDY: "+ str(self.agent.model.epsilon_greedy))
+                # print("EPSILON GREEDY DECAY: "+str(self.agent.model.epsilon_decay_rate))
 
                 if done:
                     victory = default_reward == 1
