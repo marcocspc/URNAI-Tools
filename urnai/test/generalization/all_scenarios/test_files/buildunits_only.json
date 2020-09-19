@@ -10,16 +10,17 @@
             }
         },
         "model": {
-            "class": "DqlTensorFlow",
+            "class": "DDQNKeras",
             "params": {
-                "learning_rate": 0.5,
+                "learning_rate": 0.9,
                 "learning_rate_decay" : 1,
-                "gamma": 0.96,
+                "gamma": 0.5,
                 "per_episode_epsilon_decay": false,
-                "use_memory": false,
-                "epsilon_decay": 0.998,
-                "epsilon_min": 0.01,
-                "memory_maxlen": 10000.0,
+                "use_memory": true,
+                "epsilon_decay": 0.999999,
+                "epsilon_min": 0,
+                "epsilon_start": 1.0,
+                "memory_maxlen": 10000,
                 "build_model": [
                     {
                         "type": "input",
@@ -31,8 +32,13 @@
                     },
                     {
                         "type": "fullyconn",
-                        "nodes": 25,
+                        "nodes": 50,
                         "name": "fullyconn0"
+                    },
+                    {
+                        "type": "fullyconn",
+                        "nodes": 25,
+                        "name": "fullyconn1"
                     },
                     {
                         "type": "output",
@@ -55,7 +61,7 @@
         },
         "json_trainer": {
             "train": {
-                "num_episodes": 3000.0,
+                "num_episodes": 10000.0,
                 "max_steps": 500
             },
             "play": {
