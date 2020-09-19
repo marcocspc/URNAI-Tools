@@ -133,13 +133,26 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
             for peasant in peasant_set:
                 peasant.right_click(gold_tile)
 
+    def get_farm_count(self):
+        units = self.get_player_units(0)
+        farms = []
+        for unit in units:
+            if unit.type == self.env.constants.Unit.Farm:
+                farms.append(unit)
+
+        return len(farms)
+
+
+
+
     def build_farm(self):
         tile = self.env.game.tilemap.get_tile(GeneralizedBuildUnitsScenario.MAP_PLAYER_FARM_X, GeneralizedBuildUnitsScenario.MAP_PLAYER_FARM_Y)
         self.env.game.players[0].spawn_unit(self.env.constants.Unit.Farm, tile)
 
     def build_barrack(self):
         tile = self.env.game.tilemap.get_tile(GeneralizedBuildUnitsScenario.MAP_PLAYER_BARRACK_X, GeneralizedBuildUnitsScenario.MAP_PLAYER_BARRACK_Y)
-        self.env.game.players[0].spawn_unit(self.env.constants.Unit.Barracks, tile)
+        if self.get_farm_count > 0:
+            self.env.game.players[0].spawn_unit(self.env.constants.Unit.Barracks, tile)
 
     def build_footman(self):
         player = 0
