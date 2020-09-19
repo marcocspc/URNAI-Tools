@@ -1,0 +1,74 @@
+[
+    {
+        "env": {
+            "class" : "GeneralizedFindAndDefeatScenario",
+            "params": {
+                "method": "single",
+                "state_builder_method": "map",
+                "game": "drts",
+                "render": false
+            }
+        },
+        "model": {
+            "class": "DDQNKeras",
+            "params": {
+                "learning_rate": 0.9,
+                "learning_rate_decay" : 1,
+                "gamma": 0.5,
+                "per_episode_epsilon_decay": false,
+                "use_memory": true,
+                "epsilon_decay": 0.999999,
+                "epsilon_min": 0,
+                "epsilon_start": 1.0,
+                "memory_maxlen": 10000,
+                "build_model": [
+                    {
+                        "type": "input",
+                        "nodes": 50,
+                        "shape": [
+                            null,
+                            54
+                        ]
+                    },
+                    {
+                        "type": "fullyconn",
+                        "nodes": 50,
+                        "name": "fullyconn0"
+                    },
+                    {
+                        "type": "fullyconn",
+                        "nodes": 25,
+                        "name": "fullyconn1"
+                    },
+                    {
+                        "type": "output",
+                        "length": 4
+                    }
+                ]
+            }
+        },
+        "agent": {
+            "class": "GenericAgent",
+            "params": {}
+        },
+        "trainer": {
+            "class": "Trainer",
+            "params": {
+                "file_name": "agent_drts_only_findanddefeat",
+                "save_every": 100.0,
+                "enable_save": true
+            }
+        },
+        "json_trainer": {
+            "train": {
+                "num_episodes": 10000.0,
+                "max_steps": 500
+            },
+            "play": {
+                "num_matches": 1000.0,
+                "max_steps": 500
+            },
+            "params": {}
+        }
+    }
+]
