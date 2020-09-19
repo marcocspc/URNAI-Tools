@@ -74,7 +74,8 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
             self.reset()
 
     def is_action_done(self):
-        return len(self.action_queue) == 0 
+        #return len(self.action_queue) == 0 
+        return True
 
     def reset(self):
         self.move_number = 0
@@ -135,7 +136,9 @@ class CollectablesStarcraftIIActionWrapper(ActionWrapper):
         self.pending_actions = []
 
     def is_action_done(self):
-        return len(self.pending_actions) == 0
+        #return len(self.pending_actions) == 0
+        return True
+
 
     def reset(self):
         self.move_number = 0

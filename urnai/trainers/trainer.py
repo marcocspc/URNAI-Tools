@@ -112,7 +112,6 @@ class Trainer(Savable):
                 
                 # Choosing an action and passing it to our env.step() in order to act on our environment
                 action = self.agent.step(obs, done)
-                print(">>>>>>>>>>>>> CHOSEN ACTION: {}".format(action))
                 obs, default_reward, done = self.env.step(action)
 
                 is_last_step = step == max_steps - 1
@@ -132,9 +131,6 @@ class Trainer(Savable):
 
                 # commenting this line to test whether or not the creation of action graphs impacts agent performance
                 # ep_actions[self.agent.previous_action] += 1
-
-                # print("EPSILON GREEDY: "+ str(self.agent.model.epsilon_greedy))
-                # print("EPSILON GREEDY DECAY: "+str(self.agent.model.epsilon_decay_rate))
 
                 if done:
                     victory = default_reward == 1

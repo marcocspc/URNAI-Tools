@@ -41,6 +41,9 @@ class GeneralizedFindAndDefeatScenario(GeneralizedCollectablesScenario):
             else:
                 state, reward, done = self.env.step(action)
 
+            if len(self.get_player_units(0)) == 0:
+                done = True
+
             self.steps += 1
             return state, reward, done 
 

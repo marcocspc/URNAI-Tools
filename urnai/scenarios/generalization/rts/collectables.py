@@ -115,10 +115,11 @@ class GeneralizedCollectablesScenario(ABScenario):
         return env
 
     def get_army_mean(self, player):
+        units = self.get_player_units(player)
         xs = []
         ys = []
 
-        for unit in self.get_player_units(player):
+        for unit in units:
             try:
                 if unit.id != 1 and unit.id != 2:
                     xs.append(unit.tile.x)
@@ -127,9 +128,12 @@ class GeneralizedCollectablesScenario(ABScenario):
                 if not "'NoneType' object has no attribute 'x'" in str(ae):
                     raise
 
-        army_x = int(mean(xs))
-        army_y = int(mean(ys))
-        return army_x, army_y
+        if len(xs) > 0 and len(ys) > 0:
+            army_x = int(mean(xs))
+            army_y = int(mean(ys))
+            return army_x, army_y
+        else:
+            return 0, 0
 
     def solve_action(self, action):
         player = 0

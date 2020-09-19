@@ -51,6 +51,7 @@ class DqlTensorFlow(LearningModel):
         expl_expt_tradeoff = np.random.rand()
 
         if self.epsilon_greedy > expl_expt_tradeoff:
+            ex_int = self.actions[random.randint(0, len(self.actions) - 1)]
             random_action = random.choice(self.actions)
 
             # Removing excluded actions
