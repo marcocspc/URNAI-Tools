@@ -118,7 +118,8 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
                 map_[tile.y, tile.x] = tile.get_type_id()
 
         for unit in obs["units"]:
-            map_[unit.tile.y, unit.tile.x] = int(unit.type)
+            if unit.tile is not None:
+                map_[unit.tile.y, unit.tile.x] = int(unit.type)
 
         return map_
 

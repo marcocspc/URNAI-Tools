@@ -112,6 +112,7 @@ class Trainer(Savable):
                 
                 # Choosing an action and passing it to our env.step() in order to act on our environment
                 action = self.agent.step(obs, done)
+                print(">>>>>>>>>>>>> CHOSEN ACTION: {}".format(action))
                 obs, default_reward, done = self.env.step(action)
 
                 is_last_step = step == max_steps - 1
