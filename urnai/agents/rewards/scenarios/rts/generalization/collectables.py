@@ -50,7 +50,7 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
             self.collectable_counter = 0
         elif curr - old > 0:
             self.collectable_counter += 1
-            return 2 ** self.collectable_counter 
+            return 3 ** self.collectable_counter 
         else:
             return 0
         return 0

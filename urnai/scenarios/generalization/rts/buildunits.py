@@ -151,7 +151,7 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
 
     def build_barrack(self):
         tile = self.env.game.tilemap.get_tile(GeneralizedBuildUnitsScenario.MAP_PLAYER_BARRACK_X, GeneralizedBuildUnitsScenario.MAP_PLAYER_BARRACK_Y)
-        if self.get_farm_count > 0:
+        if self.get_farm_count() > 0:
             self.env.game.players[0].spawn_unit(self.env.constants.Unit.Barracks, tile)
 
     def build_footman(self):

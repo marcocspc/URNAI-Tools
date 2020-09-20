@@ -10,15 +10,15 @@
             }
         },
         "model": {
-            "class": "DDQNKeras",
+            "class": "DqlTensorFlow",
             "params": {
                 "learning_rate": 0.9,
                 "learning_rate_decay" : 1,
                 "gamma": 0.5,
                 "per_episode_epsilon_decay": false,
-                "use_memory": true,
-                "epsilon_decay": 0.999999,
-                "epsilon_min": 0,
+                "use_memory": false,
+                "epsilon_decay": 0.9999,
+                "epsilon_min": 0.01,
                 "epsilon_start": 1.0,
                 "memory_maxlen": 10000,
                 "build_model": [
@@ -61,12 +61,12 @@
         },
         "json_trainer": {
             "train": {
-                "num_episodes": 10000.0,
-                "max_steps": 500
+                "num_episodes": 1000.0,
+                "max_steps": 500 
             },
             "play": {
                 "num_matches": 1000.0,
-                "max_steps": 500
+                "max_steps": 500 
             },
             "params": {}
         }
