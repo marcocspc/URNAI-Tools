@@ -10,10 +10,13 @@ class FindAndDefeatDeepRTSActionWrapper(CollectablesDeepRTSActionWrapper):
         super().__init__()
         self.cancel = 16
 
-        self.final_actions = [self.moveleft, self.moveright, self.moveup, self.movedown, self.attack, self.cancel] 
+        #self.final_actions = [self.moveleft, self.moveright, self.moveup, self.movedown, self.attack, self.cancel] 
+        self.final_actions = [self.moveleft, self.moveright, self.moveup, self.movedown, self.attack] 
         self.action_indices = range(len(self.final_actions))
 
     def solve_action(self, action_idx, obs):
+        #print(">>>>>>>>> AVAIL. ACTIONS: {}".format(self.final_actions))
+        #print(">>>>>>>>> CHOSEN ACTION: {}".format(self.final_actions[action_idx]))
         if action_idx != None:
             if action_idx != self.noaction:
                 i = action_idx 

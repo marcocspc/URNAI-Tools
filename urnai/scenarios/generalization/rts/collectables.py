@@ -187,8 +187,9 @@ class GeneralizedCollectablesScenario(ABScenario):
 
     def move_troops(self, new_x, new_y):
         for unit in self.get_player_units(0):
-            tile = self.env.game.tilemap.get_tile(new_x, new_y)
-            unit.right_click(tile)
+            if unit.tile is not None and new_x > 0 and new_y > 0:
+                tile = self.env.game.tilemap.get_tile(new_x, new_y)
+                unit.right_click(tile)
 
     def setup_map(self):
         if (self.game == GeneralizedCollectablesScenario.GAME_DEEP_RTS):
