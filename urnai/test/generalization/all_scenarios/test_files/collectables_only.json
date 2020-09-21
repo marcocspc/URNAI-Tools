@@ -10,16 +10,16 @@
             }
         },
         "model": {
-            "class": "DDQNKeras",
+            "class": "DqlTensorFlow",
             "params": {
-                "learning_rate": 0.5,
-                "gamma": 0.96,
+                "learning_rate": 0.001,
+                "learning_rate_decay": 1,
+                "gamma": 0.9,
                 "per_episode_epsilon_decay": false,
-                "use_memory": true,
-                "epsilon_decay": 0.99995,
-                "epsilon_min": 0.1,
+                "use_memory": false,
+                "epsilon_decay": 0.99999,
+                "epsilon_min": 0.005,
                 "memory_maxlen": 10000,
-                "min_memory_size": 5000,
                 "build_model": [
                     {
                         "type": "input",
@@ -36,7 +36,7 @@
                     },
                     {
                         "type": "fullyconn",
-                        "nodes": 10,
+                        "nodes": 25,
                         "name": "default1"
                     },
                     {
@@ -60,7 +60,7 @@
         },
         "json_trainer": {
             "train": {
-                "num_episodes": 3000.0,
+                "num_episodes": 1000.0,
                 "max_steps": 500.0
             },
             "play": {

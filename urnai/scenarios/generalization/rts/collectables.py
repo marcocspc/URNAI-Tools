@@ -301,7 +301,7 @@ class GeneralizedCollectablesScenario(ABScenario):
             height = self.env.game.map.map_height
             map_ = np.zeros((width, height)) 
 
-            while np.sum(map_) <= RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS:
+            while np.sum(map_) < RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS:
                 tile = self.random_tile()
 
                 while not tile.is_walkable() or map_[tile.y, tile.x] != 0:

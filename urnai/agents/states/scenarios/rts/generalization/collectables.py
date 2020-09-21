@@ -132,8 +132,11 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
             value = self.non_spatial_state[i]
             max_ = self.non_spatial_maximums[i]
             min_ = self.non_spatial_minimums[i]
-            value = (value - min_)/(max_ - min_)
+            value = self.normalize_value(value, max_, min_) 
             self.non_spatial_state[i] = value
+
+    def normalize_value(self, value, max_, min_=0):
+        return (value - min_)/(max_ - min_) 
 
     def get_state_dim(self):
         if self.method == RTSGeneralization.STATE_MAP:
@@ -178,6 +181,11 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         #position 2: number of remaining shards
         self.non_spatial_state[2] = np.count_nonzero(obs.feature_minimap[4] == 16)
         self.normalize_non_spatial_list() 
+        #spatial values need a second normalization because the value can
+        #be negative, so they are summed with 1 and then normalized 
+        #again 
+        self.non_spatial_state[0] = self.normalize_value(self.non_spatial_state[0] + 1, 2)
+        self.non_spatial_state[1] = self.normalize_value(self.non_spatial_state[1] + 1, 2)
         return self.non_spatial_state
 
     def build_non_spatial_drts_state(self, obs):
@@ -189,6 +197,11 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         #position 2: number of remaining shards
         self.non_spatial_state[2] = np.count_nonzero(obs['collectables_map'] == 1)
         self.normalize_non_spatial_list() 
+        #spatial values need a second normalization because the value can
+        #be negative, so they are summed with 1 and then normalized 
+        #again 
+        self.non_spatial_state[0] = self.normalize_value(self.non_spatial_state[0] + 1, 2)
+        self.non_spatial_state[1] = self.normalize_value(self.non_spatial_state[1] + 1, 2)
         return self.non_spatial_state
 
     def get_closest_drts_mineral_shard_x_y(self, obs):
