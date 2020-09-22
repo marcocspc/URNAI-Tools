@@ -46,6 +46,7 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
         curr = np.count_nonzero(current == 1)
         if curr != self.old_collectable_counter:
             self.old_collectable_counter = curr 
+            #return 2 ** (RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS - curr)
             return 1
         else:
             return 0 
@@ -61,12 +62,9 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
             return 0 
 
     def filter_non_mineral_shard_units(self, obs):
-        filtered_map = np.copy(obs.feature_minimap[4])
-        for y in range(len(filtered_map)):
-            for x in range(len(filtered_map[y])):
-                element = filtered_map[y][x]
-                if element != 16 or element != 0:
-                    filtered_map[y][x] = 0
+        filtered_map = np.zeros((len(obs.feature_minimap[0]), len(obs.feature_minimap[0][])))
+        for unit in sc2aux.get_all_neutral_units(obs):
+            filtered_map[unit.y][unit.x] = 1
 
         return filtered_map
 

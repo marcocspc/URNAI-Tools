@@ -199,10 +199,11 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         x, y = self.get_drts_army_mean(obs)
         for mineral_shard_y in range(len(obs['collectables_map'])):
             for mineral_shard_x in range(len(obs['collectables_map'][0])):
-                x_dist = abs(x - mineral_shard_x)
-                y_dist = abs(y - mineral_shard_y)
-                if x_dist < x_closest_distance: x_closest_distance = x_dist
-                if y_dist < y_closest_distance: y_closest_distance = y_dist
+                if obs['collectables_map'][mineral_shard_y][mineral_shard_x] == 1:
+                    x_dist = abs(x - mineral_shard_x)
+                    y_dist = abs(y - mineral_shard_y)
+                    if x_dist < x_closest_distance: x_closest_distance = x_dist
+                    if y_dist < y_closest_distance: y_closest_distance = y_dist
 
         return x_closest_distance, y_closest_distance
 

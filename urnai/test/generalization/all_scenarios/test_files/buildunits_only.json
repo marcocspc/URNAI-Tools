@@ -12,13 +12,13 @@
         "model": {
             "class": "DqlTensorFlow",
             "params": {
-                "learning_rate": 0.9,
+                "learning_rate": 0.001,
                 "learning_rate_decay" : 1,
-                "gamma": 0.5,
+                "gamma": 0.9,
                 "per_episode_epsilon_decay": false,
                 "use_memory": false,
-                "epsilon_decay": 0.9999,
-                "epsilon_min": 0.01,
+                "epsilon_decay": 0.99999,
+                "epsilon_min": 0.005,
                 "epsilon_start": 1.0,
                 "memory_maxlen": 10000,
                 "build_model": [
@@ -32,7 +32,7 @@
                     },
                     {
                         "type": "fullyconn",
-                        "nodes": 50,
+                        "nodes": 25,
                         "name": "fullyconn0"
                     },
                     {
