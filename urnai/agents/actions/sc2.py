@@ -432,6 +432,10 @@ def get_neutral_units_by_type(obs, unit_type):
             if unit.unit_type == unit_type
             and unit.alliance == features.PlayerRelative.NEUTRAL]
 
+def get_all_neutral_units(obs):
+    return [unit for unit in obs.raw_units 
+            if unit.alliance == features.PlayerRelative.NEUTRAL]
+
 def get_free_supply(obs):
     return obs.player.food_cap - obs.player.food_used
 

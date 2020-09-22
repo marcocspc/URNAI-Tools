@@ -161,14 +161,13 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         x_closest_distance = RTSGeneralization.STATE_MAXIMUM_X 
         y_closest_distance = RTSGeneralization.STATE_MAXIMUM_Y 
         x, y = self.get_sc2_marine_mean(obs)
-        for mineral_shard_y in range(len(obs.feature_minimap[4])):
-            for mineral_shard_x in range(len(obs.feature_minimap[4][0])):
-                mineral_shard = (obs.feature_minimap[4][y][x] == 16)
-                if mineral_shard: 
-                    x_dist = x - mineral_shard_x 
-                    y_dist = y - mineral_shard_y 
-                    if x_dist < x_closest_dist: x_closest_distance = x_dist
-                    if y_dist < y_closest_dist: y_closest_distance = y_dist
+        for mineral_shard in sc2aux.get_all_neutral_units(obs):
+                mineral_shard_x = mineral_shard.x
+                mineral_shard_y = mineral_shard.y
+                x_dist = abs(x - mineral_shard_x)
+                y_dist = abs(y - mineral_shard_y)
+                if x_dist < x_closest_distance: x_closest_distance = x_dist
+                if y_dist < y_closest_distance: y_closest_distance = y_dist
 
         return x_closest_distance, y_closest_distance
 
@@ -181,11 +180,6 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         #position 2: number of remaining shards
         self.non_spatial_state[2] = np.count_nonzero(obs.feature_minimap[4] == 16)
         self.normalize_non_spatial_list() 
-        #spatial values need a second normalization because the value can
-        #be negative, so they are summed with 1 and then normalized 
-        #again 
-        self.non_spatial_state[0] = self.normalize_value(self.non_spatial_state[0] + 1, 2)
-        self.non_spatial_state[1] = self.normalize_value(self.non_spatial_state[1] + 1, 2)
         return self.non_spatial_state
 
     def build_non_spatial_drts_state(self, obs):
@@ -197,11 +191,6 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         #position 2: number of remaining shards
         self.non_spatial_state[2] = np.count_nonzero(obs['collectables_map'] == 1)
         self.normalize_non_spatial_list() 
-        #spatial values need a second normalization because the value can
-        #be negative, so they are summed with 1 and then normalized 
-        #again 
-        self.non_spatial_state[0] = self.normalize_value(self.non_spatial_state[0] + 1, 2)
-        self.non_spatial_state[1] = self.normalize_value(self.non_spatial_state[1] + 1, 2)
         return self.non_spatial_state
 
     def get_closest_drts_mineral_shard_x_y(self, obs):
@@ -210,8 +199,8 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         x, y = self.get_drts_army_mean(obs)
         for mineral_shard_y in range(len(obs['collectables_map'])):
             for mineral_shard_x in range(len(obs['collectables_map'][0])):
-                x_dist = x - mineral_shard_x 
-                y_dist = y - mineral_shard_y 
+                x_dist = abs(x - mineral_shard_x)
+                y_dist = abs(y - mineral_shard_y)
                 if x_dist < x_closest_distance: x_closest_distance = x_dist
                 if y_dist < y_closest_distance: y_closest_distance = y_dist
 
