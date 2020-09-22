@@ -249,7 +249,7 @@ class Logger(Savable):
             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inst_ep_sps_graph.pdf")
             plt.close(temp_fig)
 
-            temp_fig = self.generalized_curve_plot(self.episode_sps_list, "Episode Avg. SPS", "Per Episode Avg. SPS")
+            temp_fig = self.generalized_curve_plot(self.avg_sps_list, "Episode Avg. SPS", "Per Episode Avg. SPS")
             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_ep_sps_graph.png")
             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_ep_sps_graph.pdf")
             plt.close(temp_fig)
@@ -296,7 +296,7 @@ class Logger(Savable):
         return fig
 
     def __plot_curve(self, x, y, x_label, y_label, title):
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(12.8,4.8))
         ax.plot(x, y)
 
         ax.set(xlabel=x_label, ylabel=y_label, title=title)
