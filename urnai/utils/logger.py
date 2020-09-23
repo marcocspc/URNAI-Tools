@@ -56,7 +56,7 @@ class Logger(Savable):
         self.play_win_rates = []
 
         # Some agent info
-        self.agent_info = []
+        self.agent_info = None 
 
         self.is_episodic = is_episodic
 
@@ -123,7 +123,13 @@ class Logger(Savable):
             self.ep_victories.append(victory)
             self.ep_avg_victories.append(sum(self.ep_victories)/ self.ep_count)
 
-        self.agent_info.append(agent_info)
+        if self.agent_info == None:
+            self.agent_info = dict.fromkeys(agent_info)
+            for key in self.agent_info:
+                self.agent_info[key] = []
+
+        for key in agent_info:
+            self.agent_info[key].append(agent_info[key])
 
     def record_play_test(self, ep_count, play_rewards, play_victories, num_matches):
         self.play_ep_count.append(ep_count)
@@ -151,8 +157,13 @@ class Logger(Savable):
 
     def log_ep_stats(self):
         if self.ep_count > 0:
+
+            agent_info = dict.fromkeys(self.agent_info)
+            for key in agent_info:
+                agent_info[key] = self.agent_info[key][-1]
+
             rp.report("Episode: {}/{} | Outcome: {} | Episode Avg. Reward: {:10.6f} | Episode Reward: {:10.6f} | Episode Steps: {:10.6f} | Best Reward was {} on episode: {} | Episode Duration (seconds): {} | Episode SPS: {} | SPS AVG: {} | Agent info: {}"
-            .format(self.ep_count, self.ep_total, self.ep_victories[-1], self.ep_avg_rewards[-1], self.ep_rewards[-1], self.ep_steps_count[-1], self.best_reward, self.best_reward_episode, self.episode_duration_list[-1], self.episode_sps_list[-1], self.avg_sps_list[-1], self.agent_info[-1]))
+            .format(self.ep_count, self.ep_total, self.ep_victories[-1], self.ep_avg_rewards[-1], self.ep_rewards[-1], self.ep_steps_count[-1], self.best_reward, self.best_reward_episode, self.episode_duration_list[-1], self.episode_sps_list[-1], self.avg_sps_list[-1], agent_info))
         else:
             rp.report("There are no recorded episodes!")
 
@@ -275,7 +286,6 @@ class Logger(Savable):
 
             #Plot action bars for each episode
             #First of all, transpose action usage list
-            #transposed = [list(x).pop() for x in zip(self.ep_agent_actions)
             transposed = [list(x) for x in np.transpose(self.ep_agent_actions)]
             #Then, for each episode, get a bar graph showing each action usage
             for episode in range(self.ep_count):
@@ -298,6 +308,13 @@ class Logger(Savable):
             all_actions_graph = self.__plot_curves(range(self.ep_count), self.avg_ep_agent_actions, 'Episode Count', "Actions avg. per Ep.", self.agent_action_names, "Average rate of all actions")
             plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "average" + os.path.sep + "all_actions.png")
             plt.close(all_actions_graph)
+
+            # Plotting agent info
+            for key in self.agent_info: 
+                temp_fig = self.generalized_curve_plot(self.agent_info[key], "Agent {}".format(key), "Per Episode Agent {} Data".format(key))
+                plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "agent_{}_graph.png".format(key))
+                plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "agent_{}_graph.pdf".format(key))
+                plt.close(temp_fig)
 
             self.render = True 
 
@@ -343,19 +360,11 @@ class Logger(Savable):
 
         rects = ax.bar(x, values, width)
 
-        #bar_count = len(y_bars)
-        #min_width = x - width / bar_count
-        #max_width = x + width / bar_count
-        #for bar, bar_label, bar_idx in zip(y_bars, bar_labels, range(bar_count)):
-        #    bar_width = x if bar_count == 1 else self.__lerp(min_width, max_width, bar_idx / (bar_count - 1))
-        #    rects = ax.bar(bar_width, bar, width, label=bar_label)
-
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
         ax.set_title(title)
         ax.set_xticks(x)
         ax.set_xticklabels(bar_labels)
-        #ax.legend()
 
 	#Attach a text label above each bar in *rects*, displaying its height.
         for rect in rects:
