@@ -68,7 +68,9 @@ class Trainer(Savable):
         elif self.enable_save:
             rp.report("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
             os.makedirs(self.full_save_path)
-            os.makedirs(self.full_save_path + os.path.sep + "action_graphs")
+            os.makedirs(self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "instant")
+            os.makedirs(self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "average")
+            os.makedirs(self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars")
             os.makedirs(self.full_save_play_path)
             os.makedirs(self.full_save_play_path + os.path.sep + "action_graphs")
         else:
@@ -129,8 +131,7 @@ class Trainer(Savable):
                 # Adding our step reward to the total count of the episode's reward
                 ep_reward += step_reward
 
-                # commenting this line to test whether or not the creation of action graphs impacts agent performance
-                # ep_actions[self.agent.previous_action] += 1
+                ep_actions[self.agent.previous_action] += 1
 
                 if done:
                     victory = default_reward == 1

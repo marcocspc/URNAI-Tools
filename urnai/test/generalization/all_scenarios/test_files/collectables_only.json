@@ -54,7 +54,7 @@
             "class": "Trainer",
             "params": {
                 "file_name": "agent_drts_only_collectables",
-                "save_every": 100.0,
+                "save_every": 10.0,
                 "enable_save": true
             }
         },

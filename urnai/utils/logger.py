@@ -47,6 +47,7 @@ class Logger(Savable):
         self.agent_action_names = agent_action_names
         self.agent_action_size = agent_action_size
         self.ep_agent_actions = [ [] for i in range(agent_action_size) ]
+        self.avg_ep_agent_actions = [ [] for i in range(agent_action_size) ]
 
         # Play testing count
         self.play_ep_count = []
@@ -75,6 +76,7 @@ class Logger(Savable):
         self.training_report = ""
 
         self.render = render
+        self.graph_size_in_inches = (12.8,4.8)
 
         self.log_training_start_information()
 
@@ -94,10 +96,11 @@ class Logger(Savable):
         self.episode_temp_start_time = time()
 
     def record_episode(self, ep_reward, has_won, steps_count, agent_info, ep_actions):
+        self.ep_count += 1
+
         for i in range(self.agent_action_size):
             self.ep_agent_actions[i].append(ep_actions[i])
-
-        self.ep_count += 1
+            self.avg_ep_agent_actions[i].append(sum(self.ep_agent_actions[i]) / self.ep_count)
 
         self.ep_rewards.append(ep_reward)
         self.ep_avg_rewards.append(sum(self.ep_rewards) / self.ep_count)
@@ -254,23 +257,47 @@ class Logger(Savable):
             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_ep_sps_graph.pdf")
             plt.close(temp_fig)
 
-            # commenting this section to test whether or not the creation of action graphs impacts agent performance
-            # # Populating self.agent_action_names with filler names if it wasn't provided by the agent's action wrapper
-            # if self.agent_action_names == None:
-            #     self.agent_action_names = []
-            #     for i in range(self.agent_action_size):
-            #         self.agent_action_names.append("Action "+str(i))
-            # # Plotting the rate of occurrence of each action in a different graph
-            # for i in range(self.agent_action_size):
-            #     if self.agent_action_names != None:
-            #         action_graph = self.generalized_curve_plot(self.ep_agent_actions[i], self.agent_action_names[i], "Plot for action " + self.agent_action_names[i])
-            #         plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + self.agent_action_names[i] + ".png")
-            #     plt.close(action_graph)
+            if self.agent_action_names == None:
+                self.agent_action_names = []
+                for i in range(self.agent_action_size):
+                    self.agent_action_names.append("Action "+str(i))
+            # Plotting the rate of occurrence of each action in a different graph
+            for i in range(self.agent_action_size):
+                if self.agent_action_names != None:
+                    #plot instant action usage graphs
+                    action_graph = self.generalized_curve_plot(self.ep_agent_actions[i], self.agent_action_names[i], "Action " + self.agent_action_names[i] + " usage per episode.")
+                    plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "instant" + os.path.sep + self.agent_action_names[i] + ".png")
+                    plt.close(action_graph)
 
-            # # Plotting the rate of occurrence of all actions in one single graph
-            # all_actions_graph = self.__plot_curves(range(self.ep_count), self.ep_agent_actions, 'Episode Count', "Actions per Ep.", self.agent_action_names, "Título")
-            # plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "all_actions.png")
-            # plt.close(all_actions_graph)
+                    action_graph = self.generalized_curve_plot(self.avg_ep_agent_actions[i], self.agent_action_names[i], "Action " + self.agent_action_names[i] + " average usage per episode.")
+                    plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "average" + os.path.sep + self.agent_action_names[i] + ".png")
+                    plt.close(action_graph)
+
+            #Plot action bars for each episode
+            #First of all, transpose action usage list
+            #transposed = [list(x).pop() for x in zip(self.ep_agent_actions)
+            transposed = [list(x) for x in np.transpose(self.ep_agent_actions)]
+            #Then, for each episode, get a bar graph showing each action usage
+            for episode in range(self.ep_count):
+                values = transposed[episode] 
+                bar_labels = self.agent_action_names
+                x_label = "Actions"
+                y_label = "How many times action was used"
+                title = "Action usage at episode {}.".format(episode)
+                bar_width = 0.2
+                action_graph = self.__plot_bar(values, bar_labels, x_label, y_label, title, width=bar_width)
+                plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars" + os.path.sep + str(episode) + ".png")
+                plt.close(action_graph)
+
+            # Plotting the instant rate of occurrence of all actions in one single graph
+            all_actions_graph = self.__plot_curves(range(self.ep_count), self.ep_agent_actions, 'Episode Count', "Actions per Ep.", self.agent_action_names, "Instant rate of all actions")
+            plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "instant" + os.path.sep + "all_actions.png")
+            plt.close(all_actions_graph)
+
+            # Plotting the average rate of occurrence of all actions in one single graph
+            all_actions_graph = self.__plot_curves(range(self.ep_count), self.avg_ep_agent_actions, 'Episode Count', "Actions avg. per Ep.", self.agent_action_names, "Average rate of all actions")
+            plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "average" + os.path.sep + "all_actions.png")
+            plt.close(all_actions_graph)
 
             self.render = True 
 
@@ -278,14 +305,14 @@ class Logger(Savable):
                 output.write(self.training_report)
 
     def __plot_curves(self, x, ys, x_label, y_label, y_labels, title):
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=self.graph_size_in_inches)
         for i in range(len(ys)):
             ax.plot(x, ys[i], label=y_labels[i])
 
         ax.set(xlabel=x_label, ylabel=y_label, title=title)
         ax.grid()
         box = ax.get_position()
-        ax.set_position([box.x0, box.y0, box.width * 0.6, box.height])
+        ax.set_position([box.x0, box.y0, box.width * 0.95, box.height])
         ax.legend(bbox_to_anchor=(1.02,1), loc="upper left", ncol=2, prop={'size': 6})
 
         if self.render: 
@@ -296,7 +323,7 @@ class Logger(Savable):
         return fig
 
     def __plot_curve(self, x, y, x_label, y_label, title):
-        fig, ax = plt.subplots(figsize=(12.8,4.8))
+        fig, ax = plt.subplots(figsize=self.graph_size_in_inches)
         ax.plot(x, y)
 
         ax.set(xlabel=x_label, ylabel=y_label, title=title)
@@ -309,26 +336,35 @@ class Logger(Savable):
 
         return fig
 
-    def __plot_bar(self, x_values, y_bars, bar_labels, x_label, y_label, title, width=0.2, format_percent=False, percent_scale=1):
-        fig, ax = plt.subplots()
+    def __plot_bar(self, values, bar_labels, x_label, y_label, title, width=0.2):
+        fig, ax = plt.subplots(figsize=self.graph_size_in_inches)
 
-        x = np.arange(len(x_values))  # List of label locations for the x values
-        bar_count = len(y_bars)
-        min_width = x - width / bar_count
-        max_width = x + width / bar_count
-        for bar, bar_label, bar_idx in zip(y_bars, bar_labels, range(bar_count)):
-            bar_width = x if bar_count == 1 else self.__lerp(min_width, max_width, bar_idx / (bar_count - 1))
-            rects = ax.bar(bar_width, bar, width, label=bar_label)
+        x = np.arange(len(bar_labels))  # List of label locations for the x values
+
+        rects = ax.bar(x, values, width)
+
+        #bar_count = len(y_bars)
+        #min_width = x - width / bar_count
+        #max_width = x + width / bar_count
+        #for bar, bar_label, bar_idx in zip(y_bars, bar_labels, range(bar_count)):
+        #    bar_width = x if bar_count == 1 else self.__lerp(min_width, max_width, bar_idx / (bar_count - 1))
+        #    rects = ax.bar(bar_width, bar, width, label=bar_label)
 
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
         ax.set_title(title)
         ax.set_xticks(x)
-        ax.set_xticklabels(x_values)
-        ax.legend()
+        ax.set_xticklabels(bar_labels)
+        #ax.legend()
 
-        if format_percent:
-            ax.yaxis.set_major_formatter(PercentFormatter(xmax=percent_scale))
+	#Attach a text label above each bar in *rects*, displaying its height.
+        for rect in rects:
+            height = rect.get_height()
+            ax.annotate('{}'.format(height),
+                        xy=(rect.get_x() + rect.get_width() / 2, height),
+                        xytext=(0, 3),  # 3 points vertical offset
+                        textcoords="offset points",
+                        ha='center', va='bottom')
 
         if self.render: 
             plt.ion()
