@@ -30,8 +30,8 @@ class GeneralizedCollectablesScenario(ABScenario):
         self.state_builder_method = state_builder_method
         self.game = game
         self.steps = 0
-        self.drts_hor_threshold = 3
-        self.drts_ver_threshold = 3
+        self.drts_hor_threshold = 2
+        self.drts_ver_threshold = 2
         self.drts_action_previousunit = 0 
         self.drts_action_nextunit = 1
         self.drts_action_moveleft = 2

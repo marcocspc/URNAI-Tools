@@ -289,15 +289,16 @@ class Logger(Savable):
             transposed = [list(x) for x in np.transpose(self.ep_agent_actions)]
             #Then, for each episode, get a bar graph showing each action usage
             for episode in range(self.ep_count):
-                values = transposed[episode] 
-                bar_labels = self.agent_action_names
-                x_label = "Actions"
-                y_label = "How many times action was used"
-                title = "Action usage at episode {}.".format(episode)
-                bar_width = 0.2
-                action_graph = self.__plot_bar(values, bar_labels, x_label, y_label, title, width=bar_width)
-                plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars" + os.path.sep + str(episode) + ".png")
-                plt.close(action_graph)
+                if episode % 100 == 0:
+                    values = transposed[episode] 
+                    bar_labels = self.agent_action_names
+                    x_label = "Actions"
+                    y_label = "How many times action was used"
+                    title = "Action usage at episode {}.".format(episode)
+                    bar_width = 0.2
+                    action_graph = self.__plot_bar(values, bar_labels, x_label, y_label, title, width=bar_width)
+                    plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars" + os.path.sep + str(episode) + ".png")
+                    plt.close(action_graph)
 
             # Plotting the instant rate of occurrence of all actions in one single graph
             all_actions_graph = self.__plot_curves(range(self.ep_count), self.ep_agent_actions, 'Episode Count', "Actions per Ep.", self.agent_action_names, "Instant rate of all actions")

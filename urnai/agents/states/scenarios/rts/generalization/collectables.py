@@ -4,6 +4,7 @@ import urnai.agents.actions.sc2 as sc2aux
 from pysc2.lib import units as sc2units
 import numpy as np
 from statistics import mean
+import math
 
 
 class CollectablesGeneralizedStatebuilder(StateBuilder):
@@ -12,16 +13,24 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         self.previous_state = None
         self.method = method
         self.non_spatial_maximums = [
-                RTSGeneralization.STATE_MAXIMUM_X,
-                RTSGeneralization.STATE_MAXIMUM_Y,
-                RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS,
+                RTSGeneralization.STATE_MAX_COLL_DIST,
+                RTSGeneralization.STATE_MAX_COLL_DIST,
+        #        RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS,
                 ]
-        self.non_spatial_minimums = [0, 0, 0]
+        self.non_spatial_minimums = [
+                0, 
+                0,
+        #        0,
+                ]
         #non-spatial is composed of
         #X distance to next mineral shard 
         #Y distance to next mineral shard 
         #number of mineral shards left
-        self.non_spatial_state = [0, 0, 0]
+        self.non_spatial_state = [
+                0, 
+                0, 
+                #0,
+                ]
 
     def get_game(self, obs):
         try:
@@ -158,16 +167,16 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         return x_mean, y_mean
 
     def get_closest_sc2_mineral_shard_x_y(self, obs):
-        x_closest_distance = RTSGeneralization.STATE_MAXIMUM_X 
-        y_closest_distance = RTSGeneralization.STATE_MAXIMUM_Y 
+        closest_distance = RTSGeneralization.STATE_MAX_COLL_DIST
         x, y = self.get_sc2_marine_mean(obs)
         for mineral_shard in sc2aux.get_all_neutral_units(obs):
                 mineral_shard_x = mineral_shard.x
                 mineral_shard_y = mineral_shard.y
-                x_dist = abs(x - mineral_shard_x)
-                y_dist = abs(y - mineral_shard_y)
-                if x_dist < x_closest_distance: x_closest_distance = x_dist
-                if y_dist < y_closest_distance: y_closest_distance = y_dist
+                dist = self.calculate_distance(x, y, mineral_shard_x, mineral_shard_y) 
+                if dist < closest_distance: 
+                    closest_distance = dist
+                    x_closest_distance = x - mineral_shard_x 
+                    y_closest_distance = y - mineral_shard_y
 
         return x_closest_distance, y_closest_distance
 
@@ -177,8 +186,9 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         self.non_spatial_state[0] = x
         #position 1: distance y to closest shard
         self.non_spatial_state[1] = y
-        #position 2: number of remaining shards
-        self.non_spatial_state[2] = np.count_nonzero(obs.feature_minimap[4] == 16)
+
+        #position 4: number of remaining shards
+        #self.non_spatial_state[4] = np.count_nonzero(obs.feature_minimap[4] == 16)
         self.normalize_non_spatial_list() 
         return self.non_spatial_state
 
@@ -188,24 +198,24 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         self.non_spatial_state[0] = x
         #position 1: distance y to closest shard
         self.non_spatial_state[1] = y
-        #position 2: number of remaining shards
-        self.non_spatial_state[2] = np.count_nonzero(obs['collectables_map'] == 1)
+        #position 4: number of remaining shards
+        #self.non_spatial_state[2] = np.count_nonzero(obs['collectables_map'] == 1)
         self.normalize_non_spatial_list() 
         return self.non_spatial_state
 
     def get_closest_drts_mineral_shard_x_y(self, obs):
-        x_closest_distance = RTSGeneralization.STATE_MAXIMUM_X 
-        y_closest_distance = RTSGeneralization.STATE_MAXIMUM_Y 
+        closest_distance = RTSGeneralization.STATE_MAX_COLL_DIST
         x, y = self.get_drts_army_mean(obs)
         for mineral_shard_y in range(len(obs['collectables_map'])):
             for mineral_shard_x in range(len(obs['collectables_map'][0])):
                 if obs['collectables_map'][mineral_shard_y][mineral_shard_x] == 1:
-                    x_dist = abs(x - mineral_shard_x)
-                    y_dist = abs(y - mineral_shard_y)
-                    if x_dist < x_closest_distance: x_closest_distance = x_dist
-                    if y_dist < y_closest_distance: y_closest_distance = y_dist
+                    dist = self.calculate_distance(x, y, mineral_shard_x, mineral_shard_y) 
 
-        return x_closest_distance, y_closest_distance
+        return abs(x_closest_distance), abs(y_closest_distance)
+
+    def calculate_distance(self, x1,y1,x2,y2):  
+        dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)  
+        return dist  
 
     def get_drts_army_mean(self, obs):
         xs = []
