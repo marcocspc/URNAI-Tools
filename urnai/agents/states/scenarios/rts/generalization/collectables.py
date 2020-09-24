@@ -1,5 +1,6 @@
 from urnai.agents.states.abstate import StateBuilder  
 from urnai.utils.constants import RTSGeneralization, Games 
+from urnai.utils.numpy_utils import save_iterable_as_csv 
 import urnai.agents.actions.sc2 as sc2aux 
 from pysc2.lib import units as sc2units
 import numpy as np
@@ -102,6 +103,9 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
                 elif obs.feature_minimap[4][y][x] == 16: map_[y][x] = 100 #drts 1000 was chosen by me to represent virtual shards
                 elif obs.feature_minimap[4][y][x] == 3: map_[y][x] = 102 #drts 102 is gold 
 
+        save_iterable_as_csv(map_)
+        exit()
+
         return map_
 
     def build_drts_map(self, obs): 
@@ -178,7 +182,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
                     x_closest_distance = x - mineral_shard_x 
                     y_closest_distance = y - mineral_shard_y
 
-        return x_closest_distance, y_closest_distance
+        return abs(x_closest_distance), abs(y_closest_distance)
 
     def build_non_spatial_sc2_state(self, obs):
         x, y = self.get_closest_sc2_mineral_shard_x_y(obs)
@@ -210,6 +214,8 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
             for mineral_shard_x in range(len(obs['collectables_map'][0])):
                 if obs['collectables_map'][mineral_shard_y][mineral_shard_x] == 1:
                     dist = self.calculate_distance(x, y, mineral_shard_x, mineral_shard_y) 
+                    x_closest_distance = x - mineral_shard_x 
+                    y_closest_distance = y - mineral_shard_y
 
         return abs(x_closest_distance), abs(y_closest_distance)
 

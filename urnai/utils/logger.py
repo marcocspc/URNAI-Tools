@@ -15,7 +15,10 @@ from models.model_builder import ModelBuilder
 from time import time
 
 class Logger(Savable):
-    def __init__(self, ep_total, agent_name, model_name, model_builder:ModelBuilder, action_wrapper_name, agent_action_size, agent_action_names, state_builder_name, reward_builder_name, env_name, is_episodic=True, render=True):
+    def __init__(self, ep_total, agent_name, model_name, model_builder:ModelBuilder, 
+                 action_wrapper_name, agent_action_size, agent_action_names, 
+                 state_builder_name, reward_builder_name, env_name, 
+                 is_episodic=True, render=True, generate_bar_graphs_every=100):
         #Training information
         self.agent_name = agent_name
         self.model_name = model_name
@@ -24,6 +27,8 @@ class Logger(Savable):
         self.state_builder_name = state_builder_name
         self.reward_builder_name = reward_builder_name
         self.env_name = env_name
+
+        self.generate_bar_graphs_every = generate_bar_graphs_every
 
         # Episode count
         self.ep_count = 0
@@ -289,7 +294,7 @@ class Logger(Savable):
             transposed = [list(x) for x in np.transpose(self.ep_agent_actions)]
             #Then, for each episode, get a bar graph showing each action usage
             for episode in range(self.ep_count):
-                if episode % 100 == 0:
+                if episode % self.generate_bar_graphs_every == 0:
                     values = transposed[episode] 
                     bar_labels = self.agent_action_names
                     x_label = "Actions"
