@@ -114,6 +114,9 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
     def get_no_action(self):
         return self.noaction 
 
+    def get_named_actions(self):
+        return self.named_actions
+
 
 class CollectablesStarcraftIIActionWrapper(ActionWrapper):
 
@@ -135,6 +138,7 @@ class CollectablesStarcraftIIActionWrapper(ActionWrapper):
         self.action_indices = range(len(self.actions))
 
         self.pending_actions = []
+        self.named_actions = None
 
     def is_action_done(self):
         #return len(self.pending_actions) == 0
