@@ -13,6 +13,7 @@ from matplotlib.ticker import PercentFormatter
 from tdd.reporter import Reporter as rp
 from models.model_builder import ModelBuilder
 from time import time
+import psutil
 
 class Logger(Savable):
     def __init__(self, ep_total, agent_name, model_name, model_builder:ModelBuilder, 
@@ -77,6 +78,18 @@ class Logger(Savable):
         self.avg_sps_list = []
         self.episode_temp_start_time = 0
 
+        #performance report
+        self.memory_usage_percent_inst = []
+        self.memory_usage_gigs_inst = []
+        self.memory_avail_percent_inst = []
+        self.memory_avail_gigs_inst = []
+        self.cpu_usage_percent_inst = []
+        self.memory_usage_percent_avg = []
+        self.memory_usage_gigs_avg = []
+        self.memory_avail_percent_avg = []
+        self.memory_avail_gigs_avg = []
+        self.cpu_usage_percent_avg = []
+
         #Training report
         self.training_report = ""
 
@@ -118,6 +131,24 @@ class Logger(Savable):
         self.episode_duration_list.append(round(episode_duration, 1))
         self.episode_sps_list.append(round(steps_count / episode_duration, 2))
         self.avg_sps_list.append(round(sum(self.episode_sps_list) / self.ep_count, 2))
+
+        #performance stuff
+        memory_usage_percent = psutil.virtual_memory().percent
+        memory_avail_percent = psutil.virtual_memory().available * 100 / psutil.virtual_memory().total
+        memory_usage_gigs = psutil.virtual_memory().used / 1024**3
+        memory_avail_gigs = psutil.virtual_memory().free / 1024**3
+        cpu_usage_percent = psutil.cpu_percent()
+        self.memory_usage_percent_inst.append(memory_usage_percent)
+        self.memory_usage_gigs_inst.append(memory_usage_gigs)
+        self.memory_avail_percent_inst.append(memory_avail_percent)
+        self.memory_avail_gigs_inst.append(memory_avail_gigs)
+        self.cpu_usage_percent_inst.append(cpu_usage_percent)
+
+        self.memory_usage_percent_avg.append(sum(self.memory_usage_percent_inst)/self.ep_count)
+        self.memory_usage_gigs_avg.append(sum(self.memory_usage_gigs_inst)/self.ep_count)
+        self.memory_avail_percent_avg.append(sum(self.memory_avail_percent_inst)/self.ep_count)
+        self.memory_avail_gigs_avg.append(sum(self.memory_avail_gigs_inst)/self.ep_count)
+        self.cpu_usage_percent_avg.append(sum(self.cpu_usage_percent_inst)/self.ep_count)
 
         if ep_reward > self.best_reward:
             self.best_reward = ep_reward
@@ -320,6 +351,53 @@ class Logger(Savable):
                 temp_fig = self.generalized_curve_plot(self.agent_info[key], "Agent {}".format(key), "Per Episode Agent {} Data".format(key))
                 plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "agent_{}_graph.png".format(key))
                 plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "agent_{}_graph.pdf".format(key))
+                plt.close(temp_fig)
+
+            # Plotting performance info
+            fig_names = [
+                    "memory_usage_percent_instant",
+                    "memory_usage_gigs_instant",
+                    "memory_avail_percent_instant",
+                    "memory_avail_gigs_instant",
+                    "cpu_usage_percent_instant",
+                    "memory_usage_percent_average",
+                    "memory_usage_gigs_average",
+                    "memory_avail_percent_average",
+                    "memory_avail_gigs_average",
+                    "cpu_usage_percent_average",
+                    ]
+            lst_to_save = [ 
+                    self.memory_usage_percent_inst,
+                    self.memory_usage_gigs_inst,
+                    self.memory_avail_percent_inst,
+                    self.memory_avail_gigs_inst,
+                    self.cpu_usage_percent_inst,
+                    self.memory_usage_percent_avg,
+                    self.memory_usage_gigs_avg,
+                    self.memory_avail_percent_avg,
+                    self.memory_avail_gigs_avg,
+                    self.cpu_usage_percent_avg,
+            ]
+            graph_titles = [
+                    "Instant Memory Usage (%)",
+                    "Instant Memory Usage (GB)",
+                    "Instant Memory Available (%)",
+                    "Instant Memory Available (GB)",
+                    "Instant CPU usage (%)",
+                    "Average Memory Usage (%)",
+                    "Average Memory Usage (GB)",
+                    "Average Memory Available (%)",
+                    "Average Memory Available (GB)",
+                    "Average CPU usage (%)",
+            ] 
+            for i in range(len(fig_names)):
+                fig_name = fig_names[i]
+                save_lst = lst_to_save[i]
+                graph_title  = graph_titles[i]
+
+                temp_fig = self.generalized_curve_plot(save_lst, graph_title, "Per episode " + graph_title)
+                plt.savefig(persist_path + os.path.sep + "performance_graphs" + os.path.sep + self.get_default_save_stamp() + "{}.png".format(fig_name))
+                plt.savefig(persist_path + os.path.sep + "performance_graphs" + os.path.sep + self.get_default_save_stamp() + "{}.pdf".format(fig_name))
                 plt.close(temp_fig)
 
             self.render = True 

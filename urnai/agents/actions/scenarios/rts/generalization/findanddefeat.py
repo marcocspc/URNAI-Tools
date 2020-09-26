@@ -11,6 +11,7 @@ class FindAndDefeatDeepRTSActionWrapper(CollectablesDeepRTSActionWrapper):
         self.cancel = 16
 
         #self.final_actions = [self.moveleft, self.moveright, self.moveup, self.movedown, self.attack, self.cancel] 
+        self.named_actions = None
         self.final_actions = [self.moveleft, self.moveright, self.moveup, self.movedown, self.attack] 
         self.action_indices = range(len(self.final_actions))
 

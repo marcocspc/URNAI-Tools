@@ -9,6 +9,7 @@ class DefeatEnemiesDeepRTSActionWrapper(FindAndDefeatDeepRTSActionWrapper):
         super().__init__()
         self.run = 17
 
+        self.named_actions = None
         self.final_actions = [self.attack, self.run, self.cancel]
         self.action_indices = range(len(self.final_actions))
 

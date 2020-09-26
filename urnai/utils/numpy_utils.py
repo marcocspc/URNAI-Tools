@@ -14,7 +14,6 @@ def save_iterable_as_csv(iterable, file_name="urnai_iterable_" + time.strftime("
     if convert_to_int: 
         csv = np.array(iterable).astype(int) 
         np.savetxt(directory + sep + file_name, csv, fmt='%i',delimiter=delimiter)
-    elif convert_to_string:
     else:
         csv = np.array(iterable)
         np.savetxt(directory + sep + file_name, csv, delimiter=delimiter)

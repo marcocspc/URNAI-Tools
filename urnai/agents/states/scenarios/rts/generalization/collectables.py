@@ -16,12 +16,12 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         self.non_spatial_maximums = [
                 RTSGeneralization.STATE_MAX_COLL_DIST,
                 RTSGeneralization.STATE_MAX_COLL_DIST,
-        #        RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS,
+                RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS,
                 ]
         self.non_spatial_minimums = [
                 0, 
                 0,
-        #        0,
+                0,
                 ]
         #non-spatial is composed of
         #X distance to next mineral shard 
@@ -30,7 +30,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         self.non_spatial_state = [
                 0, 
                 0, 
-                #0,
+                0,
                 ]
 
     def get_game(self, obs):
@@ -102,9 +102,6 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
                 elif obs.feature_minimap[4][y][x] == 2: map_[y][x] = 7 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
                 elif obs.feature_minimap[4][y][x] == 16: map_[y][x] = 100 #drts 1000 was chosen by me to represent virtual shards
                 elif obs.feature_minimap[4][y][x] == 3: map_[y][x] = 102 #drts 102 is gold 
-
-        save_iterable_as_csv(map_)
-        exit()
 
         return map_
 
@@ -190,9 +187,8 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         self.non_spatial_state[0] = x
         #position 1: distance y to closest shard
         self.non_spatial_state[1] = y
-
-        #position 4: number of remaining shards
-        #self.non_spatial_state[4] = np.count_nonzero(obs.feature_minimap[4] == 16)
+        #position 2: number of remaining shards
+        self.non_spatial_state[2] = np.count_nonzero(obs.feature_minimap[4] == 16)
         self.normalize_non_spatial_list() 
         return self.non_spatial_state
 
@@ -203,7 +199,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         #position 1: distance y to closest shard
         self.non_spatial_state[1] = y
         #position 4: number of remaining shards
-        #self.non_spatial_state[2] = np.count_nonzero(obs['collectables_map'] == 1)
+        self.non_spatial_state[2] = np.count_nonzero(obs['collectables_map'] == 1)
         self.normalize_non_spatial_list() 
         return self.non_spatial_state
 

@@ -5,6 +5,7 @@ from DeepRTS import Engine
 from DeepRTS.Engine import Constants, UnitManager 
 from DeepRTS.python import Config, Game 
 from urnai.utils.error import MapNotFoundError, DeepRTSEnvError 
+import importlib
 
 #TODO: add enemy AI
 
@@ -32,7 +33,7 @@ class DeepRTSEnv(Env):
             number_of_players = 1, updates_per_action = 1, flatten_state = True,
             drts_engine_config = None,
             start_oil=0, start_gold=1500, start_lumber=750, start_food = 1,
-            fit_to_screen=False):
+            fit_to_screen=False, deep_reset_every = 100):
 
         if self.is_map_installed(map):
             self.map = map
@@ -49,9 +50,25 @@ class DeepRTSEnv(Env):
         self.max_ups = max_ups
         self.unit_manager = UnitManager
         self.constants = Constants 
+        self.deep_reset_every = deep_reset_every
+        self.episode_count = 0
+        self.start_oil = start_oil
+        self.start_gold = start_gold
+        self.start_lumber = start_lumber
+        self.start_food = start_food
+        self.fit_to_screen = fit_to_screen
 
+        #needed for self.setup()
+        self.gui_config = drts_engine_config 
+        self.engine_config = None 
+        self.game = None
+        self.players = None
+
+        self.setup()
+
+    def setup(self):
         self.gui_config = Config(
-            render=True,
+            render=self.render,
             view=self.render,
             inputs=False,
             caption=False,
@@ -62,17 +79,15 @@ class DeepRTSEnv(Env):
             audio_volume=50
         )
 
-        if drts_engine_config == None:
+        if self.engine_config == None:
             self.engine_config = Engine.Config.defaults()
-            self.engine_config.set_start_oil(start_oil)
-            self.engine_config.set_start_gold(start_gold)
-            self.engine_config.set_start_lumber(start_lumber)
-            self.engine_config.set_start_food(start_food)
+            self.engine_config.set_start_oil(self.start_oil)
+            self.engine_config.set_start_gold(self.start_gold)
+            self.engine_config.set_start_lumber(self.start_lumber)
+            self.engine_config.set_start_food(self.start_food)
             self.engine_config.set_archer(True)
             self.engine_config.set_instant_town_hall(False)
             self.engine_config.set_barracks(True)
-        else:
-            self.engine_config = drts_engine_config
 
         self.game = Game(
             self.map,
@@ -80,7 +95,7 @@ class DeepRTSEnv(Env):
             engine_config = self.engine_config,
             gui_config = self.gui_config,
             terminal_signal = False,
-            fit_to_screen=fit_to_screen
+            fit_to_screen=self.fit_to_screen
         )
         self.game.set_max_fps(self.max_fps)
         self.game.set_max_ups(self.max_ups)
@@ -148,9 +163,28 @@ class DeepRTSEnv(Env):
         self.done = True
 
     def reset(self):
+        self.episode_count += 1
+        if self.episode_count % self.deep_reset_every == 0:
+            self.deep_reset()
+
         self.close()
         state = self.start()
         return state
+
+    def deep_reset(self):
+        del self.game
+        del self.engine_config
+        del self.gui_config
+        del self.players
+        importlib.reload(drts)
+
+        #needed for self.setup()
+        self.gui_config = None
+        self.engine_config = None 
+        self.game = None
+        self.players = None
+
+        self.setup()
 
     def restart(self):
         return self.reset()

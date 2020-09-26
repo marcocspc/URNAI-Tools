@@ -25,6 +25,7 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
         self.build2 = 14
         self.noaction = 15
 
+        self.named_actions = ["move_left", "move_right", "move_up", "move_down"]
         self.excluded_actions = []
 
         self.final_actions = [self.moveleft, self.moveright, self.moveup, self.movedown] 
@@ -235,3 +236,6 @@ class CollectablesStarcraftIIActionWrapper(ActionWrapper):
 
     def get_no_action(self):
         return self.noaction
+
+    def get_named_actions(self):
+        return self.named_actions

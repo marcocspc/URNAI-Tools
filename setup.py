@@ -17,6 +17,7 @@ VERSION_MATPLOTLIB = "==3.2.0"
 VERSION_KERAS = "==2.3.1"
 VERSION_PYSC2 = "==3.0.0"
 VERSION_PANDAS = "==1.0.1"
+VERSION_PSUTIL = "==5.7.2"
 
 VIZDOOM = 'URNAI_VIZDOOM'
 TF_CPU = 'URNAI_TF_CPU'
@@ -72,6 +73,7 @@ setup(
         'keras' + VERSION_KERAS,
         'pysc2' + VERSION_PYSC2,
         'pandas' + VERSION_PANDAS,
+        'psutil' + VERSION_PSUTIL,
         ] + dep_list,
     dependency_links=dep_links,
     entry_points = {

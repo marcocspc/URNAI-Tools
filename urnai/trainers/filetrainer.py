@@ -9,7 +9,24 @@ import pandas as pd
 class FileTrainer(Trainer):
 
     def __init__(self, file_path):
-        self.pickle_black_list = []
+        #this is needed because in python3
+        #attributes cannot be declared outside init
+        #so here we go
+        self.env = None
+        self.agent = None
+        self.save_path = None
+        self.file_name = None
+        self.enable_save = None
+        self.save_every = None
+        self.relative_path = None
+        self.reset_epsilon = None
+        self.max_training_episodes = None
+        self.max_test_episodes = None
+        self.max_steps_training = None
+        self.max_steps_testing = None
+
+        self.pickle_black_list = None
+        self.prepare_black_list()
         self.trainings = []
         if is_json_file(file_path):
             self.load_json_file(file_path)
@@ -54,15 +71,9 @@ class FileTrainer(Trainer):
             self.setup(env, agent, **training["trainer"]["params"])
 
             if not play_only:
-                try:
-                    self.train(**training["json_trainer"]["train"])
-                except KeyError as ke:
-                    if 'train' in str(ke): pass
+                self.train()
 
-            try:
-                self.play(**training["json_trainer"]["play"])
-            except KeyError as ke:
-                if 'play' in str(ke): pass
+            self.play()
 
     def check_trainings(self):
         for training in self.trainings:
@@ -80,7 +91,6 @@ class FileTrainer(Trainer):
                     string = string.replace("'", "\"")
                     string = string.replace("None", "null")
                     training['model']['params']['build_model'] = json.loads(string)
-
 
     def load_json_file(self, json_file_path):
         with open(json_file_path, "r") as json_file:

@@ -14,6 +14,7 @@ class BuildUnitsDeepRTSActionWrapper(DefeatEnemiesDeepRTSActionWrapper):
         self.build_footman = 20
 
         self.final_actions = [self.build_farm, self.build_barrack, self.build_footman] 
+        self.named_actions = ["build_farm", "build_barrack", "build_footman"]
         self.action_indices = range(len(self.final_actions))
 
     def solve_action(self, action_idx, obs):
