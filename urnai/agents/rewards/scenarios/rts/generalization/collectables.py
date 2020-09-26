@@ -47,9 +47,9 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
         if curr != self.old_collectable_counter:
             self.old_collectable_counter = curr 
             #return 2 ** (RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS - curr)
-            return 1
+            return 5
         else:
-            return 0 
+            return -1 
 
     def get_sc2_reward(self, obs):
         #layer 4 is units (1 friendly, 2 enemy, 16 mineral shards, 3 neutral 
