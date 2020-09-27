@@ -47,7 +47,7 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
         if curr != self.old_collectable_counter:
             self.old_collectable_counter = curr 
             #return 2 ** (RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS - curr)
-            return 5
+            return 10
         else:
             return -1 
 
