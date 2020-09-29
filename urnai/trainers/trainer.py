@@ -26,7 +26,7 @@ class Trainer(Savable):
         self.setup(env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path, file_name, enable_save, save_every, relative_path, debug_level, reset_epsilon)
 
     def prepare_black_list(self):
-        self.pickle_black_list = ["save_path", "file_name", "full_save_path", "full_save_play_path", "agent"]
+        self.pickle_black_list = ["save_path", "file_name", "full_save_path", "full_save_play_path", "agent", "max_training_episodes","max_test_episodes","max_steps_training","max_steps_testing"]
 
     def setup(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False):
         self.env = env
@@ -41,6 +41,8 @@ class Trainer(Savable):
         self.max_test_episodes = max_test_episodes
         self.max_steps_training = max_steps_training
         self.max_steps_testing = max_steps_testing
+        self.curr_training_episodes = -1
+        self.curr_playing_episodes = -1
         rp.VERBOSITY_LEVEL = debug_level
 
         self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
@@ -98,7 +100,8 @@ class Trainer(Savable):
         if test_params != None:
             test_params.logger = self.logger
 
-        for episode in range(self.max_training_episodes):
+        while self.curr_training_episodes < self.max_training_episodes:
+            self.curr_training_episodes += 1
 
             self.env.start()
 
@@ -109,7 +112,7 @@ class Trainer(Savable):
             # Passing the episode to the agent reset, so that it can be passed to model reset
             # Allowing the model to track the episode number, and decide if it should diminish the
             # Learning Rate, depending on the currently selected strategy.
-            self.agent.reset(episode)
+            self.agent.reset(self.curr_training_episodes)
 
             ep_reward = 0
             victory = False
@@ -151,14 +154,14 @@ class Trainer(Savable):
                     break
             
             self.logger.log_ep_stats()
-            if self.enable_save and episode > 0 and episode % self.save_every == 0:
+            if self.enable_save and self.curr_training_episodes > 0 and self.curr_training_episodes % self.save_every == 0:
                 #self.logger.log_ep_stats()
                 self.save(self.full_save_path)
             #if enable_save and episode > 0 and episode % save_steps == 0:
                 #self.save(self.full_save_path)
 
-            if test_params != None and episode % test_params.test_steps == 0 and episode != 0:
-                test_params.current_ep_count = episode
+            if test_params != None and self.curr_training_episodes % test_params.test_steps == 0 and episode != 0:
+                test_params.current_ep_count = self.curr_training_episodes
                 self.play(test_params.num_matches, test_params.max_steps, test_params)
 
                 # Stops training if reward threshold was reached in play testing
@@ -182,7 +185,8 @@ class Trainer(Savable):
 
         self.logger = Logger(self.max_test_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
 
-        for match in range(self.max_test_episodes):
+        while self.curr_playing_episodes < self.max_test_episodes:
+            self.curr_playing_episodes += 1
             self.env.start()
 
             # Reset the environment
@@ -192,7 +196,7 @@ class Trainer(Savable):
             # Passing the episode to the agent reset, so that it can be passed to model reset
             # Allowing the model to track the episode number, and decide if it should diminish the
             # Learning Rate, depending on the currently selected strategy.
-            self.agent.reset(match)
+            self.agent.reset(self.curr_playing_episodes)
 
             ep_reward = 0
             victory = False

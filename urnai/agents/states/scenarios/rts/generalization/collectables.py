@@ -184,9 +184,9 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
     def build_non_spatial_sc2_state(self, obs):
         x, y = self.get_closest_sc2_mineral_shard_x_y(obs)
         #position 0: distance x to closest shard 
-        self.non_spatial_state[0] = x
+        self.non_spatial_state[0] = int(x)
         #position 1: distance y to closest shard
-        self.non_spatial_state[1] = y
+        self.non_spatial_state[1] = int(y)
         #position 2: number of remaining shards
         self.non_spatial_state[2] = np.count_nonzero(obs.feature_minimap[4] == 16)
         self.normalize_non_spatial_list() 
@@ -195,9 +195,9 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
     def build_non_spatial_drts_state(self, obs):
         x, y = self.get_closest_drts_mineral_shard_x_y(obs)
         #position 0: distance x to closest shard 
-        self.non_spatial_state[0] = x
+        self.non_spatial_state[0] = int(x)
         #position 1: distance y to closest shard
-        self.non_spatial_state[1] = y
+        self.non_spatial_state[1] = int(y)
         #position 4: number of remaining shards
         self.non_spatial_state[2] = np.count_nonzero(obs['collectables_map'] == 1)
         self.normalize_non_spatial_list() 

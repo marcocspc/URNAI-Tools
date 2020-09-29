@@ -24,6 +24,8 @@ class FileTrainer(Trainer):
         self.max_test_episodes = None
         self.max_steps_training = None
         self.max_steps_testing = None
+        self.curr_training_episodes = None 
+        self.curr_playing_episodes = None
 
         self.pickle_black_list = None
         self.prepare_black_list()
