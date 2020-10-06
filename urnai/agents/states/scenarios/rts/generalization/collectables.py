@@ -209,9 +209,11 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         for mineral_shard_y in range(len(obs['collectables_map'])):
             for mineral_shard_x in range(len(obs['collectables_map'][0])):
                 if obs['collectables_map'][mineral_shard_y][mineral_shard_x] == 1:
-                    dist = self.calculate_distance(x, y, mineral_shard_x, mineral_shard_y) 
-                    x_closest_distance = x - mineral_shard_x 
-                    y_closest_distance = y - mineral_shard_y
+                    if dist < closest_distance:
+                        closest_distance = dist
+                        dist = self.calculate_distance(x, y, mineral_shard_x, mineral_shard_y) 
+                        x_closest_distance = x - mineral_shard_x 
+                        y_closest_distance = y - mineral_shard_y
 
         return abs(x_closest_distance), abs(y_closest_distance)
 

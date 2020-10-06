@@ -142,9 +142,6 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
 
         return len(farms)
 
-
-
-
     def build_farm(self):
         tile = self.env.game.tilemap.get_tile(GeneralizedBuildUnitsScenario.MAP_PLAYER_FARM_X, GeneralizedBuildUnitsScenario.MAP_PLAYER_FARM_Y)
         self.env.game.players[0].spawn_unit(self.env.constants.Unit.Farm, tile)
