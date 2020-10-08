@@ -55,9 +55,12 @@ def main(unused_argv):
         agent = SC2Agent(dq_network, KilledUnitsReward())
 
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_v_easy", save_every=20, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_epsilon_reset", save_every=20, enable_save=True, relative_path=True, reset_epsilon=True)
-        trainer.train(num_episodes=3, max_steps=200)
-        #trainer.play(num_matches=500, max_steps=1200)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_asd", 
+                        save_every=20, enable_save=True, relative_path=True, reset_epsilon=True,
+                        max_training_episodes=2, max_steps_training=1200,
+                        max_test_episodes=2, max_steps_testing=1200)
+        trainer.train()
+        trainer.play()
 
     except KeyboardInterrupt:
         pass

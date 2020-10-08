@@ -45,9 +45,12 @@ def main(unused_argv):
 
         agent = GenericAgent(dq_network, PureReward())
 
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-ram-v0_lrdecaytest", save_every=100, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=1000, max_steps=700)
-        trainer.play(num_matches=100, max_steps=700)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-ram-v0_lrdecaytest", 
+                        save_every=100, enable_save=True, relative_path=True,
+                        max_training_episodes=1000, max_steps_training=700,
+                        max_test_episodes=100, max_steps_testing=700)
+        trainer.train()
+        trainer.play()
     except KeyboardInterrupt:
         pass
 

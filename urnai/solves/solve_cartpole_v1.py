@@ -47,9 +47,12 @@ def main(unused_argv):
 
         # Cartpole-v1 is solved when avg. reward over 100 episodes is greater than or equal to 475
         #test_params = TestParams(num_matches=100, steps_per_test=100, max_steps=500, reward_threshold=500)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v1_pg_50x50_test6", save_every=100, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=1000, max_steps=500)
-        trainer.play(num_matches=100, max_steps=500)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v1_pg_50x50_test6", 
+                        save_every=100, enable_save=True, relative_path=True,
+                        max_training_episodes=1000, max_steps_training=500,
+                        max_test_episodes=100, max_steps_testing=500)
+        trainer.train()
+        trainer.play()
     except KeyboardInterrupt:
         pass
 

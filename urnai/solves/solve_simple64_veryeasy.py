@@ -31,10 +31,15 @@ def main(unused_argv):
                                 gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=2000)
         
         agent = SC2Agent(dq_network, KilledUnitsReward())
+        
 
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_vs_random_v_easy", save_every=100, enable_save=True, relative_path=True)
-        trainer.train(num_episodes=3000, max_steps=1200)
-        trainer.play(num_matches=100, max_steps=1200)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_vs_random_v_easy", 
+                        save_every=20, enable_save=True, relative_path=True,
+                        max_training_episodes=3000, max_steps_training=1200,
+                        max_test_episodes=100, max_steps_testing=1200)
+        trainer.train()
+        trainer.play()
+
 
     except KeyboardInterrupt:
         pass
