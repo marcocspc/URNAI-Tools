@@ -18,6 +18,7 @@ from agents.states.sc2 import Simple64GridState
 from models.pg_keras import PGKeras
 from models.dqn_keras import DQNKeras
 from models.ddqn_keras import DDQNKeras
+from models.dqn_tf import DqlTensorFlow
 from utils.functions import query_yes_no
 from models.model_builder import ModelBuilder
 
@@ -48,14 +49,16 @@ def main(unused_argv):
         helper.add_fullyconn_layer(nodes=50)
         helper.add_output_layer(action_wrapper.get_action_space_dim())
 
-        dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False,
-                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=2000)
+        # dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False,
+        #                     gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=2000)
         
+        dq_network = DqlTensorFlow(action_wrapper, state_builder, build_model=helper.get_model_layout(), use_memory=True,
+                                gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=100)
         # Terran agent
         agent = SC2Agent(dq_network, KilledUnitsReward())
 
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_v_easy", save_every=20, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_asd", 
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_testdqltf", 
                         save_every=20, enable_save=True, relative_path=True, reset_epsilon=True,
                         max_training_episodes=2, max_steps_training=1200,
                         max_test_episodes=2, max_steps_testing=1200)

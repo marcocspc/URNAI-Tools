@@ -80,7 +80,7 @@ class DDQNKeras(DQNKeras):
                 # new Q-value is equal to the reward at that step + discount factor * the max q-value for the next_state
                 new_q = reward + self.gamma * max_next_q
             else:
-                # if this is the last step, there is no future max q value, so we the new_q is just the reward
+                # if this is the last step, there is no future max q value, so the new_q is just the reward
                 new_q = reward
 
             current_qs = current_qs_list[index]
