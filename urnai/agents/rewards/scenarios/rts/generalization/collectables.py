@@ -57,7 +57,7 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
         curr = np.count_nonzero(current == 1)
         if curr != self.old_collectable_counter:
             self.old_collectable_counter = curr 
-            return 1
+            return 10
         else:
             return 0 
 

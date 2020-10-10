@@ -135,6 +135,7 @@ class CollectablesStarcraftIIActionWrapper(ActionWrapper):
         self.excluded_actions = []
 
         self.actions = [self.moveleft, self.moveright, self.moveup, self.movedown] 
+        self.named_actions = ["move_left", "move_right", "move_up", "move_down"]
         self.action_indices = range(len(self.actions))
 
         self.pending_actions = []

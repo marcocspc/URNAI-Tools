@@ -74,21 +74,33 @@ class Trainer(Savable):
         if self.enable_save and os.path.exists(self.full_save_path):
             rp.report("WARNING! Loading training from " + self.full_save_path + " with SAVING ENABLED.")
             self.load(self.full_save_path)
+            self.make_persistance_dirs()
         elif self.enable_save:
             rp.report("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
-            os.makedirs(self.full_save_path)
-            os.makedirs(self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "instant")
-            os.makedirs(self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "average")
-            os.makedirs(self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars")
-            os.makedirs(self.full_save_path + os.path.sep + "performance_graphs")
-            os.makedirs(self.full_save_play_path)
-            os.makedirs(self.full_save_play_path + os.path.sep + "action_graphs" + os.path.sep + "instant")
-            os.makedirs(self.full_save_play_path + os.path.sep + "action_graphs" + os.path.sep + "average")
-            os.makedirs(self.full_save_play_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars")
-            os.makedirs(self.full_save_play_path + os.path.sep + "performance_graphs")
+            self.make_persistance_dirs()
         else:
             rp.report("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
+
+    def make_persistance_dirs(self):
+        dir_list = [
+                    self.full_save_path,
+                    self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "instant",
+                    self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "average",
+                    self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars",
+                    self.full_save_path + os.path.sep + "performance_graphs",
+                    self.full_save_play_path,
+                    self.full_save_play_path + os.path.sep + "action_graphs" + os.path.sep + "instant",
+                    self.full_save_play_path + os.path.sep + "action_graphs" + os.path.sep + "average",
+                    self.full_save_play_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars",
+                    self.full_save_play_path + os.path.sep + "performance_graphs",
+                ]
+
+        for mkdir in dir_list:
+            try:
+                os.makedirs(mkdir)
+            except FileExistsError:
+                pass
 
     def train(self, test_params: TestParams=None, reward_from_agent=True):
         start_time = time.time()

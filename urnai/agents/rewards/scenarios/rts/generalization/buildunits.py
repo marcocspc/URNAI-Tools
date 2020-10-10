@@ -43,4 +43,6 @@ class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
 
         rwdC = (current - prev) * 100
 
-        return (rwdA + rwdB + rwdC)
+        rwd = rwdA + rwdB + rwdC
+        if rwd > 0: return rwd
+        else: return 0

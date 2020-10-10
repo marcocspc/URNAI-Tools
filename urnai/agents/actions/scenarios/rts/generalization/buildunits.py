@@ -46,6 +46,7 @@ class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
         self.build_barrack = 9
         self.build_marine = 10
         self.actions = [self.build_supply_depot, self.build_barrack, self.build_marine]
+        self.named_actions = ["build_supply_depot", "build_barrack", "build_marine"]
         self.action_indices = range(len(self.actions))
 
     def solve_action(self, action_idx, obs):
