@@ -16,12 +16,12 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         self.non_spatial_maximums = [
                 RTSGeneralization.STATE_MAX_COLL_DIST,
                 RTSGeneralization.STATE_MAX_COLL_DIST,
-                RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS,
+#                RTSGeneralization.STATE_MAXIMUM_NUMBER_OF_MINERAL_SHARDS,
                 ]
         self.non_spatial_minimums = [
                 0, 
                 0,
-                0,
+#                0,
                 ]
         #non-spatial is composed of
         #X distance to next mineral shard 
@@ -30,7 +30,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         self.non_spatial_state = [
                 0, 
                 0, 
-                0,
+#                0,
                 ]
 
     def get_game(self, obs):
@@ -170,6 +170,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
     def get_closest_sc2_mineral_shard_x_y(self, obs):
         closest_distance = RTSGeneralization.STATE_MAX_COLL_DIST
         x, y = self.get_sc2_marine_mean(obs)
+        x_closest_distance, y_closest_distance = -1, -1
         for mineral_shard in sc2aux.get_all_neutral_units(obs):
                 mineral_shard_x = mineral_shard.x
                 mineral_shard_y = mineral_shard.y
@@ -188,7 +189,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         #position 1: distance y to closest shard
         self.non_spatial_state[1] = int(y)
         #position 2: number of remaining shards
-        self.non_spatial_state[2] = np.count_nonzero(obs.feature_minimap[4] == 16)
+#        self.non_spatial_state[2] = np.count_nonzero(obs.feature_minimap[4] == 16)
         self.normalize_non_spatial_list() 
         return self.non_spatial_state
 
@@ -199,13 +200,14 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         #position 1: distance y to closest shard
         self.non_spatial_state[1] = int(y)
         #position 4: number of remaining shards
-        self.non_spatial_state[2] = np.count_nonzero(obs['collectables_map'] == 1)
+#        self.non_spatial_state[2] = np.count_nonzero(obs['collectables_map'] == 1)
         self.normalize_non_spatial_list() 
         return self.non_spatial_state
 
     def get_closest_drts_mineral_shard_x_y(self, obs):
         closest_distance = RTSGeneralization.STATE_MAX_COLL_DIST
         x, y = self.get_drts_army_mean(obs)
+        x_closest_distance, y_closest_distance = -1, -1
         for mineral_shard_y in range(len(obs['collectables_map'])):
             for mineral_shard_x in range(len(obs['collectables_map'][0])):
                 if obs['collectables_map'][mineral_shard_y][mineral_shard_x] == 1:
