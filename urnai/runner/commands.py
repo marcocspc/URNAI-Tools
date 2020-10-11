@@ -7,6 +7,7 @@ from urnai.envs.sc2 import SC2Env
 from urnai.envs.deep_rts import DeepRTSEnv 
 from pysc2.env import sc2_env
 from pysc2.lib import actions
+import time
 import numpy as np
 from absl import flags
 import json
