@@ -53,8 +53,6 @@ class DeepRTSRunner(Runner):
                     drts_utils.extract_specs(map_name)
             
             else:
-                drts_utils.install_map(full_map_path, force=True)
-
                 rp.report("Starting DeepRTS using map " + map_name)
                 drts = DeepRTSEnv(render=True,map=map_name)
                 drts.reset()
