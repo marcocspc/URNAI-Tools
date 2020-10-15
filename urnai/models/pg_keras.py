@@ -19,8 +19,8 @@ class PGKeras(LearningModel):
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma=0.95, 
                 learning_rate=0.002, learning_rate_min=0.0002, learning_rate_decay=0.99995, learning_rate_decay_ep_cutoff=0,
-                name='PolicyGradientKeras', build_model = ModelBuilder.DEFAULT_BUILD_MODEL):
-        super(PGKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, learning_rate_min, learning_rate_decay, name, epsilon_min=0.1, epsilon_decay_rate=0.995, learning_rate_decay_ep_cutoff=0)
+                name='PolicyGradientKeras', build_model = ModelBuilder.DEFAULT_BUILD_MODEL, seed_value=None, cpu_only=False):
+        super(PGKeras, self).__init__(action_wrapper, state_builder, gamma, learning_rate, learning_rate_min, learning_rate_decay, name, epsilon_min=0.1, epsilon_decay_rate=0.995, learning_rate_decay_ep_cutoff=0, seed_value=seed_value, cpu_only=cpu_only)
 
         self.build_model = build_model
         self.model, self.predict_model = self.make_model()
@@ -161,6 +161,8 @@ class PGKeras(LearningModel):
             self.model, self.predict_model = self.make_model()
             # self.model.load_model(...)
             self.model.load_weights(self.get_full_persistance_path(persist_path)+".h5")
+
+            self.set_seeds()
 
     def predict(self, state, excluded_actions=[]):
         '''

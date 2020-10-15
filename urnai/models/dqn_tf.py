@@ -16,8 +16,8 @@ class DqlTensorFlow(LearningModel):
 
     #by default learning rate should not decay at all, since this is not the default behavior
     #of Deep-Q Learning
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, learning_rate_min=0.00002, learning_rate_decay=1, learning_rate_decay_ep_cutoff=0, gamma=0.95, name='DQN', build_model = ModelBuilder.DEFAULT_BUILD_MODEL, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False, use_memory=False, memory_maxlen=10000, batch_training=False, batch_size=32, min_memory_size=5000):
-        super().__init__(action_wrapper, state_builder, gamma, learning_rate, learning_rate_min, learning_rate_decay, epsilon_start, epsilon_min, epsilon_decay , per_episode_epsilon_decay, learning_rate_decay_ep_cutoff, name)
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, learning_rate_min=0.00002, learning_rate_decay=1, learning_rate_decay_ep_cutoff=0, gamma=0.95, name='DQN', build_model = ModelBuilder.DEFAULT_BUILD_MODEL, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False, use_memory=False, memory_maxlen=10000, batch_training=False, batch_size=32, min_memory_size=5000, seed_value=None, cpu_only=False):
+        super().__init__(action_wrapper, state_builder, gamma, learning_rate, learning_rate_min, learning_rate_decay, epsilon_start, epsilon_min, epsilon_decay , per_episode_epsilon_decay, learning_rate_decay_ep_cutoff, name, seed_value, cpu_only)
         # Defining the model's layers. Tensorflow's objects are stored into self.model_layers
         self.batch_size = batch_size
         self.build_model = build_model
@@ -140,6 +140,7 @@ class DqlTensorFlow(LearningModel):
         #If yes, load it
         if exists:
             self.saver.restore(self.sess, self.get_full_persistance_tensorflow_path(persist_path))
+            self.set_seeds()
 
     def make_model(self):
         #These are already inside make_model(), commenting out

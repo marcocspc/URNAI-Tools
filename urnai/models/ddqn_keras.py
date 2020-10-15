@@ -7,7 +7,6 @@ from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activation
 from keras.optimizers import Adam
 from keras import backend as K
-from .base.abmodel import LearningModel
 from models.dqn_keras import DQNKeras
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
@@ -19,12 +18,14 @@ class DDQNKeras(DQNKeras):
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma=0.99,
                     learning_rate=0.001, learning_rate_min=0.0001, learning_rate_decay=0.99995, learning_rate_decay_ep_cutoff = 0,
                     name='DDQN', epsilon_start=1.0, epsilon_min=0.01, epsilon_decay=0.99995, per_episode_epsilon_decay=False,
-                    batch_size=64, use_memory=True, memory_maxlen=50000, min_memory_size=1000, build_model = ModelBuilder.DEFAULT_BUILD_MODEL, update_target_every=5,):
+                    batch_size=64, use_memory=True, memory_maxlen=50000, min_memory_size=1000, build_model = ModelBuilder.DEFAULT_BUILD_MODEL, update_target_every=5, 
+                    seed_value=None, cpu_only=False):
         super(DDQNKeras, self).__init__(action_wrapper, state_builder, gamma=gamma, use_memory=use_memory,  name=name,
                                         learning_rate=learning_rate, learning_rate_decay=learning_rate_decay, 
                                         learning_rate_min=learning_rate_min, learning_rate_decay_ep_cutoff= learning_rate_decay_ep_cutoff,
                                         epsilon_start=epsilon_start, epsilon_min=epsilon_min, 
-                                        epsilon_decay=epsilon_decay, per_episode_epsilon_decay=per_episode_epsilon_decay)
+                                        epsilon_decay=epsilon_decay, per_episode_epsilon_decay=per_episode_epsilon_decay,
+                                        seed_value=seed_value, cpu_only=cpu_only)
 
         self.build_model = build_model
 
@@ -155,3 +156,5 @@ class DDQNKeras(DQNKeras):
             self.model.load_weights(self.get_full_persistance_path(persist_path)+".h5")
             self.target_model = self.make_model()
             self.target_model.set_weights(self.model.get_weights())
+
+            self.set_seeds()

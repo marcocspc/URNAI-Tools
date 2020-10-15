@@ -9,7 +9,7 @@ VERSION_TF = "==2.2.0"
 VERSION_VIZDOOM = "==1.1.7"
 VERSION_DRTS = "stable"
 VERSION_PLE = "3dbe79d"
-VERSION_2048 = "==0.2.6"
+# VERSION_2048 = "==0.2.6"
 VERSION_ABSL = "==0.9.0"
 VERSION_GYM = "==0.10.11"
 VERSION_NUMPY = "==1.18.4"
@@ -21,7 +21,7 @@ VERSION_PSUTIL = "==5.7.2"
 
 VIZDOOM = 'URNAI_VIZDOOM'
 TF_CPU = 'URNAI_TF_CPU'
-G2048 = 'URNAI_2048'
+# G2048 = 'URNAI_2048'
 DEEPRTS = 'URNAI_DEEPRTS'
 LATEST_DEPS = 'URNAI_LATEST_DEPS'
 
@@ -34,7 +34,7 @@ if is_optional_enabled(LATEST_DEPS):
     print("Dependencies will be installed in theirs latest versions.")
     VERSION_TF = ""
     VERSION_VIZDOOM = ""
-    VERSION_2048 = ""
+    # VERSION_2048 = ""
     VERSION_ABSL = ""
     VERSION_GYM = ""
     VERSION_NUMPY = ""
@@ -52,10 +52,10 @@ if is_optional_enabled(VIZDOOM):
     print("VizDoom installation enabled.")
     dep_list.append('vizdoom' + VERSION_VIZDOOM)
 
-if is_optional_enabled(G2048):
-    print("Gym-2048 installation enabled.")
-    dep_list.append(git_url.format(user='ntasfi', package='ple', branch=VERSION_PLE, repo='PyGame-Learning-Environment'))
-    dep_list.append('gym-2048' + VERSION_2048)
+# if is_optional_enabled(G2048):
+#     print("Gym-2048 installation enabled.")
+#     dep_list.append(git_url.format(user='ntasfi', package='ple', branch=VERSION_PLE, repo='PyGame-Learning-Environment'))
+#     dep_list.append('gym-2048' + VERSION_2048)
 
 if is_optional_enabled(TF_CPU):
     print("Tensorflow cpu will be installed instead of Tensorflow GPU.")
