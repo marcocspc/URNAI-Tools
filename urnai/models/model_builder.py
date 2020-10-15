@@ -60,21 +60,21 @@ class ModelBuilder():
     def __init__(self):
         self.layers = []
 
-    def add_input_layer(self, size, nodes = 50, custom_shape = None):
-        shape = None
-        if custom_shape == None: 
-            shape = [None, size]
-        else: 
-            shape = custom_shape
+    def add_input_layer(self, nodes = 50):
+        # shape = None
+        # if custom_shape == None: 
+        #     shape = [None, size]
+        # else: 
+        #     shape = custom_shape
 
-        if type(shape) == list:
-            self.layers.append({
-                'type' : ModelBuilder.LAYER_INPUT,
-                'nodes' : nodes,
-                'shape' : shape 
-                })
-        else:
-            raise TypeError("Input layer shape should be a list with its dimensions in it.")
+        # if type(shape) == list:
+        self.layers.append({
+            'type' : ModelBuilder.LAYER_INPUT,
+            'nodes' : nodes,
+            'shape' : [] 
+            })
+        # else:
+        #     raise TypeError("Input layer shape should be a list with its dimensions in it.")
 
     def add_convolutional_layer(self, filters = 1, filter_shape = (3, 3), padding = 'same', name = 'default', input_shape = None, max_pooling_pool_size_shape = (2, 2), dropout=0.2):
         if name == "default":
@@ -127,14 +127,14 @@ class ModelBuilder():
         else:
             raise TypeError("Fully connected layer's number of nodes should be an integer.")
 
-    def add_output_layer(self, length):
-        if type(length) == int:
-            self.layers.append({
-                'type' : ModelBuilder.LAYER_OUTPUT,
-                'length' : length,
-                })
-        else:
-            raise TypeError("Output layer's length should be an integer.")
+    def add_output_layer(self):
+        # if type(length) == int:
+        self.layers.append({
+            'type' : ModelBuilder.LAYER_OUTPUT,
+            'length' : 0,
+            })
+        # else:
+        #     raise TypeError("Output layer's length should be an integer.")
 
     def get_model_layout(self):
         return self.layers
