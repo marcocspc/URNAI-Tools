@@ -19,7 +19,7 @@ class Simple64State(StateBuilder):
         self.player_race = 0
 
     def build_state(self, obs):
-        if obs.game_loop[0] == 0:
+        if obs.game_loop[0] < 80 and self.base_top_left == None:
 
             commandcenter = get_my_units_by_type(obs, units.Terran.CommandCenter)
             nexus = get_my_units_by_type(obs, units.Protoss.Nexus)
@@ -154,7 +154,7 @@ class Simple64StateFullRes(StateBuilder):
         self.player_race = 0
 
     def build_state(self, obs):
-        if obs.game_loop[0] == 0:
+        if obs.game_loop[0] < 80 and self.base_top_left == None:
 
             commandcenter = get_my_units_by_type(obs, units.Terran.CommandCenter)
             nexus = get_my_units_by_type(obs, units.Protoss.Nexus)
@@ -283,9 +283,10 @@ class Simple64GridState(StateBuilder):
         self.grid_size = grid_size
         self._state_size = int(22 + 2*(self.grid_size**2))
         self.player_race = 0
+        self.base_top_left = None
 
     def build_state(self, obs):
-        if obs.game_loop[0] == 0:
+        if obs.game_loop[0] < 80 and self.base_top_left == None:
 
             commandcenter = get_my_units_by_type(obs, units.Terran.CommandCenter)
             nexus = get_my_units_by_type(obs, units.Protoss.Nexus)

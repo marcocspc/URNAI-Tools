@@ -117,7 +117,7 @@ class SC2Wrapper(ActionWrapper):
         self.units_to_effect = sc2._NO_UNITS            # self.units_to_effect and self.last_effect_action serve a very similar purpuse as self.units_to_attack and self.last_attack_action
         self.last_effect_action = ACTION_DO_NOTHING     # both of these variables will be used to effect a group of units with an ability, for example effecting all marines with stimpack
         
-        self.base_top_left = True                       # Variable used to verify if the initial players base is on the top left or bottom right part of the map (used mainly for internal calculations)
+        self.base_top_left = None                       # Variable used to verify if the initial players base is on the top left or bottom right part of the map (used mainly for internal calculations)
 
         self.my_base_xy = [19, 23]                      # Variable that represents the x,y position of the player's base in the simple64 map
         self.my_second_base_xy = [43, 23]               # Variable that represents the x,y position of the enemy's base in the simple64 map
@@ -635,7 +635,7 @@ class TerranWrapper(SC2Wrapper):
         if self.units_to_effect != sc2._NO_UNITS:
             named_action = self.last_effect_action
 
-        if obs.game_loop[0] == 0:
+        if obs.game_loop[0] < 80 and self.base_top_left == None:
             command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
             self.base_top_left = (command_center.x < 32)
 
@@ -1482,7 +1482,7 @@ class ProtossWrapper(SC2Wrapper):
         if self.units_to_effect != sc2._NO_UNITS:
             named_action = self.last_effect_action
 
-        if obs.game_loop[0] == 0:
+        if obs.game_loop[0] < 80 and self.base_top_left == None:
             nexus = get_my_units_by_type(obs, units.Protoss.Nexus)[0]
             self.base_top_left = (nexus.x < 32)
 
@@ -1930,7 +1930,7 @@ class ZergWrapper(SC2Wrapper):
         if self.units_to_effect != sc2._NO_UNITS:
             named_action = self.last_effect_action
 
-        if obs.game_loop[0] == 0:
+        if obs.game_loop[0] < 80 and self.base_top_left == None:
             hatchery = get_my_units_by_type(obs, units.Zerg.Hatchery)[0]
             self.base_top_left = (hatchery.x < 32)
 

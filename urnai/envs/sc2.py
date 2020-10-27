@@ -23,6 +23,7 @@ class SC2Env(Env):
         step_mul=8,
         game_steps_per_ep=0,
         obs_features=None,
+        realtime=False,
     ):
         super().__init__(map_name, render, reset_done)
 
@@ -36,6 +37,7 @@ class SC2Env(Env):
         self.enemy_race = get_sc2_race(enemy_race)
         self.difficulty = get_sc2_difficulty(difficulty)
         self.players = [sc2_env.Agent(self.player_race), sc2_env.Bot(self.enemy_race, self.difficulty)]
+        self.realtime = realtime
         self.done = False
 
         self.start()
@@ -59,7 +61,8 @@ class SC2Env(Env):
                     )
                 ],
                 step_mul=self.step_mul,
-                game_steps_per_episode=self.game_steps_per_ep
+                game_steps_per_episode=self.game_steps_per_ep,
+                realtime=self.realtime
             )
 
     
