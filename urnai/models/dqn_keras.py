@@ -1,3 +1,4 @@
+import tensorflow as tf
 import numpy as np
 import random
 import os, sys
@@ -32,6 +33,9 @@ class DQNKeras(LearningModel):
         if self.use_memory:
             self.memory = deque(maxlen=memory_maxlen)
             self.memory_maxlen = memory_maxlen
+
+        # Defining the log directory of keras tensorboard
+        #self.tensorboard_callback = tf.keras.callbacks.TensorBoard()
         
     def make_model(self):
         model = Sequential()
@@ -101,7 +105,7 @@ class DQNKeras(LearningModel):
                     target = (reward + self.gamma * np.amax(self.model.predict(next_state)[0]))
                 target_f = self.model.predict(state)
                 target_f[0][action] = target
-                self.model.fit(state, target_f, epochs=1, verbose=0)
+                self.model.fit(state, target_f, epochs=1, verbose=0, callbacks=self.tensorboard_callback)
         else:
             inputs = np.zeros((len(minibatch), self.state_size))
             targets = np.zeros((len(minibatch), self.action_size))
@@ -131,7 +135,7 @@ class DQNKeras(LearningModel):
                 target = (r + self.gamma * np.amax(self.model.predict(s_)[0]))
             target_f = self.model.predict(s)
             target_f[0][a] = target
-            self.model.fit(s, target_f, epochs=1, verbose=0)
+            self.model.fit(s, target_f, epochs=1, verbose=0, callbacks=self.tensorboard_callback)
 
     def learn(self, s, a, r, s_, done):
         if self.use_memory:

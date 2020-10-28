@@ -2,6 +2,7 @@ import sys,os,inspect
 import itertools
 import time
 import numpy as np
+import tensorflow as tf
 from utils.logger import Logger
 from base.savable import Savable 
 from tdd.reporter import Reporter as rp
@@ -19,16 +20,16 @@ class TestParams():
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
 
-    def __init__(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False):
+    def __init__(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False):
         super().__init__()
         self.pickle_black_list = None 
         self.prepare_black_list()
-        self.setup(env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path, file_name, enable_save, save_every, relative_path, debug_level, reset_epsilon)
+        self.setup(env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path, file_name, enable_save, save_every, relative_path, debug_level, reset_epsilon, tensorboard_logging)
 
     def prepare_black_list(self):
         self.pickle_black_list = ["save_path", "file_name", "full_save_path", "full_save_play_path", "agent", "max_training_episodes","max_test_episodes","max_steps_training","max_steps_testing"]
 
-    def setup(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False):
+    def setup(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False):
         self.env = env
         self.agent = agent
         self.save_path = save_path
@@ -44,6 +45,7 @@ class Trainer(Savable):
         self.curr_training_episodes = -1
         self.curr_playing_episodes = -1
         rp.VERBOSITY_LEVEL = debug_level
+        self.tensorboard_logging = tensorboard_logging
 
         self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
 
@@ -81,6 +83,9 @@ class Trainer(Savable):
         else:
             rp.report("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
+        if(self.tensorboard_logging):
+            logdir = self.full_save_path + "/tf_logs"
+            self.agent.model.tensorboard_callback = [tf.keras.callbacks.TensorBoard(log_dir=logdir)]
 
     def make_persistance_dirs(self):
         dir_list = [

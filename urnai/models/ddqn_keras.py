@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import random
 import os
+from datetime import datetime
 from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activation
@@ -28,6 +29,7 @@ class DDQNKeras(DQNKeras):
                                         seed_value=seed_value, cpu_only=cpu_only)
 
         self.build_model = build_model
+        self.loss = 0
 
         # Main model, trained every step
         self.model = self.make_model()
@@ -42,6 +44,11 @@ class DDQNKeras(DQNKeras):
             self.memory_maxlen = memory_maxlen
             self.min_memory_size = min_memory_size
             self.batch_size = batch_size
+
+        # Defining the log directory of keras tensorboard
+        #logdir = "logs/scalars/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+        #logdir = self.tensorboard_callback_logdir + "tf_logs"
+        #self.tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
 
     def learn(self, s, a, r, s_, done):
         if self.use_memory:
@@ -93,7 +100,7 @@ class DDQNKeras(DQNKeras):
         np_inputs = np.squeeze(np.array(inputs))
         np_targets = np.array(targets)
 
-        self.model.fit(np_inputs, np_targets, batch_size=self.batch_size, verbose=0, shuffle=False)
+        self.loss = self.model.fit(np_inputs, np_targets, batch_size=self.batch_size, verbose=0, shuffle=False, callbacks=self.tensorboard_callback)
 
         # If it's the end of an episode, increase the target update counter
         if done:
@@ -132,7 +139,7 @@ class DDQNKeras(DQNKeras):
         inputs = s
         targets = current_qs
 
-        self.model.fit(inputs, targets, verbose=0)
+        self.loss = self.model.fit(inputs, targets, verbose=0, callbacks=self.tensorboard_callback)
 
         # If it's the end of an episode, increase the target update counter
         if done:

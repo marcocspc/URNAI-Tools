@@ -31,6 +31,9 @@ class LearningModel(Savable):
         self.epsilon_decay_rate = epsilon_decay_rate 
         self.per_episode_epsilon_decay = per_episode_epsilon_decay
 
+        #self.tensorboard_callback_logdir = ""
+        self.tensorboard_callback = None
+
     @abstractmethod
     def learn(self, s, a, r, s_, done, is_last_step: bool) -> None : 
         '''
