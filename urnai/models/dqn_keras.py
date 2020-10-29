@@ -33,9 +33,6 @@ class DQNKeras(LearningModel):
         if self.use_memory:
             self.memory = deque(maxlen=memory_maxlen)
             self.memory_maxlen = memory_maxlen
-
-        # Defining the log directory of keras tensorboard
-        #self.tensorboard_callback = tf.keras.callbacks.TensorBoard()
         
     def make_model(self):
         model = Sequential()

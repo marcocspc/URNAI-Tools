@@ -10,15 +10,12 @@ from envs.sc2 import SC2Env
 from trainers.trainer import Trainer
 from trainers.trainer import TestParams
 from agents.sc2_agent import SC2Agent
-from agents.actions.sc2_wrapper import SC2Wrapper, TerranWrapper, SimpleTerranWrapper, ProtossWrapper
-from agents.rewards.sc2 import KilledUnitsReward, KilledUnitsRewardBoosted, GeneralReward
-from agents.states.sc2 import Simple64State
-from agents.states.sc2 import Simple64StateFullRes
+from agents.actions.sc2_wrapper import SimpleTerranWrapper
+from agents.actions.mo_spatial_terran_wrapper import MOspatialTerranWrapper
+from agents.rewards.sc2 import KilledUnitsReward
 from agents.states.sc2 import Simple64GridState
-from models.pg_keras import PGKeras
-from models.dqn_keras import DQNKeras
 from models.ddqn_keras import DDQNKeras
-from models.dqn_tf import DqlTensorFlow
+from models.ddqn_keras_mo import DDQNKerasMO
 from utils.functions import query_yes_no
 from models.model_builder import ModelBuilder
 
@@ -41,7 +38,7 @@ def main(unused_argv):
         ## Initializing our StarCraft 2 environment
         env = SC2Env(map_name="Simple64", render=False, step_mul=16, player_race="terran", enemy_race="random", difficulty="very_easy")
         
-        action_wrapper = SimpleTerranWrapper()
+        action_wrapper = MOspatialTerranWrapper(8, 8, env.env_instance._interface_formats[0]._raw_resolution)
         state_builder = Simple64GridState(grid_size=4)
         
         helper = ModelBuilder()
@@ -49,9 +46,12 @@ def main(unused_argv):
         helper.add_fullyconn_layer(nodes=50)
         helper.add_output_layer()
 
-        dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False,
-                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=200)
+        # dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False,
+        #                     gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=200)
         
+        dq_network = DDQNKerasMO(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False,
+                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=200)
+
         # dq_network = DqlTensorFlow(action_wrapper, state_builder, build_model=helper.get_model_layout(), use_memory=True,
         #                         gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=100)
         
@@ -59,10 +59,10 @@ def main(unused_argv):
         agent = SC2Agent(dq_network, KilledUnitsReward())
 
         #trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_v_easy", save_every=20, enable_save=True)
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_test_tensorboard4",
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_test_MO",
                         save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
-                        max_training_episodes=4, max_steps_training=1200,
-                        max_test_episodes=2, max_steps_testing=1200, tensorboard_logging=True)
+                        max_training_episodes=10, max_steps_training=1200,
+                        max_test_episodes=2, max_steps_testing=1200)
         trainer.train()
         trainer.play()
 

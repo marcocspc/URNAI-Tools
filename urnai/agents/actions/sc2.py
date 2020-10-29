@@ -129,8 +129,8 @@ def build_structure_by_type(obs, action_id, player_race, target=None):
             return action_id("now", target.tag), _NO_UNITS              # RAW_CMD actions only need [0]queue and [1]unit_tags and doesn't use a worker
         
         elif " raw_cmd_pt " in str(action_id.function_type):            # Checking if the build action is of type RAW_CMD_PT
-            if is_valid_target(target):                
-                return action_id("now", worker.tag, target), worker     # RAW_CMD_PT actions need [0]queue, [1]unit_tags and [2]world_point
+            #if is_valid_target(target):                
+            return action_id("now", worker.tag, target), worker     # RAW_CMD_PT actions need [0]queue, [1]unit_tags and [2]world_point
 
         elif " raw_cmd_unit " in str(action_id.function_type):          # Checking if the build action is of type RAW_CMD_UNIT
             return action_id("now", worker.tag, target.tag), worker     # RAW_CMD_UNIT actions need [0]queue, [1]unit_tags and [2]unit_tags
@@ -185,6 +185,16 @@ def attack_target_point(obs, player_race, target, base_top_left):
             army.pop(unit_index)
             distances.pop(unit_index)
         return actions_queue
+    return [_NO_OP()]
+
+def attack_target_point_spatial(obs, player_race, target):
+    army = select_army(obs, player_race)
+    if(army != _NO_UNITS):
+        army_tag = [unit.tag for unit in army]
+        if army != _NO_UNITS:
+            actions_queue = []
+            actions_queue.append(actions.RAW_FUNCTIONS.Attack_pt("now", army_tag, target))
+            return actions_queue
     return [_NO_OP()]
 
 def attack_distribute_army(obs, player_race):
@@ -346,6 +356,17 @@ def build_structure_raw_pt(obs, building_type, building_action, base_top_left, m
         return actions_queue
         
     return [_NO_OP()]
+
+def build_structure_raw_pt_spatial(obs, building_type, building_action, target):
+    player_race = get_unit_race(building_type)
+
+    try:
+        action_one, last_worker = build_structure_by_type(obs, building_action, player_race, target)
+        action_two = harvest_gather_minerals_quick(obs, last_worker, player_race)
+        actions_queue = [action_one, action_two]
+        return actions_queue
+    except:  
+        return [_NO_OP()]
 
 def build_gas_structure_raw_unit(obs, building_type, building_action, player_race, max_amount = 999):  
     player_race = get_unit_race(building_type)
