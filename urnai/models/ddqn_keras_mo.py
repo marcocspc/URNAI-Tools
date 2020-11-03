@@ -82,7 +82,7 @@ class DDQNKerasMO(DDQNKeras):
                     new_q = reward
 
                 current_qs = current_qs_list[index]
-                current_qs[action+self.action_wrapper.multi_output_ranges[j]] = new_q
+                current_qs[action] = new_q
 
             inputs.append(state)
             targets.append(current_qs)
@@ -166,7 +166,7 @@ class DDQNKerasMO(DDQNKeras):
         culmulative_range = 0
         action_idx = []
         for i in range(len(self.action_wrapper.multi_output_ranges)-1):
-            #culmulative_range = self.action_wrapper.multi_output_ranges[i]
+            culmulative_range = self.action_wrapper.multi_output_ranges[i]
             action_idx.append(culmulative_range + int(np.argmax(
                             q_values[self.action_wrapper.multi_output_ranges[i]:self.action_wrapper.multi_output_ranges[i+1]] )))
 

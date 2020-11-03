@@ -19,7 +19,7 @@ class Logger(Savable):
     def __init__(self, ep_total, agent_name, model_name, model_builder:ModelBuilder, 
                  action_wrapper_name, agent_action_size, agent_action_names, 
                  state_builder_name, reward_builder_name, env_name, 
-                 is_episodic=True, render=True, generate_bar_graphs_every=100):
+                 is_episodic=True, render=True, generate_bar_graphs_every=100, log_actions=True):
         #Training information
         self.agent_name = agent_name
         self.model_name = model_name
@@ -30,6 +30,8 @@ class Logger(Savable):
         self.env_name = env_name
 
         self.generate_bar_graphs_every = generate_bar_graphs_every
+
+        self.log_actions = log_actions
 
         # Episode count
         self.ep_count = 0
@@ -304,47 +306,48 @@ class Logger(Savable):
             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_ep_sps_graph.pdf")
             plt.close(temp_fig)
 
-            if self.agent_action_names == None:
-                self.agent_action_names = []
+            if self.log_actions:
+                if self.agent_action_names == None:
+                    self.agent_action_names = []
+                    for i in range(self.agent_action_size):
+                        self.agent_action_names.append("Action "+str(i))
+                # Plotting the rate of occurrence of each action in a different graph
                 for i in range(self.agent_action_size):
-                    self.agent_action_names.append("Action "+str(i))
-            # Plotting the rate of occurrence of each action in a different graph
-            for i in range(self.agent_action_size):
-                if self.agent_action_names != None:
-                    #plot instant action usage graphs
-                    action_graph = self.generalized_curve_plot(self.ep_agent_actions[i], self.agent_action_names[i], "Action " + self.agent_action_names[i] + " usage per episode.")
-                    plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "instant" + os.path.sep + self.agent_action_names[i] + ".png")
-                    plt.close(action_graph)
+                    if self.agent_action_names != None:
+                        #plot instant action usage graphs
+                        action_graph = self.generalized_curve_plot(self.ep_agent_actions[i], self.agent_action_names[i], "Action " + self.agent_action_names[i] + " usage per episode.")
+                        plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "instant" + os.path.sep + self.agent_action_names[i] + ".png")
+                        plt.close(action_graph)
 
-                    action_graph = self.generalized_curve_plot(self.avg_ep_agent_actions[i], self.agent_action_names[i], "Action " + self.agent_action_names[i] + " average usage per episode.")
-                    plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "average" + os.path.sep + self.agent_action_names[i] + ".png")
-                    plt.close(action_graph)
+                        action_graph = self.generalized_curve_plot(self.avg_ep_agent_actions[i], self.agent_action_names[i], "Action " + self.agent_action_names[i] + " average usage per episode.")
+                        plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "average" + os.path.sep + self.agent_action_names[i] + ".png")
+                        plt.close(action_graph)
 
-            #Plot action bars for each episode
-            #First of all, transpose action usage list
-            transposed = [list(x) for x in np.transpose(self.ep_agent_actions)]
-            #Then, for each episode, get a bar graph showing each action usage
-            for episode in range(self.ep_count):
-                if episode % self.generate_bar_graphs_every == 0:
-                    values = transposed[episode] 
-                    bar_labels = self.agent_action_names
-                    x_label = "Actions"
-                    y_label = "How many times action was used"
-                    title = "Action usage at episode {}.".format(episode)
-                    bar_width = 0.2
-                    action_graph = self.__plot_bar(values, bar_labels, x_label, y_label, title, width=bar_width)
-                    plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars" + os.path.sep + str(episode) + ".png")
-                    plt.close(action_graph)
+                #Plot action bars for each episode
+                #First of all, transpose action usage list
+                transposed = [list(x) for x in np.transpose(self.ep_agent_actions)]
+                #Then, for each episode, get a bar graph showing each action usage
+                for episode in range(self.ep_count):
+                    if episode % self.generate_bar_graphs_every == 0:
+                        values = transposed[episode] 
+                        bar_labels = self.agent_action_names
+                        x_label = "Actions"
+                        y_label = "How many times action was used"
+                        title = "Action usage at episode {}.".format(episode)
+                        bar_width = 0.2
+                        action_graph = self.__plot_bar(values, bar_labels, x_label, y_label, title, width=bar_width)
+                        plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars" + os.path.sep + str(episode) + ".png")
+                        plt.close(action_graph)
 
-            # Plotting the instant rate of occurrence of all actions in one single graph
-            all_actions_graph = self.__plot_curves(range(self.ep_count), self.ep_agent_actions, 'Episode Count', "Actions per Ep.", self.agent_action_names, "Instant rate of all actions")
-            plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "instant" + os.path.sep + "all_actions.png")
-            plt.close(all_actions_graph)
+                # Plotting the instant rate of occurrence of all actions in one single graph
+                all_actions_graph = self.__plot_curves(range(self.ep_count), self.ep_agent_actions, 'Episode Count', "Actions per Ep.", self.agent_action_names, "Instant rate of all actions")
+                plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "instant" + os.path.sep + "all_actions.png")
+                plt.close(all_actions_graph)
 
-            # Plotting the average rate of occurrence of all actions in one single graph
-            all_actions_graph = self.__plot_curves(range(self.ep_count), self.avg_ep_agent_actions, 'Episode Count', "Actions avg. per Ep.", self.agent_action_names, "Average rate of all actions")
-            plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "average" + os.path.sep + "all_actions.png")
-            plt.close(all_actions_graph)
+                # Plotting the average rate of occurrence of all actions in one single graph
+                all_actions_graph = self.__plot_curves(range(self.ep_count), self.avg_ep_agent_actions, 'Episode Count', "Actions avg. per Ep.", self.agent_action_names, "Average rate of all actions")
+                plt.savefig(persist_path + os.path.sep + "action_graphs" + os.path.sep + "average" + os.path.sep + "all_actions.png")
+                plt.close(all_actions_graph)
 
             # Plotting agent info
             for key in self.agent_info: 

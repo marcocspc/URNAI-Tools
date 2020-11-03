@@ -22,9 +22,9 @@ class MOspatialTerranWrapper(SC2Wrapper):
             sc2_wrapper.ACTION_BUILD_COMMAND_CENTER,
             sc2_wrapper.ACTION_BUILD_SUPPLY_DEPOT,
             sc2_wrapper.ACTION_BUILD_REFINERY,
-            sc2_wrapper.ACTION_BUILD_ENGINEERINGBAY,
-            sc2_wrapper.ACTION_BUILD_ARMORY,
-            sc2_wrapper.ACTION_BUILD_MISSILETURRET,
+            # sc2_wrapper.ACTION_BUILD_ENGINEERINGBAY,
+            # sc2_wrapper.ACTION_BUILD_ARMORY,
+            # sc2_wrapper.ACTION_BUILD_MISSILETURRET,
             # ACTION_BUILD_SENSORTOWER,
             # ACTION_BUILD_BUNKER,
             # ACTION_BUILD_FUSIONCORE,
@@ -76,7 +76,7 @@ class MOspatialTerranWrapper(SC2Wrapper):
             # FUSION CORE RESEARCH
             # ACTION_RESEARCH_BATTLECRUISER_WEAPONREFIT,
 
-            sc2_wrapper.ACTION_EFFECT_STIMPACK,
+            #sc2_wrapper.ACTION_EFFECT_STIMPACK,
 
             sc2_wrapper.ACTION_TRAIN_SCV,
 
@@ -118,8 +118,8 @@ class MOspatialTerranWrapper(SC2Wrapper):
         return excluded_actions
 
     def get_actions(self):
-        x_grid_actions = np.arange(0, self.x_gridsize)
-        y_grid_actions = np.arange(0, self.y_gridsize)
+        x_grid_actions = np.arange(self.multi_output_ranges[1], self.multi_output_ranges[1] + self.x_gridsize)
+        y_grid_actions = np.arange(self.multi_output_ranges[2], self.multi_output_ranges[2] + self.y_gridsize)
         total_actions = []
         total_actions.extend(self.action_indices)
         total_actions.extend(x_grid_actions)
@@ -129,11 +129,14 @@ class MOspatialTerranWrapper(SC2Wrapper):
     def get_action(self, action_idx, obs):
         action_id, x, y = action_idx
 
+        adjusted_x = x - self.multi_output_ranges[1]
+        adjusted_y = y - self.multi_output_ranges[2]
+
         gridwidth = self.map_size.x/self.x_gridsize
         gridheight = self.map_size.y/self.y_gridsize
 
-        xtarget = int((x*gridwidth) + random.uniform(0, gridwidth))
-        ytarget = int(y*gridheight + random.uniform(0, gridheight))
+        xtarget = int((adjusted_x*gridwidth) + random.uniform(0, gridwidth))
+        ytarget = int(adjusted_y*gridheight + random.uniform(0, gridheight))
 
         target = [xtarget, ytarget]
 

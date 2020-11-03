@@ -128,8 +128,7 @@ def build_structure_by_type(obs, action_id, player_race, target=None):
         if " raw_cmd " in str(action_id.function_type):                 # Checking if the build action is of type RAW_CMD
             return action_id("now", target.tag), _NO_UNITS              # RAW_CMD actions only need [0]queue and [1]unit_tags and doesn't use a worker
         
-        elif " raw_cmd_pt " in str(action_id.function_type):            # Checking if the build action is of type RAW_CMD_PT
-            #if is_valid_target(target):                
+        elif " raw_cmd_pt " in str(action_id.function_type):            # Checking if the build action is of type RAW_CMD_PT              
             return action_id("now", worker.tag, target), worker     # RAW_CMD_PT actions need [0]queue, [1]unit_tags and [2]world_point
 
         elif " raw_cmd_unit " in str(action_id.function_type):          # Checking if the build action is of type RAW_CMD_UNIT
@@ -162,16 +161,6 @@ def train_unit(obs, action_id, building_type):
                     return action_id("now", building.tag)
     return _NO_OP()
 
-# def attack_target_point(obs, units, target):
-#     if units != _NO_UNITS:
-#         distances = get_distances(obs, units, target)
-#         unit_index = np.argmax(distances)
-#         unit = units[unit_index]
-#         units.pop(unit_index)
-#         if len(units) == 0:
-#             units = _NO_UNITS
-#         return actions.RAW_FUNCTIONS.Attack_pt("now", unit.tag, target), units
-#     return no_op()
 def attack_target_point(obs, player_race, target, base_top_left):
     if not base_top_left: target = (63-target[0]-5, 63-target[1]+5)
     army = select_army(obs, player_race)
@@ -462,12 +451,6 @@ def get_free_supply(obs):
 
 def get_units_amount(obs, unit_type):
     return len(get_my_units_by_type(obs, unit_type))
-
-# TO DO: Find a more general way of checking whether the target is at a valid screen point
-def is_valid_target(target):
-    if 0 <= target[0] <= 63 and 0<= target[1] <= 63:
-        return True
-    return False
 
 def building_exists(obs, unit_type):
     if get_units_amount(obs, unit_type) > 0:

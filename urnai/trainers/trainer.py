@@ -20,16 +20,16 @@ class TestParams():
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
 
-    def __init__(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False):
+    def __init__(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False, log_actions=True):
         super().__init__()
         self.pickle_black_list = None 
         self.prepare_black_list()
-        self.setup(env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path, file_name, enable_save, save_every, relative_path, debug_level, reset_epsilon, tensorboard_logging)
+        self.setup(env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path, file_name, enable_save, save_every, relative_path, debug_level, reset_epsilon, tensorboard_logging, log_actions)
 
     def prepare_black_list(self):
         self.pickle_black_list = ["save_path", "file_name", "full_save_path", "full_save_play_path", "agent", "max_training_episodes","max_test_episodes","max_steps_training","max_steps_testing"]
 
-    def setup(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False):
+    def setup(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False, log_actions=True):
         self.env = env
         self.agent = agent
         self.save_path = save_path
@@ -46,8 +46,9 @@ class Trainer(Savable):
         self.curr_playing_episodes = -1
         rp.VERBOSITY_LEVEL = debug_level
         self.tensorboard_logging = tensorboard_logging
+        self.log_actions = log_actions
 
-        self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
+        self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__, log_actions=self.log_actions) 
 
         # Adding epsilon, learning rate and gamma factors to our pickle black list, 
         # so that they are not loaded when loading the model's weights.
@@ -76,10 +77,10 @@ class Trainer(Savable):
         if self.enable_save and os.path.exists(self.full_save_path):
             rp.report("WARNING! Loading training from " + self.full_save_path + " with SAVING ENABLED.")
             self.load(self.full_save_path)
-            self.make_persistance_dirs()
+            self.make_persistance_dirs(self.log_actions)
         elif self.enable_save:
             rp.report("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
-            self.make_persistance_dirs()
+            self.make_persistance_dirs(self.log_actions)
         else:
             rp.report("WARNING! Starting new training WITHOUT SAVING PROGRESS.")
 
@@ -87,19 +88,27 @@ class Trainer(Savable):
             logdir = self.full_save_path + "/tf_logs"
             self.agent.model.tensorboard_callback = [tf.keras.callbacks.TensorBoard(log_dir=logdir)]
 
-    def make_persistance_dirs(self):
-        dir_list = [
-                    self.full_save_path,
-                    self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "instant",
-                    self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "average",
-                    self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars",
-                    self.full_save_path + os.path.sep + "performance_graphs",
-                    self.full_save_play_path,
-                    self.full_save_play_path + os.path.sep + "action_graphs" + os.path.sep + "instant",
-                    self.full_save_play_path + os.path.sep + "action_graphs" + os.path.sep + "average",
-                    self.full_save_play_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars",
-                    self.full_save_play_path + os.path.sep + "performance_graphs",
-                ]
+    def make_persistance_dirs(self, log_actions):
+        if log_actions:
+            dir_list = [
+                        self.full_save_path,
+                        self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "instant",
+                        self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "average",
+                        self.full_save_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars",
+                        self.full_save_path + os.path.sep + "performance_graphs",
+                        self.full_save_play_path,
+                        self.full_save_play_path + os.path.sep + "action_graphs" + os.path.sep + "instant",
+                        self.full_save_play_path + os.path.sep + "action_graphs" + os.path.sep + "average",
+                        self.full_save_play_path + os.path.sep + "action_graphs" + os.path.sep + "per_episode_bars",
+                        self.full_save_play_path + os.path.sep + "performance_graphs",
+                    ]
+        else:
+            dir_list = [
+                        self.full_save_path,
+                        self.full_save_path + os.path.sep + "performance_graphs",
+                        self.full_save_play_path,
+                        self.full_save_play_path + os.path.sep + "performance_graphs",
+                    ]
 
         for mkdir in dir_list:
             try:
@@ -112,7 +121,7 @@ class Trainer(Savable):
 
         rp.report("> Training")
         if self.logger.ep_count == 0:
-            self.logger = Logger(self.max_training_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
+            self.logger = Logger(self.max_training_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__, log_actions=self.log_actions) 
 
         if test_params != None:
             test_params.logger = self.logger
@@ -200,7 +209,7 @@ class Trainer(Savable):
     def play(self, test_params=None, reward_from_agent = True):
         rp.report("\n\n> Playing")
 
-        self.logger = Logger(self.max_test_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__) 
+        self.logger = Logger(self.max_test_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__, log_actions=self.log_actions) 
 
         while self.curr_playing_episodes < self.max_test_episodes:
             self.curr_playing_episodes += 1
