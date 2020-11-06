@@ -26,7 +26,7 @@ class DDQNKeras(DQNKeras):
                                         learning_rate_min=learning_rate_min, learning_rate_decay_ep_cutoff= learning_rate_decay_ep_cutoff,
                                         epsilon_start=epsilon_start, epsilon_min=epsilon_min, 
                                         epsilon_decay=epsilon_decay, per_episode_epsilon_decay=per_episode_epsilon_decay,
-                                        seed_value=seed_value, cpu_only=cpu_only)
+                                        seed_value=seed_value, cpu_only=cpu_only, build_model=build_model)
 
         self.build_model = build_model
         self.loss = 0

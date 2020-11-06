@@ -39,7 +39,8 @@ class DQNKeras(LearningModel):
 
         if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
             self.build_model[0]['shape'] = [None, self.state_size]
-            self.build_model[-1]['length'] = self.action_size
+        
+        self.build_model[-1]['length'] = self.action_size
 
         for idx, (layer_model) in enumerate(self.build_model):
             if layer_model['type'] == ModelBuilder.LAYER_INPUT: 
