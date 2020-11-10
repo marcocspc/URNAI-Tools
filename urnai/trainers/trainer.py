@@ -6,6 +6,7 @@ import tensorflow as tf
 from utils.logger import Logger
 from base.savable import Savable 
 from tdd.reporter import Reporter as rp
+from version.versioner import Versioner
 from datetime import datetime
 
 class TestParams():
@@ -30,6 +31,7 @@ class Trainer(Savable):
         self.pickle_black_list = ["save_path", "file_name", "full_save_path", "full_save_play_path", "agent", "max_training_episodes","max_test_episodes","max_steps_training","max_steps_testing"]
 
     def setup(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False, log_actions=True):
+        self.versioner = Versioner() 
         self.env = env
         self.agent = agent
         self.save_path = save_path
@@ -77,6 +79,7 @@ class Trainer(Savable):
         if self.enable_save and os.path.exists(self.full_save_path):
             rp.report("WARNING! Loading training from " + self.full_save_path + " with SAVING ENABLED.")
             self.load(self.full_save_path)
+            self.versioner.ask_for_continue()
             self.make_persistance_dirs(self.log_actions)
         elif self.enable_save:
             rp.report("WARNING! Starting new training on " + self.full_save_path + " with SAVING ENABLED.")
@@ -274,10 +277,12 @@ class Trainer(Savable):
         self.env.save(save_path)
         self.agent.save(save_path)
         self.logger.save(save_path)
+        self.versioner.save(save_path)
         rp.save(save_path)
 
     def load_extra(self, save_path):
         self.agent.load(save_path)
         self.env.load(save_path)
         self.logger.load(save_path)
+        self.versioner.load(save_path)
         rp.load(save_path)

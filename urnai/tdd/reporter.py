@@ -32,6 +32,24 @@ class Reporter():
             Reporter.MESSAGES.append(message)
 
     @staticmethod
+    def input(message, default_value):
+        date = "[URNAI REPORT AT " + str(datetime.now()) + "] "
+        if not type(message) == str:
+            message = str(message)
+        message = date + message
+        message = "{} [Default: {}]".format(message, default_value)
+        return_value = "Should never happen." 
+        try:
+            user_input = str(input(message))
+            return_value = user_input if user_input != "" else return_value = default_value
+        except ValueError:
+            return_value = default_value
+
+        Reporter.MESSAGES.append(message)
+        Reporter.MESSAGES.append(return_value)
+        return return_value
+
+    @staticmethod
     def save(persist_path):
         pickle_path = persist_path + os.path.sep + "report.pkl"
         with open(pickle_path, "wb") as pickle_out: 

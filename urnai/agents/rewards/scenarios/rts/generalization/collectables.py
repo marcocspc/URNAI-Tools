@@ -59,7 +59,7 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
             self.old_collectable_counter = curr 
             return 10
         else:
-            return 0 
+            return -1
 
     def filter_non_mineral_shard_units(self, obs):
         filtered_map = np.zeros((len(obs.feature_minimap[0]), len(obs.feature_minimap[0][0])))
