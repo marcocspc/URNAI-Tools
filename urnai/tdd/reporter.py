@@ -41,7 +41,10 @@ class Reporter():
         return_value = "Should never happen." 
         try:
             user_input = str(input(message))
-            return_value = user_input if user_input != "" else return_value = default_value
+            if user_input != "":
+                return_value = user_input
+            else:
+                return_value = default_value
         except ValueError:
             return_value = default_value
 

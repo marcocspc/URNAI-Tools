@@ -8,6 +8,7 @@ class Versioner(Savable):
     VERSION = "1.0-43f5281"
 
     def __init__(self):
+        super().__init__()
         self.__curr_version = self.get_current_version()
         self.version = self.__curr_version
         self.pickle_black_list.append("__curr_version") 
@@ -18,13 +19,16 @@ class Versioner(Savable):
         #this file, I have to get the parent folder twice
         parent_dir = os.path.dirname(my_dir)
         git_dir = os.path.dirname(parent_dir)
+        print("GIT DIR: {}".format(git_dir))
+        branch = ""
+        git_hash = ""
 
         try:
             branch = subprocess.check_output(['git', 'branch', '--show-current'], cwd=git_dir)
             git_hash = subprocess.check_output(['git', 'rev-parse', '--short', branch], cwd=git_dir)
 
             return "{}-{}".format(branch, git_hash)
-        except CalledProcessError:
+        except subprocess.CalledProcessError as cpe:
             return Versioner.VERSION
 
     def load_extra(self, persist_path):
@@ -39,3 +43,6 @@ class Versioner(Savable):
                 if answer.lower() == "n":
                     rp.report("The training was stopped.")
                     exit()
+
+    def get_default_save_stamp(self):
+        return "urnai_version_{}_".format(self.__curr_version)
