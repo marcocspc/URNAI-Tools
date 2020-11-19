@@ -428,15 +428,8 @@ class Simple64GridState_SimpleTerran(StateBuilder):
 
         self.grid_size = grid_size
         self._state_size = int(12 + 2*(self.grid_size**2))
-        self.player_race = 0
-        self.base_top_left = None
 
     def build_state(self, obs):
-        if obs.game_loop[0] < 80 and self.base_top_left == None:
-            commandcenter = get_my_units_by_type(obs, units.Terran.CommandCenter)
-            townhall = commandcenter[0]
-            self.player_race = sc2_env.Race.terran
-            self.base_top_left = (townhall.x < 32)
 
         new_state = []
         new_state.append(obs.player.minerals/6000)
@@ -446,15 +439,14 @@ class Simple64GridState_SimpleTerran(StateBuilder):
         new_state.append(obs.player.food_army/200)
         new_state.append(obs.player.idle_worker_count/200)
 
-        if self.player_race == sc2_env.Race.terran:
-            new_state.append(get_units_amount(obs, units.Terran.CommandCenter)+
-                            get_units_amount(obs, units.Terran.OrbitalCommand)+
-                            get_units_amount(obs, units.Terran.PlanetaryFortress)/10)
-            new_state.append(get_units_amount(obs, units.Terran.SupplyDepot)/10)
-            new_state.append(get_units_amount(obs, units.Terran.Refinery)/10)
-            new_state.append(get_units_amount(obs, units.Terran.Barracks)/10)
-            new_state.append(get_units_amount(obs, units.Terran.Factory)/10)
-            new_state.append(get_units_amount(obs, units.Terran.Starport)/10)  
+        new_state.append(get_units_amount(obs, units.Terran.CommandCenter)+
+                        get_units_amount(obs, units.Terran.OrbitalCommand)+
+                        get_units_amount(obs, units.Terran.PlanetaryFortress)/10)
+        new_state.append(get_units_amount(obs, units.Terran.SupplyDepot)/10)
+        new_state.append(get_units_amount(obs, units.Terran.Refinery)/10)
+        new_state.append(get_units_amount(obs, units.Terran.Barracks)/10)
+        new_state.append(get_units_amount(obs, units.Terran.Factory)/10)
+        new_state.append(get_units_amount(obs, units.Terran.Starport)/10)  
 
 
         enemy_grid = np.zeros((self.grid_size,self.grid_size))
@@ -472,10 +464,6 @@ class Simple64GridState_SimpleTerran(StateBuilder):
             y = int(math.ceil((player_units[i].x + 1) / (64/self.grid_size)))
             x = int(math.ceil((player_units[i].y + 1) / (64/self.grid_size)))
             player_grid[x-1][y-1] += 1
-
-        if not self.base_top_left:
-            enemy_grid = np.rot90(enemy_grid, 2)
-            player_grid = np.rot90(player_grid, 2)
 
         # Normalizing the values to always be between 0 and 1 (since the max amount of units in SC2 is 200)
         enemy_grid = enemy_grid/200
