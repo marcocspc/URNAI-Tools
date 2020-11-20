@@ -1,4 +1,4 @@
-from urnai.base.savable import Savable
+from base.savable import Savable
 from tdd.reporter import Reporter as rp
 import os
 import subprocess
@@ -23,13 +23,14 @@ class Versioner(Savable):
         branch = ""
         git_hash = ""
 
-        try:
-            branch = subprocess.check_output(['git', 'branch', '--show-current'], cwd=git_dir)
-            git_hash = subprocess.check_output(['git', 'rev-parse', '--short', branch], cwd=git_dir)
+        # try:
+        #     branch = subprocess.check_output(['git', 'branch', '--show-current'], cwd=git_dir)
+        #     git_hash = subprocess.check_output(['git', 'rev-parse', '--short', branch], cwd=git_dir)
 
-            return "{}-{}".format(branch, git_hash)
-        except subprocess.CalledProcessError as cpe:
-            return Versioner.VERSION
+        #     return "{}-{}".format(branch, git_hash)
+        # except subprocess.CalledProcessError as cpe:
+        #     return Versioner.VERSION
+        return Versioner.VERSION
 
     def load_extra(self, persist_path):
         self.__curr_version = self.get_current_version()
