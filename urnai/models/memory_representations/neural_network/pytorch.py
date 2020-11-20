@@ -12,8 +12,7 @@ class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
         #pytorch
         self.aux_pytorch_obj = SubDeepQNetwork()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-        self.model_layers = []
+        self.optimizer = optim.Adam(self.aux_pytorch_obj.model_layers.parameters(), lr=self.alpha)
 
     def add_input_layer(self, idx):
         self.aux_pytorch_obj.model_layers.append(nn.Linear(self.state_size, self.build_model[idx]['nodes']))
@@ -28,13 +27,19 @@ class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
     #def add_convolutional_layer(self, idx):
 
     #TODO
-    #def update(self, s, a, r, s_) -> None :
+    def update(self, state, expected_output):
+        output = self.get_output(state) 
+        loss = alguma_funcao_do_pytorch(output, expected_output)
+        alguma_funcao_do_pytorch_de_atualizacao_de_pesos_de_rede_neural(output, expected_output, loss)
 
-    def get_output(self, state) -> list:
-        x = state
-        for i in range(len(self.model_layers) - 1):
-            x = F.relu(self.model_layers[i](x))
-        return self.model_layers[-1](x)
+    def get_output(self, state):
+        state = torch.from_numpy(state).float().unsqueeze(0).to(self.device)
+        self.aux_pytorch_obj.eval()
+        with torch.no_grad():
+            action_values = self.aux_pytorch_obj(state)
+        self.aux_pytorch_obj.train()
+
+        return action_values.cpu().data.numpy()
 
     #TODO
     #def set_seed(self) -> None:
@@ -43,3 +48,8 @@ class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
         def __init__(self):
             super().__init__()
             self.model_layers = nn.ModuleList()
+
+        def forward(self,x):
+            for i in range(len(self.model_layers) - 1):
+                x = F.relu(self.model_layers[i](x))
+            return self.model_layers[-1](x)
