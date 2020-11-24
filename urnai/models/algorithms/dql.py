@@ -1,5 +1,5 @@
 import numpy
-from models.memory_representations.neural_network import DeepNeuralNetwork
+from models.memory_representations.pytorch import PyTorchDeepNeuralNetwork as DeepNeuralNetwork
 from models.base.abmodel import LearningModel 
 
 class DeepQLearning(LearningModel):
@@ -40,6 +40,9 @@ class DeepQLearning(LearningModel):
         rows = self.batch_size
         cols = self.action_size
         q_s_a = numpy.zeros(shape=(rows, cols))
+        
+        #TODO: Try and implement this generically for different Libraries 
+        # (tf, keras and pytorch all probably have some built-in way of batch inference)
         for i in range(self.batch_size):
             q_s_a[i] = self.dnn.get_output(state)
 
@@ -47,11 +50,14 @@ class DeepQLearning(LearningModel):
         rows = self.batch_size
         cols = self.action_size
         q_s_a_d = numpy.zeros(shape=(rows, cols))
+        
+        #TODO: Try and implement this generically for different Libraries 
+        # (tf, keras and pytorch all probably have some built-in way of batch inference)
         for i in range(self.batch_size):
             q_s_a_d[i] = self.dnn.get_output(state)
 
         # setup training arrays
-        expected_q_values = numpy.zeros((len(batch), self.action_size))
+        target_q_values = numpy.zeros((len(batch), self.action_size))
 
         for i, (state, action, reward, next_state, done) in enumerate(batch):
             # get the current q values for all actions in state
@@ -63,17 +69,17 @@ class DeepQLearning(LearningModel):
                 # new Q-value is equal to the reward at that step + discount factor * the max q-value for the next_state
                 current_q[action] = reward + self.gamma * numpy.amax(q_s_a_d[i])
             
-            expected_q_values[i] = current_q
+            target_q_values[i] = current_q
 
         #update neural network with expected q values
         for i in range(self.batch_size):
-            self.dnn.update(states[i], expected_q_values[i])
+            self.dnn.update(states[i], target_q_values[i])
 
     def no_memory_learn(self, s, a, r, s_, done):
         #get output for current sars array
         rows = 1 
         cols = self.action_size
-        expected_q_values = numpy.zeros(shape=(rows, cols))
+        target_q_values = numpy.zeros(shape=(rows, cols))
 
         expected_q = 0
         if done:
@@ -81,9 +87,9 @@ class DeepQLearning(LearningModel):
         else:
             expected_q = r + self.gamma * self.__maxq(s_)
 
-        expected_q_values[0, a] = expected_q 
+        target_q_values[0, a] = expected_q 
 
-        self.dnn.update(s, expected_q_values)
+        self.dnn.update(s, target_q_values)
 
     def __maxq(self, state):
         values = self.dnn.get_output(state)
