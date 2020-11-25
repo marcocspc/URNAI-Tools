@@ -20,7 +20,7 @@ class ABNeuralNetwork(ABMemoryRepresentation):
                 else:
                     raise IncoherentBuildModelError("The first layer type should be {}".format(ModelBuilder.LAYER_INPUT))
             elif layer_model['type'] == ModelBuilder.LAYER_OUTPUT:
-                if (idx + 1) = len(self.build_model):
+                if (idx + 1) == len(self.build_model):
                     self.add_output_layer(idx)
                 else:
                     raise IncoherentBuildModelError("The last layer type should be {}".format(ModelBuilder.LAYER_OUTPUT))

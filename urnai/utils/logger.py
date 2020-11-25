@@ -1,9 +1,4 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
 from base.savable import Savable 
-
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import numpy as np
@@ -19,7 +14,8 @@ class Logger(Savable):
     def __init__(self, ep_total, agent_name, model_name, model_builder:ModelBuilder, 
                  action_wrapper_name, agent_action_size, agent_action_names, 
                  state_builder_name, reward_builder_name, env_name, 
-                 is_episodic=True, render=True, generate_bar_graphs_every=100, log_actions=True):
+                 is_episodic=True, render=True, generate_bar_graphs_every=100, log_actions=True,
+                 episode_batch_avg_calculation=100):
         #Training information
         self.agent_name = agent_name
         self.model_name = model_name
@@ -40,8 +36,11 @@ class Logger(Savable):
         # Reward count
         self.best_reward = -999999
         self.best_reward_episode = -1
+        self.episode_batch_avg_calculation = episode_batch_avg_calculation
         self.ep_rewards = []
         self.ep_avg_rewards = []
+        self.ep_avg_batch_rewards = [] 
+        self.ep_avg_batch_rewards_episodes = [] 
 
         # Steps count
         self.ep_steps_count = []
@@ -169,6 +168,16 @@ class Logger(Savable):
         for key in agent_info:
             self.agent_info[key].append(agent_info[key])
 
+        #batch episode calculation
+        if self.ep_count == 1 or self.ep_count % self.episode_batch_avg_calculation == 0:
+            if self.ep_count == 1:
+                self.ep_avg_batch_rewards_episodes.append(self.ep_count)
+                self.ep_avg_batch_rewards.append(ep_reward)
+            else:
+                avg_rwd = sum(self.ep_rewards[(self.ep_avg_batch_rewards_episodes[-1]-1):-1])/self.episode_batch_avg_calculation
+                self.ep_avg_batch_rewards_episodes.append(self.ep_count)
+                self.ep_avg_batch_rewards.append(avg_rwd)
+
     def record_play_test(self, ep_count, play_rewards, play_victories, num_matches):
         self.play_ep_count.append(ep_count)
         self.play_match_count.append(num_matches)
@@ -247,6 +256,11 @@ class Logger(Savable):
         # Plotting average reward graph
         return self.__plot_curve(range(self.ep_count), self.ep_rewards, 'Episode Count',
                             'Ep Reward', r'Episode Reward over training')
+
+    def plot_batch_reward_graph(self):
+        # Plotting average reward graph
+        return self.__plot_curve(self.ep_avg_batch_rewards_episodes, self.ep_avg_batch_rewards, 'Episode Count',
+                            'Ep Avg Reward', r'Episode Reward over training')
 
     def plot_win_rate_graph(self):
         # Plotting average reward graph
@@ -355,6 +369,13 @@ class Logger(Savable):
                 plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "agent_{}_graph.png".format(key))
                 plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "agent_{}_graph.pdf".format(key))
                 plt.close(temp_fig)
+
+            # Plotting new reward calculation graphs
+            fig = self.plot_batch_reward_graph()
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "batch_reward_graph.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "batch_reward_graph.pdf")
+            plt.close(fig)
+            fig = None
 
             # Plotting performance info
             fig_names = [

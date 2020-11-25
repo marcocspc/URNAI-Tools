@@ -1,7 +1,7 @@
 import os, importlib
 from abc import ABC, abstractmethod
 from base.savable import Savable 
-from models.model_builder import 
+from models.model_builder import ModelBuilder 
 
 class ABMemoryRepresentation(Savable):
 

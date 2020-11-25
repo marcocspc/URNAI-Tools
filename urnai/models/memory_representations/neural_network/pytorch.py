@@ -28,9 +28,21 @@ class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
 
     #TODO
     def update(self, state, expected_output):
-        output = self.get_output(state) 
-        loss = alguma_funcao_do_pytorch(output, expected_output)
-        alguma_funcao_do_pytorch_de_atualizacao_de_pesos_de_rede_neural(output, expected_output, loss)
+        #obter saída da rede
+        predicted_output = self.get_output(state) 
+
+        #usar saída da rede e saída esperada para calcular o loss
+        loss = torch.nn.MSELoss()(predicted_output, expected_output).to(self.device)
+
+        #usar o loss e o learning_rate (alpha) pra atualizar a rede 
+        optimizer = optim.Adam(self.aux_pytorch_obj.parameters(),lr=self.alpha)
+
+        #deus queira que as linhas abaixo estejam atualizando a rede
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+
 
     def get_output(self, state):
         state = torch.from_numpy(state).float().unsqueeze(0).to(self.device)
