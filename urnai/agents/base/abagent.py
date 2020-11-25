@@ -50,6 +50,8 @@ class Agent(Savable):
         self.previous_state = None
         self.action_wrapper.reset()
         self.model.ep_reset(episode)
+        self.reward_builder.reset()
+        self.state_builder.reset()
 
     def learn(self, obs, reward, done):
         '''

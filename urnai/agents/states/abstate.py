@@ -21,3 +21,6 @@ class StateBuilder(ABC):
         Returns the dimensions of the States returned by the build_state method.
         '''
         pass
+
+    def reset():
+        pass

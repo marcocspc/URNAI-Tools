@@ -9,3 +9,6 @@ class RewardBuilder(ABC):
     '''
     @abstractmethod
     def get_reward(self, obs) -> Reward: ...
+
+    def reset():
+        pass
