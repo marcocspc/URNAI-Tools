@@ -1,4 +1,6 @@
-from models.memory_representations.base.abmemory import ABMemoryRepresentation
+from abc import abstractmethod
+
+from models.memory_representations.base.abmem import ABMemoryRepresentation
 from urnai.utils.error import IncoherentBuildModelError
 from urnai.utils.error import UnsupportedBuildModelLayerTypeError
 from models.model_builder import ModelBuilder
@@ -7,11 +9,11 @@ class ABNeuralNetwork(ABMemoryRepresentation):
 
     def make_model(self):
         if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
-            self.build_model[0]['shape'] = [None, self.state_size]
+            self.build_model[0]['shape'] = [None, self.state_input_shape]
         else:
             raise IncoherentBuildModelError("The first layer type should be {} and the last one type should be {}".format(ModelBuilder.LAYER_INPUT, ModelBuilder.LAYER_OUTPUT))
         
-        self.build_model[-1]['length'] = self.action_size
+        self.build_model[-1]['length'] = self.action_output_size
 
         for idx, (layer_model) in enumerate(self.build_model):
             if layer_model['type'] == ModelBuilder.LAYER_INPUT: 

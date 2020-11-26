@@ -153,6 +153,12 @@ class Savable(ABC):
                 else:
                     raise
 
+            except ValueError as ve:
+                if "ctypes objects" in str(ve):
+                    continue
+                else:
+                    raise
+
         return pickleable_list
 
     def get_pickleable_dict(self):

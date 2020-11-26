@@ -1,11 +1,15 @@
 import numpy
-from models.memory_representations.pytorch import PyTorchDeepNeuralNetwork as DeepNeuralNetwork
-from models.base.abmodel import LearningModel 
+import random
+from collections import deque
+from models.memory_representations.neural_network.pytorch import PyTorchDeepNeuralNetwork as DeepNeuralNetwork
+from models.base.abmodel import LearningModel
+from agents.actions.base.abwrapper import ActionWrapper
+from agents.states.abstate import StateBuilder
 
 class DeepQLearning(LearningModel):
     #by default learning rate should not decay at all, since this is not the default behavior
     #of Deep-Q Learning
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, learning_rate_min=0.00002, learning_rate_decay=1, learning_rate_decay_ep_cutoff=0, gamma=0.95, name='DQN', build_model = ModelBuilder.DEFAULT_BUILD_MODEL, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False, use_memory=False, memory_maxlen=10000, batch_training=False, batch_size=32, min_memory_size=5000, seed_value=None, cpu_only=False):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, learning_rate_min=0.00002, learning_rate_decay=1, learning_rate_decay_ep_cutoff=0, gamma=0.95, name='DQN', build_model = None, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False, use_memory=False, memory_maxlen=10000, batch_size=32, min_memory_size=5000, seed_value=None, cpu_only=False):
         super().__init__(action_wrapper, state_builder, gamma, learning_rate, learning_rate_min, learning_rate_decay, epsilon_start, epsilon_min, epsilon_decay , per_episode_epsilon_decay, learning_rate_decay_ep_cutoff, name, seed_value, cpu_only)
         # Defining the model's layers. Tensorflow's objects are stored into self.model_layers
         self.batch_size = batch_size
@@ -93,10 +97,7 @@ class DeepQLearning(LearningModel):
 
     def __maxq(self, state):
         values = self.dnn.get_output(state)
-
-        index = numpy.argmax(values[0])
-        mxq = values[0, index]
-
+        mxq = values.max()
         return mxq
 
     def choose_action(self, state, excluded_actions=[]):
@@ -122,7 +123,7 @@ class DeepQLearning(LearningModel):
         action_idx = numpy.argmax(q_values)
 
         # Removing excluded actions
-        # This is possibly badly optimized, eventually look back into this
+        # TODO: This is possibly badly optimized, eventually look back into this
         while action_idx in excluded_actions:
             q_values = numpy.delete(q_values, action_idx)
             action_idx = numpy.argmax(q_values)
