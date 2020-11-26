@@ -22,5 +22,5 @@ class StateBuilder(ABC):
         '''
         pass
 
-    def reset():
+    def reset(self):
         pass

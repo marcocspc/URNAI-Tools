@@ -10,6 +10,7 @@ class RTSGeneralization:
     STATE_MAP = "map"
     STATE_NON_SPATIAL = "non_spatial_only"
     STATE_BOTH = "map_and_non_spatial"
+    STATE_MAP_DEFAULT_REDUCTIONFACTOR = 1
     STATE_MAXIMUM_X = 64 
     STATE_MAXIMUM_Y = 64 
     STATE_MAX_COLL_DIST = 15 
