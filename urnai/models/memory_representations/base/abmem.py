@@ -1,7 +1,7 @@
 import os, importlib
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from base.savable import Savable 
-from models.model_builder import 
+from models.model_builder import ModelBuilder
 
 class ABMemoryRepresentation(Savable):
 
@@ -19,12 +19,15 @@ class ABMemoryRepresentation(Savable):
         self.make_model()
 
     @abstractmethod
-    def update(self, mem_input, expected_output ) -> None : 
+    def update(self, mem_input, target_output ) -> None : 
         '''
         Update the model values
         for each action. Every memory representation
         uses different update strategies
         so parameters should be adjusted for each.
+
+        The mem_input atribute refers to the input that the memory representation is going to use to update itself, on a DNN this would be the state.
+        The target_output refers to the desired output of the memory representation to the input, on a Q-Learning DNN this would be the target_q_values.
         '''
         ...
 
@@ -38,7 +41,7 @@ class ABMemoryRepresentation(Savable):
         ...
 
     @abstractmethod
-    def set_seed(self) -> None:
+    def set_seed(self, seed) -> None:
         '''
             This method should manually set the seed to
             generate a model when needed.
