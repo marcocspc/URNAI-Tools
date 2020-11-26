@@ -87,6 +87,9 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
 
         return specific_units
 
+    def get_drts_player_gold(self, obs, player):
+        return obs["players"][player].gold
+
     def get_drts_number_of_specific_units(self, obs, player, unit_id):
         return len(self.get_drts_player_specific_type_units(obs, player, unit_id))
 
@@ -110,4 +113,6 @@ class CollectablesGeneralizedRewardBuilder(RewardBuilder):
         units = sc2aux.get_units_by_type(obs, sc2units.Terran.SupplyDepot)
         return len(units)
 
+    def get_sc2_player_minerals(self, obs):
+        return obs.player.minerals 
 

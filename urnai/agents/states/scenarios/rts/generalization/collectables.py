@@ -2,6 +2,7 @@ from urnai.agents.states.abstate import StateBuilder
 from urnai.utils.constants import RTSGeneralization, Games 
 from urnai.utils.numpy_utils import save_iterable_as_csv 
 import urnai.agents.actions.sc2 as sc2aux 
+from utils.image import lower_featuremap_resolution
 from pysc2.lib import units as sc2units
 import numpy as np
 from statistics import mean
@@ -10,9 +11,17 @@ import math
 
 class CollectablesGeneralizedStatebuilder(StateBuilder):
 
-    def __init__(self, method=RTSGeneralization.STATE_MAP):
+    def __init__(self, method=RTSGeneralization.STATE_MAP, map_reduction_factor=RTSGeneralization.STATE_MAP_DEFAULT_REDUCTIONFACTOR):
         self.previous_state = None
         self.method = method
+        #number of quadrants is the amount of parts
+        #the map should be reduced
+        #this helps the agent to 
+        #deal with the big size
+        #of state space
+        #if -1 (default value), the map
+        #wont be reduced
+        self.map_reduction_factor = map_reduction_factor
         self.non_spatial_maximums = [
                 RTSGeneralization.STATE_MAX_COLL_DIST,
                 RTSGeneralization.STATE_MAX_COLL_DIST,
@@ -115,6 +124,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
                 if map_[y][x] != 100 and map_[y][x] != 7: 
                     map_[y][x] = 0
 
+        map_ = self.reduce_map(map_) 
         map_ = self.normalize_map(map_)
 
         return map_
@@ -150,7 +160,8 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
 
     def get_state_dim(self):
         if self.method == RTSGeneralization.STATE_MAP:
-            return 64*64 
+            size = 64 / self.map_reduction_factor
+            return int(size * size) 
         elif self.method == RTSGeneralization.STATE_NON_SPATIAL:
             return len(self.non_spatial_state)
 
@@ -253,3 +264,6 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
                 specific_units.append(unit)
 
         return specific_units
+
+    def reduce_map(self, map_):
+        return lower_featuremap_resolution(map_, self.map_reduction_factor)
