@@ -8,13 +8,13 @@ import random
 class BuildUnitsDeepRTSActionWrapper(DefeatEnemiesDeepRTSActionWrapper):
     def __init__(self):
         super().__init__()
-        self.collect_gold = 17
+        self.do_nothing = 17
         self.build_farm = 18
         self.build_barrack = 19
         self.build_footman = 20
 
-        self.final_actions = [self.build_farm, self.build_barrack, self.build_footman] 
-        self.named_actions = ["build_farm", "build_barrack", "build_footman"]
+        self.final_actions = [self.do_nothing, self.build_farm, self.build_barrack, self.build_footman] 
+        self.named_actions = ["do_nothing", "build_farm", "build_barrack", "build_footman"]
         self.action_indices = range(len(self.final_actions))
 
     def solve_action(self, action_idx, obs):
@@ -38,23 +38,40 @@ class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
     BARRACK_X = 39
     BARRACK_Y = 36
 
+    MAP_PLAYER_SUPPLY_DEPOT_COORDINATES = [
+                {"x" : SUPPLY_DEPOT_X, "y" : SUPPLY_DEPOT_Y},
+                {"x" : SUPPLY_DEPOT_X - 2, "y" : SUPPLY_DEPOT_Y},
+                {"x" : SUPPLY_DEPOT_X - 4, "y" : SUPPLY_DEPOT_Y},
+                {"x" : SUPPLY_DEPOT_X - 6, "y" : SUPPLY_DEPOT_Y},
+                {"x" : SUPPLY_DEPOT_X - 8, "y" : SUPPLY_DEPOT_Y},
+                {"x" : SUPPLY_DEPOT_X - 10, "y" : SUPPLY_DEPOT_Y},
+                {"x" : SUPPLY_DEPOT_X - 12, "y" : SUPPLY_DEPOT_Y},
+            ]
+
+    MAP_PLAYER_BARRACK_COORDINATES = [
+                {"x" : BARRACK_X, "y" : BARRACK_Y},
+                {"x" : BARRACK_X, "y" : BARRACK_Y - 6},
+            ]
+
     def __init__(self):
         super().__init__()
 
-        self.collect_minerals = 7
+        self.do_nothing = 7
         self.build_supply_depot = 8
         self.build_barrack = 9
         self.build_marine = 10
-        self.actions = [self.build_supply_depot, self.build_barrack, self.build_marine]
-        self.named_actions = ["build_supply_depot", "build_barrack", "build_marine"]
+        self.actions = [self.do_nothing, self.build_supply_depot, self.build_barrack, self.build_marine]
+        self.named_actions = ["do_nothing", "build_supply_depot", "build_barrack", "build_marine"]
         self.action_indices = range(len(self.actions))
+        self.barrack_coords = BuildUnitsStarcraftIIActionWrapper.MAP_PLAYER_BARRACK_COORDINATES
+        self.supply_depot_coords = BuildUnitsStarcraftIIActionWrapper.MAP_PLAYER_SUPPLY_DEPOT_COORDINATES
 
     def solve_action(self, action_idx, obs):
         if action_idx != None:
             if action_idx != self.noaction:
                 action = self.actions[action_idx]
-                if action == self.collect_minerals:
-                    self.collect(obs)
+                if action == self.do_nothing:
+                    self.collect_idle(obs)
                 elif action == self.build_supply_depot:
                     self.build_supply_depot_(obs)
                 elif action == self.build_barrack:
@@ -87,6 +104,12 @@ class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
             for scv in scvset:
                 self.pending_actions.append(actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", scv.tag, mineral.tag))
 
+    def collect_idle(self, obs):
+        scv = scaux.get_random_idle_worker(obs, sc2_env.Race.terran)
+        mineral = random.choice(scaux.get_neutral_units_by_type(obs, units.Neutral.MineralField))
+        if scv != scaux._NO_UNITS: 
+            self.pending_actions.append(actions.RAW_FUNCTIONS.Harvest_Gather_unit("queued", scv.tag, mineral.tag))
+
     def select_random_scv(self, obs):
         #get SCV list
         scvs = scaux.get_my_units_by_type(obs, units.Terran.SCV)
@@ -96,21 +119,26 @@ class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
 
     def build_supply_depot_(self, obs):
         #randomly select scv
-        scv = self.select_random_scv(obs)
         #get coordinates
-        x, y = BuildUnitsStarcraftIIActionWrapper.SUPPLY_DEPOT_X, BuildUnitsStarcraftIIActionWrapper.SUPPLY_DEPOT_Y
+        #x, y = BuildUnitsStarcraftIIActionWrapper.SUPPLY_DEPOT_X, BuildUnitsStarcraftIIActionWrapper.SUPPLY_DEPOT_Y
+        coord = random.choice(self.supply_depot_coords)
+        x, y = coord['x'], coord['y']
+        scv = self.select_random_scv(obs)
         #append action to build supply depot
         self.pending_actions.append(actions.RAW_FUNCTIONS.Build_SupplyDepot_pt("now", scv.tag, [x, y]))
 
     def build_barrack_(self, obs):
         #randomly select scv
-        scv = self.select_random_scv(obs)
         #get coordinates
-        x, y = BuildUnitsStarcraftIIActionWrapper.BARRACK_X, BuildUnitsStarcraftIIActionWrapper.BARRACK_Y 
-        #append action to build supply depot
-        self.pending_actions.append(actions.RAW_FUNCTIONS.Build_Barracks_pt("now", scv.tag, [x, y]))
+        #x, y = BuildUnitsStarcraftIIActionWrapper.BARRACK_X, BuildUnitsStarcraftIIActionWrapper.BARRACK_Y 
+            coord = random.choice(self.barrack_coords)
+            x, y = coord['x'], coord['y']
+            scv = self.select_random_scv(obs)
+            #append action to build supply depot
+            self.pending_actions.append(actions.RAW_FUNCTIONS.Build_Barracks_pt("now", scv.tag, [x, y]))
 
     def build_marine_(self, obs):
         barracks = scaux.get_my_units_by_type(obs, units.Terran.Barracks)
-        for barrack in barracks:
+        if len(barracks) > 0:
+            barrack = random.choice(barracks)
             self.pending_actions.append(actions.RAW_FUNCTIONS.Train_Marine_quick("now", barrack.tag))
