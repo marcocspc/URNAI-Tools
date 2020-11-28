@@ -3,6 +3,7 @@ from urnai.utils.constants import RTSGeneralization, Games
 from urnai.utils.numpy_utils import save_iterable_as_csv 
 import urnai.agents.actions.sc2 as sc2aux 
 from utils.image import lower_featuremap_resolution
+from utils.numpy_utils import trim_matrix 
 from pysc2.lib import units as sc2units
 import numpy as np
 from statistics import mean
@@ -93,24 +94,35 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
 
     def build_sc2_map(self, obs):
         map_ = self.build_basic_sc2_map(obs)
+        map_ = self.reduce_map(map_) 
         map_ = self.normalize_map(map_)
 
         return map_
 
     def build_basic_sc2_map(self, obs):
+       #old map generation code
         #layer 3 is base (2 walkable area, 0 not)
         #layer 4 is units (1 friendly, 2 enemy, 16 mineral shards, 3 neutral 
-        map_ = np.zeros(obs.feature_minimap[0].shape)
-        for y in range(len(obs.feature_minimap[3])):  
-            for x in range(len(obs.feature_minimap[3][y])):  
-                if obs.feature_minimap[3][y][x] == 2: map_[y][x] = 270 #drts walkable area 
+       # for y in range(len(obs.feature_minimap[3])):  
+       #     for x in range(len(obs.feature_minimap[3][y])):  
+       #         if obs.feature_minimap[3][y][x] == 2: map_[y][x] = 270 #drts walkable area 
 
-        for y in range(len(obs.feature_minimap[4])):  
-            for x in range(len(obs.feature_minimap[4][y])):  
-                if obs.feature_minimap[4][y][x] == 1: map_[y][x] = 1 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
-                elif obs.feature_minimap[4][y][x] == 2: map_[y][x] = 7 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
-                elif obs.feature_minimap[4][y][x] == 16: map_[y][x] = 100 #drts 1000 was chosen by me to represent virtual shards
-                elif obs.feature_minimap[4][y][x] == 3: map_[y][x] = 102 #drts 102 is gold 
+       # for y in range(len(obs.feature_minimap[4])):  
+       #     for x in range(len(obs.feature_minimap[4][y])):  
+       #         if obs.feature_minimap[4][y][x] == 1: map_[y][x] = 1 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
+       #         elif obs.feature_minimap[4][y][x] == 2: map_[y][x] = 7 #drts 1 is peasant, 7 is archer, which one is needed for the current map 
+       #         elif obs.feature_minimap[4][y][x] == 16: map_[y][x] = 100 #drts 1000 was chosen by me to represent virtual shards
+       #         elif obs.feature_minimap[4][y][x] == 3: map_[y][x] = 102 #drts 102 is gold 
+
+        map_ = np.zeros(obs.feature_minimap[0].shape)
+        marines = sc2aux.get_units_by_type(obs, sc2units.Terran.Marine)
+        shards = sc2aux.get_all_neutral_units(obs)
+
+        for marine in marines:
+            map_[marine.y][marine.x] = 7 
+
+        for shard in shards:
+            map_[shard.y][shard.x] = 100
 
         return map_
 
@@ -160,8 +172,9 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
 
     def get_state_dim(self):
         if self.method == RTSGeneralization.STATE_MAP:
-            size = 64 / self.map_reduction_factor
-            return int(size * size) 
+            #size = 64 / self.map_reduction_factor
+            #return int(size * size) 
+            return 22 * 16 
         elif self.method == RTSGeneralization.STATE_NON_SPATIAL:
             return len(self.non_spatial_state)
 
@@ -266,4 +279,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         return specific_units
 
     def reduce_map(self, map_):
-        return lower_featuremap_resolution(map_, self.map_reduction_factor)
+        x1, y1 = 22, 28
+        x2, y2 = 43, 43 
+        return trim_matrix(map_, x1, y1, x2, y2)
+        #return lower_featuremap_resolution(map_, self.map_reduction_factor)
