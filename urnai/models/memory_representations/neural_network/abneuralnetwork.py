@@ -8,6 +8,8 @@ from models.model_builder import ModelBuilder
 class ABNeuralNetwork(ABMemoryRepresentation):
 
     def make_model(self):
+        self.model = self.create_base_model()
+
         if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
             self.build_model[0]['shape'] = [None, self.state_input_shape]
         else:
@@ -31,6 +33,10 @@ class ABNeuralNetwork(ABMemoryRepresentation):
             elif layer_model['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
                 self.add_convolutional_layer(idx)
 
+    @abstractmethod
+    def create_base_model(self) -> None:
+        ...
+    
     @abstractmethod
     def add_input_layer(self, idx) -> None:
         ...

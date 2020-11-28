@@ -4,12 +4,25 @@ from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activati
 from keras.optimizers import Adam
 from keras import backend as K
 
+class AA(KerasDeepNeuralNetwork):
+    def __init__(self, action_output_size, state_input_shape, build_model, gamma, alpha, seed = None):        
+        super().__init__(action_output_size, state_input_shape, build_model, gamma, alpha)
+    
+    def make_model(self):
+        self.model = Sequential()
+
+        self.model.add(Dense(50, activation='relu', input_dim=self.state_input_shape))
+        self.model.add(Dense(50, activation='relu'))
+        self.model.add(Dense(self.action_output_size, activation='linear'))
+
+        self.model.compile(optimizer=Adam(lr=self.alpha), loss='mse', metrics=['accuracy'])
+
+
 class KerasDeepNeuralNetwork(ABNeuralNetwork):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, action_output_size, state_input_shape, build_model, gamma, alpha, seed = None):     
+        super().__init__(action_output_size, state_input_shape, build_model, gamma, alpha)
 
-        self.model = Sequential()
         self.model.compile(optimizer=Adam(lr=self.alpha), loss='mse', metrics=['accuracy'])
 
 
@@ -43,6 +56,10 @@ class KerasDeepNeuralNetwork(ABNeuralNetwork):
 
     #TODO
     #def set_seed(self) -> None:
+
+    def create_base_model(self):
+        model = Sequential()
+        return model
 
     class SubDeepQNetwork(nn.Module):
         def __init__(self):

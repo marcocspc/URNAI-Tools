@@ -16,6 +16,7 @@ class ABMemoryRepresentation(Savable):
         self.action_output_size = action_output_size 
         self.state_input_shape = state_input_shape
 
+        self.model = None
         self.make_model()
 
     @abstractmethod
