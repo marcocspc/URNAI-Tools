@@ -1,5 +1,6 @@
 from urnai.agents.actions import sc2 as scaux
 from .defeatenemies import DefeatEnemiesDeepRTSActionWrapper, DefeatEnemiesStarcraftIIActionWrapper  
+from urnai.agents.rewards.scenarios.rts.generalization.buildunits import BuildUnitsGeneralizedRewardBuilder 
 from pysc2.lib import actions, features, units
 from statistics import mean
 from pysc2.env import sc2_env
@@ -38,6 +39,11 @@ class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
     BARRACK_X = 39
     BARRACK_Y = 36
 
+    ACTION_DO_NOTHING = 7
+    ACTION_BUILD_SUPPLY_DEPOT = 8
+    ACTION_BUILD_BARRACK = 9
+    ACTION_BUILD_MARINE = 10
+
     MAP_PLAYER_SUPPLY_DEPOT_COORDINATES = [
                 {"x" : SUPPLY_DEPOT_X, "y" : SUPPLY_DEPOT_Y},
                 {"x" : SUPPLY_DEPOT_X - 2, "y" : SUPPLY_DEPOT_Y},
@@ -56,10 +62,10 @@ class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
     def __init__(self):
         super().__init__()
 
-        self.do_nothing = 7
-        self.build_supply_depot = 8
-        self.build_barrack = 9
-        self.build_marine = 10
+        self.do_nothing = BuildUnitsStarcraftIIActionWrapper.ACTION_DO_NOTHING
+        self.build_supply_depot = BuildUnitsStarcraftIIActionWrapper.ACTION_BUILD_SUPPLY_DEPOT 
+        self.build_barrack = BuildUnitsStarcraftIIActionWrapper.ACTION_BUILD_BARRACK
+        self.build_marine = BuildUnitsStarcraftIIActionWrapper.ACTION_BUILD_MARINE
         self.actions = [self.do_nothing, self.build_supply_depot, self.build_barrack, self.build_marine]
         self.named_actions = ["do_nothing", "build_supply_depot", "build_barrack", "build_marine"]
         self.action_indices = range(len(self.actions))
@@ -69,6 +75,7 @@ class BuildUnitsStarcraftIIActionWrapper(DefeatEnemiesStarcraftIIActionWrapper):
     def solve_action(self, action_idx, obs):
         if action_idx != None:
             if action_idx != self.noaction:
+                BuildUnitsGeneralizedRewardBuilder.LAST_CHOSEN_ACTION = self.actions[action_idx]
                 action = self.actions[action_idx]
                 if action == self.do_nothing:
                     self.collect_idle(obs)

@@ -3,6 +3,7 @@ from urnai.utils.constants import RTSGeneralization, Games
 from urnai.utils.numpy_utils import save_iterable_as_csv 
 import urnai.agents.actions.sc2 as sc2aux 
 from utils.image import lower_featuremap_resolution
+from utils.numpy_utils import trim_matrix 
 from pysc2.lib import units as sc2units
 import numpy as np
 from statistics import mean
@@ -171,8 +172,9 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
 
     def get_state_dim(self):
         if self.method == RTSGeneralization.STATE_MAP:
-            size = 64 / self.map_reduction_factor
-            return int(size * size) 
+            #size = 64 / self.map_reduction_factor
+            #return int(size * size) 
+            return 22 * 16 
         elif self.method == RTSGeneralization.STATE_NON_SPATIAL:
             return len(self.non_spatial_state)
 
@@ -277,4 +279,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         return specific_units
 
     def reduce_map(self, map_):
-        return lower_featuremap_resolution(map_, self.map_reduction_factor)
+        x1, y1 = 22, 28
+        x2, y2 = 43, 43 
+        return trim_matrix(map_, x1, y1, x2, y2)
+        #return lower_featuremap_resolution(map_, self.map_reduction_factor)

@@ -5,7 +5,7 @@
             "params": {
                 "method": "single",
                 "state_builder_method": "non_spatial_only",
-                "game": "sc2",
+                "game": "drts",
                 "render": false
             }
         },
@@ -54,13 +54,14 @@
         "trainer": {
             "class": "Trainer",
             "params": {
-                "file_name": "agent_drts_only_buildunits",
-                "max_training_episodes": 1000,
-                "max_steps_training": 1000,
+                "file_name": "agent_drts_only_buildunits_highway_to_hell1",
+                "max_training_episodes": 3000,
+                "max_steps_training": 500,
                 "max_test_episodes": 1000,
-                "max_steps_testing": 1000,
+                "max_steps_testing": 500,
                 "save_every": 100.0,
-                "enable_save": true
+                "enable_save": true,
+                "debug_level" : 0
             }
         }
     }

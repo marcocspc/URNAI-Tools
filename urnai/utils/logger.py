@@ -15,7 +15,7 @@ class Logger(Savable):
                  action_wrapper_name, agent_action_size, agent_action_names, 
                  state_builder_name, reward_builder_name, env_name, 
                  is_episodic=True, render=True, generate_bar_graphs_every=100, log_actions=True,
-                 episode_batch_avg_calculation=50):
+                 episode_batch_avg_calculation=10):
         #Training information
         self.agent_name = agent_name
         self.model_name = model_name

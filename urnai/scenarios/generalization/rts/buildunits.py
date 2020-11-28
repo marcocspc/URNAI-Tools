@@ -2,13 +2,14 @@ from .defeatenemies import GeneralizedDefeatEnemiesScenario
 from urnai.utils.constants import RTSGeneralization, Games 
 from urnai.utils.error import EnvironmentNotSupportedError
 from urnai.agents.actions.scenarios.rts.generalization.buildunits import BuildUnitsDeepRTSActionWrapper, BuildUnitsStarcraftIIActionWrapper 
+from urnai.agents.rewards.scenarios.rts.generalization.buildunits import BuildUnitsGeneralizedRewardBuilder
 from pysc2.lib import actions, features, units
 from urnai.agents.actions import sc2 as scaux
 from urnai.agents.rewards.default import PureReward
 import numpy as np
 from pysc2.env import sc2_env
 from statistics import mean
-import random, math
+import random
 from urnai.envs.deep_rts import DeepRTSEnv
 from tdd.reporter import Reporter as rp
 
@@ -93,6 +94,7 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
 
     def step(self, action):
         if (self.game == GeneralizedBuildUnitsScenario.GAME_DEEP_RTS):
+            BuildUnitsGeneralizedRewardBuilder.LAST_CHOSEN_ACTION = action
             if self.steps == 0:
                 self.setup_map()
                 self.spawn_army()
@@ -191,3 +193,8 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
         if len(barracks_list) > 0:
             barracks = random.choice(barracks_list)
             barracks.build(0)
+
+    def reset(self):
+        state = super().reset()
+        BuildUnitsGeneralizedRewardBuilder.LAST_CHOSEN_ACTION = -1
+        return state

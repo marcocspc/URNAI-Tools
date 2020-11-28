@@ -2,8 +2,13 @@ class Games:
     DRTS = "deep_rts"
     SC2 = "starcraft_ii"
 
-
 class RTSGeneralization:
+
+    ACTION_DRTS_DO_NOTHING = 17
+    ACTION_DRTS_BUILD_FARM = 18
+    ACTION_DRTS_BUILD_BARRACK = 19
+    ACTION_DRTS_BUILD_FOOTMAN = 20
+
     METHOD_SINGLE = "single_environment"
     METHOD_MULTIPLE = "multiple_environment"
 
