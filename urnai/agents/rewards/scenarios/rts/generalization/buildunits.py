@@ -17,18 +17,21 @@ class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
         build_farm = RTSGeneralization.ACTION_DRTS_BUILD_FARM
         build_barrack = RTSGeneralization.ACTION_DRTS_BUILD_BARRACK
         build_footman = RTSGeneralization.ACTION_DRTS_BUILD_FOOTMAN
+        do_nothing = RTSGeneralization.ACTION_DRTS_DO_NOTHING
 
-        #current = self.get_drts_number_of_specific_units(obs, player, farm) 
-        #prev = self.get_drts_number_of_specific_units(self.previous_state, player, farm) 
+        current = self.get_drts_number_of_specific_units(obs, player, farm) 
+        prev = self.get_drts_number_of_specific_units(self.previous_state, player, farm) 
+        farm_amount = (current - prev)
 
-        #rwdA = (current - prev)
+        current = self.get_drts_number_of_specific_units(obs, player, barracks) 
+        prev = self.get_drts_number_of_specific_units(self.previous_state, player, barracks) 
+        barracks_amount = (current - prev)
 
-        #current = self.get_drts_number_of_specific_units(obs, player, barracks) 
-        #prev = self.get_drts_number_of_specific_units(self.previous_state, player, barracks) 
+        current = self.get_drts_number_of_specific_units(obs, player, footman) 
+        prev = self.get_drts_number_of_specific_units(self.previous_state, player, footman) 
+        footman_amount = (current - prev)
 
-        #rwdB = (current - prev) * 10
-
-        rwdA = 0
+        negative_rwd = 0
         chosen_action = BuildUnitsGeneralizedRewardBuilder.LAST_CHOSEN_ACTION 
         #print(chosen_action)
         if chosen_action > -1:
@@ -37,43 +40,42 @@ class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
             gold_amount = obs['players'][0].gold 
             if chosen_action == build_farm: 
                 if farm_number > 7 or gold_amount < 500:
-                    rwdA = -1
+                    negative_rwd = -10
             elif chosen_action == build_barrack:
                 if farm_number <= 0 or gold_amount < 700:
-                    rwdA = -1
+                    negative_rwd = -10
             elif chosen_action == build_footman:
                 if barracks_amount <= 0 or gold_amount < 600:
-                    rwdA = -1
+                    negative_rwd = -10
+            elif chosen_action == do_nothing:
+                negative_rwd = -1
 
-
-        #reward agent for number of soldiers built
-        current = self.get_drts_number_of_specific_units(obs, player, footman) 
-        prev = self.get_drts_number_of_specific_units(self.previous_state, player, footman) 
-        rwdB = (current - prev)
-
-        #rwd = rwdA + rwdB + rwdC
-        rwd = rwdA + rwdB
-        return rwd
-        #print(rwd)
-        #if rwd > 0: return rwd
-        #else: return 0
+        #rwd = negative_rwd + rwdB + rwdC
+        if farm_amount < 0 or barracks_amount < 0 or footman_amount < 0:
+            return 0
+        else:
+            rwd = negative_rwd + farm_amount + barracks_amount + footman_amount * 20
+            return rwd
 
     def get_sc2_reward(self, obs):
-        #current = self.get_sc2_number_of_supply_depot(obs)
-        #prev = self.get_sc2_number_of_supply_depot(self.previous_state)
-
-        #rwdA = (current - prev)
-
-        #current = self.get_sc2_number_of_barracks(obs)
-        #prev = self.get_sc2_number_of_barracks(self.previous_state)
-
-        #rwdB = (current - prev) * 10
-
         build_supply_depot = BuildUnitsGeneralizedRewardBuilder.ACTION_BUILD_SUPPLY_DEPOT
         build_barrack = BuildUnitsGeneralizedRewardBuilder.ACTION_BUILD_BARRACK
         build_marine = BuildUnitsGeneralizedRewardBuilder.ACTION_BUILD_MARINE
+        do_nothing = BuildUnitsGeneralizedRewardBuilder.ACTION_DO_NOTHING 
 
-        rwdA = 0
+        current = self.get_sc2_number_of_supply_depot(obs)
+        prev = self.get_sc2_number_of_supply_depot(self.previous_state)
+        supply_depot_amount_diff = (current - prev)
+
+        current = self.get_sc2_number_of_barracks(obs)
+        prev = self.get_sc2_number_of_barracks(self.previous_state)
+        barracks_amount_diff = (current - prev)
+
+        current = self.get_sc2_number_of_marines(obs)
+        prev = self.get_sc2_number_of_marines(self.previous_state)
+        marines_amount_diff = (current - prev)
+
+        negative_rwd = 0
         chosen_action = BuildUnitsGeneralizedRewardBuilder.LAST_CHOSEN_ACTION 
         if chosen_action > -1:
             supply_depot_amount = self.get_sc2_number_of_supply_depot(obs)
@@ -81,20 +83,22 @@ class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
             minerals = obs.player.minerals
             if chosen_action == build_supply_depot: 
                 if supply_depot_amount > 7 or minerals < 100:
-                    rwdA = -1
+                    negative_rwd = -10
             elif chosen_action == build_barrack:
                 if supply_depot_amount <= 0 or minerals < 150:
-                    rwdA = -1
+                    negative_rwd = -10
             elif chosen_action == build_marine:
                 if barracks_amount <= 0 or minerals < 50:
-                    rwdA = -1
+                    negative_rwd = -10
+            elif chosen_action == do_nothing:
+                negative_rwd = -1
 
-        current = self.get_sc2_number_of_marines(obs)
-        prev = self.get_sc2_number_of_marines(self.previous_state)
-        rwdB = (current - prev)
 
-        #rwd = rwdA + rwdB + rwdC
-        rwd = rwdA + rwdB
-        return rwd
+        #rwd = negative_rwd + rwdB + rwdC
+        if supply_depot_amount_diff < 0 or barracks_amount_diff < 0 or marines_amount_diff < 0:
+            return 0
+        else:
+            rwd = negative_rwd + supply_depot_amount_diff + barracks_amount_diff + marines_amount_diff * 20
+            return rwd
         #if rwd > 0: return rwd
         #else: return 0
