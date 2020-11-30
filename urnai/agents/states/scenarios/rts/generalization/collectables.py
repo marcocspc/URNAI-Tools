@@ -174,7 +174,8 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         if self.method == RTSGeneralization.STATE_MAP:
             #size = 64 / self.map_reduction_factor
             #return int(size * size) 
-            return 22 * 16 
+            #return 22 * 16 
+            return int(16 / self.map_reduction_factor)
         elif self.method == RTSGeneralization.STATE_NON_SPATIAL:
             return len(self.non_spatial_state)
 
