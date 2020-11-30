@@ -47,14 +47,14 @@ class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
             elif chosen_action == build_footman:
                 if barracks_amount <= 0 or gold_amount < 600:
                     negative_rwd = -10
-            elif chosen_action == do_nothing:
-                negative_rwd = -1
+            #elif chosen_action == do_nothing:
+            #    negative_rwd = -1
 
         #rwd = negative_rwd + rwdB + rwdC
         if farm_amount < 0 or barracks_amount < 0 or footman_amount < 0:
             return 0
         else:
-            rwd = negative_rwd + farm_amount + barracks_amount + footman_amount * 20
+            rwd = negative_rwd + farm_amount + barracks_amount * 10 + footman_amount * 100
             return rwd
 
     def get_sc2_reward(self, obs):
@@ -90,15 +90,15 @@ class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
             elif chosen_action == build_marine:
                 if barracks_amount <= 0 or minerals < 50:
                     negative_rwd = -10
-            elif chosen_action == do_nothing:
-                negative_rwd = -1
+            #elif chosen_action == do_nothing:
+            #    negative_rwd = -1
 
 
         #rwd = negative_rwd + rwdB + rwdC
         if supply_depot_amount_diff < 0 or barracks_amount_diff < 0 or marines_amount_diff < 0:
             return 0
         else:
-            rwd = negative_rwd + supply_depot_amount_diff + barracks_amount_diff + marines_amount_diff * 20
+            rwd = negative_rwd + supply_depot_amount_diff + barracks_amount_diff  * 10 + marines_amount_diff * 100
             return rwd
         #if rwd > 0: return rwd
         #else: return 0

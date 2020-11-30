@@ -281,5 +281,5 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
     def reduce_map(self, map_):
         x1, y1 = 22, 28
         x2, y2 = 43, 43 
-        return trim_matrix(map_, x1, y1, x2, y2)
-        #return lower_featuremap_resolution(map_, self.map_reduction_factor)
+        map_ = trim_matrix(map_, x1, y1, x2, y2)
+        return lower_featuremap_resolution(map_, self.map_reduction_factor)
