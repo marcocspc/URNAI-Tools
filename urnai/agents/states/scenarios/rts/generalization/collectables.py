@@ -88,7 +88,6 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
 
         state = np.asarray(state).flatten()
         state = state.reshape((1, len(state)))
-
         
         return state
 
@@ -175,7 +174,9 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
             #size = 64 / self.map_reduction_factor
             #return int(size * size) 
             #return 22 * 16 
-            return int(16 / self.map_reduction_factor)
+            a = int(22 / self.map_reduction_factor) 
+            b = int(16 / self.map_reduction_factor) 
+            return int(a * b)
         elif self.method == RTSGeneralization.STATE_NON_SPATIAL:
             return len(self.non_spatial_state)
 

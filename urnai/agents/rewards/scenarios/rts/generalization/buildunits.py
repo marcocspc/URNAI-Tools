@@ -1,5 +1,6 @@
 from .defeatenemies import DefeatEnemiesGeneralizedRewardBuilder 
 from utils.constants import RTSGeneralization 
+from tdd.reporter import Reporter as rp 
 
 class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
 
@@ -21,19 +22,18 @@ class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
 
         current = self.get_drts_number_of_specific_units(obs, player, farm) 
         prev = self.get_drts_number_of_specific_units(self.previous_state, player, farm) 
-        farm_amount = (current - prev)
+        farm_amount_curr = (current - prev)
 
         current = self.get_drts_number_of_specific_units(obs, player, barracks) 
         prev = self.get_drts_number_of_specific_units(self.previous_state, player, barracks) 
-        barracks_amount = (current - prev)
+        barracks_amount_curr = (current - prev)
 
         current = self.get_drts_number_of_specific_units(obs, player, footman) 
         prev = self.get_drts_number_of_specific_units(self.previous_state, player, footman) 
-        footman_amount = (current - prev)
+        footman_amount_curr = (current - prev)
 
         negative_rwd = 0
         chosen_action = BuildUnitsGeneralizedRewardBuilder.LAST_CHOSEN_ACTION 
-        #print(chosen_action)
         if chosen_action > -1:
             farm_number = self.get_drts_number_of_specific_units(obs, player, farm) 
             barracks_amount = self.get_drts_number_of_specific_units(obs, player, barracks)
@@ -51,10 +51,27 @@ class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
             #    negative_rwd = -1
 
         #rwd = negative_rwd + rwdB + rwdC
-        if farm_amount < 0 or barracks_amount < 0 or footman_amount < 0:
+        rp.report(
+                '''
+Calculated reward is: {},
+composed of:
+farm_amount: {},
+barracks_amount: {},
+footman_amount: {},
+negative_rdw: {}
+                '''.format(
+                    negative_rwd + farm_amount_curr + barracks_amount_curr * 10 + footman_amount_curr * 100,
+                    farm_amount_curr,
+                    barracks_amount_curr * 10,
+                    footman_amount_curr * 100,
+                    negative_rwd
+                    ),
+               verbosity_lvl = 1 
+                )
+        if farm_amount_curr < 0 or barracks_amount_curr < 0 or footman_amount_curr < 0:
             return 0
         else:
-            rwd = negative_rwd + farm_amount + barracks_amount * 10 + footman_amount * 100
+            rwd = negative_rwd + farm_amount_curr + barracks_amount_curr * 10 + footman_amount_curr * 100
             return rwd
 
     def get_sc2_reward(self, obs):
