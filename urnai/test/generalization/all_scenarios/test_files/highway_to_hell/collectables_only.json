@@ -5,8 +5,8 @@
             "params": {
                 "method": "single",
                 "state_builder_method": "map",
-                "map_reduction_factor" : 16,
-                "game": "drts",
+                "map_reduction_factor" : 4,
+                "game": "sc2",
                 "render": false
             }
         },
