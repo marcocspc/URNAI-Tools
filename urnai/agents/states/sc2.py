@@ -484,4 +484,83 @@ def trim_feature_minimap(feature_minimap):
     feature_minimap = np.delete(feature_minimap, np.s_[44:63:1], 0)
     feature_minimap = np.delete(feature_minimap, np.s_[0:8:1], 1)
     feature_minimap = np.delete(feature_minimap, np.s_[44:63:1], 1)
-    return feature_minimap
+    return feature_minimap]
+
+def build_cropped_gridstate(obs, grid_size, x1, y1, r_enemy:bool, r_player:bool, r_neutral:bool):
+    """
+    This function generates a series of grids based on a cropped raw SC2 representation.
+    You can have a return vector with only the enemy, player or neutral units, or any mix of these three.
+    The cropping logic is the following: you could have a 64x64 SC2 map but the playable part is restricted 
+    to a rectangle defined by the top-left point with x1=20 and y1=25 and the bottom right point with x2=40, y2=45.
+    The point (x1,y1) will be used to calculate the position of units relative to the playable area.
+    This would, for example, mean that a unit that originally was on the (24,27) point will now be on the (4,2) on our cropped representation.
+
+    Args:
+        obs: raw SC2 observation
+        grid_size (int): 
+        x1 (int): is the x position of the top-left point of the rectangle that you want to crop the map
+        y1 (int): is the y positiono f the top-left point of the rectangle that you want to crop the map
+        r_enemy (bool): whether or not the grid with enemy units will be returned
+        r_player (bool): whether or not the grid with player units will be returned
+        r_neutral (bool): whether or not the grid with neutral units will be returned
+
+    Returns:
+        A list with the flattened grids from the enemy, player and neutral units depending on the input arguments.
+    """
+    new_state = []
+
+    if r_enemy:
+        enemy_grid = np.zeros((grid_size,grid_size))
+        enemy_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.ENEMY]
+        
+        for i in range(0, len(enemy_units)):
+            cropped_x = enemy_units[i].x - x1
+            cropped_y = enemy_units[i].y - y1
+            y = int(math.ceil((cropped_x + 1) / 64/grid_size))
+            x = int(math.ceil((cropped_y + 1) / 64/grid_size))
+            enemy_grid[x-1][y-1] += 1
+
+        # Normalizing the values to always be between 0 and 1 (since the max amount of units in SC2 is 200)
+        # This code line can be commented out depending on your desired representation
+        enemy_grid = enemy_grid/200
+        # Adding the flattened grid matrix to the new_state
+        new_state.extend(enemy_grid.flatten())
+
+    if r_player:
+        player_grid = np.zeros((grid_size,grid_size))
+        player_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.SELF]
+
+        for i in range(0, len(player_units)):
+            cropped_x = player_units[i].x - x1
+            cropped_y = player_units[i].y - y1
+            y = int(math.ceil((cropped_x + 1) / (64/grid_size)))
+            x = int(math.ceil((cropped_y + 1) / (64/grid_size)))
+            player_grid[x-1][y-1] += 1
+
+        # Normalizing the values to always be between 0 and 1 (since the max amount of units in SC2 is 200)
+        # This code line can be commented out depending on your desired representation
+        player_grid = player_grid/200
+        # Adding the flattened grid matrix to the new_state
+        new_state.extend(player_grid.flatten())
+
+
+    if r_neutral:
+        neutral_grid = np.zeros((grid_size,grid_size))
+        neutral_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.NEUTRAL]
+
+        for i in range(0, len(neutral_units)):
+            cropped_x = neutral_units[i].x - x1
+            cropped_y = neutral_units[i].y - y1
+            y = int(math.ceil((cropped_x + 1) / (64/grid_size)))
+            x = int(math.ceil((cropped_y + 1) / (64/grid_size)))
+            neutral_grid[x-1][y-1] += 1
+
+        # Normalizing the values to always be between 0 and 1 (since the max amount of units in SC2 is 200)
+        # This code line can be commented out depending on your desired representation
+        neutral_grid = neutral_grid/200
+        # Adding the flattened grid matrix to the new_state
+        new_state.extend(neutral_grid.flatten())
+
+    final_state = np.array(new_state)
+    final_state = np.expand_dims(new_state, axis=0)
+    return final_state
