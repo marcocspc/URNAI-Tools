@@ -479,14 +479,35 @@ class Simple64GridState_SimpleTerran(StateBuilder):
         return self._state_size
 
 
+class SimpleCroppedGridState(StateBuilder):
+    def __init__(self, x1, y1, x2, y2, grid_size=4, r_enemy=False, r_player=False, r_neutral=False):
+        self.grid_size = grid_size
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+        self.r_enemy = r_enemy
+        self.r_player = r_player
+        self.r_neutral = r_neutral
+
+        num_grids = int(r_enemy) + int(r_player) + int(r_neutral)
+        self._state_size = int(num_grids*(self.grid_size**2))
+
+    def build_state(self, obs):
+        state = build_cropped_gridstate(obs, self.grid_size, self.x1, self.y1, self.x2, self.y2, self.r_enemy, self.r_player, self.r_neutral)
+        return state
+
+    def get_state_dim(self):
+        return self._state_size
+
 def trim_feature_minimap(feature_minimap):
     feature_minimap = np.delete(feature_minimap, np.s_[0:12:1], 0)
     feature_minimap = np.delete(feature_minimap, np.s_[44:63:1], 0)
     feature_minimap = np.delete(feature_minimap, np.s_[0:8:1], 1)
     feature_minimap = np.delete(feature_minimap, np.s_[44:63:1], 1)
-    return feature_minimap]
+    return feature_minimap
 
-def build_cropped_gridstate(obs, grid_size, x1, y1, r_enemy:bool, r_player:bool, r_neutral:bool):
+def build_cropped_gridstate(obs, grid_size, x1, y1, x2, y2, r_enemy:bool, r_player:bool, r_neutral:bool):
     """
     This function generates a series of grids based on a cropped raw SC2 representation.
     You can have a return vector with only the enemy, player or neutral units, or any mix of these three.
@@ -509,16 +530,14 @@ def build_cropped_gridstate(obs, grid_size, x1, y1, r_enemy:bool, r_player:bool,
     """
     new_state = []
 
+    cropped_x = x2-x1
+    cropped_y = y2-y1
+
     if r_enemy:
         enemy_grid = np.zeros((grid_size,grid_size))
         enemy_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.ENEMY]
-        
-        for i in range(0, len(enemy_units)):
-            cropped_x = enemy_units[i].x - x1
-            cropped_y = enemy_units[i].y - y1
-            y = int(math.ceil((cropped_x + 1) / 64/grid_size))
-            x = int(math.ceil((cropped_y + 1) / 64/grid_size))
-            enemy_grid[x-1][y-1] += 1
+
+        build_cropped_grid(player_units, cropped_x, cropped_y, grid_size, player_grid, x1, y1)
 
         # Normalizing the values to always be between 0 and 1 (since the max amount of units in SC2 is 200)
         # This code line can be commented out depending on your desired representation
@@ -530,12 +549,7 @@ def build_cropped_gridstate(obs, grid_size, x1, y1, r_enemy:bool, r_player:bool,
         player_grid = np.zeros((grid_size,grid_size))
         player_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.SELF]
 
-        for i in range(0, len(player_units)):
-            cropped_x = player_units[i].x - x1
-            cropped_y = player_units[i].y - y1
-            y = int(math.ceil((cropped_x + 1) / (64/grid_size)))
-            x = int(math.ceil((cropped_y + 1) / (64/grid_size)))
-            player_grid[x-1][y-1] += 1
+        build_cropped_grid(player_units, cropped_x, cropped_y, grid_size, player_grid, x1, y1)
 
         # Normalizing the values to always be between 0 and 1 (since the max amount of units in SC2 is 200)
         # This code line can be commented out depending on your desired representation
@@ -543,17 +557,11 @@ def build_cropped_gridstate(obs, grid_size, x1, y1, r_enemy:bool, r_player:bool,
         # Adding the flattened grid matrix to the new_state
         new_state.extend(player_grid.flatten())
 
-
     if r_neutral:
         neutral_grid = np.zeros((grid_size,grid_size))
         neutral_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.NEUTRAL]
 
-        for i in range(0, len(neutral_units)):
-            cropped_x = neutral_units[i].x - x1
-            cropped_y = neutral_units[i].y - y1
-            y = int(math.ceil((cropped_x + 1) / (64/grid_size)))
-            x = int(math.ceil((cropped_y + 1) / (64/grid_size)))
-            neutral_grid[x-1][y-1] += 1
+        build_cropped_grid(neutral_units, cropped_x, cropped_y, grid_size, neutral_grid, x1, y1)
 
         # Normalizing the values to always be between 0 and 1 (since the max amount of units in SC2 is 200)
         # This code line can be commented out depending on your desired representation
@@ -564,3 +572,13 @@ def build_cropped_gridstate(obs, grid_size, x1, y1, r_enemy:bool, r_player:bool,
     final_state = np.array(new_state)
     final_state = np.expand_dims(new_state, axis=0)
     return final_state
+
+def build_cropped_grid(unit_list, cropped_x, cropped_y, grid_size, unit_grid, x1, y1):
+    for i in range(0, len(unit_list)):
+        unit_x = unit_list[i].x - x1
+        unit_y = unit_list[i].y - y1
+
+        if( (unit_x < cropped_x) and (unit_y < cropped_y)):
+            y = int(math.ceil( (unit_x + 1) / (cropped_x/grid_size) ))
+            x = int(math.ceil( (unit_y + 1) / (cropped_y/grid_size) ))
+            unit_grid[x-1][y-1] += 1

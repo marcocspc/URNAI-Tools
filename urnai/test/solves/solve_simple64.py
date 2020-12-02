@@ -13,7 +13,7 @@ from agents.sc2_agent import SC2Agent
 from agents.actions.sc2_wrapper import SimpleTerranWrapper
 from agents.actions.mo_spatial_terran_wrapper import MOspatialTerranWrapper
 from agents.rewards.sc2 import KilledUnitsReward
-from agents.states.sc2 import Simple64GridState
+from agents.states.sc2 import Simple64GridState, SimpleCroppedGridState
 from models.ddqn_keras import DDQNKeras
 from models.ddqn_keras_mo import DDQNKerasMO
 from utils.functions import query_yes_no
@@ -39,7 +39,8 @@ def main(unused_argv):
         env = SC2Env(map_name="Simple64", render=False, step_mul=16, player_race="terran", enemy_race="random", difficulty="very_easy")
         
         action_wrapper = SimpleTerranWrapper()
-        state_builder = Simple64GridState(grid_size=4)
+        #state_builder = Simple64GridState(grid_size=4)
+        state_builder = SimpleCroppedGridState(grid_size=4, x1=10, y1=10, x2=50, y2=50, r_enemy=False, r_player=True, r_neutral=True)
         
         helper = ModelBuilder()
         helper.add_input_layer(nodes=50)
@@ -52,15 +53,15 @@ def main(unused_argv):
         # Terran agent
         agent = SC2Agent(dq_network, KilledUnitsReward())
 
-        trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_v_easy",
-                        save_every=100, enable_save=True, relative_path=False, reset_epsilon=False,
-                        max_training_episodes=3000, max_steps_training=1200,
-                        max_test_episodes=100, max_steps_testing=1200)
+        # trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_v_easy",
+        #                 save_every=100, enable_save=True, relative_path=False, reset_epsilon=False,
+        #                 max_training_episodes=3000, max_steps_training=1200,
+        #                 max_test_episodes=100, max_steps_testing=1200)
 
-        # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_test_2",
-        #                 save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
-        #                 max_training_episodes=4, max_steps_training=1200,
-        #                 max_test_episodes=1, max_steps_testing=1200)
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_croppgrid_1",
+                        save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
+                        max_training_episodes=4, max_steps_training=800,
+                        max_test_episodes=1, max_steps_testing=800)
         trainer.train()
         trainer.play()
 
