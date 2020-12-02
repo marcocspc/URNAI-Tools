@@ -112,6 +112,23 @@ negative_rdw: {}
 
 
         #rwd = negative_rwd + rwdB + rwdC
+        rp.report(
+                '''
+Calculated reward is: {},
+composed of:
+supply_depot_amount: {},
+barracks_amount: {},
+marines_amount: {},
+negative_rdw: {}
+                '''.format(
+                    negative_rwd + supply_depot_amount_diff + barracks_amount_diff  * 10 + marines_amount_diff * 100,
+                    supply_depot_amount_diff,
+                    barracks_amount_diff * 10,
+                    marines_amount_diff * 100,
+                    negative_rwd
+                    ),
+               verbosity_lvl = 1 
+                )
         if supply_depot_amount_diff < 0 or barracks_amount_diff < 0 or marines_amount_diff < 0:
             return 0
         else:

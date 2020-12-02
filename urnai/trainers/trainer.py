@@ -238,6 +238,9 @@ class Trainer(Savable):
                 # Take the action (a) and observe the outcome state(s') and reward (r)
                 obs, default_reward, done = self.env.step(action)
 
+                is_last_step = step == self.max_steps_testing - 1
+                done = done or is_last_step
+
                 if reward_from_agent:
                     step_reward = self.agent.get_reward(obs, default_reward, done)
                 else:
@@ -247,8 +250,6 @@ class Trainer(Savable):
 
                 ep_actions[self.agent.previous_action] += 1
 
-                is_last_step = step == self.max_steps_testing - 1
-                done = done or is_last_step
                 # If done: finish episode
                 if done:
                     victory = default_reward == 1

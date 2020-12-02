@@ -6,7 +6,7 @@
                 "method": "single",
                 "state_builder_method": "map",
                 "map_reduction_factor" : 4,
-                "game": "sc2",
+                "game": "drts",
                 "render": false
             }
         },
@@ -55,7 +55,7 @@
             "class": "Trainer",
             "params": {
                 "file_name": "agent_drts_only_collectables_highway_to_hell",
-                "max_training_episodes": 20000,
+                "max_training_episodes": 10000,
                 "max_steps_training": 50,
                 "max_test_episodes": 100,
                 "max_steps_testing": 50,

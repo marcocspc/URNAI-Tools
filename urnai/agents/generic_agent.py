@@ -36,4 +36,4 @@ class GenericAgent(Agent):
             current_state = self.build_state(obs)
             predicted_action_idx = self.model.predict(current_state)
             self.previous_action = predicted_action_idx
-        return self.action_wrapper.get_action(predicted_action_idx, obs)
+        return self.action_wrapper.get_action(self.previous_action, obs)

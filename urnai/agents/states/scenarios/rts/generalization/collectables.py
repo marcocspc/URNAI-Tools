@@ -12,7 +12,7 @@ import math
 
 class CollectablesGeneralizedStatebuilder(StateBuilder):
 
-    def __init__(self, method=RTSGeneralization.STATE_MAP, map_reduction_factor=RTSGeneralization.STATE_MAP_DEFAULT_REDUCTIONFACTOR):
+    def __init__(self, method=RTSGeneralization.STATE_MAP, map_reduction_factor=RTSGeneralization.STATE_MAP_DEFAULT_REDUCTIONFACTOR, trim_map=False):
         self.previous_state = None
         self.method = method
         #number of quadrants is the amount of parts
@@ -42,6 +42,7 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
                 0, 
 #                0,
                 ]
+        self.trim_map=trim_map
 
     def get_game(self, obs):
         try:
@@ -171,11 +172,12 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
 
     def get_state_dim(self):
         if self.method == RTSGeneralization.STATE_MAP:
-            #size = 64 / self.map_reduction_factor
-            #return int(size * size) 
-            #return 22 * 16 
-            a = int(22 / self.map_reduction_factor) 
-            b = int(16 / self.map_reduction_factor) 
+            if self.trim_map:
+                a = int(22 / self.map_reduction_factor) 
+                b = int(16 / self.map_reduction_factor) 
+            else:
+                a = int(64 / self.map_reduction_factor)
+                b = int(64 / self.map_reduction_factor)
             return int(a * b)
         elif self.method == RTSGeneralization.STATE_NON_SPATIAL:
             return len(self.non_spatial_state)
@@ -281,7 +283,8 @@ class CollectablesGeneralizedStatebuilder(StateBuilder):
         return specific_units
 
     def reduce_map(self, map_):
-        x1, y1 = 22, 28
-        x2, y2 = 43, 43 
-        map_ = trim_matrix(map_, x1, y1, x2, y2)
+        if self.trim_map:
+            x1, y1 = 22, 28
+            x2, y2 = 43, 43 
+            map_ = trim_matrix(map_, x1, y1, x2, y2)
         return lower_featuremap_resolution(map_, self.map_reduction_factor)

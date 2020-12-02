@@ -26,7 +26,7 @@ class GeneralizedCollectablesScenario(ABScenario):
     TRAINING_METHOD_SINGLE_ENV = "single"
     TRAINING_METHOD_MULTIPLE_ENV = "multiple"
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-16x22-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV, state_builder_method=RTSGeneralization.STATE_MAP, updates_per_action = 12, step_mul=32, map_reduction_factor=RTSGeneralization.STATE_MAP_DEFAULT_REDUCTIONFACTOR):
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-16x22-collectables.json", sc2_map="CollectMineralShards", drts_number_of_players=1, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV, state_builder_method=RTSGeneralization.STATE_MAP, updates_per_action = 12, step_mul=32, map_reduction_factor=RTSGeneralization.STATE_MAP_DEFAULT_REDUCTIONFACTOR, trim_map=False):
         self.state_builder_method = state_builder_method
         self.game = game
         self.steps = 0
@@ -50,6 +50,7 @@ class GeneralizedCollectablesScenario(ABScenario):
         self.drts_action_noaction = 15
 
         self.map_reduction_factor = map_reduction_factor
+        self.trim_map = trim_map
 
         self.envs = None
 
@@ -292,6 +293,7 @@ class GeneralizedCollectablesScenario(ABScenario):
     def get_default_state_builder(self):
         wrapper = MultipleScenarioStateBuilder(self.__class__.__name__, method=self.state_builder_method)
         wrapper.state_builder.map_reduction_factor = self.map_reduction_factor
+        wrapper.trim_map = self.trim_map
         return wrapper
 
     def random_tile(self):
