@@ -21,16 +21,16 @@ class TestParams():
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
 
-    def __init__(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False, log_actions=True):
+    def __init__(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False, log_actions=True, episode_batch_avg_calculation=10, do_reward_test=False, reward_test_number_of_episodes=10):
         super().__init__()
         self.pickle_black_list = None 
         self.prepare_black_list()
-        self.setup(env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path, file_name, enable_save, save_every, relative_path, debug_level, reset_epsilon, tensorboard_logging, log_actions)
+        self.setup(env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path, file_name, enable_save, save_every, relative_path, debug_level, reset_epsilon, tensorboard_logging, log_actions, episode_batch_avg_calculation=episode_batch_avg_calculation, do_reward_test=do_reward_test, reward_test_number_of_episodes=reward_test_number_of_episodes)
 
     def prepare_black_list(self):
         self.pickle_black_list = ["save_path", "file_name", "full_save_path", "full_save_play_path", "agent", "max_training_episodes","max_test_episodes","max_steps_training","max_steps_testing"]
 
-    def setup(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False, log_actions=True):
+    def setup(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False, log_actions=True, episode_batch_avg_calculation=10, do_reward_test=False, reward_test_number_of_episodes=10):
         self.versioner = Versioner() 
         self.env = env
         self.agent = agent
@@ -49,8 +49,12 @@ class Trainer(Savable):
         rp.VERBOSITY_LEVEL = debug_level
         self.tensorboard_logging = tensorboard_logging
         self.log_actions = log_actions
+        self.episode_batch_avg_calculation = episode_batch_avg_calculation
+        self.do_reward_test=do_reward_test
+        self.reward_test_number_of_episodes = reward_test_number_of_episodes
+        self.inside_training_test_loggers = []
 
-        self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__, log_actions=self.log_actions) 
+        self.logger = Logger(0, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__, log_actions=self.log_actions, episode_batch_avg_calculation=self.episode_batch_avg_calculation) 
 
         # Adding epsilon, learning rate and gamma factors to our pickle black list, 
         # so that they are not loaded when loading the model's weights.
@@ -124,7 +128,7 @@ class Trainer(Savable):
 
         rp.report("> Training")
         if self.logger.ep_count == 0:
-            self.logger = Logger(self.max_training_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__, log_actions=self.log_actions) 
+            self.logger = Logger(self.max_training_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__, log_actions=self.log_actions, episode_batch_avg_calculation = self.episode_batch_avg_calculation) 
 
         if test_params != None:
             test_params.logger = self.logger
@@ -183,11 +187,34 @@ class Trainer(Savable):
                     break
             
             self.logger.log_ep_stats()
+
+            #check if user wants to pause training and test agent
+            #if self.do_reward_test and self.curr_training_episodes % self.episode_batch_avg_calculation == 0 and self.curr_training_episodes > 1:
+            if self.do_reward_test and self.curr_training_episodes % self.episode_batch_avg_calculation == 0:
+                self.test_agent()
+
             if self.enable_save and self.curr_training_episodes > 0 and self.curr_training_episodes % self.save_every == 0:
-                #self.logger.log_ep_stats()
                 self.save(self.full_save_path)
-            #if enable_save and episode > 0 and episode % save_steps == 0:
-                #self.save(self.full_save_path)
+
+                #if we have done tests along the training
+                #save all loggers for further detailed analysis
+                #this was needed because the play() method
+                #was saving these loggers every test, slowing down
+                #training a lot. Putting this code here allows
+                #to save them once and optimize training time.
+                if self.do_reward_test and len(self.inside_training_test_loggers) > 0:
+                    for idx in range(len(self.logger.ep_avg_batch_rewards_episodes)):
+                        logger_dict = self.inside_training_test_loggers[idx]
+                        if not logger_dict["saved"]:
+                            episode = self.logger.ep_avg_batch_rewards_episodes[idx]
+                            backup_full_save_path = self.full_save_path
+                            self.full_save_path = self.full_save_path + os.path.sep + "inside_training_play_files" + os.path.sep + "test_at_training_episode_{}".format(episode)
+                            self.make_persistance_dirs(self.log_actions)
+                            logger_dict["logger"].save(self.full_save_path)
+                            logger_dict["saved"] = True
+                            self.full_save_path = backup_full_save_path
+
+
 
             if test_params != None and self.curr_training_episodes % test_params.test_steps == 0 and episode != 0:
                 test_params.current_ep_count = self.curr_training_episodes
@@ -199,6 +226,7 @@ class Trainer(Savable):
                     rp.report("> Stopping training")
                     break
 
+
         end_time = time.time()
         rp.report("\n> Training duration: {} seconds".format(end_time - start_time))
 
@@ -207,12 +235,29 @@ class Trainer(Savable):
         # Saving the model when the training has ended
         if self.enable_save:
             self.save(self.full_save_path)
+            #if we have done tests along the training
+            #save all loggers for further detailed analysis
+            #this was needed because the play() method
+            #was saving these loggers every test, slowing down
+            #training a lot. Putting this code here allows
+            #to save them once and optimize training time.
+            if self.do_reward_test and len(self.inside_training_test_loggers) > 0:
+                for idx in range(len(self.logger.ep_avg_batch_rewards_episodes)):
+                    logger_dict = self.inside_training_test_loggers[idx]
+                    if not logger_dict["saved"]:
+                        episode = self.logger.ep_avg_batch_rewards_episodes[idx]
+                        backup_full_save_path = self.full_save_path
+                        self.full_save_path = self.full_save_path + os.path.sep + "inside_training_play_files" + os.path.sep + "test_at_training_episode_{}".format(episode)
+                        self.make_persistance_dirs(self.log_actions)
+                        logger_dict["logger"].save(self.full_save_path)
+                        logger_dict["saved"] = True
+                        self.full_save_path = backup_full_save_path
 
 
     def play(self, test_params=None, reward_from_agent = True):
         rp.report("\n\n> Playing")
 
-        self.logger = Logger(self.max_test_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__, log_actions=self.log_actions) 
+        self.logger = Logger(self.max_test_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__, log_actions=self.log_actions, episode_batch_avg_calculation=self.episode_batch_avg_calculation) 
 
         while self.curr_playing_episodes < self.max_test_episodes:
             self.curr_playing_episodes += 1
@@ -273,6 +318,47 @@ class Trainer(Savable):
         if self.enable_save:
             self.logger.save(self.full_save_play_path)
             rp.save(self.full_save_play_path)
+
+    def test_agent(self):
+        #backup attributes
+        max_test_episodes_backup = self.max_test_episodes
+        curr_playing_episodes_backup = self.curr_playing_episodes
+        logger_backup = self.logger
+        #full_save_play_path_backup = self.full_save_play_path
+        enable_save_backup = self.enable_save
+
+        #set attributes to test agent
+        self.enable_save = False
+        #self.full_save_play_path = self.full_save_path + os.path.sep + "inside_training_play_files" + os.path.sep + "test_at_training_episode_{}".format(self.curr_training_episodes)
+        #self.make_persistance_dirs(self.log_actions)
+        self.max_test_episodes = self.reward_test_number_of_episodes 
+        self.curr_playing_episodes = 0
+
+        rp.report("> Starting to check current agent performance.")
+        #make the agent play
+        self.play()
+        rp.report("> Finished checking current agent performance.")
+
+        #get_reward_avg
+        rwd_avg = self.logger.ep_avg_rewards[-1] 
+        #save this logger for later saving
+        #this is needed to get some more detailed
+        #info on tests
+        logger_dict = {}
+        logger_dict["logger"] = self.logger
+        logger_dict["saved"] = False
+        self.inside_training_test_loggers.append(logger_dict)
+
+
+        #restore backup
+        self.max_test_episodes = max_test_episodes_backup
+        self.curr_playing_episodes = curr_playing_episodes_backup
+        self.logger = logger_backup
+        #self.full_save_play_path = full_save_play_path_backup
+        self.enable_save = enable_save_backup
+
+        #register reward avg:
+        self.logger.inside_training_test_avg_rwds.append(rwd_avg) 
 
     def save_extra(self, save_path):
         self.env.save(save_path)

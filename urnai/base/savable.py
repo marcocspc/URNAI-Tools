@@ -97,6 +97,7 @@ class Savable(ABC):
         This method saves pickle objects
         and extra stuff needed
         '''
+        rp.report("Saving {} object...".format(self.__class__.__name__), verbosity_lvl=1)
         self.save_pickle(savepath)
         self.save_extra(savepath)
 

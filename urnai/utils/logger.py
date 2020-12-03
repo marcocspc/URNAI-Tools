@@ -41,6 +41,7 @@ class Logger(Savable):
         self.ep_avg_rewards = []
         self.ep_avg_batch_rewards = [] 
         self.ep_avg_batch_rewards_episodes = [] 
+        self.inside_training_test_avg_rwds = []
 
         # Steps count
         self.ep_steps_count = []
@@ -262,6 +263,11 @@ class Logger(Savable):
         return self.__plot_curve(self.ep_avg_batch_rewards_episodes, self.ep_avg_batch_rewards, 'Episode Count',
                             'Ep Avg Reward', r'Episode Reward over training')
 
+    def plot_inside_training_test_avg_rwds(self):
+        # Plotting average reward graph
+        return self.__plot_curve(self.ep_avg_batch_rewards_episodes, self.inside_training_test_avg_rwds, 'Episode Count',
+                            'Training Tests Avg Reward', r'Training Tests Average Reward Evolution')
+
     def plot_win_rate_graph(self):
         # Plotting average reward graph
         return self.__plot_curve(range(self.ep_count), self.ep_avg_victories, 'Episode Count',
@@ -370,12 +376,20 @@ class Logger(Savable):
                 plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "agent_{}_graph.pdf".format(key))
                 plt.close(temp_fig)
 
-            # Plotting new reward calculation graphs
+            # Plotting batch reward calculation graphs
             fig = self.plot_batch_reward_graph()
             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "batch_reward_graph.png")
             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "batch_reward_graph.pdf")
             plt.close(fig)
             fig = None
+
+            # Plotting average reward for training tests
+            if len(self.inside_training_test_avg_rwds) > 0:
+                fig = self.plot_inside_training_test_avg_rwds()
+                plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inside_training_test_avg_rwds.png")
+                plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "inside_training_test_avg_rwds.pdf")
+                plt.close(fig)
+                fig = None
 
             # Plotting performance info
             fig_names = [

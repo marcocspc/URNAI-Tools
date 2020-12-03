@@ -75,7 +75,6 @@ class CollectablesDeepRTSActionWrapper(ActionWrapper):
             self.reset()
 
     def is_action_done(self):
-        #return len(self.action_queue) == 0 
         return True
 
     def reset(self):

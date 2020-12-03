@@ -96,8 +96,8 @@ class DqlTensorFlow(LearningModel):
         return mxq
 
     def choose_action(self, state, excluded_actions=[]):
-
         expl_expt_tradeoff = np.random.rand()
+        action = None
 
         if self.epsilon_greedy > expl_expt_tradeoff:
             ex_int = self.actions[random.randint(0, len(self.actions) - 1)]

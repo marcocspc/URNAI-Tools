@@ -34,6 +34,8 @@ class GenericAgent(Agent):
         predicted_action_idx = None 
         if self.action_wrapper.is_action_done():
             current_state = self.build_state(obs)
-            predicted_action_idx = self.model.predict(current_state)
+            excluded_actions = self.action_wrapper.get_excluded_actions(obs)
+            predicted_action_idx = self.model.predict(current_state, excluded_actions)
             self.previous_action = predicted_action_idx
+            self.previous_state = current_state
         return self.action_wrapper.get_action(self.previous_action, obs)
