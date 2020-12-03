@@ -19,7 +19,7 @@
             }
         },
         "model" : {
-            "class" : "PGKeras",
+            "class" : "DqlTensorFlow",
             "params" : {
                 "learning_rate" : 0.005,
                 "gamma" : 0.9,

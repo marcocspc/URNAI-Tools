@@ -41,7 +41,7 @@ class FileTrainer(Trainer):
         else:
             raise FileFormatNotSupportedError("FileTrainer only supports JSON and CSV formats.")
 
-    def start_training(self, play_only=False):
+    def start_training(self, play_only=False, setup_only=False):
         scenario = False
         self.check_trainings()
         for training in self.trainings:
@@ -76,10 +76,11 @@ class FileTrainer(Trainer):
 
             self.setup(env, agent, **training["trainer"]["params"])
 
-            if not play_only:
-                self.train()
+            if not setup_only:
+                if not play_only:
+                    self.train()
 
-            self.play()
+                self.play()
 
     def check_trainings(self):
         for training in self.trainings:
