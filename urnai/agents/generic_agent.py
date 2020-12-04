@@ -24,14 +24,11 @@ class GenericAgent(Agent):
             self.previous_action = current_action_idx
             self.previous_state = current_state
 
-        # Returns the decoded action from action_wrapper
         return self.action_wrapper.get_action(self.previous_action, obs)
 
+        # Returns the decoded action from action_wrapper
+
     def play(self, obs):
-        #this is needed because newer python versions
-        #complain about predicted_action_idx being referenced
-        #before assingment
-        predicted_action_idx = None 
         if self.action_wrapper.is_action_done():
             current_state = self.build_state(obs)
             excluded_actions = self.action_wrapper.get_excluded_actions(obs)

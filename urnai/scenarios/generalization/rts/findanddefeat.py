@@ -23,8 +23,8 @@ class GeneralizedFindAndDefeatScenario(GeneralizedCollectablesScenario):
     TRAINING_METHOD_SINGLE_ENV = "single_environment"
     TRAINING_METHOD_MULTIPLE_ENV = "multiple_environment"
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-43x31-findanddefeat.json", sc2_map="FindAndDefeatZerglings", drts_number_of_players=2, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV, state_builder_method=RTSGeneralization.STATE_MAP, updates_per_action = 12, step_mul=8):
-        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=drts_number_of_players, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food, fit_to_screen=fit_to_screen, method=method, state_builder_method=state_builder_method, updates_per_action=updates_per_action, step_mul=step_mul)
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-43x31-findanddefeat.json", sc2_map="FindAndDefeatZerglings", drts_number_of_players=2, drts_start_oil=99999, drts_start_gold=99999, drts_start_lumber=99999, drts_start_food=99999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV, state_builder_method=RTSGeneralization.STATE_MAP, updates_per_action = 12, step_mul=8, sc2_real_time_rendering=False):
+        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=drts_number_of_players, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food, fit_to_screen=fit_to_screen, method=method, state_builder_method=state_builder_method, updates_per_action=updates_per_action, step_mul=step_mul, sc2_real_time_rendering=sc2_real_time_rendering)
         
         self.drts_attack_radius = 5
 

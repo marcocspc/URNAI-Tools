@@ -87,8 +87,8 @@ class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):
     ACTION_DRTS_BUILD_BARRACK = 19
     ACTION_DRTS_BUILD_FOOTMAN = 20
 
-    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-22x16-buildunits.json", sc2_map="BuildMarines", drts_start_oil=999999, drts_start_gold=0, drts_start_lumber=999999, drts_start_food=999999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV, state_builder_method=RTSGeneralization.STATE_MAP, updates_per_action = 6, step_mul=8):
-        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=1, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food, fit_to_screen=fit_to_screen, method=method, state_builder_method=state_builder_method, updates_per_action=updates_per_action, step_mul=step_mul)
+    def __init__(self, game = GAME_DEEP_RTS, render=False, drts_map="total-64x64-playable-22x16-buildunits.json", sc2_map="BuildMarines", drts_start_oil=999999, drts_start_gold=0, drts_start_lumber=999999, drts_start_food=999999, fit_to_screen=False, method=TRAINING_METHOD_SINGLE_ENV, state_builder_method=RTSGeneralization.STATE_MAP, updates_per_action = 6, step_mul=8, sc2_real_time_rendering=False):
+        super().__init__(game=game, render=render, drts_map=drts_map, sc2_map=sc2_map, drts_number_of_players=1, drts_start_oil=drts_start_oil, drts_start_gold=drts_start_gold, drts_start_lumber=drts_start_lumber, drts_start_food=drts_start_food, fit_to_screen=fit_to_screen, method=method, state_builder_method=state_builder_method, updates_per_action=updates_per_action, step_mul=step_mul, sc2_real_time_rendering=sc2_real_time_rendering)
         self.farm_spawn_points = GeneralizedBuildUnitsScenario.MAP_PLAYER_FARM_COORDINATES
         self.barrack_spawn_points = GeneralizedBuildUnitsScenario.MAP_PLAYER_BARRACK_COORDINATES
 
