@@ -28,20 +28,20 @@ def main(unused_argv):
         state_builder = GymState(env.env_instance.observation_space.shape[0])
 
         helper = ModelBuilder()
-        helper.add_input_layer(int(state_builder.get_state_dim()), nodes=50)
+        helper.add_input_layer(nodes=50)
         helper.add_fullyconn_layer(50)
         #helper.add_fullyconn_layer(12)
-        helper.add_output_layer(action_wrapper.get_action_space_dim())
+        helper.add_output_layer()
 
 
         # dq_network = DQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, 
         #                         gamma=0.99, learning_rate=0.001, epsilon_decay=0.9995, epsilon_min=0.01, 
         #                         build_model=helper.get_model_layout(), memory_maxlen=5000)
 
-        # dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), use_memory=False,
-        #                     gamma=0.99, learning_rate=0.001, epsilon_decay=0.9997, epsilon_min=0.01, memory_maxlen=50000, min_memory_size=1000)
+        dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), use_memory=False,
+                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.9997, epsilon_min=0.01, memory_maxlen=50000, min_memory_size=1000)
 
-        dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
+        # dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
 
         agent = GenericAgent(dq_network, PureReward())
 

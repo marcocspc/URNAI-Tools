@@ -513,7 +513,7 @@ def build_cropped_gridstate(obs, grid_size, x1, y1, x2, y2, r_enemy:bool, r_play
     You can have a return vector with only the enemy, player or neutral units, or any mix of these three.
     The cropping logic is the following: you could have a 64x64 SC2 map but the playable part is restricted 
     to a rectangle defined by the top-left point with x1=20 and y1=25 and the bottom right point with x2=40, y2=45.
-    The point (x1,y1) will be used to calculate the position of units relative to the playable area.
+    The points (x1,y1) and (x2,y2) will be used to calculate the position of units relative to the playable area.
     This would, for example, mean that a unit that originally was on the (24,27) point will now be on the (4,2) on our cropped representation.
 
     Args:

@@ -1,3 +1,11 @@
+"""This file has errors. It will not work at the moment"""
+
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+parentdir = os.path.dirname(parentdir)
+sys.path.insert(0,parentdir)
+
 from absl import app
 from urnai.envs.gym import GymEnv
 from urnai.trainers.trainer import Trainer
@@ -7,8 +15,9 @@ from urnai.agents.actions.gym_wrapper import GymWrapper
 from urnai.agents.rewards.default import PureReward
 from urnai.agents.states.gym import PureState
 from urnai.agents.states.gym import GymState
+from urnai.models.dqn_keras import DQNKeras
+from urnai.models.ddqn_keras import DDQNKeras
 from urnai.models.pg_keras import PGKeras
-from urnai.models.dqn_keras_mem import DQNKerasMem
 from urnai.models.model_builder import ModelBuilder
 
 def main(unused_argv):
@@ -21,13 +30,12 @@ def main(unused_argv):
         #state_builder = GymState(env)
 
         helper = ModelBuilder()
-        helper.add_input_layer(int(state_builder.get_state_dim()))
+        helper.add_input_layer()
         helper.add_fullyconn_layer(25)
-        helper.add_output_layer(action_wrapper.get_action_space_dim())
+        helper.add_output_layer()
 
-        dq_network = DQNKerasMem(action_wrapper=action_wrapper, state_builder=state_builder, 
-                                 gamma=0.99, learning_rate=0.001, epsilon_decay=0.95, epsilon_min=0.01, 
-                                 build_model=helper.get_model_layout(), memory_maxlen=10000, batch_size=64)
+        dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), use_memory=False,
+                            gamma=0.99, learning_rate=0.001, epsilon_decay=0.9997, epsilon_min=0.01, memory_maxlen=50000, min_memory_size=1000)
 
         agent = GenericAgent(dq_network, PureReward())
 

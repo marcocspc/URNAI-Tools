@@ -1,3 +1,9 @@
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+parentdir = os.path.dirname(parentdir)
+sys.path.insert(0,parentdir)
+
 from absl import app
 from urnai.envs.gym import GymEnv
 from urnai.trainers.trainer import Trainer
@@ -6,7 +12,6 @@ from urnai.agents.generic_agent import GenericAgent
 from urnai.agents.actions.gym_wrapper import GymWrapper
 from urnai.agents.rewards.gym import FrozenlakeReward
 from urnai.agents.states.gym import FrozenLakeState
-from urnai.models.dqn_keras_mem import DQNKerasMem
 from urnai.models.ddqn_keras import DDQNKeras 
 from urnai.models.model_builder import ModelBuilder
 from datetime import datetime
@@ -20,6 +25,7 @@ def main(unused_argv):
 
         training_date = str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_")
 
+        """
         helper = ModelBuilder()
         helper.add_input_layer(int(state_builder.get_state_dim()))
         helper.add_fullyconn_layer(256)
@@ -33,20 +39,23 @@ def main(unused_argv):
         # FrozenLake is solved when the agent is able to reach the end of the maze 100% of the times
         trainer.train(num_episodes=3000, reward_from_env=True, max_steps=3000)
         trainer.play(num_matches=100)
+        """
 
         helper = ModelBuilder()
-        helper.add_input_layer(int(state_builder.get_state_dim()))
+        helper.add_input_layer()
         helper.add_fullyconn_layer(256)
         helper.add_fullyconn_layer(256)
         helper.add_fullyconn_layer(256)
         helper.add_fullyconn_layer(256)
-        helper.add_output_layer(action_wrapper.get_action_space_dim())
+        helper.add_output_layer()
         dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, learning_rate=0.005, gamma=0.90, use_memory=False, per_episode_epsilon_decay = True, build_model=helper.get_model_layout())
         agent = GenericAgent(dq_network, FrozenlakeReward())
-        trainer = Trainer(env, agent, file_name=training_date + os.path.sep + "frozenlake_test_ddqnKeras", save_every=1000, enable_save=True)
+        trainer = Trainer(env, agent, file_name=training_date + os.path.sep + "frozenlake_test_ddqnKeras", save_every=1000, enable_save=True,
+                            max_training_episodes = 1000, max_steps_training=500,
+                            max_test_episodes=10, max_steps_testing=500)
         # FrozenLake is solved when the agent is able to reach the end of the maze 100% of the times
-        trainer.train(num_episodes=3000, reward_from_env=True, max_steps=3000)
-        trainer.play(num_matches=100)
+        trainer.train()
+        trainer.play()
 
         # helper = ModelBuilder()
         # helper.add_input_layer(int(state_builder.get_state_dim()))

@@ -40,7 +40,7 @@ def main(unused_argv):
         
         action_wrapper = SimpleTerranWrapper()
         #state_builder = Simple64GridState(grid_size=4)
-        state_builder = SimpleCroppedGridState(grid_size=4, x1=10, y1=10, x2=50, y2=50, r_enemy=False, r_player=True, r_neutral=True)
+        state_builder = SimpleCroppedGridState(grid_size=4, x1=10, y1=10, x2=50, y2=50, r_enemy=True, r_player=True, r_neutral=False)
         
         helper = ModelBuilder()
         helper.add_input_layer(nodes=50)
@@ -58,7 +58,7 @@ def main(unused_argv):
         #                 max_training_episodes=3000, max_steps_training=1200,
         #                 max_test_episodes=100, max_steps_testing=1200)
 
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_croppgrid_1",
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_exemplo",
                         save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
                         max_training_episodes=4, max_steps_training=800,
                         max_test_episodes=1, max_steps_testing=800)
