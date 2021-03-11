@@ -44,9 +44,12 @@ class LearningModel(Savable):
 
 
     @abstractmethod
-    def choose_action(self, state, excluded_actions=[]) -> ActionIndex:
+    def choose_action(self, state, excluded_actions=[], is_testing=False) -> ActionIndex:
         '''
-        Implements the exploration exploitation method for the model.
+        Implements the logic for choosing an action while training and while testing an Agent.
+        For most Reinforcement Learning Algorithms, this method will choose an action directly
+        When is_testing=True, and will implement the exploration algorithm for when is_testing=False.
+        One such exploration algorithm commonly used it the epsilon greedy strategy.
         '''
         pass
 

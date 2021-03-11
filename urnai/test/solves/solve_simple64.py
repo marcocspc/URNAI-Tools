@@ -58,11 +58,11 @@ def main(unused_argv):
         #                 max_training_episodes=3000, max_steps_training=1200,
         #                 max_test_episodes=100, max_steps_testing=1200)
 
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_exemplo",
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_exemplo2",
                         save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
                         max_training_episodes=4, max_steps_training=800,
                         max_test_episodes=1, max_steps_testing=800)
-        trainer.train()
+        #trainer.train()
         trainer.play()
 
     except KeyboardInterrupt:

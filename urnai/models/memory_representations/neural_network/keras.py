@@ -55,7 +55,8 @@ class KerasDeepNeuralNetwork(ABNeuralNetwork):
         return self.model.predict(state)
 
     #TODO
-    #def set_seed(self) -> None:
+    def set_seed(self) -> None:
+        pass
 
     def create_base_model(self):
         model = Sequential()

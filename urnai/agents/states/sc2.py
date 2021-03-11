@@ -537,7 +537,7 @@ def build_cropped_gridstate(obs, grid_size, x1, y1, x2, y2, r_enemy:bool, r_play
         enemy_grid = np.zeros((grid_size,grid_size))
         enemy_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.ENEMY]
 
-        build_cropped_grid(player_units, cropped_x, cropped_y, grid_size, player_grid, x1, y1)
+        build_cropped_grid(enemy_units, cropped_x, cropped_y, grid_size, enemy_grid, x1, y1)
 
         # Normalizing the values to always be between 0 and 1 (since the max amount of units in SC2 is 200)
         # This code line can be commented out depending on your desired representation

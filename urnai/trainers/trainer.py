@@ -156,7 +156,7 @@ class Trainer(Savable):
             for step in range(self.max_steps_training):
                 
                 # Choosing an action and passing it to our env.step() in order to act on our environment
-                action = self.agent.step(obs, done)
+                action = self.agent.step(obs, done, is_testing=False)
                 obs, default_reward, done = self.env.step(action)
 
                 is_last_step = step == self.max_steps_training - 1
@@ -279,7 +279,7 @@ class Trainer(Savable):
             self.logger.record_episode_start()
 
             for step in range(self.max_steps_testing):
-                action = self.agent.play(obs)
+                action = self.agent.step(obs, done, is_testing=True)
                 # Take the action (a) and observe the outcome state(s') and reward (r)
                 obs, default_reward, done = self.env.step(action)
 

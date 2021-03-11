@@ -21,7 +21,7 @@ from urnai.models.model_builder import ModelBuilder
 
 def main(unused_argv):
     try:
-        env = GymEnv(id="CartPole-v1")
+        env = GymEnv(id="CartPole-v1", render=True)
 
         action_wrapper = env.get_action_wrapper()
         #state_builder = PureState(env.env_instance.observation_space)

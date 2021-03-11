@@ -147,15 +147,20 @@ class DQNKeras(LearningModel):
             self.decay_epsilon()
 
 
-    def choose_action(self, state, excluded_actions=[]):
-        if np.random.rand() <= self.epsilon_greedy:
-            random_action = random.choice(self.actions)
-            # Removing excluded actions
-            while random_action in excluded_actions:
-                random_action = random.choice(self.actions)
-            return random_action
-        else:
+    def choose_action(self, state, excluded_actions=[], is_testing=False):
+        # Verifies if we are running a test (Evaluating our agent)
+        if is_testing:
             return self.predict(state, excluded_actions)
+        # If we are not testing (therefore we are training), evaluate epsilon greedy strategy
+        else:
+            if np.random.rand() <= self.epsilon_greedy:
+                random_action = random.choice(self.actions)
+                # Removing excluded actions
+                while random_action in excluded_actions:
+                    random_action = random.choice(self.actions)
+                return random_action
+            else:
+                return self.predict(state, excluded_actions)
         
     def predict(self, state, excluded_actions=[]):
         '''

@@ -40,7 +40,7 @@ def main(unused_argv):
         agent = GenericAgent(dq_network, PureReward())
 
         # Cartpole-v0 is solved when avg. reward over 100 episodes is greater than or equal to 195
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole_v0_dqn_batch64_25_80eps", 
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole-v0-unified-step-play", 
                         save_every=100, enable_save=True, relative_path=True,
                         max_training_episodes=1000, max_steps_training=500,
                         max_test_episodes=100, max_steps_testing=500)
