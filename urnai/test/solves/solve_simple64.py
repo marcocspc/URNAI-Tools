@@ -23,10 +23,13 @@ from urnai.tdd.reporter import Reporter as rp
 
 """ Change "sc2_local_path" to your local SC2 installation path. 
 If you used the default installation path, you may ignore this step.
-For more information consult https://github.com/deepmind/pysc2#get-starcraft-ii 
+For more information see https://github.com/deepmind/pysc2#get-starcraft-ii 
 """
 # sc2_local_path = "D:/Program Files (x86)/StarCraft II"
 
+# import tensorflow as tf
+# physical_devices = tf.config.list_physical_devices('GPU') 
+# tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 def main(unused_argv):
     try:
@@ -58,12 +61,14 @@ def main(unused_argv):
         #                 max_training_episodes=3000, max_steps_training=1200,
         #                 max_test_episodes=100, max_steps_testing=1200)
 
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_exemplo2",
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_exemplo8",
                         save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
-                        max_training_episodes=4, max_steps_training=800,
-                        max_test_episodes=1, max_steps_testing=800)
+                        max_training_episodes=10, max_steps_training=300,
+                        max_test_episodes=1, max_steps_testing=300)
         #trainer.train()
-        trainer.play()
+        #trainer.play()
+        trainer.unified_train()
+        trainer.unified_play()
 
     except KeyboardInterrupt:
         pass

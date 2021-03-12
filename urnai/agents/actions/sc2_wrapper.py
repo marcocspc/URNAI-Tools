@@ -638,7 +638,7 @@ class TerranWrapper(SC2Wrapper):
         if self.units_to_effect != sc2._NO_UNITS:
             named_action = self.last_effect_action
 
-        if obs.game_loop[0] < 80 and self.base_top_left == None:
+        if obs.game_loop[0] < 80:
             command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
             self.base_top_left = (command_center.x < 32)
 

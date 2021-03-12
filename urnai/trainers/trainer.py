@@ -1,4 +1,9 @@
-import sys,os,inspect
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+parentdir = os.path.dirname(parentdir)
+sys.path.insert(0,parentdir)
+
 import itertools
 import time
 import numpy as np
@@ -135,7 +140,6 @@ class Trainer(Savable):
 
         while self.curr_training_episodes < self.max_training_episodes:
             self.curr_training_episodes += 1
-
             self.env.start()
 
             # Reset the environment
@@ -253,7 +257,6 @@ class Trainer(Savable):
                         logger_dict["saved"] = True
                         self.full_save_path = backup_full_save_path
 
-
     def play(self, test_params=None, reward_from_agent = True):
         rp.report("\n\n> Playing")
 
@@ -314,11 +317,144 @@ class Trainer(Savable):
             # Only logs train stats if this is not a test, to avoid cluttering the interface with info
             self.logger.log_train_stats()
 
-        #We need to save playing status as well 
+        # We need to save playing status as well 
         if self.enable_save:
             self.logger.save(self.full_save_play_path)
             rp.save(self.full_save_play_path)
 
+    def unified_train(self, reward_from_agent=True):
+        self.training_loop(is_testing=False, reward_from_agent=reward_from_agent)
+
+    def unified_play(self, reward_from_agent=True):
+        self.training_loop(is_testing=True, reward_from_agent=reward_from_agent)
+
+    def training_loop(self, is_testing, reward_from_agent=True):
+        start_time = time.time()
+        current_episodes = 0
+
+        if is_testing:
+            rp.report("\n\n> Playing")
+            max_episodes = self.max_test_episodes
+            max_steps = self.max_steps_testing
+        else:
+            rp.report("> Training")
+            max_episodes = self.max_training_episodes
+            max_steps = self.max_steps_training
+        
+        if self.logger.ep_count == 0 or is_testing:
+            self.logger = Logger(max_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__, log_actions=self.log_actions, episode_batch_avg_calculation = self.episode_batch_avg_calculation) 
+        
+        while current_episodes < max_episodes:
+            current_episodes += 1
+            self.env.start()
+
+            if is_testing:
+                self.curr_playing_episodes = current_episodes
+            else:
+                self.curr_training_episodes = current_episodes
+
+            # Reset the environment
+            obs = self.env.reset()
+            step_reward = 0
+            done = False
+            # Passing the episode to the agent reset, so that it can be passed to model reset
+            # Allowing the model to track the episode number, and decide if it should diminish the
+            # Learning Rate, depending on the currently selected strategy.
+            self.agent.reset(current_episodes)
+
+            ep_reward = 0
+            victory = False
+
+            ep_actions = np.zeros(self.agent.action_wrapper.get_action_space_dim())
+            self.logger.record_episode_start()
+
+            for step in range(max_steps):
+                # Choosing an action and passing it to our env.step() in order to act on our environment
+                action = self.agent.step(obs, done, is_testing)
+                # Take the action (a) and observe the outcome state (s') and reward (r)
+                obs, default_reward, done = self.env.step(action)
+
+                # Logic to test wheter this is the last step of this episode
+                is_last_step = step == max_steps - 1
+                done = done or is_last_step
+
+                # Checking whether or not to use the reward from the reward builder so we can pass that to the agent
+                if reward_from_agent:
+                    step_reward = self.agent.get_reward(obs, default_reward, done)
+                else:
+                    step_reward = default_reward
+
+                # Making the agent learn
+                if not is_testing:
+                    self.agent.learn(obs, step_reward, done)
+
+                # Adding our step reward to the total count of the episode's reward
+                ep_reward += step_reward
+                ep_actions[self.agent.previous_action] += 1
+
+                if done:
+                    victory = default_reward == 1
+                    agent_info = {
+                            "Learning rate" : self.agent.model.learning_rate,
+                            "Gamma" : self.agent.model.gamma,
+                            "Epsilon" : self.agent.model.epsilon_greedy,
+                            }
+                    self.logger.record_episode(ep_reward, victory, step + 1, agent_info, ep_actions)
+                    break
+            
+            self.logger.log_ep_stats()
+
+            # check if user wants to pause training and test agent
+            # if self.do_reward_test and current_episodes % self.episode_batch_avg_calculation == 0 and current_episodes > 1:
+            if (not is_testing) and self.do_reward_test and current_episodes % self.episode_batch_avg_calculation == 0:
+                self.test_agent()
+
+            if self.enable_save and current_episodes > 0 and current_episodes % self.save_every == 0:
+                self.save(self.full_save_path)
+
+                # if we have done tests along the training save all loggers for further detailed analysis
+                if self.do_reward_test and len(self.inside_training_test_loggers) > 0:
+                    for idx in range(len(self.logger.ep_avg_batch_rewards_episodes)):
+                        logger_dict = self.inside_training_test_loggers[idx]
+                        if not logger_dict["saved"]:
+                            episode = self.logger.ep_avg_batch_rewards_episodes[idx]
+                            backup_full_save_path = self.full_save_path
+                            self.full_save_path = self.full_save_path + os.path.sep + "inside_training_play_files" + os.path.sep + "test_at_training_episode_{}".format(episode)
+                            self.make_persistance_dirs(self.log_actions)
+                            logger_dict["logger"].save(self.full_save_path)
+                            logger_dict["saved"] = True
+                            self.full_save_path = backup_full_save_path
+
+        end_time = time.time()
+        if is_testing:
+            rp.report("\n> Test duration: {} seconds".format(end_time - start_time))
+            self.logger.log_train_stats()
+        else:
+            rp.report("\n> Training duration: {} seconds".format(end_time - start_time))
+            self.logger.log_train_stats()
+            self.logger.plot_train_stats()
+        
+        # Saving the model at the end of the training loop
+        if self.enable_save:
+            if is_testing:
+                self.logger.save(self.full_save_play_path)
+                rp.save(self.full_save_play_path)
+            else:
+                self.save(self.full_save_path)
+
+                # if we have done tests along the training save all loggers for further detailed analysis
+                if self.do_reward_test and len(self.inside_training_test_loggers) > 0:
+                    for idx in range(len(self.logger.ep_avg_batch_rewards_episodes)):
+                        logger_dict = self.inside_training_test_loggers[idx]
+                        if not logger_dict["saved"]:
+                            episode = self.logger.ep_avg_batch_rewards_episodes[idx]
+                            backup_full_save_path = self.full_save_path
+                            self.full_save_path = self.full_save_path + os.path.sep + "inside_training_play_files" + os.path.sep + "test_at_training_episode_{}".format(episode)
+                            self.make_persistance_dirs(self.log_actions)
+                            logger_dict["logger"].save(self.full_save_path)
+                            logger_dict["saved"] = True
+                            self.full_save_path = backup_full_save_path
+    
     def test_agent(self):
         #backup attributes
         max_test_episodes_backup = self.max_test_episodes
