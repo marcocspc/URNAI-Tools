@@ -1,15 +1,13 @@
+import os,sys
+sys.path.insert(0, os.getcwd())
+
 from abc import abstractmethod
 from pysc2.lib import actions, features
-from models.base.abmodel import LearningModel
-from .base.abagent import Agent
-from models.base.abmodel import LearningModel
-from agents.rewards.abreward import RewardBuilder
 
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
-from utils import error
+from urnai.models.base.abmodel import LearningModel
+from urnai.agents.base.abagent import Agent
+from urnai.agents.rewards.abreward import RewardBuilder
+from urnai.utils import error
 
 
 class SC2Agent(Agent):
