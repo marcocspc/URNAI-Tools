@@ -62,7 +62,7 @@
             "params" : {
                 "save_path" : "urnai/models/saved",
                 "file_name" : "terran_ddqn_vs_random_v_easy",
-                "save_every" : 20,
+                "save_every" : 50,
                 "enable_save" : true,
                 "relative_path" : true,
                 "max_training_episodes" : 3000,

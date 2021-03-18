@@ -1,19 +1,16 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-parentdir = os.path.dirname(parentdir)
-sys.path.insert(0,parentdir)
+import os,sys
+sys.path.insert(0, os.getcwd())
 
 from absl import app
 
-from envs.sc2 import SC2Env
-from trainers.trainer import Trainer
-from agents.sc2_agent import SC2Agent
-from agents.actions.sc2_wrapper import SimpleTerranWrapper
-from agents.rewards.sc2 import KilledUnitsReward
-from agents.states.sc2 import Simple64GridState
-from models.ddqn_keras import DDQNKeras
-from models.model_builder import ModelBuilder
+from urnai.envs.sc2 import SC2Env
+from urnai.trainers.trainer import Trainer
+from urnai.agents.sc2_agent import SC2Agent
+from urnai.agents.actions.sc2_wrapper import SimpleTerranWrapper
+from urnai.agents.rewards.sc2 import KilledUnitsReward
+from urnai.agents.states.sc2 import Simple64GridState
+from urnai.models.ddqn_keras import DDQNKeras
+from urnai.models.model_builder import ModelBuilder
 
 def main(unused_argv):
     try:
@@ -25,9 +22,9 @@ def main(unused_argv):
         state_builder = Simple64GridState(grid_size=4)
         
         helper = ModelBuilder()
-        helper.add_input_layer(int(state_builder.get_state_dim()), nodes=50)
+        helper.add_input_layer(nodes=50)
         helper.add_fullyconn_layer(50)
-        helper.add_output_layer(action_wrapper.get_action_space_dim())
+        helper.add_output_layer()
 
         dq_network = DDQNKeras(action_wrapper=action_wrapper, 
                                state_builder=state_builder, 
@@ -41,7 +38,7 @@ def main(unused_argv):
         
 
         trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_vs_random_v_easy", 
-                        save_every=20, enable_save=True, relative_path=True,
+                        save_every=50, enable_save=True, relative_path=True,
                         max_training_episodes=3000, max_steps_training=1200,
                         max_test_episodes=100, max_steps_testing=1200)
         trainer.train()
