@@ -6,7 +6,7 @@ def is_optional_enabled(optional):
 
 # Dependencies versions
 VERSION_TF = "==2.2.0"
-VERSION_VIZDOOM = "==1.1.7"
+VERSION_VIZDOOM = ""
 VERSION_DRTS = "stable"
 VERSION_PLE = "3dbe79d"
 VERSION_ABSL = "==0.9.0"
