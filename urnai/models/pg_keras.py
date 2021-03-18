@@ -1,3 +1,7 @@
+"""
+This implementation of policy gradient is currently broken
+"""
+
 import tensorflow as tf
 import numpy as np
 import random
@@ -84,10 +88,10 @@ class PGKeras(LearningModel):
 
 
         self.advantages = Input(shape=[1])
-        model = Model(input=[model_layers[0], self.advantages], output=[model_layers[-1]])
+        model = Model(inputs=[model_layers[0], self.advantages], outputs=[model_layers[-1]])
         model.compile(optimizer=Adam(lr=self.learning_rate), loss=self.custom_loss)
 
-        predict_model = Model(input=[model_layers[0]], output=[model_layers[-1]])
+        predict_model = Model(inputs=[model_layers[0]], outputs=[model_layers[-1]])
 
         return model, predict_model
 
@@ -129,7 +133,7 @@ class PGKeras(LearningModel):
             std = np.std(G) if np.std(G) > 0 else 1
             G = (G-mean)/std
 
-            self.model.train_on_batch([state_memory, discount_reward], action_onehot)
+            self.model.fit([state_memory, discount_reward], action_onehot)
             
 
     def compute_discounted_R(self, R):
@@ -143,9 +147,9 @@ class PGKeras(LearningModel):
 
         return discounted_r
 
-    def choose_action(self, state, excluded_actions=[]):
+    def choose_action(self, state, excluded_actions=[], is_testing=False):
         '''
-        Choose Sction for policy gradient is equal as predict.
+        Choose Action for policy gradient is equal as predict.
         Since there is no explore probability, all actions will come from the Net's weights.
         '''
         return self.predict(state)

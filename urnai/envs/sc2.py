@@ -1,6 +1,8 @@
-import sys
+import os, sys
+sys.path.insert(0, os.getcwd())
+
 import numpy as np
-from utils.sc2_utils import get_sc2_race, get_sc2_difficulty
+from urnai.utils.sc2_utils import get_sc2_race, get_sc2_difficulty
 from absl import flags
 from .base.abenv import Env
 from pysc2.lib import actions

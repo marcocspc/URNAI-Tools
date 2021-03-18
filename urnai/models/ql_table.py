@@ -47,13 +47,16 @@ class QLearning(LearningModel):
         if self._epsilon > self._epsilon_min:
             self._epsilon *= self._epsilon_decay
 
-    def choose_action(self, state, excluded_actions=[]):
-        if np.random.uniform(0, 1) < self._epsilon:  # 0.01
-            return np.random.choice(self.action_size)
+    def choose_action(self, state, excluded_actions=[], is_testing=False):
+        if is_testing:
+            return self.predict(state, excluded_actions)
         else:
-            return self.predict(state)
+            if np.random.uniform(0, 1) < self._epsilon:  # 0.01
+                return np.random.choice(self.action_size)
+            else:
+                return self.predict(state, excluded_actions)
 
-    def predict(self, state):
+    def predict(self, state, excluded_actions=[]):
         state_str = str(state)
 
         self.__check_state_exists(state_str)

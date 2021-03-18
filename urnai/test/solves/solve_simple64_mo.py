@@ -1,23 +1,19 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-parentdir = os.path.dirname(parentdir)
-sys.path.insert(0,parentdir)
+import os,sys
+sys.path.insert(0, os.getcwd())
 
 from absl import app
 from pysc2.env import sc2_env
-from envs.sc2 import SC2Env
-from trainers.trainer import Trainer
-from trainers.trainer import TestParams
-from agents.sc2_agent import SC2Agent
-from agents.actions.sc2_wrapper import SimpleTerranWrapper
-from agents.actions.mo_spatial_terran_wrapper import MOspatialTerranWrapper
-from agents.rewards.sc2 import KilledUnitsReward
-from agents.states.sc2 import Simple64GridState, Simple64GridState_SimpleTerran
-from models.ddqn_keras import DDQNKeras
-from models.ddqn_keras_mo import DDQNKerasMO
-from utils.functions import query_yes_no
-from models.model_builder import ModelBuilder
+from urnai.envs.sc2 import SC2Env
+from urnai.trainers.trainer import Trainer
+from urnai.agents.sc2_agent import SC2Agent
+from urnai.agents.actions.sc2_wrapper import SimpleTerranWrapper
+from urnai.agents.actions.mo_spatial_terran_wrapper import MOspatialTerranWrapper
+from urnai.agents.rewards.sc2 import KilledUnitsReward
+from urnai.agents.states.sc2 import Simple64GridState, Simple64GridState_SimpleTerran
+from urnai.models.ddqn_keras import DDQNKeras
+from urnai.models.ddqn_keras_mo import DDQNKerasMO
+from urnai.utils.functions import query_yes_no
+from urnai.models.model_builder import ModelBuilder
 
 from urnai.tdd.reporter import Reporter as rp
 

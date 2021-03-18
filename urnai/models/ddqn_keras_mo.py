@@ -146,16 +146,20 @@ class DDQNKerasMO(DDQNKeras):
             self.decay_epsilon()
 
 
-    def choose_action(self, state, excluded_actions=[]):
-        if np.random.rand() <= self.epsilon_greedy:
-            random_action = []
-
-            for i in range(len(self.action_wrapper.multi_output_ranges)-1):
-                random_action.append(random.choice(self.actions[self.action_wrapper.multi_output_ranges[i]:self.action_wrapper.multi_output_ranges[i+1]]))
-            
-            return random_action
-        else:
+    def choose_action(self, state, excluded_actions=[], is_testing=False):
+        if is_testing:
             return self.predict(state, excluded_actions)
+        
+        else:
+            if np.random.rand() <= self.epsilon_greedy:
+                random_action = []
+
+                for i in range(len(self.action_wrapper.multi_output_ranges)-1):
+                    random_action.append(random.choice(self.actions[self.action_wrapper.multi_output_ranges[i]:self.action_wrapper.multi_output_ranges[i+1]]))
+                
+                return random_action
+            else:
+                return self.predict(state, excluded_actions)
 
     def predict(self, state, excluded_actions=[]):
         '''

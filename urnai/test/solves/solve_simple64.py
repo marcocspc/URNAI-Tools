@@ -1,23 +1,19 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-parentdir = os.path.dirname(parentdir)
-sys.path.insert(0,parentdir)
+import os,sys
+sys.path.insert(0, os.getcwd())
 
 from absl import app
 from pysc2.env import sc2_env
-from envs.sc2 import SC2Env
-from trainers.trainer import Trainer
-from trainers.trainer import TestParams
-from agents.sc2_agent import SC2Agent
-from agents.actions.sc2_wrapper import SimpleTerranWrapper
-from agents.actions.mo_spatial_terran_wrapper import MOspatialTerranWrapper
-from agents.rewards.sc2 import KilledUnitsReward
-from agents.states.sc2 import Simple64GridState, SimpleCroppedGridState
-from models.ddqn_keras import DDQNKeras
-from models.ddqn_keras_mo import DDQNKerasMO
-from utils.functions import query_yes_no
-from models.model_builder import ModelBuilder
+from urnai.envs.sc2 import SC2Env
+from urnai.trainers.trainer import Trainer
+from urnai.agents.sc2_agent import SC2Agent
+from urnai.agents.actions.sc2_wrapper import SimpleTerranWrapper
+from urnai.agents.actions.mo_spatial_terran_wrapper import MOspatialTerranWrapper
+from urnai.agents.rewards.sc2 import KilledUnitsReward
+from urnai.agents.states.sc2 import Simple64GridState, SimpleCroppedGridState
+from urnai.models.ddqn_keras import DDQNKeras
+from urnai.models.ddqn_keras_mo import DDQNKerasMO
+from urnai.utils.functions import query_yes_no
+from urnai.models.model_builder import ModelBuilder
 
 from urnai.tdd.reporter import Reporter as rp
 
@@ -56,15 +52,15 @@ def main(unused_argv):
         # Terran agent
         agent = SC2Agent(dq_network, KilledUnitsReward())
 
-        # trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_v_easy",
-        #                 save_every=100, enable_save=True, relative_path=False, reset_epsilon=False,
-        #                 max_training_episodes=3000, max_steps_training=1200,
-        #                 max_test_episodes=100, max_steps_testing=1200)
+        trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_v_easy",
+                        save_every=100, enable_save=True, relative_path=False, reset_epsilon=False,
+                        max_training_episodes=3000, max_steps_training=1200,
+                        max_test_episodes=100, max_steps_testing=1200)
 
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_exemplo8",
-                        save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
-                        max_training_episodes=10, max_steps_training=300,
-                        max_test_episodes=1, max_steps_testing=300)
+        # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_exemplo8",
+        #                 save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
+        #                 max_training_episodes=10, max_steps_training=300,
+        #                 max_test_episodes=1, max_steps_testing=300)
         #trainer.train()
         #trainer.play()
         trainer.unified_train()

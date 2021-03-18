@@ -1,7 +1,9 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-parentdir = os.path.dirname(parentdir)
+"""
+Outdated file
+"""
+
+import os,sys
+sys.path.insert(0, os.getcwd())
 
 from absl import app
 from urnai.envs.vizdoom import VizdoomEnv

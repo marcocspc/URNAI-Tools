@@ -95,25 +95,29 @@ class DqlTensorFlow(LearningModel):
 
         return mxq
 
-    def choose_action(self, state, excluded_actions=[]):
-        expl_expt_tradeoff = np.random.rand()
-        action = None
-
-        if self.epsilon_greedy > expl_expt_tradeoff:
-            ex_int = self.actions[random.randint(0, len(self.actions) - 1)]
-            random_action = random.choice(self.actions)
-
-            # Removing excluded actions
-            while random_action in excluded_actions:
-                random_action = random.choice(self.actions)
-            action = random_action
+    def choose_action(self, state, excluded_actions=[], is_testing=False):
+        if is_testing:
+            return self.predict(state, excluded_actions)
+        
         else:
-            action = self.predict(state, excluded_actions)
+            expl_expt_tradeoff = np.random.rand()
+            action = None
 
-        if not self.per_episode_epsilon_decay:
-            self.decay_epsilon()
+            if self.epsilon_greedy > expl_expt_tradeoff:
+                ex_int = self.actions[random.randint(0, len(self.actions) - 1)]
+                random_action = random.choice(self.actions)
 
-        return action
+                # Removing excluded actions
+                while random_action in excluded_actions:
+                    random_action = random.choice(self.actions)
+                action = random_action
+            else:
+                action = self.predict(state, excluded_actions)
+
+            if not self.per_episode_epsilon_decay:
+                self.decay_epsilon()
+
+            return action
 
     def predict(self, state, excluded_actions=[]):
         q_values = self.sess.run(self.model_layers[-1], feed_dict={self.model_layers[0]: state})

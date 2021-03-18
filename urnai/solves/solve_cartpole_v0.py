@@ -1,10 +1,5 @@
-"""This file has errors. It will not work at the moment"""
-
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-parentdir = os.path.dirname(parentdir)
-sys.path.insert(0,parentdir)
+import os,sys
+sys.path.insert(0, os.getcwd())
 
 from absl import app
 from urnai.envs.gym import GymEnv
@@ -26,8 +21,7 @@ def main(unused_argv):
         env = GymEnv(id="CartPole-v0")
 
         action_wrapper = env.get_action_wrapper()
-        state_builder = PureState(env.env_instance.observation_space)
-        #state_builder = GymState(env)
+        state_builder = GymState(env.env_instance.observation_space.shape[0])
 
         helper = ModelBuilder()
         helper.add_input_layer()
@@ -40,7 +34,7 @@ def main(unused_argv):
         agent = GenericAgent(dq_network, PureReward())
 
         # Cartpole-v0 is solved when avg. reward over 100 episodes is greater than or equal to 195
-        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole-v0-unified-step-play", 
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="cartpole-v0-unified-step-play3", 
                         save_every=100, enable_save=True, relative_path=True,
                         max_training_episodes=1000, max_steps_training=500,
                         max_test_episodes=100, max_steps_testing=500)

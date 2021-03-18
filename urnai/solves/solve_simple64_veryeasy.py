@@ -1,8 +1,5 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-parentdir = os.path.dirname(parentdir)
-sys.path.insert(0,parentdir)
+import os,sys
+sys.path.insert(0, os.getcwd())
 
 from absl import app
 
@@ -15,6 +12,10 @@ from urnai.agents.states.sc2 import Simple64GridState
 from urnai.models.ddqn_keras import DDQNKeras
 from urnai.models.model_builder import ModelBuilder
 
+import tensorflow as tf
+physical_devices = tf.config.list_physical_devices('GPU') 
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
+
 def main(unused_argv):
     try:
         env = SC2Env(map_name="Simple64", render=False, 
@@ -25,9 +26,9 @@ def main(unused_argv):
         state_builder = Simple64GridState(grid_size=4)
         
         helper = ModelBuilder()
-        helper.add_input_layer(int(state_builder.get_state_dim()), nodes=50)
+        helper.add_input_layer(nodes=50)
         helper.add_fullyconn_layer(50)
-        helper.add_output_layer(action_wrapper.get_action_space_dim())
+        helper.add_output_layer()
 
         dq_network = DDQNKeras(action_wrapper=action_wrapper, 
                                state_builder=state_builder, 

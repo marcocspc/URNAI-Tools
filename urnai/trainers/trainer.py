@@ -128,7 +128,7 @@ class Trainer(Savable):
             except FileExistsError:
                 pass
 
-    def train(self, test_params: TestParams=None, reward_from_agent=True):
+    def old_train(self, test_params: TestParams=None, reward_from_agent=True):
         start_time = time.time()
 
         rp.report("> Training")
@@ -257,7 +257,7 @@ class Trainer(Savable):
                         logger_dict["saved"] = True
                         self.full_save_path = backup_full_save_path
 
-    def play(self, test_params=None, reward_from_agent = True):
+    def old_play(self, test_params=None, reward_from_agent = True):
         rp.report("\n\n> Playing")
 
         self.logger = Logger(self.max_test_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model.build_model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__, log_actions=self.log_actions, episode_batch_avg_calculation=self.episode_batch_avg_calculation) 
@@ -322,10 +322,10 @@ class Trainer(Savable):
             self.logger.save(self.full_save_play_path)
             rp.save(self.full_save_play_path)
 
-    def unified_train(self, reward_from_agent=True):
+    def train(self, reward_from_agent=True):
         self.training_loop(is_testing=False, reward_from_agent=reward_from_agent)
 
-    def unified_play(self, reward_from_agent=True):
+    def play(self, reward_from_agent=True):
         self.training_loop(is_testing=True, reward_from_agent=reward_from_agent)
 
     def training_loop(self, is_testing, reward_from_agent=True):

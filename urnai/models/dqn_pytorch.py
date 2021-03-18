@@ -135,19 +135,23 @@ class DQNPytorch(LearningModel):
                                            local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1-tau)*target_param.data)
 
-    def choose_action(self, state, excluded_actions=[]):
+    def choose_action(self, state, excluded_actions=[], is_testing=False):
         """
         If current epsilon greedy strategy is reached a random action will be returned.
         If not, self.predict will be called to choose the action with the highest Q-Value.
         """
-        if np.random.rand() <= self.epsilon_greedy:
-            random_action = random.choice(self.actions)
-            # Removing excluded actions
-            while random_action in excluded_actions:
-                random_action = random.choice(self.actions)
-            return random_action
-        else:
+        if is_testing:
             return self.predict(state, excluded_actions)
+            
+        else:
+            if np.random.rand() <= self.epsilon_greedy:
+                random_action = random.choice(self.actions)
+                # Removing excluded actions
+                while random_action in excluded_actions:
+                    random_action = random.choice(self.actions)
+                return random_action
+            else:
+                return self.predict(state, excluded_actions)
         
     def predict(self, state, excluded_actions=[]):
         """
