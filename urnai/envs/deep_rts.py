@@ -1,9 +1,13 @@
 from .base.abenv import Env
 import os
-import DeepRTS as drts
-from DeepRTS import Engine
-from DeepRTS.Engine import Constants, UnitManager 
-from DeepRTS.python import Config, Game 
+try:
+    import DeepRTS as drts
+    from DeepRTS import Engine
+    from DeepRTS.Engine import Constants, UnitManager 
+    from DeepRTS.python import Config, Game 
+except ImportError as e:
+    rp.report("\n!!! An import of the DeepRTS environment file was done but DeepRTS is not installed as a module !!!")
+    pass
 from urnai.utils.error import MapNotFoundError, DeepRTSEnvError 
 import importlib
 
