@@ -32,17 +32,17 @@ If you opt to install URNAI by only cloning this repo, you will need to manually
 
 ### Supported Environments
 
-The default package installation will install all basic required game environments, including OpenAI Gym, and PySC2. But for other supported environments, you will need to install them for yourself. We give a brief overview of each environment and its installation bellow. 
+Installing URNAI as a package will also install all basic required game environments, including OpenAI Gym, and PySC2. But for other supported environments, you will need to install them for yourself. We give a brief overview of each environment and its installation bellow. 
 
-We would like to highlight that the environment wrapper, action wrapper and reward builder classes available in URNAI are inspired by Gym's wrappers, and are made to fit over them. Therefore, developers used to Gym's naming conventions and their way of representing states, rewards and action sets, will find URNAI to be comfortably familiar. Consequently, the addition of new Gym-like game environments to URNAI should be an easy task for any developer that is relatively familiar with Gym's workflow.
+We would also like to highlight that the environment wrapper, action wrapper and reward builder classes available in URNAI are inspired by Gym's wrappers, and are made to fit over them. Therefore, developers used to Gym's naming conventions and their way of representing states, rewards and action sets, will find URNAI to be comfortably familiar. Consequently, the addition of new Gym-like game environments to URNAI should be an easy task for any developer that is relatively familiar with Gym's workflow.
 
 #### OpenAI Gym
 
-Gym is already marked as a dependency, so it will be automatically installed by Pip. Gym is a widely known and used Reinforcement Learning toolkit that provides a series of ready-to-use environments. A few Gym sub packages don't come with the main package, and need to be installed separetly. That's the case with Gym Atari games. To see a quick installation guide for Gym Atari [click here](#gym-atari-games) 
+Gym is already marked as a dependency, so it will be automatically installed by pip. Gym is a widely known and used Reinforcement Learning toolkit that provides a series of ready-to-use environments. A few Gym sub packages don't come with the main package, and need to be installed separetly. That's the case with Gym Atari games. To see a quick installation guide for Gym Atari [click here](#gym-atari-games) 
 
 #### Starcraft II
 
-PySC2 is already marked as a dependency, so it will be automatically installed by Pip. But you need to install StarCraft II and download some of its available maps (mini-game, testing and full-game maps), to do this, you can head to:
+PySC2 is already marked as a dependency, so it will be automatically installed by pip. However, you need to install StarCraft II and download some of its available maps (mini-game, testing and full-game maps) in order to use this environment in URNAI. To do this, you can head to PySC2's tutorial:
 
 [How to install Starcraft II and Maps](https://github.com/deepmind/pysc2#get-starcraft-ii) 
 
@@ -72,22 +72,6 @@ pip3 install gym[atari]
 - On Windows:
 
 Unfortunately, this package tends to have problems when installed on a Windows system. A workaround can be found in this unofficial [atari-py](https://github.com/Kojoley/atari-py) repository.
-
-#### Full Install (with all optional environments except for [Gym Atari Games](#gym-atari-games))
-
-##### Disclaimer: Installation of URNAI with DeepRTS is currently broken, see the DeepRTS section above.
-
-To install urnai with all optional environments, use:
-
-- On Unix:
-```
-URNAI_DEEPRTS=1 URNAI_VIZDOOM=1 pip3 install git+https://github.com/marcocspc/URNAI-Tools/
-```
-
-- On Windows:
-```
-set "URNAI_DEEPRTS=1" && set "URNAI_VIZDOOM=1" && pip3 install git+https://github.com/marcocspc/URNAI-Tools/
-```
 
 ### Optional Configurations
 
