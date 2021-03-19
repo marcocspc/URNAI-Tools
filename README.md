@@ -38,7 +38,7 @@ We would also like to highlight that the environment wrapper, action wrapper and
 
 #### OpenAI Gym
 
-Gym is already marked as a dependency, so it will be automatically installed by pip. Gym is a widely known and used Reinforcement Learning toolkit that provides a series of ready-to-use environments. A few Gym sub packages don't come with the main package, and need to be installed separetly. That's the case with Gym Atari games. To see a quick installation guide for Gym Atari [click here](#gym-atari-games) 
+[Gym](https://gym.openai.com/) is already marked as a dependency, so it will be automatically installed by pip. Gym is a widely known and used Reinforcement Learning toolkit that provides a series of ready-to-use standardized environments. A few Gym sub packages don't come with the main package, and need to be installed separetly. That's the case with Gym Atari games. To see a quick installation guide for Gym Atari [click here](#gym-atari-games) 
 
 #### Starcraft II
 
@@ -54,7 +54,7 @@ Installation of VizDoom for Python is not as straight forward as some other pack
 
 #### DeepRTS 
 
-URNAI supports a modified DeepRTS version. To download it as a python package, run the following command:
+URNAI supports a modified [DeepRTS](https://github.com/cair/deep-rts) version. To download it as a python package, run the following command:
 
 ```
 pip3 install git+https://github.com/marcocspc/deep-rts
