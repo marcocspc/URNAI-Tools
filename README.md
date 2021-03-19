@@ -5,35 +5,44 @@ URNAI Tools is a modular Deep Reinforcement Learning (DRL) toolkit that supports
 
 Follow these instructions to get a working copy of the toolkit on your PC. It's a good idea to use the 'solve_x.py' files as a base to start developing your own agents.
 
-URNAI is currently being actively developed on [branch 1.0](https://github.com/marcocspc/URNAI-Tools/tree/1.0). If you would like to get the most up to date version of the toolkit, consider installing from branch 1.0, as many bugs have been fixed and improvements have been made, altough it may be more unstable.
+URNAI is currently being developed on [branch 1.0](https://github.com/marcocspc/URNAI-Tools/tree/1.0). If you would like to get the most up to date version of the toolkit, consider installing from branch 1.0, as many bugs have been fixed and improvements have been made, altough it may be more unstable.
 
 ### Prerequisites
 
 - Python 3.6
 - Python 3 PIP
 
-### Basic installation
+### Installation
 
-- You can install from pypi:
-**WARNING**, you cannot install extras from this option because pypi doesn't allow dependencies from github repositories. If you need a full installation, go to next section.
+There are two main ways of installing URNAI. The first one would be to clone this repository to your local machine, and run python files directly. The second one would be to install this repository as a Python package using pip. The second option allows you to use URNAI on your command line as a python package, and schedule batches of trainings using .CSV or .JSON files easily. However, it can make development inside URNAI cumbersome, as you would need to code directly inside of the packages directory of your Python installation. Therefore, if you intend to use URNAI on the command line but also want to develop in it, we recommend you do both of these installations.
+
+- Cloning this repo:
 ```
-pip3 install urnai
+git clone https://github.com/marcocspc/URNAI-Tools.git
 ```
 
-- Or you can install from this repository:
+- Install urnai Python package from this repo:
 ```
 pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
-The basic installation will install all the *basic* required dependencies, including OpenAI Gym and SC2LE. But for other supported environments, you will need to install them for yourself. We describe how to do this on the next section. 
+Installing using pip will automatically install URNAI dependencies, such as PySC2, Tensorflow, Keras, Gym etc. To see all dependencies you can check [setup.py](https://github.com/marcocspc/URNAI-Tools/blob/master/setup.py). By default, URNAI installs tensorflow-gpu. If you wish to install tensorflow-cpu instead, check out [this section](#tensorflow-cpu)
 
-To use tensorflowp-cpu instead of gpu, go to Optional below.
+If you opt to install URNAI by only cloning this repo, you will need to manually install all dependencies to use the toolkit.
 
-### Optional
+### Supported Environments
+
+The default package installation will install all basic required game environments, including OpenAI Gym, and PySC2. But for other supported environments, you will need to install them for yourself. We give a brief overview of each environment and its installation bellow. 
+
+We would like to highlight that the environment wrapper, action wrapper and reward builder classes available in URNAI are inspired by Gym's wrappers, and are made to fit over them. Therefore, developers used to Gym's naming conventions and their way of representing states, rewards and action sets, will find URNAI to be comfortably familiar. Consequently, the addition of new Gym-like game environments to URNAI should be an easy task for any developer that is relatively familiar with Gym's workflow.
+
+#### OpenAI Gym
+
+Gym is already marked as a dependency, so it will be automatically installed by Pip. Gym is a widely known and used Reinforcement Learning toolkit that provides a series of ready-to-use environments. A few Gym sub packages don't come with the main package, and need to be installed separetly. That's the case with Gym Atari games. To see a quick installation guide for Gym Atari [click here](#gym-atari-games) 
 
 #### Starcraft II
 
-PySC2 is already marked as dependency, so it will be automatically installed by Pip. But you need to install StarCraft II and download some of its available maps (mini-game, testing and full-game maps), to do this, you can head to:
+PySC2 is already marked as a dependency, so it will be automatically installed by Pip. But you need to install StarCraft II and download some of its available maps (mini-game, testing and full-game maps), to do this, you can head to:
 
 [How to install Starcraft II and Maps](https://github.com/deepmind/pysc2#get-starcraft-ii) 
 
@@ -41,36 +50,14 @@ We would recommend you install atleast the Melee maps, as those are used in some
 
 #### VizDoom
 
-Before setting urnai to install vizdoom, please see if you have all dependencies installed.
-
-Go [here](https://github.com/mwydmuch/ViZDoom/blob/master/doc/Building.md#deps) first.
-
-To install urnai with vizdoom support, use:
-
-- On Unix:
-```
-URNAI_VIZDOOM=1 pip3 install git+https://github.com/marcocspc/URNAI-Tools/ 
-```
-
-- On Windows:
-```
-set "URNAI_VIZDOOM=1" && pip3 install git+https://github.com/marcocspc/URNAI-Tools/
-```
+Installation of VizDoom for Python is not as straight forward as some other packages, as you need a few dependencies, and installation process might vary depending on whether you're on Linux, MacOS or Windows. We recommend you check their [installation/building guide](https://github.com/mwydmuch/ViZDoom/blob/master/doc/Building.md) for a full explanation.
 
 #### DeepRTS 
 
-##### Installation of DeepRTS alongside URNAI is currently broken. We recommend an initial installation without DeepRTS and, if you need to install it, try to do it separately
+URNAI supports a modified DeepRTS version. To download it as a python package, run the following command:
 
-To install urnai with DeepRTS support, use:
-
-- On Unix:
 ```
-URNAI_DEEPRTS=1 pip3 install git+https://github.com/marcocspc/URNAI-Tools/
-```
-
-- On Windows:
-```
-set "URNAI_DEEPRTS=1" && pip3 install git+https://github.com/marcocspc/URNAI-Tools/
+pip3 install git+https://github.com/marcocspc/deep-rts
 ```
 
 #### Gym Atari Games
@@ -102,11 +89,11 @@ URNAI_DEEPRTS=1 URNAI_VIZDOOM=1 pip3 install git+https://github.com/marcocspc/UR
 set "URNAI_DEEPRTS=1" && set "URNAI_VIZDOOM=1" && pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
-
+### Optional Configurations
 
 #### Tensorflow CPU
 
-By default, urnai depends on tensorflow-gpu, to use tf-cpu instead, use:
+By default, URNAI depends on tensorflow-gpu, to use tf-cpu instead, use:
 
 - On Unix:
 ```
@@ -134,22 +121,28 @@ set "URNAI_LATEST_DEPS=1" && pip3 install git+https://github.com/marcocspc/URNAI
 
 ### Running the examples
 
-From version 0.0.2+ you can use json-files:
+From version 0.0.2+ you can use CSV or JSON files to run a batch of trainings:
 
 ```
 git clone https://github.com/marcocspc/URNAI-Tools 
 cd 'URNAI-Tools/urnai/test/solves'
-urnai train --json-file=solve_x.json
+urnai train --train-file=solve_x.json
+```
+or
+```
+urnai train --train-file=solve_x.csv
 ```
 
 The Alternative to using JSON files is to run one of our solve_x.py files in your Python interpreter. These files are used to instantiate and train an AI agent.
 There are a few files to choose from. To see the solve files for games and scenarios that we have already solved (achieved a reasonable level of success) check the [solves directory](https://github.com/marcocspc/URNAI-Tools/tree/master/urnai/solves). To see the solve files that are currently being worked on, and that we haven't yet found a successful solving strategy, check out the [test/solves directory](https://github.com/marcocspc/URNAI-Tools/tree/master/urnai/test/solves).
 
+These Solve files are great learning tools to get in touch with URNAI's architecture because they instantiate every object that needs to exist in order for the training of an Agent to occur. They start from the very basic instantiation of an environment, to the more complex instantiation of a Learning Model, with its layers and hyperparameters. At the end, all of those instantiated objects are used by the Trainer class, responsible for implementing the Reinforcement Learning cycle.
+
 ## Command line
 
-You can now use urnai on command line. Commands:
+You can use urnai on command line. Commands:
 
-To see what you can do, use:
+To see what you can do, run:
 ```
 urnai -h
 ```
@@ -160,12 +153,12 @@ Follow these instructions to start developing new stuff using our library.
 
 ### Building an agent for a supported environment
 
-- Building a PySC2 agent
-- Building an OpenAI Gym agent
+- Building a PySC2 agent **(TO DO)**
+- Building an OpenAI Gym agent **(TO DO)**
 
 ### Building a new DRL model
 
-To build a new model, you should check the readme in the [urnai.models](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/models) module.
+To build a new model, you should check the readme in the [urnai.models](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/models) module. **(TO DO)**
 
 ### Integrating a new environment
 
@@ -184,9 +177,10 @@ Here you'll find all the things that we plan to do in this project. **Bold** ite
   * [X] [Vizdoom](https://github.com/mwydmuch/ViZDoom)
   * [X] [DeepRTS](https://github.com/cair/deep-rts)
 * [ ] More Deep RL algorithms
+  * [X] Deep Q-Learning
   * [X] Policy Gradient
   * [X] Double Deep Q-Learning
-  * [ ] **A3C**
+  * [ ] A3C
   * [ ] Curiosity-Driven Learning
   * [ ] Proximal Policy Optimization
 * [X] Core codebase improvements
