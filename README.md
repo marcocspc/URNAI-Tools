@@ -26,7 +26,9 @@ git clone https://github.com/marcocspc/URNAI-Tools.git
 pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
-Installing using pip will automatically install URNAI dependencies, such as PySC2, Tensorflow, Keras, Gym etc. To see all dependencies you can check [setup.py](https://github.com/marcocspc/URNAI-Tools/blob/master/setup.py). By default, URNAI installs tensorflow-gpu. If you wish to install tensorflow-cpu instead, check out [this section](#tensorflow-cpu)
+Installing using pip will automatically install URNAI dependencies, such as PySC2, Tensorflow, Keras, Gym etc. To see all dependencies you can check [setup.py](https://github.com/marcocspc/URNAI-Tools/blob/master/setup.py). 
+
+**By default, URNAI installs tensorflow-gpu**. If you wish to install tensorflow-cpu instead, check out [this section](#tensorflow-cpu).
 
 If you opt to install URNAI by only cloning this repo, you will need to manually install all dependencies to use the toolkit.
 
