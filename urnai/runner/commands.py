@@ -1,10 +1,10 @@
 from urnai.runner.base.runner import Runner
 from shutil import copyfile
 from urnai.tdd.reporter import Reporter as rp 
-from urnai.utils import drts_utils
+# from urnai.utils import drts_utils
 from urnai.utils import sc2_utils
 from urnai.envs.sc2 import SC2Env
-from urnai.envs.deep_rts import DeepRTSEnv 
+# from urnai.envs.deep_rts import DeepRTSEnv 
 from pysc2.env import sc2_env
 from pysc2.lib import actions
 import time

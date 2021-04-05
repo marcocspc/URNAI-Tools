@@ -12,10 +12,6 @@ from urnai.agents.states.sc2 import Simple64GridState
 from urnai.models.ddqn_keras import DDQNKeras
 from urnai.models.model_builder import ModelBuilder
 
-import tensorflow as tf
-physical_devices = tf.config.list_physical_devices('GPU') 
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
-
 def main(unused_argv):
     try:
         env = SC2Env(map_name="Simple64", render=False, 
@@ -42,7 +38,7 @@ def main(unused_argv):
         
 
         trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_vs_random_v_easy", 
-                        save_every=20, enable_save=True, relative_path=True,
+                        save_every=50, enable_save=True, relative_path=True,
                         max_training_episodes=3000, max_steps_training=1200,
                         max_test_episodes=100, max_steps_testing=1200)
         trainer.train()

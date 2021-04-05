@@ -6,10 +6,9 @@ def is_optional_enabled(optional):
 
 # Dependencies versions
 VERSION_TF = "==2.2.0"
-VERSION_VIZDOOM = "==1.1.7"
+VERSION_VIZDOOM = ""
 VERSION_DRTS = "stable"
 VERSION_PLE = "3dbe79d"
-# VERSION_2048 = "==0.2.6"
 VERSION_ABSL = "==0.9.0"
 VERSION_GYM = "==0.10.11"
 VERSION_NUMPY = "==1.18.4"
@@ -21,7 +20,6 @@ VERSION_PSUTIL = "==5.7.2"
 
 VIZDOOM = 'URNAI_VIZDOOM'
 TF_CPU = 'URNAI_TF_CPU'
-# G2048 = 'URNAI_2048'
 DEEPRTS = 'URNAI_DEEPRTS'
 LATEST_DEPS = 'URNAI_LATEST_DEPS'
 
@@ -34,7 +32,6 @@ if is_optional_enabled(LATEST_DEPS):
     print("Dependencies will be installed in theirs latest versions.")
     VERSION_TF = ""
     VERSION_VIZDOOM = ""
-    # VERSION_2048 = ""
     VERSION_ABSL = ""
     VERSION_GYM = ""
     VERSION_NUMPY = ""
@@ -51,11 +48,6 @@ if is_optional_enabled(DEEPRTS):
 if is_optional_enabled(VIZDOOM):
     print("VizDoom installation enabled.")
     dep_list.append('vizdoom' + VERSION_VIZDOOM)
-
-# if is_optional_enabled(G2048):
-#     print("Gym-2048 installation enabled.")
-#     dep_list.append(git_url.format(user='ntasfi', package='ple', branch=VERSION_PLE, repo='PyGame-Learning-Environment'))
-#     dep_list.append('gym-2048' + VERSION_2048)
 
 if is_optional_enabled(TF_CPU):
     print("Tensorflow cpu will be installed instead of Tensorflow GPU.")
@@ -80,8 +72,8 @@ setup(
         "console_scripts": ['urnai=urnai.urnai_cmd:main']
         },
     version = "1.0",
-    description = "A modular Deep Reinforcement Learning library that supports multiple environments, such as PySC2, OpenAI Gym, and PyGame Learning Environment.",
-    long_description = "URNAI Tools is a modular Deep Reinforcement Learning library that supports multiple environments, such as PySC2, OpenAI Gym, and PyGame Learning Environment. The main goal of URNAI Tools is to provide an easy way to develop DRL agents in a way that allows the developer to reuse as much code as possible when developing different agents, and that also allows him to reuse previously implemented models in different environments and to integrate new environments easily when necessary. The main advantage of using URNAI Tools is that the models you make for one environment will also work in other environments, so you can prototype new agents for different environments very easily.",
+    description = "A modular Deep Reinforcement Learning toolkit that supports multiple environments, such as PySC2, OpenAI Gym, ViZDoom and DeepRTS.",
+    long_description = "URNAI Tools is a modular Deep Reinforcement Learning (DRL) toolkit that supports multiple environments, such as PySC2, OpenAI Gym, ViZDoom and DeepRTS. The main goal of URNAI Tools is to provide an easy-to-use modular platform for the development of DRL agents. Each part of a typical Reinforcement Learning scenario, such as the environment, the learning algorithm, the action space and so on, is considered a module in URNAI and can simply be swaped. Beyond that, it supplies a series of out-of-the-box DRL algorithms, environment wrappers, action wrappers, reward functions and state representations, allowing developers to easily assemble different learning configurations and quickly iterate through them.",
     author = "UFRN-IMD-URNAITeam",
     author_email = "urnaiteam@gmail.com",
     url = "https://github.com/marcocspc/URNAI-Tools",

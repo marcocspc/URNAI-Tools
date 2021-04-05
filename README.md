@@ -1,13 +1,15 @@
 # URNAI-Tools
-URNAI Tools is a modular Deep Reinforcement Learning (DRL) toolkit that supports multiple environments, such as [PySC2](https://github.com/deepmind/pysc2), [OpenAI Gym](https://github.com/openai/gym), [ViZDoom](https://github.com/mwydmuch/ViZDoom) and [DeepRTS](https://github.com/cair/deep-rts). The main goal of URNAI Tools is to provide an easy-to-use modular platform for the development of DRL agents. Each part of a typical Reinforcement Learning scenario, such as the action space, state representation, reward function, algorithm etc, is considered a module in URNAI, and can be swaped by other action spaces, state representations etc. To supply that need, URNAI comes with a series of out-of-the-box DRL algorithms, environment wrappers, action wrappers, reward functions and state representations, allowing developers to easily assemble different learning configurations and to quickly iterate through them.
+URNAI Tools is a modular Deep Reinforcement Learning (DRL) toolkit that supports multiple environments, such as [PySC2](https://github.com/deepmind/pysc2), [OpenAI Gym](https://github.com/openai/gym), [ViZDoom](https://github.com/mwydmuch/ViZDoom) and [DeepRTS](https://github.com/cair/deep-rts). The main goal of URNAI Tools is to provide an easy-to-use modular platform for the development of DRL agents. Each part of a typical Reinforcement Learning scenario, such as the environment, the learning algorithm, the action space and so on, is considered a module in URNAI and can simply be swaped. Beyond that, it supplies a series of out-of-the-box DRL algorithms, environment wrappers, action wrappers, reward functions and state representations, allowing developers to easily assemble different learning configurations and quickly iterate through them.
 
 ## Getting Started
 
 Follow these instructions to get a working copy of the toolkit on your PC. It's a good idea to use the 'solve_x.py' files as a base to start developing your own agents.
 
+URNAI is currently being actively developed on [branch 1.0](https://github.com/marcocspc/URNAI-Tools/tree/1.0). If you would like to get the most up to date version of the toolkit, consider installing from branch 1.0, as many bugs have been fixed and improvements have been made, altough it may be more unstable.
+
 ### Prerequisites
 
-- Python 3
+- Python 3.6
 - Python 3 PIP
 
 ### Basic installation
@@ -31,9 +33,11 @@ To use tensorflowp-cpu instead of gpu, go to Optional below.
 
 #### Starcraft II
 
-SC2LE is already marked as dependency, so it will be automatically installed by Pip. But you need to install Starcraft II and download the mini-games and maps to Starcraft II, to do this, you can head to:
+PySC2 is already marked as dependency, so it will be automatically installed by Pip. But you need to install StarCraft II and download some of its available maps (mini-game, testing and full-game maps), to do this, you can head to:
 
 [How to install Starcraft II and Maps](https://github.com/deepmind/pysc2#get-starcraft-ii) 
+
+We would recommend you install atleast the Melee maps, as those are used in some of our example files for StarCraft II.
 
 #### VizDoom
 
@@ -54,6 +58,8 @@ set "URNAI_VIZDOOM=1" && pip3 install git+https://github.com/marcocspc/URNAI-Too
 ```
 
 #### DeepRTS 
+
+##### Installation of DeepRTS alongside URNAI is currently broken. We recommend an initial installation without DeepRTS and, if you need to install it, try to do it separately
 
 To install urnai with DeepRTS support, use:
 
@@ -80,19 +86,23 @@ pip3 install gym[atari]
 
 Unfortunately, this package tends to have problems when installed on a Windows system. A workaround can be found in this unofficial [atari-py](https://github.com/Kojoley/atari-py) repository.
 
-#### Full Install (with all optional environments)
+#### Full Install (with all optional environments except for [Gym Atari Games](#gym-atari-games))
+
+##### Disclaimer: Installation of URNAI with DeepRTS is currently broken, see the DeepRTS section above.
 
 To install urnai with all optional environments, use:
 
 - On Unix:
 ```
-URNAI_DEEPRTS=1 URNAI_VIZDOOM=1 URNAI_2048=1 pip3 install git+https://github.com/marcocspc/URNAI-Tools/
+URNAI_DEEPRTS=1 URNAI_VIZDOOM=1 pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
 
 - On Windows:
 ```
 set "URNAI_DEEPRTS=1" && set "URNAI_VIZDOOM=1" && pip3 install git+https://github.com/marcocspc/URNAI-Tools/
 ```
+
+
 
 #### Tensorflow CPU
 

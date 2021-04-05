@@ -1,8 +1,10 @@
-from agents.base.abagent import Agent
-from models.base.abmodel import LearningModel
-from agents.rewards.abreward import RewardBuilder
-import numpy as np 
-import sys
+import os,sys
+sys.path.insert(0, os.getcwd())
+
+from urnai.agents.base.abagent import Agent
+from urnai.models.base.abmodel import LearningModel
+from urnai.agents.rewards.abreward import RewardBuilder
+import numpy as np
 
 
 class GenericAgent(Agent):
