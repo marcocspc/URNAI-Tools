@@ -52,19 +52,17 @@ def main(unused_argv):
         # Terran agent
         agent = SC2Agent(dq_network, KilledUnitsReward())
 
-        trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_v_easy",
-                        save_every=100, enable_save=True, relative_path=False, reset_epsilon=False,
-                        max_training_episodes=3000, max_steps_training=1200,
-                        max_test_episodes=100, max_steps_testing=1200)
+        # trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddqn_v_easy",
+        #                 save_every=100, enable_save=True, relative_path=False, reset_epsilon=False,
+        #                 max_training_episodes=3000, max_steps_training=1200,
+        #                 max_test_episodes=100, max_steps_testing=1200)
 
-        # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_exemplo8",
-        #                 save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
-        #                 max_training_episodes=10, max_steps_training=300,
-        #                 max_test_episodes=1, max_steps_testing=300)
-        #trainer.train()
-        #trainer.play()
-        trainer.unified_train()
-        trainer.unified_play()
+        trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_exemplo9",
+                        save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
+                        max_training_episodes=2, max_steps_training=300,
+                        max_test_episodes=1, max_steps_testing=300)
+        trainer.train()
+        trainer.play()
 
     except KeyboardInterrupt:
         pass
