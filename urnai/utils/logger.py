@@ -499,8 +499,8 @@ class Logger(Savable):
 
         if self.render: 
             plt.ion()
-            plt.show()
-            plt.pause(0.001)
+            #plt.show()
+            #plt.pause(0.001)
 
         return fig
 

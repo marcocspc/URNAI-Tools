@@ -23,9 +23,9 @@ For more information see https://github.com/deepmind/pysc2#get-starcraft-ii
 """
 # sc2_local_path = "D:/Program Files (x86)/StarCraft II"
 
-import tensorflow as tf
-physical_devices = tf.config.list_physical_devices('GPU') 
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+# import tensorflow as tf
+# physical_devices = tf.config.list_physical_devices('GPU') 
+# tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 def main(unused_argv):
     try:
