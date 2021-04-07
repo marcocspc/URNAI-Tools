@@ -409,7 +409,9 @@ class Trainer(Savable):
             if (not is_testing) and self.do_reward_test and current_episodes % self.episode_batch_avg_calculation == 0:
                 self.test_agent()
 
-            if self.enable_save and current_episodes > 0 and current_episodes % self.save_every == 0:
+            # if this is not a test (evaluation), saving is enabled and we are in a multiple 
+            # of our save_every variable then we save the model and generate graphs
+            if (not is_testing) and self.enable_save and current_episodes > 0 and current_episodes % self.save_every == 0:
                 self.save(self.full_save_path)
 
                 # if we have done tests along the training save all loggers for further detailed analysis
@@ -432,7 +434,6 @@ class Trainer(Savable):
         else:
             rp.report("\n> Training duration: {} seconds".format(end_time - start_time))
             self.logger.log_train_stats()
-            self.logger.plot_train_stats()
         
         # Saving the model at the end of the training loop
         if self.enable_save:

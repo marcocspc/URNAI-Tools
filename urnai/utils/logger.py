@@ -246,22 +246,22 @@ class Logger(Savable):
     def plot_average_reward_graph(self):
         # Plotting average reward graph
         return self.__plot_curve(range(self.ep_count), self.ep_avg_rewards, 'Episode Count',
-                            'Avg. Reward', r'Reward avg. over training')
+                            'Avg. Reward', r'Per Episode Avg. Reward')
 
     def plot_average_steps_graph(self):
         # Plotting average steps graph
         return self.__plot_curve(range(self.ep_count), self.ep_avg_steps, 'Episode Count',
-                            'Avg. Steps', r'Steps avg. over training')
+                            'Avg. Steps', r'Per Episode Avg. Steps')
 
     def plot_instant_reward_graph(self):
         # Plotting average reward graph
         return self.__plot_curve(range(self.ep_count), self.ep_rewards, 'Episode Count',
-                            'Ep Reward', r'Episode Reward over training')
+                            'Ep Reward', r'Per Episode Reward')
 
     def plot_batch_reward_graph(self):
         # Plotting average reward graph
         return self.__plot_curve(self.ep_avg_batch_rewards_episodes, self.ep_avg_batch_rewards, 'Episode Count',
-                            'Ep Avg Reward', r'Episode Reward over training')
+                            'Ep Avg Reward', r'Average Reward Over Batch of Episodes')
 
     def plot_inside_training_test_avg_rwds(self):
         # Plotting average reward graph
@@ -271,7 +271,7 @@ class Logger(Savable):
     def plot_win_rate_graph(self):
         # Plotting average reward graph
         return self.__plot_curve(range(self.ep_count), self.ep_avg_victories, 'Episode Count',
-                            'Avg. Win Rate', r'Average Win Rate over training')
+                            'Avg. Win Rate', r'Per Episode Avg. Win Rate')
 
     def plot_win_rate_percentage_over_play_testing_graph(self):
         # Plotting win rate over play testing graph
