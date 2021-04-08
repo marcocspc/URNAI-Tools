@@ -1,6 +1,6 @@
 from urnai.runner.base.runner import Runner
 from shutil import copyfile
-from urnai.tdd.reporter import Reporter as rp 
+from urnai.utils.reporter import Reporter as rp 
 # from urnai.utils import drts_utils
 from urnai.utils import sc2_utils
 from urnai.envs.sc2 import SC2Env

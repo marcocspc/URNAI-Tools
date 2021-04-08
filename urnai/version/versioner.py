@@ -1,5 +1,5 @@
 from base.savable import Savable
-from tdd.reporter import Reporter as rp
+from utils.reporter import Reporter as rp
 import os
 import subprocess
 

@@ -10,7 +10,7 @@ import numpy as np
 import tensorflow as tf
 from utils.logger import Logger
 from base.savable import Savable 
-from tdd.reporter import Reporter as rp
+from utils.reporter import Reporter as rp
 from version.versioner import Versioner
 from datetime import datetime
 

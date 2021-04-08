@@ -3,7 +3,7 @@ import ast
 import importlib
 import inspect
 from .error import ClassNotFoundError
-from urnai.tdd.reporter import Reporter as rp
+from urnai.utils.reporter import Reporter as rp
 
 def get_class_import_path(pkg_str, classname):
     module_path = "" 

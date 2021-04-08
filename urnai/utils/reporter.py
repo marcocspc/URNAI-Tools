@@ -7,9 +7,9 @@ class Reporter():
     '''
         This class should be used to print instead of print()
         It should be imported as follows:
-        from urnai.tdd.reporter import Reporter as rp
+        from urnai.utils.reporter import Reporter as rp
         or
-        from tdd.reporter import Reporter as rp
+        from utils.reporter import Reporter as rp
         And then the function report should be called to print:
         rp.report("My message")
         If the message is a debug one, a level different from 0

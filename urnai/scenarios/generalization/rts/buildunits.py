@@ -11,7 +11,7 @@ from pysc2.env import sc2_env
 from statistics import mean
 import random
 from urnai.envs.deep_rts import DeepRTSEnv
-from tdd.reporter import Reporter as rp
+from utils.reporter import Reporter as rp
 
 
 class GeneralizedBuildUnitsScenario(GeneralizedDefeatEnemiesScenario):

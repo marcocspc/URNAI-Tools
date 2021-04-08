@@ -1,7 +1,7 @@
 from urnai.envs.deep_rts import DeepRTSEnv
 from urnai.utils.error import IncorrectDeepRTSMapDataError
 import DeepRTS as drts
-from urnai.tdd.reporter import Reporter as rp 
+from urnai.utils.reporter import Reporter as rp 
 from shutil import copyfile
 import os, json
 import numpy as np

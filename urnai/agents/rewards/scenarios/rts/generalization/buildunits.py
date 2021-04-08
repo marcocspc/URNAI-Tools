@@ -1,6 +1,6 @@
 from .defeatenemies import DefeatEnemiesGeneralizedRewardBuilder 
 from utils.constants import RTSGeneralization 
-from tdd.reporter import Reporter as rp 
+from utils.reporter import Reporter as rp 
 
 class BuildUnitsGeneralizedRewardBuilder(DefeatEnemiesGeneralizedRewardBuilder):
 
