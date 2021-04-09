@@ -1,20 +1,37 @@
 import numpy
 import random
 from collections import deque
-from models.memory_representations.neural_network.pytorch import PyTorchDeepNeuralNetwork as DeepNeuralNetwork
+from models.memory_representations.neural_network.keras import KerasDeepNeuralNetwork
+from models.memory_representations.neural_network.pytorch import PyTorchDeepNeuralNetwork
 from models.base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
+from utils.error import UnsuportedLibraryError
+from utils import constants
 
 class DeepQLearning(LearningModel):
     #by default learning rate should not decay at all, since this is not the default behavior
     #of Deep-Q Learning
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, learning_rate_min=0.00002, learning_rate_decay=1, learning_rate_decay_ep_cutoff=0, gamma=0.95, name='DQN', build_model = None, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, per_episode_epsilon_decay=False, use_memory=False, memory_maxlen=10000, batch_size=32, min_memory_size=5000, seed_value=None, cpu_only=False):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.0002, learning_rate_min=0.00002, learning_rate_decay=1, 
+                learning_rate_decay_ep_cutoff=0, gamma=0.95, name='DQN', build_model = None, epsilon_start=1.0, epsilon_min=0.5, epsilon_decay=0.995, 
+                per_episode_epsilon_decay=False, use_memory=False, memory_maxlen=10000, batch_size=32, min_memory_size=5000, seed_value=None, cpu_only=False, lib='keras'):
         super().__init__(action_wrapper, state_builder, gamma, learning_rate, learning_rate_min, learning_rate_decay, epsilon_start, epsilon_min, epsilon_decay , per_episode_epsilon_decay, learning_rate_decay_ep_cutoff, name, seed_value, cpu_only)
         # Defining the model's layers. Tensorflow's objects are stored into self.model_layers
         self.batch_size = batch_size
         self.build_model = build_model
-        self.dnn = DeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value) 
+        self.lib = lib
+
+        if self.lib in constants.listoflibs:
+            if self.lib == constants.Libraries.KERAS:
+                self.dnn = KerasDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value)
+            
+            if self.lib == constants.Libraries.PYTORCH:
+                self.dnn = PyTorchDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value)
+
+            # if self.lib == constants.Libraries.TENSORFLOW:
+                # self.dnn = tensorflowDNN call here
+        else:
+            raise UnsuportedLibraryError(self.lib)
 
         self.use_memory = use_memory
         if self.use_memory:
@@ -100,23 +117,19 @@ class DeepQLearning(LearningModel):
         mxq = values.max()
         return mxq
 
-    def choose_action(self, state, excluded_actions=[]):
-        expl_expt_tradeoff = numpy.random.rand()
-
-        if self.epsilon_greedy > expl_expt_tradeoff:
-            random_action = random.choice(self.actions)
-
-            # Removing excluded actions
-            while random_action in excluded_actions:
-                random_action = random.choice(self.actions)
-            action = random_action
+    def choose_action(self, state, excluded_actions=[], is_testing=False):
+        if is_testing:
+            return self.predict(state, excluded_actions)
         else:
-            action = self.predict(state, excluded_actions)
+            if numpy.random.rand() <= self.epsilon_greedy:
+                random_action = random.choice(self.actions)
 
-        if not self.per_episode_epsilon_decay:
-            self.decay_epsilon()
-
-        return action
+                # Removing excluded actions
+                while random_action in excluded_actions:
+                    random_action = random.choice(self.actions)
+                return random_action
+            else:
+                return self.predict(state, excluded_actions)
 
     def predict(self, state, excluded_actions=[]):
         q_values = self.dnn.get_output(state)

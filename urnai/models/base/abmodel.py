@@ -6,7 +6,9 @@ from base.savable import Savable
 
 class LearningModel(Savable):
 
-    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, learning_rate_min, learning_rate_decay, epsilon_start, epsilon_min, epsilon_decay_rate, per_episode_epsilon_decay=False, learning_rate_decay_ep_cutoff=0, name=None, seed_value=None, cpu_only=False):
+    def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, learning_rate_min, learning_rate_decay, 
+                epsilon_start, epsilon_min, epsilon_decay_rate, per_episode_epsilon_decay=False, learning_rate_decay_ep_cutoff=0, 
+                name=None, seed_value=None, cpu_only=False):
         super(LearningModel, self).__init__()
         self.pickle_black_list=['cpu_only'] # we don't want to save whether or not to disable cpu when inputing a seed for reproducibility
         self.seed_value = seed_value

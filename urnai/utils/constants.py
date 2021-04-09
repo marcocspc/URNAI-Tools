@@ -2,6 +2,11 @@ class Games:
     DRTS = "deep_rts"
     SC2 = "starcraft_ii"
 
+class Libraries:
+    KERAS = "keras"
+    PYTORCH = "pytorch"
+    TENSORFLOW = "tensorflow"
+
 class RTSGeneralization:
 
     ACTION_DRTS_DO_NOTHING = 17
@@ -28,3 +33,7 @@ class RTSGeneralization:
     MAXIMUM_NUMBER_OF_FARM_OR_SUPPLY_DEPOT = 1
     MAXIMUM_NUMBER_OF_BARRACKS = 1
     MAXIMUM_NUMBER_OF_ARCHERS_MARINES = 20
+
+libkeys = list(filter( lambda x: not x.startswith("_"), list(Libraries.__dict__.keys()) ))
+listoflibs = [Libraries.__dict__[x] for x in libkeys]
+print(listoflibs)

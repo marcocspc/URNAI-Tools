@@ -42,3 +42,9 @@ class UnsupportedTrainingMethodError(Exception):
 
 class FileFormatNotSupportedError(Exception):
     pass
+
+class UnsuportedLibraryError(Exception):
+    def __init__(self, lib):
+        self.lib = lib
+        self.message = "\'" + str(self.lib) + "\' is not a supported Machine Learning Library, check for typing errors."
+        super().__init__(self.message)
