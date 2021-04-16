@@ -48,7 +48,7 @@ def declare_trainer():
     #                     gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=2000)  
     
     dq_network = DeepQLearning(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False,
-                        gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=2000, lib="keras")
+                        gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=64, lib="keras")
     
     agent = SC2Agent(dq_network, KilledUnitsReward())
 
@@ -59,7 +59,7 @@ def declare_trainer():
 
     trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dql_1-0",
                     save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
-                    max_training_episodes=2, max_steps_training=300,
+                    max_training_episodes=6, max_steps_training=800,
                     max_test_episodes=2, max_steps_testing=300)
     return trainer
 

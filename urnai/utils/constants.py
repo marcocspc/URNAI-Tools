@@ -34,6 +34,9 @@ class RTSGeneralization:
     MAXIMUM_NUMBER_OF_BARRACKS = 1
     MAXIMUM_NUMBER_OF_ARCHERS_MARINES = 20
 
+# geting list of keys in Libraries.__dict__ that do not start with _ to exclude internal atributes
+# returns: ['KERAS', 'PYTORCH', 'TENSORFLOW']
 libkeys = list(filter( lambda x: not x.startswith("_"), list(Libraries.__dict__.keys()) ))
+# geting a list of values correspondent to the keys obtained above in Libraries.__dict__
+# returns: ['keras', 'pytorch', 'tensorflow']
 listoflibs = [Libraries.__dict__[x] for x in libkeys]
-print(listoflibs)
