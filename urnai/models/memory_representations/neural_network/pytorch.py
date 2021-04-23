@@ -7,8 +7,8 @@ import numpy as np
 
 class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
 
-    def __init__(self, action_output_size, state_input_shape, build_model, gamma, alpha, seed = None):       
-        super().__init__(action_output_size, state_input_shape, build_model, gamma, alpha)
+    def __init__(self, action_output_size, state_input_shape, build_model, gamma, alpha, seed = None, batch_size=32):       
+        super().__init__(action_output_size, state_input_shape, build_model, gamma, alpha, seed, batch_size)
         
         #these lines are needed to setup pytorch
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -25,7 +25,10 @@ class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
 
     #TODO
     #def add_convolutional_layer(self, idx):
+    #TODO
+    #def maxpooling
 
+    #TODO adapt to batch training
     def update(self, state, target_output):
         # transform our state from numpy array to pytorch tensor and then feed it to our model (model)
         # the result of this is our expected output
@@ -43,7 +46,7 @@ class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
         loss.backward()
         self.optimizer.step()
 
-
+    #TODO adapt to batch inference
     def get_output(self, state):
         # convert numpy format to something that pytorch understands
         state = torch.from_numpy(state).float().unsqueeze(0).to(self.device)
@@ -57,9 +60,12 @@ class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
         # return the output
         return action_values.cpu().data.numpy()
 
-    #TODO
     def set_seed(self, seed):
-        pass
+        if seed != None:
+            torch.manual_seed(self.seed)
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
+        return seed
 
     def create_base_model(self):
         model = self.SubDeepQNetwork()

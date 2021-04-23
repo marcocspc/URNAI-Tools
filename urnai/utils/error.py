@@ -48,3 +48,9 @@ class UnsuportedLibraryError(Exception):
         self.lib = lib
         self.message = "\'" + str(self.lib) + "\' is not a supported Machine Learning Library, check for typing errors."
         super().__init__(self.message)
+
+class IncoherentNeuralNetworkInitError(Exception):
+    def __init__(self, nnclass):
+        self.nnclass = nnclass
+        self.message = "\'" + str(self.nnclass) + "\' is not a valid Neural Network Class, check for import or implementation errors."
+        super().__init__(self.message)

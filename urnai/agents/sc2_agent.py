@@ -38,12 +38,3 @@ class SC2Agent(Agent):
             raise error.ActionError("Invalid function structure. Function name: %s." % selected_action[0])
         return selected_action
 
-    # def play(self, obs):
-    #     if self.action_wrapper.is_action_done():
-    #         current_state = self.build_state(obs)
-    #         excluded_actions = self.action_wrapper.get_excluded_actions(obs)
-    #         predicted_action_idx = self.model.predict(current_state, excluded_actions)
-    #         self.previous_action = predicted_action_idx
-    #     arrayed_action = [self.action_wrapper.get_action(self.previous_action, obs)]
-    #     return arrayed_action
-

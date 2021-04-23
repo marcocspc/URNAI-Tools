@@ -4,8 +4,6 @@ from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activati
 from keras.optimizers import Adam
 from keras import backend as K
 
-import numpy as np
-
 class KerasDeepNeuralNetwork(ABNeuralNetwork):
     """
     Implementation of a Deep Neural Network using Keras
@@ -25,9 +23,8 @@ class KerasDeepNeuralNetwork(ABNeuralNetwork):
     """
 
     def __init__(self, action_output_size, state_input_shape, build_model, gamma, alpha, seed = None, batch_size=32):     
-        super().__init__(action_output_size, state_input_shape, build_model, gamma, alpha)
+        super().__init__(action_output_size, state_input_shape, build_model, gamma, alpha, seed, batch_size)
 
-        self.batch_size = batch_size
         self.model.compile(optimizer=Adam(lr=self.alpha), loss='mse', metrics=['accuracy'])
 
 
@@ -43,30 +40,29 @@ class KerasDeepNeuralNetwork(ABNeuralNetwork):
     #TODO
     #def add_convolutional_layer(self, idx):
 
-    def update(self, state, target_output):
-        #TODO this has to be removed when we start passing batches of states from dql algorithm instead of single states
-        # state = state[np.newaxis, :]
-        # target_output = target_output[np.newaxis, :]
+    #TODO
+    #def maxpooling
 
-        # loss is not currently being used for anything
+    def update(self, state, target_output):
         loss = self.model.fit(state, target_output, batch_size=self.batch_size, shuffle=False, verbose=0)
 
 
     def get_output(self, state):
-        # state = state[np.newaxis, :]
         return self.model.predict(state)
 
-    #TODO
-    def set_seed(self, seed) -> None:
-        pass
+    def set_seed(self, seed) -> None:  
+        if seed != None:
+            import tensorflow as tf
+            tf.random.set_seed(seed)
+        return seed
 
     def create_base_model(self):
         model = Sequential()
         return model
 
-class AA(KerasDeepNeuralNetwork):
-    def __init__(self, action_output_size, state_input_shape, build_model, gamma, alpha, seed = None):        
-        super().__init__(action_output_size, state_input_shape, build_model, gamma, alpha)
+class DNNCustomModelOverrideExample(KerasDeepNeuralNetwork):
+    def __init__(self, action_output_size, state_input_shape, build_model, gamma, alpha, seed = None, batch_size=32):        
+        super().__init__(action_output_size, state_input_shape, build_model, gamma, alpha, seed, batch_size)
     
     def make_model(self):
         self.model = Sequential()

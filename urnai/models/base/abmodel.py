@@ -10,10 +10,9 @@ class LearningModel(Savable):
                 epsilon_start, epsilon_min, epsilon_decay_rate, per_episode_epsilon_decay=False, learning_rate_decay_ep_cutoff=0, 
                 name=None, seed_value=None, cpu_only=False):
         super(LearningModel, self).__init__()
-        self.pickle_black_list=['cpu_only'] # we don't want to save whether or not to disable cpu when inputing a seed for reproducibility
+
         self.seed_value = seed_value
-        self.cpu_only = cpu_only
-        self.set_seeds()
+        self.set_seeds(cpu_only)
 
         self.gamma = gamma
         self.learning_rate = learning_rate
@@ -91,22 +90,30 @@ class LearningModel(Savable):
 
         if episode > self.learning_rate_decay_ep_cutoff and self.learning_rate_decay_ep_cutoff != 0:
             self.decay_lr()
-
-    def set_seeds(self):
+    
+    def set_seeds(self, cpu_only):
         if self.seed_value != None:
             """
-            CODE TO MAKE TENSORFLOW/KERAS DETERMINISTIC BELLOW (https://keras.io/getting_started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development)
-            OBS: Due to the nature of paralelized calculations in GPUs, there will be some non-deterministic operations 
-            done by tensorflow WHEN RUNNING ON A GPU. To avoid this, run tensorflow on the CPU by setting CUDA_VISIBLE_DEVICES=""
-            """
-            import os, importlib
-            import tensorflow as tf
-            tf.random.set_seed(self.seed_value)
+            This method sets seeds for the Random Number Generators of Python and Numpy.
+            This is done with the objective of removing non-deterministic calculations in 
+            the process of training and inference of neural networks, since ML libraries 
+            such as keras or tensorflow use RNGs from numpy and python in their inerworkings.
+            
+            Another functionality of this method is that it forces execution of ML libraries on
+            the CPU, since paralelized calculations in GPU lead to non-deterministic operations.
+            This is done through the "cpu_only" parameter, which is independent from seed_value.
 
-            if(self.cpu_only):
+            However, for a machine learning model to be fully deterministic we also need the 
+            RNG inside the library that implements the model to have its seed fixed. This is done
+            in a separate method dependent on each ML library that URNAI supports, for example 
+            inside keras.py there is the set_seet method which will set the tensorflow RNG seed.
+            
+            more info on: https://keras.io/getting_started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development
+            """
+            import os
+
+            if(cpu_only):
                 os.environ['CUDA_VISIBLE_DEVICES']="" # To be used when GPU usage is not desired
-                physical_devices = tf.config.list_physical_devices('GPU')
-                tf.config.set_visible_devices(physical_devices[1:], 'GPU')
 
             os.environ['PYTHONHASHSEED']=str(self.seed_value)
 
@@ -115,10 +122,5 @@ class LearningModel(Savable):
             
             import random as python_random
             python_random.seed(self.seed_value)
-
-            if(importlib.util.find_spec("torch") is not None):
-                import torch
-                torch.manual_seed(self.seed_value)
-                torch.backends.cudnn.deterministic = True
-                torch.backends.cudnn.benchmark = False
+                
             

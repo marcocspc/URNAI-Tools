@@ -13,6 +13,7 @@ from urnai.agents.states.sc2 import Simple64GridState, SimpleCroppedGridState
 from urnai.models.ddqn_keras import DDQNKeras
 from urnai.models.ddqn_keras_mo import DDQNKerasMO
 from urnai.models.algorithms.dql import DeepQLearning
+from urnai.models.memory_representations.neural_network.keras import KerasDeepNeuralNetwork, DNNCustomModelOverrideExample
 from urnai.utils.functions import query_yes_no
 from urnai.models.model_builder import ModelBuilder
 
@@ -48,7 +49,7 @@ def declare_trainer():
     #                     gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=2000)  
     
     dq_network = DeepQLearning(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False,
-                        gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=64, lib="keras")
+                        gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=64, lib="keras", neural_net_class=DNNCustomModelOverrideExample)
     
     agent = SC2Agent(dq_network, KilledUnitsReward())
 
@@ -57,9 +58,9 @@ def declare_trainer():
     #                 max_training_episodes=3000, max_steps_training=1200,
     #                 max_test_episodes=100, max_steps_testing=1200)
 
-    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dql_1-0",
+    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dql_1-0_modeloverride",
                     save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
-                    max_training_episodes=6, max_steps_training=800,
+                    max_training_episodes=2, max_steps_training=800,
                     max_test_episodes=2, max_steps_testing=300)
     return trainer
 
