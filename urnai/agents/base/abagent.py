@@ -68,16 +68,6 @@ class Agent(Savable):
         '''
         pass
 
-    # @abstractmethod
-    # def play(self, obs):
-    #     '''
-    #     This method should:
-    #     1) Build a State using obs
-    #     2) Use the state that was built to get an ActionIndex from the Agent's model
-    #     3) Return an Action from the Agent's ActionWrapper by using the ActionIndex from step 2
-    #     '''
-    #     pass
-
     def save_extra(self, save_path):
         '''
         Implements the save_extra method from the Savable class.

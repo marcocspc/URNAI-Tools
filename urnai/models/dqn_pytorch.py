@@ -190,7 +190,7 @@ class QNetwork(nn.Module):
     Our dynamic Q-Network Class that inherits from PyTorche's nn.Module. 
     It receives the build_model, so it can dynamically create layers.
     """
-    # TO DO: check https://discuss.pytorch.org/t/a-more-elegant-way-of-creating-the-nets-in-pytorch/11959/4
+    # TODO: check https://discuss.pytorch.org/t/a-more-elegant-way-of-creating-the-nets-in-pytorch/11959/4
     # maybe it is a better solution to dynamic instantiation
     def __init__(self, state_size, action_size, build_model):
         super(QNetwork,self).__init__()

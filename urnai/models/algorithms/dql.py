@@ -101,10 +101,7 @@ class DeepQLearning(LearningModel):
 
 
         if neural_net_class != None:
-            try:
-                self.dnn = neural_net_class(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value, self.batch_size)
-            except:
-                raise IncoherentNeuralNetworkInitError(neural_net_class.__name__)
+            self.dnn = neural_net_class(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value, self.batch_size)
         else:
             if self.lib in constants.listoflibs:
                 if self.lib == constants.Libraries.KERAS:
@@ -112,9 +109,6 @@ class DeepQLearning(LearningModel):
 
                 if self.lib == constants.Libraries.PYTORCH:
                     self.dnn = PyTorchDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value)
-                #TODO
-                # if self.lib == constants.Libraries.TENSORFLOW:
-                    # self.dnn = tensorflowDNN call here
             else:
                 raise UnsuportedLibraryError(self.lib)
 
@@ -130,6 +124,11 @@ class DeepQLearning(LearningModel):
             self.memory_learn(s, a, r, s_, done)
         else:
             self.no_memory_learn(s, a, r, s_, done)
+
+        # if our epsilon rate decay is set to be done every step, we simply decay it. Otherwise, this will only be done
+        # at the end of every episode, on self.ep_reset() which is in our LearningModel base class
+        if not self.per_episode_epsilon_decay:
+            self.decay_epsilon()
 
     def memory_learn(self, s, a, r, s_, done):
         self.memorize(s, a, r, s_, done)

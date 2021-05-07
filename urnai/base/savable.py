@@ -123,7 +123,10 @@ class Savable(ABC):
         elif self.pickle_black_list is None:
             self.pickle_black_list = []
 
-        full_attr_list = [a for a in dir(self) if not a.startswith('__') and not callable(getattr(self, a)) and a not in self.pickle_black_list]
+        full_attr_list = [a for a in dir(self) if not a.startswith('__') 
+                        and not callable(getattr(self, a)) 
+                        and a not in self.pickle_black_list
+                        and a != "pickle_black_list"]
         pickleable_list = []
 
         for attr in full_attr_list:
@@ -173,7 +176,7 @@ class Savable(ABC):
     def restore_pickleable_attributes(self, dict_to_restore):
         for attr in dict_to_restore:
             if hasattr(self, "pickle_black_list"):
-                if attr not in self.pickle_black_list:
+                if attr not in self.pickle_black_list and attr != "pickle_black_list":
                     setattr(self, attr, dict_to_restore[attr])
             else:
                 setattr(self, attr, dict_to_restore[attr])

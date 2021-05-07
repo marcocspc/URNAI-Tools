@@ -35,17 +35,50 @@ class KerasDeepNeuralNetwork(ABNeuralNetwork):
         self.model.add(Dense(self.build_model[idx]['length'], activation='linear'))
 
     def add_fully_connected_layer(self, idx):
-        self.model.add(Dense(self.build_model[idx-1]['nodes'], activation='relu'))
+        self.model.add(Dense(self.build_model[idx]['nodes'], activation='relu'))
 
-    #TODO
-    #def add_convolutional_layer(self, idx):
+    def add_convolutional_layer(self, idx):
+        # if idx is zero it means this is an input layer, so we pass input_shape to keras
+        if idx == 0:
+            self.model.add(     Conv2D(
+                                filters=self.build_model[idx]['filters'], 
+                                kernel_size=self.build_model[idx]['filter_shape'], 
+                                activation = self.build_model[idx]['activation'],
+                                padding = self.build_model[idx]['padding'],
+                                strides = self.build_model[idx]['strides'],
+                                data_format = self.build_model[idx]['data_format'],
+                                dilation_rate = self.build_model[idx]['dilation_rate'],
+                                groups = self.build_model[idx]['groups'],
+                                input_shape = self.build_model[idx]['input_shape']
+                                )
+                            )
+        else:
+            self.model.add(     Conv2D(
+                                filters=self.build_model[idx]['filters'], 
+                                kernel_size=self.build_model[idx]['filter_shape'], 
+                                activation=self.build_model[idx]['activation'],
+                                padding = self.build_model[idx]['padding'],
+                                strides = self.build_model[idx]['strides'],
+                                data_format = self.build_model[idx]['data_format'],
+                                dilation_rate = self.build_model[idx]['dilation_rate'],
+                                groups = self.build_model[idx]['groups']
+                                )
+                            )
 
-    #TODO
-    #def maxpooling
+    def add_maxpooling_layer(self, idx):
+        self.model.add(     MaxPooling2D(
+                            pool_size=self.build_model[idx]['pool_size'],
+                            strides=self.build_model[idx]['strides'],
+                            padding=self.build_model[idx]['padding'],
+                            data_format=self.build_model[idx]['data_format']
+                            )
+                        )
+    
+    def add_flatten_layer(self, idx):
+        self.model.add(Flatten())
 
     def update(self, state, target_output):
         loss = self.model.fit(state, target_output, batch_size=self.batch_size, shuffle=False, verbose=0)
-
 
     def get_output(self, state):
         return self.model.predict(state)
@@ -59,6 +92,17 @@ class KerasDeepNeuralNetwork(ABNeuralNetwork):
     def create_base_model(self):
         model = Sequential()
         return model
+
+    def save_extra(self, persist_path):
+        self.model.save_weights(self.get_full_persistance_path(persist_path)+".h5")
+
+    def load_extra(self, persist_path):
+        import os
+        exists = os.path.isfile(self.get_full_persistance_path(persist_path)+".h5")
+
+        if(exists):
+            self.__init__(self.action_output_size, self.state_input_shape, self.build_model, self.gamma, self.alpha, self.seed, self.batch_size)
+            self.model.load_weights(self.get_full_persistance_path(persist_path)+".h5")
 
 class DNNCustomModelOverrideExample(KerasDeepNeuralNetwork):
     def __init__(self, action_output_size, state_input_shape, build_model, gamma, alpha, seed = None, batch_size=32):        

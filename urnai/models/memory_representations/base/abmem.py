@@ -8,7 +8,7 @@ class ABMemoryRepresentation(Savable):
     def __init__(self, action_output_size, state_input_shape, build_model, gamma, alpha, seed = None, batch_size = 32):
         super().__init__()
         self.pickle_black_list = []
-        self.seed_value = self.set_seed(seed)
+        self.seed = self.set_seed(seed)
         self.build_model = build_model
         self.gamma = gamma
         self.alpha = alpha

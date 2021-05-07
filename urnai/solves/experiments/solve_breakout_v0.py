@@ -15,7 +15,45 @@ from urnai.models.dqn_keras import DQNKeras
 from urnai.models.ddqn_keras import DDQNKeras
 from urnai.models.pg_keras import PGKeras
 from urnai.models.dqn_pytorch import DQNPytorch
+from urnai.models.algorithms.dql import DeepQLearning
 from urnai.models.model_builder import ModelBuilder
+
+
+from urnai.models.memory_representations.neural_network.keras import KerasDeepNeuralNetwork
+from keras import layers
+from keras import models
+from keras import optimizers
+
+class CustomKerasConvClass(KerasDeepNeuralNetwork):
+    def __init__(self, action_output_size, state_input_shape, build_model, gamma, alpha, seed = None, batch_size=32):        
+        super().__init__(action_output_size, state_input_shape, build_model, gamma, alpha, seed, batch_size)
+    
+    def make_model(self):
+        self.model = models.Sequential()
+
+        # input layer
+        self.model.add(layers.Conv2D(4, 2, input_shape=self.state_input_shape))
+        self.model.add(layers.BatchNormalization())
+        self.model.add(layers.ReLU())
+        self.model.add(layers.Dropout(0.2))
+
+        # maxpooling
+        self.model.add(layers.MaxPooling2D(pool_size=4))
+        self.model.add(layers.Dropout(0.2))
+
+        self.model.add(layers.Flatten())
+        
+        # hidden 8 neuron
+        self.model.add(layers.Dense(8))
+        self.model.add(layers.BatchNormalization())
+        self.model.add(layers.ReLU())
+
+        # output layer (4 neuron output)
+        self.model.add(layers.Dense(self.action_output_size))
+        self.model.add(layers.BatchNormalization())
+        self.model.add(layers.Activation('linear'))
+
+        self.model.compile(optimizer=optimizers.Adam(lr=self.alpha), loss='mse', metrics=['accuracy'])
 
 def declare_trainer():
     env = GymEnv(id="Breakout-v0", render=True)
@@ -25,27 +63,22 @@ def declare_trainer():
     state_builder = GymState(env.env_instance.observation_space.shape)
 
     helper = ModelBuilder()
-    helper.add_convolutional_layer(filters=8, input_shape=(env.env_instance.observation_space.shape), dropout=0)
-    helper.add_convolutional_layer(filters=4, dropout=0)
-    # helper.add_input_layer(int(state_builder.get_state_dim()), 50)
-    # helper.add_fullyconn_layer(50)
+    helper.add_convolutional_layer(filters=8, kernel_size=4, input_shape=env.env_instance.observation_space.shape, padding=(1,1))
+    helper.add_maxpooling_layer(padding=(1,1))
+    #helper.add_flatten_layer()
+    helper.add_fullyconn_layer(10)
     helper.add_output_layer()
 
-    # dq_network = DQNPytorch(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(),
-    #                     gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.01, memory_maxlen=100000)
-
-    dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(),
-                        gamma=0.99, learning_rate=0.001, learning_rate_min=0.0005, learning_rate_decay=0.99995, learning_rate_decay_ep_cutoff=500,
-                        epsilon_decay=0.99999, epsilon_min=0.01, memory_maxlen=100000, min_memory_size=2000)
-
-    #dq_network = PGKeras(action_wrapper, state_builder, learning_rate=0.001, gamma=0.99, build_model=helper.get_model_layout())
+    dq_network = DeepQLearning(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(),
+                gamma=0.99, learning_rate=0.01, epsilon_decay=0.9999, epsilon_min=0.005, memory_maxlen=50000, min_memory_size=2000, 
+                lib="pytorch")
 
     agent = GenericAgent(dq_network, PureReward())
 
-    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-v0_test", 
+    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-v0_pytorch",
                     save_every=100, enable_save=True, relative_path=True,
-                    max_training_episodes=10, max_steps_training=700,
-                    max_test_episodes=5, max_steps_testing=700)
+                    max_training_episodes=50, max_steps_training=800,
+                    max_test_episodes=5, max_steps_testing=800)
     return trainer
 
 def main(unused_argv):

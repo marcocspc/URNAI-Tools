@@ -4,6 +4,8 @@ class ModelBuilder():
     LAYER_OUTPUT = 'output'
     LAYER_FULLY_CONNECTED = 'fullyconn'
     LAYER_CONVOLUTIONAL = 'conv'
+    LAYER_MAXPOOLING = 'maxpooling'
+    LAYER_FLATTEN = 'flatten'
 
     DEFAULT_BUILD_MODEL = [ 
         {
@@ -76,7 +78,9 @@ class ModelBuilder():
         # else:
         #     raise TypeError("Input layer shape should be a list with its dimensions in it.")
 
-    def add_convolutional_layer(self, filters = 1, filter_shape = (3, 3), padding = 'same', name = 'default', input_shape = None, max_pooling_pool_size_shape = (2, 2), dropout=0.2):
+    def add_convolutional_layer(self, filters=2, kernel_size=(3,3), strides=(1, 1), padding='valid',
+                                data_format=None, dilation_rate=(1, 1), groups=1, activation='relu', 
+                                name = 'default', input_shape=None):
         if name == "default":
             cont = 0
             for layer in self.layers:
@@ -87,25 +91,58 @@ class ModelBuilder():
             name = ModelBuilder.LAYER_CONVOLUTIONAL + str(cont)
 
         if type(filters) == int:
-            if type(filter_shape) == tuple:
-                if padding == 'same' or padding == 'valid':
-                    self.layers.append({
-                    'type' : ModelBuilder.LAYER_CONVOLUTIONAL,
-                    'filters': filters,
-                    'filter_shape' : filter_shape,
-                    'padding' : padding,
-                    'name' : name,
-                    'input_shape' : input_shape,
-                    'max_pooling_pool_size_shape' : max_pooling_pool_size_shape,
-                    'dropout' : dropout
-                    }
-                    )
-                else:
-                    raise TypeError("Convolutional layer's padding should be 'same' or 'valid'.")
-            else: 
-                raise TypeError("Convolutional layer's filter_shape should be a tuple.")
+            self.layers.append({
+            'type' : ModelBuilder.LAYER_CONVOLUTIONAL,
+            'filters': filters,
+            'filter_shape' : kernel_size,
+            'strides' : strides,
+            'padding' : padding,
+            'data_format' : data_format,
+            'dilation_rate' : dilation_rate,
+            'groups' : groups,
+            'activation' : activation,
+            'name' : name,
+            'input_shape' : input_shape,
+            }
+            )
         else:
             raise TypeError("Convolutional layer's filters should be an integer.")
+
+    def add_maxpooling_layer(self, pool_size=(2, 2), strides=None, padding='valid', data_format=None, name = 'default'):
+        if name == "default":
+            cont = 0
+            for layer in self.layers:
+                if "name" in layer:
+                    if "default" in layer['name']:
+                        cont += 1
+
+            name = ModelBuilder.LAYER_MAXPOOLING + str(cont)
+
+        if type(pool_size) == tuple:
+            self.layers.append({
+            'type' : ModelBuilder.LAYER_MAXPOOLING,
+            'pool_size': pool_size,
+            'strides' : strides,
+            'padding' : padding,
+            'data_format' : data_format,
+            })
+        else: 
+            raise TypeError("Maxpooling layer's filter_shape should be a tuple.")
+
+    def add_flatten_layer(self, data_format=None, name = 'default'):
+        if name == "default":
+            cont = 0
+            for layer in self.layers:
+                if "name" in layer:
+                    if "default" in layer['name']:
+                        cont += 1
+
+            name = ModelBuilder.LAYER_FLATTEN + str(cont)
+        
+        self.layers.append({
+            'type' : ModelBuilder.LAYER_FLATTEN,
+            'data_format' : data_format,
+            })
 
 
     def add_fullyconn_layer(self, nodes, name = "default"):

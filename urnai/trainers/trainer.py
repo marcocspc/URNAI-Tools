@@ -26,16 +26,16 @@ class TestParams():
 class Trainer(Savable):
     ## TODO: Add an option to play every x episodes, instead of just training non-stop
 
-    def __init__(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False, log_actions=True, episode_batch_avg_calculation=10, do_reward_test=False, reward_test_number_of_episodes=10):
+    def __init__(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=True, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False, log_actions=True, episode_batch_avg_calculation=10, do_reward_test=False, reward_test_number_of_episodes=10):
         super().__init__()
         self.pickle_black_list = None 
         self.prepare_black_list()
         self.setup(env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path, file_name, enable_save, save_every, relative_path, debug_level, reset_epsilon, tensorboard_logging, log_actions, episode_batch_avg_calculation=episode_batch_avg_calculation, do_reward_test=do_reward_test, reward_test_number_of_episodes=reward_test_number_of_episodes)
 
     def prepare_black_list(self):
-        self.pickle_black_list = ["save_path", "file_name", "full_save_path", "full_save_play_path", "agent", "max_training_episodes","max_test_episodes","max_steps_training","max_steps_testing"]
+        self.pickle_black_list = ["save_path", "file_name", "full_save_path", "full_save_play_path", "agent", "max_training_episodes","max_test_episodes","max_steps_training","max_steps_testing","save_every"]
 
-    def setup(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=False, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False, log_actions=True, episode_batch_avg_calculation=10, do_reward_test=False, reward_test_number_of_episodes=10):
+    def setup(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=True, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False, log_actions=True, episode_batch_avg_calculation=10, do_reward_test=False, reward_test_number_of_episodes=10):
         self.versioner = Versioner() 
         self.env = env
         self.agent = agent

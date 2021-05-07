@@ -34,7 +34,7 @@ For more information see https://github.com/deepmind/pysc2#get-starcraft-ii
 
 def declare_trainer():
     ## Initializing our StarCraft 2 environment
-    env = SC2Env(map_name="Simple64", render=False, step_mul=16, player_race="terran", enemy_race="random", difficulty="very_easy")
+    env = SC2Env(map_name="Simple64", render=True, step_mul=16, player_race="terran", enemy_race="random", difficulty="very_easy")
     
     action_wrapper = SimpleTerranWrapper()
     #state_builder = Simple64GridState(grid_size=4)
@@ -58,7 +58,7 @@ def declare_trainer():
     #                 max_training_episodes=3000, max_steps_training=1200,
     #                 max_test_episodes=100, max_steps_testing=1200)
 
-    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dql_1-0_modeloverride",
+    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_dql_1-0_modeloverride2",
                     save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
                     max_training_episodes=2, max_steps_training=800,
                     max_test_episodes=2, max_steps_testing=300)

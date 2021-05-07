@@ -131,7 +131,7 @@ class Logger(Savable):
         #time and sps stuff
         episode_duration = time() - self.episode_temp_start_time
         self.episode_duration_list.append(round(episode_duration, 1))
-        self.episode_sps_list.append(round(steps_count / episode_duration, 2))
+        self.episode_sps_list.append(round(steps_count / episode_duration+1, 2))
         self.avg_sps_list.append(round(sum(self.episode_sps_list) / self.ep_count, 2))
 
         #performance stuff

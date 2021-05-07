@@ -8,11 +8,15 @@ import numpy as np
 class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
 
     def __init__(self, action_output_size, state_input_shape, build_model, gamma, alpha, seed = None, batch_size=32):       
-        super().__init__(action_output_size, state_input_shape, build_model, gamma, alpha, seed, batch_size)
         
-        #these lines are needed to setup pytorch
+        # device needs to be set before calling the parent's constructor
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        super().__init__(action_output_size, state_input_shape, build_model, gamma, alpha, seed, batch_size)
+
+        # Optimizer needs to be set after super call because we define self.model inside it
         self.optimizer = optim.Adam(self.model.model_layers.parameters(), lr=self.alpha)
+        
 
     def add_input_layer(self, idx):
         self.model.model_layers.append(nn.Linear(self.state_input_shape, self.build_model[idx]['nodes']).to(self.device))
@@ -23,12 +27,6 @@ class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
     def add_fully_connected_layer(self, idx):
         self.model.model_layers.append(nn.Linear(self.build_model[idx-1]['nodes'], self.build_model[idx]['nodes']).to(self.device))
 
-    #TODO
-    #def add_convolutional_layer(self, idx):
-    #TODO
-    #def maxpooling
-
-    #TODO adapt to batch training
     def update(self, state, target_output):
         # transform our state from numpy array to pytorch tensor and then feed it to our model (model)
         # the result of this is our expected output
@@ -46,7 +44,6 @@ class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
         loss.backward()
         self.optimizer.step()
 
-    #TODO adapt to batch inference
     def get_output(self, state):
         # convert numpy format to something that pytorch understands
         state = torch.from_numpy(state).float().unsqueeze(0).to(self.device)
@@ -58,7 +55,8 @@ class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
         # put the network back to training mode again
         self.model.train()
         # return the output
-        return action_values.cpu().data.numpy()
+        output = np.squeeze(action_values.cpu().data.numpy())
+        return output
 
     def set_seed(self, seed):
         if seed != None:
@@ -78,6 +76,6 @@ class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
 
         def forward(self,x):
             for i in range(len(self.model_layers) - 1):
-                test = self.model_layers[i]
+                layer = self.model_layers[i]
                 x = F.relu(self.model_layers[i](x))
             return self.model_layers[-1](x)

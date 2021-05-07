@@ -6,12 +6,18 @@ from urnai.utils.error import UnsupportedBuildModelLayerTypeError
 from models.model_builder import ModelBuilder
 
 class ABNeuralNetwork(ABMemoryRepresentation):
+    """
+    
+    """
+
 
     def make_model(self):
         self.model = self.create_base_model()
 
         if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
             self.build_model[0]['shape'] = [None, self.state_input_shape]
+        elif self.build_model[0]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
+            self.build_model[0]['input_shape'] = self.state_input_shape
         else:
             raise IncoherentBuildModelError("The first layer type should be {} and the last one type should be {}".format(ModelBuilder.LAYER_INPUT, ModelBuilder.LAYER_OUTPUT))
         
@@ -32,6 +38,10 @@ class ABNeuralNetwork(ABMemoryRepresentation):
                 self.add_fully_connected_layer(idx)
             elif layer_model['type'] == ModelBuilder.LAYER_CONVOLUTIONAL:
                 self.add_convolutional_layer(idx)
+            elif layer_model['type'] == ModelBuilder.LAYER_MAXPOOLING:
+                self.add_maxpooling_layer(idx)
+            elif layer_model['type'] == ModelBuilder.LAYER_FLATTEN:
+                self.add_flatten_layer(idx)
 
     @abstractmethod
     def create_base_model(self) -> None:
@@ -50,3 +60,10 @@ class ABNeuralNetwork(ABMemoryRepresentation):
 
     def add_convolutional_layer(self, idx):
         raise UnsupportedBuildModelLayerTypeError("Convolutional layer is not supported by {}.".format(self.__class__.__name__))
+    
+    def add_maxpooling_layer(self, idx):
+        raise UnsupportedBuildModelLayerTypeError("MaxPooling layer is not supported by {}.".format(self.__class__.__name__))
+
+    def add_flatten_layer(self, idx):
+        raise UnsupportedBuildModelLayerTypeError("Flatten layer is not supported by {}.".format(self.__class__.__name__))
+
