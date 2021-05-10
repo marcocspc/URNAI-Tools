@@ -65,17 +65,17 @@ def declare_trainer():
     helper = ModelBuilder()
     helper.add_convolutional_layer(filters=8, kernel_size=4, input_shape=env.env_instance.observation_space.shape, padding=(1,1))
     helper.add_maxpooling_layer(padding=(1,1))
-    #helper.add_flatten_layer()
+    helper.add_flatten_layer()
     helper.add_fullyconn_layer(10)
     helper.add_output_layer()
 
     dq_network = DeepQLearning(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(),
                 gamma=0.99, learning_rate=0.01, epsilon_decay=0.9999, epsilon_min=0.005, memory_maxlen=50000, min_memory_size=2000, 
-                lib="pytorch")
+                lib="keras")
 
     agent = GenericAgent(dq_network, PureReward())
 
-    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-v0_pytorch",
+    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="breakout-v0_keras",
                     save_every=100, enable_save=True, relative_path=True,
                     max_training_episodes=50, max_steps_training=800,
                     max_test_episodes=5, max_steps_testing=800)

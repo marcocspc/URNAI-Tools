@@ -3,17 +3,17 @@ import random
 from collections import deque
 from models.memory_representations.neural_network.keras import KerasDeepNeuralNetwork
 from models.memory_representations.neural_network.pytorch import PyTorchDeepNeuralNetwork
-from models.base.abmodel import LearningModel
+from models.algorithms.dql import DeepQLearning
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
 from utils.error import UnsuportedLibraryError
 from utils import constants
 
-class DeepQLearning(LearningModel):
+class DoubleDeepQLearning(DeepQLearning):
     """
-    Generalistic Deep Q Learning Algorithm.
+    Generalistic Double Deep Q Learning Algorithm.
 
-    This implementation of DQL allows the user to seamlessly select which backend Machine Learning 
+    This implementation of DDQL allows the user to seamlessly select which backend Machine Learning 
     Library (Keras, Pytorch, etc) they would like to use with this algorithm by passing them as a parameter.
 
     This is done through the "lib" parameter, which can receive the name of any ML Library 
@@ -21,7 +21,7 @@ class DeepQLearning(LearningModel):
 
     More advanced users can also easily override any of the default URNAI model builders for Keras, Pytorch etc
     by passing a custom Neural Network class as the "neural_net_class" parameter. This class can have any
-    model architecture that you desire, as long as it fits URNAI's overall Neural Network architecture. 
+    model architecture that you desire, as long as it fits URNAI's overall Neural Network architecture.
    
     An easy way of building one such class is inheriting from ABNeuralNetwork (urnai.models.memory_representations.abneuralnetwork) 
     or inheriting directly from a Default NN class for a specific ML Library you wish to work with, such as 
@@ -79,6 +79,10 @@ class DeepQLearning(LearningModel):
         cpu_only: Bool
             If true will run algorithm only using CPU, also useful for reproducibility since GPU 
             paralelization creates uncertainty
+        update_target_every: Int
+            Dictates the amount of episodes the algorithm will train with the target model offset from
+            the main model. After update_target_every amount of episodes it will copy the model
+            weights from the main model to the target model and continue training.
         lib: String
             Name of the Machine Learning library that should be used with the instanced Deep Q Learning 
             algorithm (names of accepted libraries are defined in urnai.utils.constants.Libraries)
@@ -90,45 +94,46 @@ class DeepQLearning(LearningModel):
     """
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, learning_rate_min=0.0001, learning_rate_decay=1, 
-                learning_rate_decay_ep_cutoff=0, gamma=0.99, name='DeepQLearning', build_model = None, epsilon_start=1.0, epsilon_min=0.005, epsilon_decay=0.99995, 
-                per_episode_epsilon_decay=False, use_memory=True, memory_maxlen=50000, batch_size=32, min_memory_size=2000, seed_value=None, cpu_only=False, lib='keras', neural_net_class=None):
-        super().__init__(action_wrapper, state_builder, gamma, learning_rate, learning_rate_min, learning_rate_decay, epsilon_start, epsilon_min, epsilon_decay , per_episode_epsilon_decay, learning_rate_decay_ep_cutoff, name, seed_value, cpu_only)
+                learning_rate_decay_ep_cutoff=0, gamma=0.99, name='DoubleDeepQLearning', build_model = None, epsilon_start=1.0, epsilon_min=0.005, epsilon_decay=0.99995, 
+                per_episode_epsilon_decay=False, use_memory=True, memory_maxlen=50000, batch_size=32, min_memory_size=2000, seed_value=None, cpu_only=False, 
+                update_target_every=5, lib='keras', neural_net_class=None):
+        super().__init__(action_wrapper, state_builder, learning_rate, learning_rate_min, learning_rate_decay,
+                        learning_rate_decay_ep_cutoff, gamma, name, build_model, epsilon_start, epsilon_min, 
+                        epsilon_decay , per_episode_epsilon_decay, use_memory, memory_maxlen, batch_size,
+                        min_memory_size, seed_value, cpu_only, lib, neural_net_class)
         
-        self.batch_size = batch_size
-        self.build_model = build_model
-        self.lib = lib
-        self.neural_net_class = neural_net_class
+        self.target_update_counter = 0
+        self.update_target_every = update_target_every
 
+        # self.batch_size = batch_size
+        # self.build_model = build_model
+        # self.lib = lib
+        # self.neural_net_class = neural_net_class
 
         if neural_net_class != None:
             self.dnn = neural_net_class(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value, self.batch_size)
+            self.target_dnn = neural_net_class(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value, self.batch_size)
+            self.target_dnn.copy_model_weights(self.dnn)
+            
         else:
             if self.lib in constants.listoflibs:
                 if self.lib == constants.Libraries.KERAS:
                     self.dnn = KerasDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value, self.batch_size)
+                    self.target_dnn = KerasDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value, self.batch_size)
+                    self.target_dnn.copy_model_weights(self.dnn)
 
                 if self.lib == constants.Libraries.PYTORCH:
                     self.dnn = PyTorchDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value)
+                    self.target_dnn = PyTorchDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value, self.batch_size)
+                    self.target_dnn.copy_model_weights(self.dnn)
             else:
                 raise UnsuportedLibraryError(self.lib)
 
-
-        self.use_memory = use_memory
-        if self.use_memory:
-            self.memory = deque(maxlen=memory_maxlen)
-            self.memory_maxlen = memory_maxlen
-            self.min_memory_size = min_memory_size
-
-    def learn(self, s, a, r, s_, done):
-        if self.use_memory:
-            self.memory_learn(s, a, r, s_, done)
-        else:
-            self.no_memory_learn(s, a, r, s_, done)
-
-        # if our epsilon rate decay is set to be done every step, we simply decay it. Otherwise, this will only be done
-        # at the end of every episode, on self.ep_reset() which is in our LearningModel base class
-        if not self.per_episode_epsilon_decay:
-            self.decay_epsilon()
+        # self.use_memory = use_memory
+        # if self.use_memory:
+        #     self.memory = deque(maxlen=memory_maxlen)
+        #     self.memory_maxlen = memory_maxlen
+        #     self.min_memory_size = min_memory_size
 
     def memory_learn(self, s, a, r, s_, done):
         self.memorize(s, a, r, s_, done)
@@ -146,7 +151,7 @@ class DeepQLearning(LearningModel):
         q_s_a = self.dnn.get_output(states)
 
         # predict Q(s',a') - so that we can do gamma * max(Q(s'a')) below
-        q_s_a_d = self.dnn.get_output(next_states)
+        q_s_a_d = self.target_dnn.get_output(next_states)
 
         # setup training arrays
         target_q_values = numpy.zeros((len(batch), self.action_size))
@@ -166,61 +171,34 @@ class DeepQLearning(LearningModel):
         # update neural network with expected q values
         self.dnn.update(states, target_q_values)
 
+        # If it's the end of an episode, increase the target update counter
+        if done:
+            self.target_update_counter += 1
+
+        # If our target update counter is greater than update_target_every we will update the weights in our target model
+        if self.target_update_counter > self.update_target_every:
+            self.target_dnn.copy_model_weights(self.dnn)
+            self.target_update_counter = 0
+
     def no_memory_learn(self, s, a, r, s_, done):
-        #get output for current sars array
+        # get output for current sars tuple
         # rows = 1 
         # cols = self.action_size
         # target_q_values = numpy.zeros(shape=(rows, cols))
-
+        
         q_s_a = self.dnn.get_output(s)
+        q_s_a_d = self.target_dnn.get_output(s_)
 
         expected_q = 0
         if done:
             expected_q = r
         else:
-            expected_q = r + self.gamma * self.__maxq(s_)
+            expected_q = r + self.gamma * numpy.amax(q_s_a_d)
 
-        q_s_a[0, a] = expected_q
+        q_s_a[0, a] = expected_q 
 
         self.dnn.update(s, q_s_a)
 
-    def __maxq(self, state):
-        values = self.dnn.get_output(state)
-        mxq = values.max()
-        return mxq
-
-    def choose_action(self, state, excluded_actions=[], is_testing=False):
-        if is_testing:
-            return self.predict(state, excluded_actions)
-        else:
-            if numpy.random.rand() <= self.epsilon_greedy:
-                random_action = random.choice(self.actions)
-
-                # Removing excluded actions
-                while random_action in excluded_actions:
-                    random_action = random.choice(self.actions)
-                return random_action
-            else:
-                return self.predict(state, excluded_actions)
-
-    def predict(self, state, excluded_actions=[]):
-        q_values = self.dnn.get_output(state)
-        action_idx = numpy.argmax(q_values)
-
-        # Removing excluded actions
-        # TODO: This is possibly badly optimized, eventually look back into this
-        while action_idx in excluded_actions:
-            q_values = numpy.delete(q_values, action_idx)
-            action_idx = numpy.argmax(q_values)
-        
-        action = int(action_idx)
-        return action
-
-    def memorize(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
-
-    def save_extra(self, persist_path):
-        self.dnn.save(persist_path)
-
     def load_extra(self, persist_path):
         self.dnn.load(persist_path)
+        self.target_dnn.copy_model_weights(self.dnn)

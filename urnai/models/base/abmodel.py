@@ -27,9 +27,9 @@ class LearningModel(Savable):
         self.state_size = state_builder.get_state_dim()
 
         # EXPLORATION PARAMETERS FOR EPSILON GREEDY STRATEGY
-        self.epsilon_greedy = epsilon_start 
-        self.epsilon_min = epsilon_min 
-        self.epsilon_decay_rate = epsilon_decay_rate 
+        self.epsilon_greedy = epsilon_start
+        self.epsilon_min = epsilon_min
+        self.epsilon_decay_rate = epsilon_decay_rate
         self.per_episode_epsilon_decay = per_episode_epsilon_decay
 
         #self.tensorboard_callback_logdir = ""

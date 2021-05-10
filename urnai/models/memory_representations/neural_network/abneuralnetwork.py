@@ -55,6 +55,10 @@ class ABNeuralNetwork(ABMemoryRepresentation):
     def add_output_layer(self, idx) -> None:
         ...
 
+    @abstractmethod
+    def copy_model_weights(self, model_to_copy) -> None:
+        ...
+
     def add_fully_connected_layer(self, idx):
         raise UnsupportedBuildModelLayerTypeError("Fully-connected layer is not supported by {}.".format(self.__class__.__name__))
 

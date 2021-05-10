@@ -103,6 +103,9 @@ class KerasDeepNeuralNetwork(ABNeuralNetwork):
         if(exists):
             self.__init__(self.action_output_size, self.state_input_shape, self.build_model, self.gamma, self.alpha, self.seed, self.batch_size)
             self.model.load_weights(self.get_full_persistance_path(persist_path)+".h5")
+    
+    def copy_model_weights(self, model_to_copy):
+        self.model.set_weights(model_to_copy.model.get_weights())
 
 class DNNCustomModelOverrideExample(KerasDeepNeuralNetwork):
     def __init__(self, action_output_size, state_input_shape, build_model, gamma, alpha, seed = None, batch_size=32):        
@@ -112,7 +115,7 @@ class DNNCustomModelOverrideExample(KerasDeepNeuralNetwork):
         self.model = Sequential()
 
         self.model.add(Dense(50, activation='relu', input_dim=self.state_input_shape))
-        self.model.add(Dense(50, activation='relu'))
+        #self.model.add(Dense(50, activation='relu'))
         self.model.add(Dense(self.action_output_size, activation='linear'))
 
         self.model.compile(optimizer=Adam(lr=self.alpha), loss='mse', metrics=['accuracy'])

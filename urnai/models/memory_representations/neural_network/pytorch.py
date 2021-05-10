@@ -69,6 +69,9 @@ class PyTorchDeepNeuralNetwork(ABNeuralNetwork):
         model = self.SubDeepQNetwork()
         return model
 
+    def copy_model_weights(self, model_to_copy):
+        self.model.load_state_dict(model_to_copy.state_dict())
+
     class SubDeepQNetwork(nn.Module):
         def __init__(self):
             super().__init__()

@@ -111,7 +111,6 @@ class DDQNKeras(DQNKeras):
         if not self.per_episode_epsilon_decay:
             self.decay_epsilon()
 
-
     def no_memory_learn(self, s, a, r, s_, done):
 
         # Q-Value for our initial states
