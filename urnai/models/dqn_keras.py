@@ -146,7 +146,6 @@ class DQNKeras(LearningModel):
         if not self.per_episode_epsilon_decay:
             self.decay_epsilon()
 
-
     def choose_action(self, state, excluded_actions=[], is_testing=False):
         # Verifies if we are running a test (Evaluating our agent)
         if is_testing:

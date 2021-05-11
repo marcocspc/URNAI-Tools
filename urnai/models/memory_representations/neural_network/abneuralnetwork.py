@@ -7,7 +7,15 @@ from models.model_builder import ModelBuilder
 
 class ABNeuralNetwork(ABMemoryRepresentation):
     """
-    
+        Base Class for a Neural Network
+
+        This class inherits from ABMemoryRepresentation, so it already has
+        abstract methods for updating the NN and for predicting an output.
+       
+        Therefore, this class just implements the make_model method, using a python
+        dict as a base to dinamically build a Neural Network. For that, it uses
+        abstract classes that add Neural Network Layers, such as add_input_layer(), 
+        add_output_layer(), add_fully_connected_layer(), etc.
     """
 
 
@@ -45,6 +53,12 @@ class ABNeuralNetwork(ABMemoryRepresentation):
 
     @abstractmethod
     def create_base_model(self) -> None:
+        """
+        This method is used to instantiate a Generic NN model and return it.
+        This is necessary because the instantiation of NN models differs from Keras 
+        to Pytorch, so with this method we can separate the instantion of the model
+        from its construction.
+        """
         ...
     
     @abstractmethod

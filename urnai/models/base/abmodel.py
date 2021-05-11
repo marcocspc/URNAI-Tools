@@ -5,6 +5,50 @@ from utils.returns import ActionIndex
 from base.savable import Savable 
 
 class LearningModel(Savable):
+    """
+        Base Class for all Reinforcement Learning Algorithms.
+
+        This base class defines all necessary methods for most RL algorithms,
+        such as learn, predict, implementation of epsilon greedy strategy etc.
+        
+        Beyond that, it also sets many important internal attributes, such as
+        the learning rate, gamma, action size, state size, minimum epsilon value etc.
+
+        Parameters:
+            action_wrapper: Object
+                Object responsible for describing possible actions
+            state_builder: Object
+                Object responsible for creating states from the game environment
+            gamma: Float
+                Gamma parameter in the Deep Q Learning algorithm
+            learning_rate: Float
+                Rate at which the deep learning algorithm will learn 
+                (alpha on most mathematical representations)
+            learning_rate_min: Float
+                Minimum value that learning_rate will reach throught training
+            learning_rate_decay: Float
+                Inverse of the rate at which the learning rate will decay each episode 
+                (defaults to 1 so no decay)
+            epsilon_start: Float
+                Value that the epsilon from epsilon greedy strategy will start from (defaults to 1)
+            epsilon_min: Float
+                Minimum value that epsilon will reach trough training
+            epsilon_decay_rate: Float
+                Inverse of the rate at which the epsilon value will decay each step 
+                (0.99 => 1% will decay each step)
+            per_episode_epsilon_decay:  Bool
+                Whether or not the epsilon decay will be done each episode, instead of each step
+            learning_rate_decay_ep_cutoff: Integer
+                Episode at which learning rate decay will start (defaults to 0)
+            name: String
+                Name of the algorithm implemented
+            seed_value: Integer (default None)
+                Value to assing to random number generators in Python and our ML libraries to try 
+                and create reproducible experiments
+            cpu_only: Bool
+                If true will run algorithm only using CPU, also useful for reproducibility since GPU 
+                paralelization creates uncertainty
+    """
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, learning_rate_min, learning_rate_decay, 
                 epsilon_start, epsilon_min, epsilon_decay_rate, per_episode_epsilon_decay=False, learning_rate_decay_ep_cutoff=0, 
