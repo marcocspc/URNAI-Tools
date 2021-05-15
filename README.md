@@ -144,7 +144,7 @@ Follow these instructions to start developing new stuff using our library.
 
 ### Building a new DRL model
 
-To build a new model, you should check the readme in the [urnai.models](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/models) module. **(TO DO)**
+To build a new model, you should check the readme in the [urnai.models](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/models) module.
 
 ### Integrating a new environment
 
