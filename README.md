@@ -148,25 +148,25 @@ Below we give a brief overview of some of URNAI modules, such as the Agent, the 
 
 ### Building a new agent for a supported environment
 
-To understand what the Agent class is and how to build new Agent classes check out the readme in the [urnai.agents](./urnai/agents/README.md) module.
+To understand what the Agent class is and how to build new Agent classes check out the readme in the [urnai.agents](./urnai/agents) module.
 
 But, despite what the naming might suggest, building a RL Agent is not acomplished completely by just creating (or using) a new Agent class. An agent also needs an action set, a reward function and a state representation.
 
-To create new [Action Wrappers](./urnai/agents/actions), [Reward Builders](./urnai/agents/rewards) and [State Builders](./urnai/agents/states) you should check the following readmes:
+To create new Action Wrappers, Reward Builders and State Builders you should check the following readmes:
 
-- [urnai.agents.actions](./urnai/agents/actions/README.md)
+- [urnai.agents.actions](./urnai/agents/actions)
 
-- [urnai.agents.rewards](./urnai/agents/rewards/README.md)
+- [urnai.agents.rewards](./urnai/agents/rewards)
 
-- [urnai.agents.states](./urnai/agents/states/README.md)
+- [urnai.agents.states](./urnai/agents/states)
 
 ### Building a new DRL model
 
-To build a new reinforcement learning model, you should check the readme in the [urnai.models](./urnai/models/README.md) module.
+To build a new reinforcement learning model, you should check the readme in the [urnai.models](./urnai/models) module.
 
 ### Integrating a new environment
 
-To integrate a new environment, you might want to check the readme in the [urnai.envs](./urnai/envs/README.md) module.
+To integrate a new environment, you might want to check the readme in the [urnai.envs](./urnai/envs) module.
 
 ## Built-in Persistence
 falar do savable, pickle, blacklist
