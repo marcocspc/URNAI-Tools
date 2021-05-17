@@ -3,9 +3,9 @@ URNAI Tools is a modular Deep Reinforcement Learning (DRL) toolkit that supports
 
 ## Getting Started
 
-Follow these instructions to get a working copy of the toolkit on your PC. It's a good idea to use the 'solve_x.py' files as a base to start developing your own agents.
+We have created a few files called "solve" files, in each of which we create basic reinforcement learning experiments for a specific game and a specific RL algorithm.
 
-URNAI is currently being developed on [branch 1.0](https://github.com/marcocspc/URNAI-Tools/tree/1.0). If you would like to get the most up to date version of the toolkit, consider installing from branch 1.0, as many bugs have been fixed and improvements have been made, altough it may be more unstable.
+In these files we instantiate all base objects necessary to use URNAI to train a RL Agent. This is one of the most simple and intuitive ways of using URNAI, and we recommend that, after installation, new users take a look at our [solve files](./urnai/solves) to start their own experiments.
 
 ### Prerequisites
 
@@ -14,12 +14,17 @@ URNAI is currently being developed on [branch 1.0](https://github.com/marcocspc/
 
 ### Installation
 
-There are two main ways of installing URNAI. The first one would be to clone this repository to your local machine, and run python files directly. The second one would be to install this repository as a Python package using pip. The second option allows you to use URNAI on your command line as a python package, and schedule batches of trainings using .CSV or .JSON files easily. However, it can make development inside URNAI cumbersome, as you would need to code directly inside of the packages directory of your Python installation. Therefore, if you intend to use URNAI on the command line but also want to develop in it, we recommend you do both of these installations.
+There are two main ways of installing URNAI. The first one would be to clone this repository to your local machine, and run python files directly. The second one would be to install this repository as a Python package using pip. 
+
+The second option allows you to use URNAI on your command line as a python package, and schedule batches of trainings using .CSV or .JSON files easily. However, it can make experimentation cumbersome, as our solve files are not installed by default, and to create new solve files one would have to code directly in the installation path for python packages, which is not very intuitive. 
+
+Therefore, if you intend to use URNAI on the command line but also want to develop in it (modify or create new experiments and classes), we recommend you do both of these installations:
 
 - Cloning this repo:
 ```
 git clone https://github.com/marcocspc/URNAI-Tools.git
 ```
+You can clone this repo to any folder you desire, and use it to run solve files or even modify the toolkit as you wish.
 
 - Install urnai Python package from this repo:
 ```
@@ -30,11 +35,11 @@ Installing using pip will automatically install URNAI dependencies, such as PySC
 
 **By default, URNAI installs tensorflow-gpu**. If you wish to install tensorflow-cpu instead, check out [this section](#tensorflow-cpu).
 
-If you opt to install URNAI by only cloning this repo, you will need to manually install all dependencies to use the toolkit.
+If you opt to install URNAI by only cloning this repo (without pip), you will need to manually install all dependencies to use the toolkit.
 
 ### Supported Environments
 
-Installing URNAI as a package will also install all basic required game environments, including OpenAI Gym, and PySC2. But for other supported environments, you will need to install them for yourself. We give a brief overview of each environment and its installation bellow. 
+Installing URNAI as a python package will also install all basic required game environments, including OpenAI Gym, and PySC2. But for other supported environments, you will need to install them for yourself. We give a brief overview of each environment and its installation bellow. 
 
 We would also like to highlight that the environment wrapper, action wrapper and reward builder classes available in URNAI are inspired by Gym's wrappers, and are made to fit over them. Therefore, developers used to Gym's naming conventions and their way of representing states, rewards and action sets, will find URNAI to be comfortably familiar. Consequently, the addition of new Gym-like game environments to URNAI should be an easy task for any developer that is relatively familiar with Gym's workflow.
 
@@ -48,7 +53,7 @@ PySC2 is already marked as a dependency, so it will be automatically installed b
 
 [How to install Starcraft II and Maps](https://github.com/deepmind/pysc2#get-starcraft-ii) 
 
-We would recommend you install atleast the Melee maps, as those are used in some of our example files for StarCraft II.
+We would recommend you install atleast the Melee maps, as those are used in some of our solve files for StarCraft II.
 
 #### VizDoom
 
@@ -120,13 +125,13 @@ urnai train --train-file=solve_x.csv
 ```
 
 The Alternative to using JSON files is to run one of our solve_x.py files in your Python interpreter. These files are used to instantiate and train an AI agent.
-There are a few files to choose from. To see the solve files for games and scenarios that we have already solved (achieved a reasonable level of success) check the [solves directory](https://github.com/marcocspc/URNAI-Tools/tree/master/urnai/solves). To see the solve files that are currently being worked on, and that we haven't yet found a successful solving strategy, check out the [test/solves directory](https://github.com/marcocspc/URNAI-Tools/tree/master/urnai/test/solves).
+There are a few files to choose from. To see the solve files for games and scenarios that we have already solved (achieved a reasonable level of success) check the [solves directory](./urnai/solves). To see the solve files that are currently being worked on, and that we haven't yet found a successful solving strategy, check out the [solves/experiments directory](./urnai/solves/experiments).
 
 These Solve files are great learning tools to get in touch with URNAI's architecture because they instantiate every object that needs to exist in order for the training of an Agent to occur. They start from the very basic instantiation of an environment, to the more complex instantiation of a Learning Model, with its layers and hyperparameters. At the end, all of those instantiated objects are used by the Trainer class, responsible for implementing the Reinforcement Learning cycle.
 
 ## Command line
 
-You can use urnai on command line. Commands:
+If you installed URNAI as a python package using pip, you can use it on the command line.
 
 To see what you can do, run:
 ```
@@ -135,20 +140,36 @@ urnai -h
 
 ## Building your own code
 
-Follow these instructions to start developing new stuff using our library.
+URNAI was created to allow easy iteration of code, so that developers can quickly do changes to the modules they need, without having to worry about other modules, as those are already ready to use.
 
-### Building an agent for a supported environment
+In this sense, the development of a new feature that fits your needs will probably consist of creating new classes that inherit from URNAI's, and then building from there, with the implementation of the necessary methods.
 
-- Building a PySC2 agent **(TO DO)**
-- Building an OpenAI Gym agent **(TO DO)**
+Below we give a brief overview of some of URNAI modules, such as the Agent, the Model, and the Environment modules. Beyond that, you can take a look at a full overview of URNAI's architecture [here](./docs/diagrams/arch.png).
+
+### Building a new agent for a supported environment
+
+To understand what the Agent class is and how to build new Agent classes check out the readme in the [urnai.agents](./urnai/agents/README.md) module.
+
+But, despite what the naming might suggest, building a RL Agent is not acomplished completely by just creating (or using) a new Agent class. An agent also needs an action set, a reward function and a state representation.
+
+To create new [Action Wrappers](./urnai/agents/actions), [Reward Builders](./urnai/agents/rewards) and [State Builders](./urnai/agents/states) you should check the following readmes:
+
+- [urnai.agents.actions](./urnai/agents/actions/README.md)
+
+- [urnai.agents.rewards](./urnai/agents/rewards/README.md)
+
+- [urnai.agents.states](./urnai/agents/states/README.md)
 
 ### Building a new DRL model
 
-To build a new model, you should check the readme in the [urnai.models](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/models) module. **(TO DO)**
+To build a new reinforcement learning model, you should check the readme in the [urnai.models](./urnai/models/README.md) module.
 
 ### Integrating a new environment
 
-To integrate a new environment, you might want to check the readme in the [urnai.envs](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/envs) module.
+To integrate a new environment, you might want to check the readme in the [urnai.envs](./urnai/envs/README.md) module.
+
+## Built-in Persistence
+falar do savable, pickle, blacklist
 
 ## Roadmap
 
@@ -158,7 +179,7 @@ Here you'll find all the things that we plan to do in this project. **Bold** ite
   * [ ] **Core codebase documentation/commenting**
   * [ ] **Documentation for each of the main modules (env, agents, models etc)**
   * [ ] **Statistics for solved problems**
-* [ ] Support for new environments
+* [X] Support for new environments
   * [X] [Arcade Learning Environment](https://github.com/mgbellemare/Arcade-Learning-Environment) ([atari-py](https://github.com/openai/atari-py))
   * [X] [Vizdoom](https://github.com/mwydmuch/ViZDoom)
   * [X] [DeepRTS](https://github.com/cair/deep-rts)
@@ -174,6 +195,7 @@ Here you'll find all the things that we plan to do in this project. **Bold** ite
   * [X] Save model parameters
   * [X] Persistance of training parameters (saving / loading)
   * [X] Automatic generation of training graphs (avg. reward, avg. win rate etc.)
+  * [X] Improvement of Model/Algorithm architecture to allow more modularity, dubbed version 1.0
 * [ ] Solve more problems
   * [X] Frozenlake
   * [X] Cartpole-V0
