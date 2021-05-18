@@ -8,13 +8,14 @@ def is_optional_enabled(optional):
 # Old versions, tf and keras might conflict in these
 VERSION_ABSL = ""
 VERSION_GYM = ""
-VERSION_TF = "==2.1"
+VERSION_TF = "==2.2"
 VERSION_NUMPY = ""
 VERSION_MATPLOTLIB = ""
 VERSION_KERAS = "==2.3.1"
 VERSION_PYSC2 = "==3.0.0"
 VERSION_PANDAS = ""
 VERSION_PSUTIL = ""
+VERSION_PYGAME = "1.9.6"
 
 # Newer versions
 # VERSION_ABSL = "0.12"
@@ -53,6 +54,7 @@ if is_optional_enabled(LATEST_DEPS):
     VERSION_PYSC2 = ""
     VERSION_PANDAS = ""
     VERSION_PSUTIL = ""
+    VERSION_PYGAME = ""
 
     VERSION_VIZDOOM = ""
 
