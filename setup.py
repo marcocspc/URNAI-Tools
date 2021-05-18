@@ -19,10 +19,10 @@ def is_optional_enabled(optional):
 # Newer versions, no conflict so far
 VERSION_ABSL = "0.12"
 VERSION_GYM = "==0.18"
-VERSION_TF = "==2.4"
+VERSION_TF = "==2.1"
 VERSION_NUMPY = "==1.19"
 VERSION_MATPLOTLIB = "==3.3"
-VERSION_KERAS = "==2.4"
+VERSION_KERAS = "==2.3.1"
 VERSION_PYSC2 = "==3.0.0"
 VERSION_PANDAS = "==1.1.5"
 VERSION_PSUTIL = "==5.7.2"
