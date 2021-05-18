@@ -6,26 +6,26 @@ def is_optional_enabled(optional):
 
 # Dependencies versions
 # Old versions, tf and keras might conflict in these
-# VERSION_ABSL = "==0.9.0"
-# VERSION_GYM = "==0.10.11"
-# VERSION_TF = "==2.4"
-# VERSION_NUMPY = "==1.18.4"
-# VERSION_MATPLOTLIB = "==3.2.0"
-# VERSION_KERAS = "==2.4"
-# VERSION_PYSC2 = "==3.0.0"
-# VERSION_PANDAS = "==1.0.1"
-# VERSION_PSUTIL = "==5.7.2"
-
-# Newer versions, no conflict so far
-VERSION_ABSL = "0.12"
-VERSION_GYM = "==0.18"
+VERSION_ABSL = ""
+VERSION_GYM = ""
 VERSION_TF = "==2.1"
-VERSION_NUMPY = "==1.19"
-VERSION_MATPLOTLIB = "==3.3"
+VERSION_NUMPY = ""
+VERSION_MATPLOTLIB = ""
 VERSION_KERAS = "==2.3.1"
 VERSION_PYSC2 = "==3.0.0"
-VERSION_PANDAS = "==1.1.5"
-VERSION_PSUTIL = "==5.7.2"
+VERSION_PANDAS = ""
+VERSION_PSUTIL = ""
+
+# Newer versions
+# VERSION_ABSL = "0.12"
+# VERSION_GYM = "==0.18"
+# VERSION_TF = "==2.4"
+# VERSION_NUMPY = "==1.19"
+# VERSION_MATPLOTLIB = "==3.3"
+# VERSION_KERAS = "==2.4"
+# VERSION_PYSC2 = "==3.0.0"
+# VERSION_PANDAS = "==1.1.5"
+# VERSION_PSUTIL = "==5.7.2"
 
 VERSION_VIZDOOM = ""
 VERSION_DRTS = "stable"
