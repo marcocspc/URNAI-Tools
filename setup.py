@@ -6,15 +6,15 @@ def is_optional_enabled(optional):
 
 # Dependencies versions
 # Old versions
-VERSION_ABSL = ""
-VERSION_GYM = "0.10.11"
+VERSION_ABSL = "==0.9.0"
+VERSION_GYM = "==0.10.11"
 VERSION_TF = "==2.2.0"
-VERSION_NUMPY = "1.18.4"
-VERSION_MATPLOTLIB = "3.2.0"
+VERSION_NUMPY = "==1.18.4"
+VERSION_MATPLOTLIB = "==3.2.0"
 VERSION_KERAS = "==2.3.1"
 VERSION_PYSC2 = "==3.0.0"
-VERSION_PANDAS = "1.0.1"
-VERSION_PSUTIL = "5.7.2"
+VERSION_PANDAS = "==1.0.1"
+VERSION_PSUTIL = "==5.7.2"
 
 # Newer versions
 # VERSION_ABSL = "0.12"
