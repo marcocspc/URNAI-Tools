@@ -6,7 +6,7 @@ def is_optional_enabled(optional):
 
 # Dependencies versions
 # Old versions
-VERSION_ABSL = "0.9.0"
+VERSION_ABSL = ""
 VERSION_GYM = "0.10.11"
 VERSION_TF = "==2.2.0"
 VERSION_NUMPY = "1.18.4"
