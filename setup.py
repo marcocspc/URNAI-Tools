@@ -5,17 +5,16 @@ def is_optional_enabled(optional):
     return os.environ.get(optional, None) is not None
 
 # Dependencies versions
-# Old versions, tf and keras might conflict in these
-VERSION_ABSL = ""
-VERSION_GYM = ""
-VERSION_TF = "==2.2"
-VERSION_NUMPY = ""
-VERSION_MATPLOTLIB = ""
+# Old versions
+VERSION_ABSL = "0.9.0"
+VERSION_GYM = "0.10.11"
+VERSION_TF = "==2.2.0"
+VERSION_NUMPY = "1.18.4"
+VERSION_MATPLOTLIB = "3.2.0"
 VERSION_KERAS = "==2.3.1"
 VERSION_PYSC2 = "==3.0.0"
-VERSION_PANDAS = ""
-VERSION_PSUTIL = ""
-VERSION_PYGAME = "1.9.6"
+VERSION_PANDAS = "1.0.1"
+VERSION_PSUTIL = "5.7.2"
 
 # Newer versions
 # VERSION_ABSL = "0.12"
@@ -54,7 +53,6 @@ if is_optional_enabled(LATEST_DEPS):
     VERSION_PYSC2 = ""
     VERSION_PANDAS = ""
     VERSION_PSUTIL = ""
-    VERSION_PYGAME = ""
 
     VERSION_VIZDOOM = ""
 

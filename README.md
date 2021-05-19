@@ -169,7 +169,18 @@ To build a new reinforcement learning model, you should check the readme in the 
 To integrate a new environment, you might want to check the readme in the [urnai.envs](./urnai/envs) module.
 
 ## Built-in Persistence
-falar do savable, pickle, blacklist
+
+URNAI has a built-in persistance module, that saves the training progress of Reinforcement Learning Agents, saving both the internal Neural Network parameters aswell as the Python parameters used during training, guaranteeing that when you load the training it will execute as intended.
+
+This persistante module is supported by our [Savable class](./urnai/base/savable.py), that serves as a base class for pretty much all classes in URNAI, since we want to save a "snapshot" of almost every class during training. 
+
+Savable utilizes a Python package called [Pickle](https://docs.python.org/3/library/pickle.html), that serializes every Python attribute that can be serialized and then stores them in a file. Pickle is then able to later de-serialize these files and restore our classes and Objects to the state they were right when training was saved, allowing us to easily pause / resume trainings without any manual work. 
+
+In summary, all you need to do to use the Built-in Persistance Module is to set "enable_save=True" when you initialize our [Trainer class](./urnai/trainers/trainer.py). The Trainer will then automatically save / load the training whenever its conditions are met (load when a training already exists, save at the ending, save every X episodes, etc).
+
+Another feature that needed to be implemented to allow more flexibility for end users was the **Pickle Black List**. This is basically an attribute of the Savable class that stores the names of all variables that we wish to ignore in the saving/loading process. 
+
+So, for example, if you have created a new trainer class, or overriden URNAI's base trainer, you could change the self.pickle_black_list attribute to not save the total amount of trained episodes, so that every time you restart the training your agent will always train max_training_episodes .
 
 ## Roadmap
 
