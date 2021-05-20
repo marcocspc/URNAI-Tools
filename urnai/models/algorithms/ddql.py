@@ -1,8 +1,6 @@
 import numpy
 import random
 from collections import deque
-from models.memory_representations.neural_network.keras import KerasDeepNeuralNetwork
-from models.memory_representations.neural_network.pytorch import PyTorchDeepNeuralNetwork
 from models.algorithms.dql import DeepQLearning
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
@@ -118,11 +116,13 @@ class DoubleDeepQLearning(DeepQLearning):
         else:
             if self.lib in constants.listoflibs:
                 if self.lib == constants.Libraries.KERAS:
+                    from models.memory_representations.neural_network.keras import KerasDeepNeuralNetwork
                     self.dnn = KerasDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value, self.batch_size)
                     self.target_dnn = KerasDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value, self.batch_size)
                     self.target_dnn.copy_model_weights(self.dnn)
 
                 if self.lib == constants.Libraries.PYTORCH:
+                    from models.memory_representations.neural_network.pytorch import PyTorchDeepNeuralNetwork
                     self.dnn = PyTorchDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value)
                     self.target_dnn = PyTorchDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value, self.batch_size)
                     self.target_dnn.copy_model_weights(self.dnn)

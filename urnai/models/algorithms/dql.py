@@ -1,8 +1,6 @@
 import numpy
 import random
 from collections import deque
-from models.memory_representations.neural_network.keras import KerasDeepNeuralNetwork
-from models.memory_representations.neural_network.pytorch import PyTorchDeepNeuralNetwork
 from models.base.abmodel import LearningModel
 from agents.actions.base.abwrapper import ActionWrapper
 from agents.states.abstate import StateBuilder
@@ -105,9 +103,11 @@ class DeepQLearning(LearningModel):
         else:
             if self.lib in constants.listoflibs:
                 if self.lib == constants.Libraries.KERAS:
+                    from models.memory_representations.neural_network.keras import KerasDeepNeuralNetwork
                     self.dnn = KerasDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value, self.batch_size)
 
                 if self.lib == constants.Libraries.PYTORCH:
+                    from models.memory_representations.neural_network.pytorch import PyTorchDeepNeuralNetwork
                     self.dnn = PyTorchDeepNeuralNetwork(self.action_size, self.state_size, self.build_model, self.gamma, self.learning_rate, self.seed_value)
             else:
                 raise UnsuportedLibraryError(self.lib)
