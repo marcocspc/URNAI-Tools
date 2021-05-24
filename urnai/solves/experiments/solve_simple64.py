@@ -30,7 +30,7 @@ For more information see https://github.com/deepmind/pysc2#get-starcraft-ii
 # os.environ["SC2PATH"] = "D:/Program Files (x86)/StarCraft II"
 
 # import tensorflow as tf
-# physical_devices = tf.config.list_physical_devices('GPU') 
+# physical_devices = tf.config.list_physical_devices('GPU')
 # tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 def declare_trainer():
@@ -54,14 +54,14 @@ def declare_trainer():
     agent = SC2Agent(dq_network, KilledUnitsReward())
 
     trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddql_1-0",
-                    save_every=100, enable_save=True, relative_path=False, reset_epsilon=False,
+                    save_every=200, enable_save=True, relative_path=False, reset_epsilon=False,
                     max_training_episodes=3000, max_steps_training=1200,
                     max_test_episodes=100, max_steps_testing=1200)
 
-    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_test4",
+    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_logger2",
     #                 save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
-    #                 max_training_episodes=3, max_steps_training=800,
-    #                 max_test_episodes=2, max_steps_testing=300)
+    #                 max_training_episodes=2, max_steps_training=800,
+    #                 max_test_episodes=1, max_steps_testing=300)
     return trainer
 
 def main(unused_argv):

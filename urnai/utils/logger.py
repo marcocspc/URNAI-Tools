@@ -1,17 +1,20 @@
 from base.savable import Savable 
+from utils import constants
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import numpy as np
-import pickle
 import os
-from matplotlib.ticker import PercentFormatter
 from utils.reporter import Reporter as rp
-from models.model_builder import ModelBuilder
 from time import time
 import psutil
 
 class Logger(Savable):
-    def __init__(self, ep_total, agent_name, model_name, model_builder:ModelBuilder, 
+    """
+    Logging class.
+    Saves training parameters in python lists, which are pickled at saving, 
+    and also generates graphs based on those lists.
+    """
+    def __init__(self, ep_total, agent_name, model_name, model, 
                  action_wrapper_name, agent_action_size, agent_action_names, 
                  state_builder_name, reward_builder_name, env_name, 
                  is_episodic=True, render=True, generate_bar_graphs_every=100, log_actions=True,
@@ -19,7 +22,7 @@ class Logger(Savable):
         #Training information
         self.agent_name = agent_name
         self.model_name = model_name
-        self.model_builder = model_builder
+        self.model = model
         self.action_wrapper_name = action_wrapper_name
         self.state_builder_name = state_builder_name
         self.reward_builder_name = reward_builder_name
@@ -193,11 +196,21 @@ class Logger(Savable):
               + "   Environment: {}\n".format (self.env_name)
               + "   Model: {}\n".format(self.model_name))
 
-        # for idx, (layer) in enumerate(self.model_builder):
-        #     if(layer['type'] == 'output'):
-        #         text += "       Layer {}: type={} | length={} \n".format(idx+1, layer['type'], layer['length'])
-        #     else:
-        #         text += "       Layer {}: type={} | nodes={} \n".format(idx+1, layer['type'], layer['nodes'])
+        if(hasattr(self.model, "lib")):
+            if self.model.neural_net_class != None:
+                if self.model.lib == constants.Libraries.KERAS:
+                    stringlist = []
+                    self.model.dnn.model.summary(print_fn=lambda x: stringlist.append(x))
+                    short_model_summary = "\n".join(stringlist)
+                    text += "       " + short_model_summary
+                if self.model.lib == constants.Libraries.PYTORCH:
+                    text += "       " + self.model.dnn.model
+            else:
+                for idx, (layer) in enumerate(self.model.build_model):
+                    text += "       Layer {}: {}\n".format(idx, self.model.build_model[idx])
+        else:
+            for idx, (layer) in enumerate(self.model.build_model):
+                text += "       Layer {}: {}\n".format(idx, self.model.build_model[idx])
 
         self.training_report += text 
 
