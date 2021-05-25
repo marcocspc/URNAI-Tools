@@ -8,7 +8,7 @@ class RewardBuilder(ABC):
     we should either use an existing RewardBase implementation or create a new one.
     '''
     @abstractmethod
-    def get_reward(self, obs) -> Reward: ...
+    def get_reward(self, obs, reward, done) -> Reward: ...
 
     def reset(self):
         pass

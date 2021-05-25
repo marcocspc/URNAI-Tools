@@ -12,9 +12,9 @@ Such an action would have many steps if performed by a human, such as: choose a 
 
 It is inside of the SC2 Action Wrappers that we call these micro actions to compose our macro "Build Supply Depot" action. This approach simplifies learning for the Agent, making it able to learn faster, but it also limits the ability to generalize and to act creatively, since we force it to only use a restricted set of pre pepared actions.
 
-## Building a new Action Wrapper
+## Creating a new Action Wrapper
 
-Given the above examples of one very simple wrapper, and a more complex one, we hope that the process of creating a new Action Wrapper feels less intimidating. 
+Given the above examples of a very simple wrapper, and a more complex one, we hope that the process of creating a new Action Wrapper feels less intimidating. 
 
 If you wish to create a new Action Wrapper for a new game environment that we haven't covered yet, you should probably create a new class inheriting from the [base ActionWrapper](./base/abwrapper.py). 
 

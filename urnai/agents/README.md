@@ -2,7 +2,7 @@
 
 The main purpose of a Deep Reinforcement Learning agent is to learn by interacting with the environment. This is accomplished through a reward function, which tells our agent whether an action he took in a certain state was good or not. An agent's success is determined by how well it can learn its reward function and by how good it is at solving the examined problem.
 
-The shape of a reward function is also heavily influenced by two things: The agent's representation of the environment, also known as the State, and the actions it can perform. In URNAI-Tools, we allow the user to create its own reward function, state representations, and to pick which actions he wants his agent to perform. These things can be accomplished through the use of [RewardBuilders](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/agents/rewards), [StateBuilders](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/agents/states) and [ActionWrappers](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/agents/actions), respectively.
+The shape of a reward function is also heavily influenced by two things: The agent's representation of the environment, also known as the State, and the actions it can perform. In URNAI-Tools, we allow the user to create its own reward function, state representations, and to pick which actions he wants his agent to perform. These things can be accomplished through the use of [RewardBuilders](./rewards), [StateBuilders](./states) and [ActionWrappers](./actions), respectively.
 
 But even if your rewards, states and actions are good enough, some problems can only be solved by using the correct algorithm. That's why we've also allowed users to give agents any DRL model they want without having to make any changes to states, rewards, actions or the model itself. In URNAI-Tools all of these elements are very modular and only need to be plugged to the agent to work.
 
@@ -11,7 +11,7 @@ To summarize, one of the main advantages of using URNAI-Tools to develop a DRL a
 
 ## Using an existing agent
 
-First of all, before using an agent, you have to make sure that the environment you're going to use is supported by URNAI, so check the [env](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/envs) section. If the environment is supported, there is also an agent class for it, so all you have to do is either implement a [RewardBuilder](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/agents/rewards), [StateBuilder](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/agents/states), [ActionWrapper](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/agents/actions) and [DRL model](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/models), or use any of the existing ones. You'll probably want to implement a RewardBuilder and StateBuilder, since those are highly problem dependant and the default ones don't provide good enough info to your agent, but the default ActionWrapper for the environment you've chosen is probably good enough for solving it, and unless you want to use a model that URNAI-Tools doesn't support, it's better to use the ones we provide, since they've already been tested and can be parameterized to your needs.
+First of all, before using an agent, you have to make sure that the environment you're going to use is supported by URNAI, so check the [env](../envs) section. If the environment is supported, there is also an agent class for it, so all you have to do is either implement a [RewardBuilder](./rewards/abreward.py), [StateBuilder](./states/abstate.py), [ActionWrapper](./actions/base/abwrapper.py) and [DRL model](../models), or use any of the existing ones. You'll probably want to implement a RewardBuilder and StateBuilder, since those are highly problem dependant and the default ones don't provide good enough info to your agent, but the default ActionWrapper for the environment you've chosen is probably good enough for solving it, and unless you want to use a model that URNAI-Tools doesn't support, it's better to use the ones we provide, since they've already been tested and can be parameterized to your needs.
 
 After choosing the StateBuilder, RewardBuilder, ActionWrapper and DRL model you're going to use, all you have to do is instantiate them and pass them to the agent's constructor.
 
@@ -31,10 +31,11 @@ action_wrapper = GymWrapper(env)
 
 # Instantiating a Deep Q-Learning model. The StateBuilder and ActionWrapper are used as
 # parameters of the model, since they control the model's input and output dimensions
-dq_network = DQNKeras(action_wrapper,
+
+dq_network = DQNKeras(action_wrapper, 
                       state_builder,
-                      'urnai/models/saved/cartpole_dql_working',
-                      gamma=0.95, epsilon_decay=0.995, epsilon_min=0.1)
+                      gamma=0.99, learning_rate=0.001, 
+                      epsilon_decay=0.9997, epsilon_min=0.01)
 
 # Instantiating a RewardBuilder
 reward_builder = PureReward()
@@ -46,15 +47,15 @@ agent = GymAgent(dq_network, reward_builder)
 
 ## Implementing a new agent
 
-You'll usually want to implement a new agent when you're supporting a new environment. All you have to do is create a new class for your agent and extend from [urnai.agents.base.abagent.Agent](https://github.com/pvnetto/URNAI-Tools/blob/master/urnai/agents/base/abagent.py) and implement its abstract methods. You'll notice that some methods like build_state, get_reward, get_state_dim, reset and learn are already implemented in the base class, that's because these methods are assumed to work equally for every agent. In the sections below we'll explain what each method from the base class does and what you should pay attention to when implementing/overriding them.
+You'll usually want to implement a new agent when you're supporting a new environment. All you have to do is create a new class for your agent and extend from [urnai.agents.base.abagent.Agent](./base/abagent.py) and implement its abstract methods. You'll notice that some methods like build_state, get_reward, get_state_dim, reset and learn are already implemented in the base class, that's because these methods are assumed to work equally for every agent. In the sections below we'll explain what each method from the base class does and what you should pay attention to when implementing/overriding them.
 
 
-### __init__(self, model: LearningModel, reward_builder: RewardBase)
+### \_\_init__(self, model: LearningModel, reward_builder: RewardBase)
 
 #### Parameters:
 
-- model: The DRL model used by the agent. The model contains references to the StateBuilder and ActionWrapper used by the agent. This must be an instance of the [urnai.models.base.abmodel.LearningModel](https://github.com/pvnetto/URNAI-Tools/blob/master/urnai/models/base/abmodel.py) class.
-- reward_builder: The agent's reward function. This parameter must be an instance of the [urnai.agents.rewards.abreward.RewardBase](https://github.com/pvnetto/URNAI-Tools/blob/master/urnai/agents/rewards/abreward.py) class
+- model: The DRL model used by the agent. The model contains references to the StateBuilder and ActionWrapper used by the agent. This must be an instance of the [urnai.models.base.abmodel.LearningModel](../models/base/abmodel.py) class.
+- reward_builder: The agent's reward function. This parameter must be an instance of the [urnai.agents.rewards.abreward.RewardBase](./rewards/abreward.py) class
 
 #### What it does:
 The constructor method from the base class is responsible for setting many important variables for the agent, including the StateBuilder and ActionWrapper, which are references obtained from the model, so it should always be called from the derived class' constructor.
@@ -63,7 +64,7 @@ The constructor method from the base class is responsible for setting many impor
 ### build_state(self, obs)
 
 #### Parameters:
-- obs: An observation from the environment. For more info, check the [env](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/envs) section.
+- obs: An observation from the environment. For more info, check the [env](../envs) section.
 
 #### What it does:
 This method is already implemented in the base class, and it simply returns the build_state method from the agent's StateBuilder.
@@ -72,7 +73,7 @@ This method is already implemented in the base class, and it simply returns the 
 ### get_reward(self, obs, reward, done)
 
 #### Parameters:
-- obs: An observation from the environment. For more info, check the [env](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/envs) section.
+- obs: An observation from the environment. For more info, check the [env](../envs) section.
 - reward: The reward given by the environment when the agent performs an action. **Don't confuse it with the agent's reward**.
 - done: Boolean value returned from the environment that tells whether the current match/episode has finished or not.
 
@@ -95,7 +96,7 @@ This method is already implemented in the base class. It's called in the start o
 ### learn(self, obs, reward, done)
 
 #### Parameters:
-- obs: An observation from the environment. For more info, check the [env](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/envs) section.
+- obs: An observation from the environment. For more info, check the [env](../envs) section.
 - reward: The reward given by the environment when the agent performs an action. **Don't confuse it with the agent's reward**.
 - done: Boolean value returned from the environment that tells whether the current match/episode has finished or not.
 
@@ -109,7 +110,7 @@ The step method receives obs, reward and done from the environment **before** th
 ### step(self, obs, reward, done)
 
 #### Parameters:
-- obs: An observation from the environment. For more info, check the [env](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/envs) section.
+- obs: An observation from the environment. For more info, check the [env](../envs) section.
 - reward: The reward given by the environment when the agent performs an action. **Don't confuse it with the agent's reward**.
 - done: Boolean value returned from the environment that tells whether the current match/episode has finished or not.
 
@@ -124,10 +125,10 @@ It's also important to note that this method should set the agent's self.previou
 ### play(self, obs)
 
 #### Parameters:
-- obs: An observation from the environment. For more info, check the [env](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/envs) section.
+- obs: An observation from the environment. For more info, check the [env](../envs) section.
 
 #### What it does:
-This is an abstract method that must be implemented by your agent. This works just like step, but instead of simply getting an action index from the model, it should make the model predict an action index, instead of using an exploration/exploitation method. More details on the [urnai.models](https://github.com/pvnetto/URNAI-Tools/tree/master/urnai/models).
+This is an abstract method that must be implemented by your agent. This works just like step, but instead of simply getting an action index from the model, it should make the model predict an action index, instead of using an exploration/exploitation method. More details on the [urnai.models](../models).
 
 #### Keep in mind:
 This method should set the agent's self.previous_action parameter to the action index it's going to return.

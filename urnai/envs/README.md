@@ -18,11 +18,11 @@ env = gym.GymEnv(_id="gym/game/id/here")
 ## Supporting a new environment
 
 
-If you want to support a new environment, you basically need to create a wrapper class for it that extends from [urnai.envs.base.abenv.Env](https://github.com/pvnetto/URNAI-Tools/blob/master/urnai/envs/base/abenv.py).
+If you want to support a new environment, you basically need to create a wrapper class for it that extends from [urnai.envs.base.abenv.Env](./base/abenv.py).
 
 When you extend the base Env class, you should implement all of its abstract methods, which are the start, step, reset and close methods. Most of the times these methods are already implemented on the environment you want to support, so you'll just have to make the new wrapper class call them from an instance of the environment you want to support.
 
-On the following sections we'll specify what each method of the base Env class does, how you should implement it and show you an example of implementation using [urnai.envs.gym.GymEnv](https://github.com/pvnetto/URNAI-Tools/blob/master/urnai/envs/gym.py).
+On the following sections we'll specify what each method of the base Env class does, how you should implement it and show you an example of implementation using [urnai.envs.gym.GymEnv](./gym.py).
 
 ### start
 
@@ -54,7 +54,7 @@ def step(self, action):
   return obs, reward, done
 ```
 
-Note that the step method from the instance of Gym also returns an extra value. To keep things consistent, we'll discard that value and return only observation, reward and done. Since our base Env class is highly based on Gym's Env class, this example might not be very valuable, so we'll also show you how we did it with our [urnai.envs.ple.PLEEnv](https://github.com/pvnetto/URNAI-Tools/blob/master/urnai/envs/ple.py) environment:
+Note that the step method from the instance of Gym also returns an extra value. To keep things consistent, we'll discard that value and return only observation, reward and done. Since our base Env class is highly based on Gym's Env class, this example might not be very valuable, so we'll also show you how we did it with our [urnai.envs.ple.PLEEnv](./ple.py) environment:
 
 ```
 def step(self, action):
@@ -71,14 +71,14 @@ Notice that the first thing we do on this method is performing the action on the
 
 Reset should simply reset the environment's instance to its initial state, which is the beginning of the game. The only thing you should keep in mind when implementing this method for a new environment is that it should return an observation.
 
-In [urnai.envs.gym.GymEnv](https://github.com/pvnetto/URNAI-Tools/blob/master/urnai/envs/gym.py), we have it implemented like this:
+In [urnai.envs.gym.GymEnv](./gym.py), we have it implemented like this:
 
 ```
 def reset(self):
   return self.env_instance.reset()
 ```
 
-GymEnv's instance object already returns an observation when reset is called, but this is not always the case, as you can observe in our [PLEEnv](https://github.com/pvnetto/URNAI-Tools/blob/master/urnai/envs/ple.py) implementation:
+GymEnv's instance object already returns an observation when reset is called, but this is not always the case, as you can observe in our [PLEEnv](./ple.py) implementation:
 
 ```
 def reset(self):
