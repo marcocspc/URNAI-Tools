@@ -23,11 +23,13 @@ To see a very simple but complete Reward Builder, take a look at our default [Pu
 
 More complex Reward Builders can be seen in our files for [VizDoom rewards](./vizdoom.py) and for [StarCraft II rewards](./sc2.py).
 
-An important internal state control that Reward Builders sometimes have to maintain is whether or not to reset themselves when an episode has ended. Most of our SC2 rewards do this, and it can be achieved by checking if done is true, and then reseting the reward at the end of the _get_reward_ method, like so:
+An important internal state control that Reward Builders sometimes have to maintain is how to reset themselves. By default, the base reset method from [RewardBuilder](./abreward.py) is just a pass, like so:
 
 ```python
-if done:
-    self.reset()
+def reset(self):
+    pass
 ```
 
-It is up to you to figure out the best way to reset your Reward Builder, but in any case the base reset method is implemented inside the RewardBuilder class in a way so that it doesn't do anything by default, allowing you to create reward functions without caring about the reset, unless it is necessary.
+However, some reward builders keep internal variables that have to be reset after each episode. In several of our SC2 rewards we have this mechanism in place. Note that you do not have to call the _reset_ method inside the _get_reward_ method, since the [Agent](../base/abagent.py) automatically resets the reward builder inside its own reset method at the end of each episode.
+
+It is up to you to figure out the best way to reset your Reward Builder. In any case, you are allowed to create reward functions without caring about the reset, unless it is necessary for your particular application.
