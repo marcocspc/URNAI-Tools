@@ -116,7 +116,7 @@ From version 0.0.2+ you can use CSV or JSON files to run a batch of trainings:
 
 ```
 git clone https://github.com/marcocspc/URNAI-Tools 
-cd 'URNAI-Tools/urnai/test/solves'
+cd 'URNAI-Tools/urnai/solves'
 urnai train --train-file=solve_x.json
 ```
 or

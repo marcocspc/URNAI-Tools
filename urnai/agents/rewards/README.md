@@ -2,7 +2,7 @@
 
 Reinforcement Learning Agents have no prior knowledge about how good a particular action is on any given state (in contrast to Supervised Learning which has labeled states). Therefore, in order to learn the Agent needs some sort of direction, a guiding function. This is exactly the role of a Reward Function.
 
-During each learning cycle the Agent performs an action in the environment, ang receives back both a state observation and a reward. This reward is generally a real number, such as 1, 10.34, -3, etc. These numbers should represent if the action taken by the Agent was good, or bad, and how good or bad it was.
+During each learning cycle the Agent performs an action in the environment, and receives back both a state observation and a reward. This reward is generally a real number, such as 1, 10.34, -3, etc. These numbers should represent if the action taken by the Agent was good, or bad, and how good or bad it was.
 
 In order for us to be able to control learning, we have to design these reward functions, create rules and reward values that should give the Agent a positive feedback whenever it does something deemed good, and maybe punish it when it does something deemed bad. In a video-game environment, these rewards generally tend to try and make the Agent learn how to win at the game, or get a higher score.
 
