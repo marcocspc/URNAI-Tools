@@ -3,6 +3,7 @@ from utils import constants
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import numpy as np
+import pandas as pd
 import os
 from utils.reporter import Reporter as rp
 from time import time
@@ -18,7 +19,7 @@ class Logger(Savable):
                  action_wrapper_name, agent_action_size, agent_action_names, 
                  state_builder_name, reward_builder_name, env_name, 
                  is_episodic=True, render=True, generate_bar_graphs_every=100, log_actions=True,
-                 episode_batch_avg_calculation=10):
+                 episode_batch_avg_calculation=10, rolling_avg_window_size=20):
         #Training information
         self.agent_name = agent_name
         self.model_name = model_name
@@ -40,6 +41,7 @@ class Logger(Savable):
         self.best_reward = -999999
         self.best_reward_episode = -1
         self.episode_batch_avg_calculation = episode_batch_avg_calculation
+        self.rolling_avg_window_size = rolling_avg_window_size
         self.ep_rewards = []
         self.ep_avg_rewards = []
         self.ep_avg_batch_rewards = [] 
@@ -286,6 +288,13 @@ class Logger(Savable):
         return self.__plot_curve(range(self.ep_count), self.ep_avg_victories, 'Episode Count',
                             'Avg. Win Rate', r'Per Episode Avg. Win Rate')
 
+    def plot_moving_avg_win_rate_graph(self):
+        winrate_series = pd.Series(self.ep_victories)
+        winrate_rolling_avg = winrate_series.rolling(window=self.rolling_avg_window_size, min_periods=1).mean()
+
+        return self.__plot_curve(range(self.ep_count), winrate_rolling_avg, 'Episode Count', 
+            'Rolling Avg. Win Rate'.format(self.rolling_avg_window_size), 'Rolling Average Win Rate (window size: {})'.format(self.rolling_avg_window_size))
+
     def plot_win_rate_percentage_over_play_testing_graph(self):
         # Plotting win rate over play testing graph
         return self.__plot_bar(self.play_ep_count, [self.play_win_rates], ['Play'], 'Episode', 'Win rate (%)', 'Win rate percentage over play testing', format_percent=True)
@@ -323,6 +332,11 @@ class Logger(Savable):
             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "avg_winrate_graph.pdf")
             plt.close(self.avg_winrate_graph)
             self.avg_winrate_graph = None
+
+            temp_fig = self.plot_moving_avg_win_rate_graph()
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "rolling_avg_winrate_graph.png")
+            plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "rolling_avg_winrate_graph.pdf")
+            plt.close(temp_fig)
 
             temp_fig = self.generalized_curve_plot(self.episode_duration_list, "Episode Duration (Seconds)", "Per Episode Duration In Seconds")
             plt.savefig(persist_path + os.path.sep + self.get_default_save_stamp() + "ep_duration_graph.png")

@@ -22,7 +22,7 @@ class SC2Env(Env):
         render=False,
         reset_done=True,
         spatial_dim=16,
-        step_mul=8,
+        step_mul=16,
         game_steps_per_ep=0,
         obs_features=None,
         realtime=False,

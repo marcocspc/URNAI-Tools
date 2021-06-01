@@ -38,8 +38,8 @@ def declare_trainer():
     env = SC2Env(map_name="Simple64", render=False, step_mul=16, player_race="terran", enemy_race="random", difficulty="very_easy")
     
     action_wrapper = SimpleTerranWrapper()
-    #state_builder = Simple64GridState(grid_size=4)
-    state_builder = SimpleCroppedGridState(grid_size=4, x1=10, y1=10, x2=50, y2=50, r_enemy=True, r_player=True, r_neutral=False)
+    state_builder = Simple64GridState(grid_size=4)
+    #state_builder = SimpleCroppedGridState(grid_size=4, x1=10, y1=10, x2=50, y2=50, r_enemy=True, r_player=True, r_neutral=False)
     
     helper = ModelBuilder()
     helper.add_input_layer(nodes=50)
@@ -48,20 +48,20 @@ def declare_trainer():
     # dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False,
     #                     gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=2000)  
     
-    dq_network = DoubleDeepQLearning(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False, use_memory=False,
-                        gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=64, lib="keras")
+    dq_network = DoubleDeepQLearning(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), use_memory=True,
+                        gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=2000, lib="keras")
     
     agent = SC2Agent(dq_network, KilledUnitsReward())
 
-    trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddql_1-0",
+    trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddql_rolling_avg",
                     save_every=200, enable_save=True, relative_path=False, reset_epsilon=False,
                     max_training_episodes=3000, max_steps_training=1200,
-                    max_test_episodes=100, max_steps_testing=1200)
+                    max_test_episodes=100, max_steps_testing=1200, rolling_avg_window_size=50)
 
-    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_logger2",
-    #                 save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
-    #                 max_training_episodes=2, max_steps_training=800,
-    #                 max_test_episodes=1, max_steps_testing=300)
+    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_rolling_avg2",
+    #                 save_every=5, enable_save=True, relative_path=True, reset_epsilon=False,
+    #                 max_training_episodes=20, max_steps_training=1200,
+    #                 max_test_episodes=3, max_steps_testing=200, rolling_avg_window_size=10)
     return trainer
 
 def main(unused_argv):
