@@ -45,9 +45,14 @@ We would also like to highlight that the environment wrapper, action wrapper and
 
 #### OpenAI Gym
 
+<img src="./docs/imgs/gym1.jpg" alt="gym1_img" width=400>
+<img src="./docs/imgs/gym2.jpg" alt="gym2_img" width=400>
+
 [Gym](https://gym.openai.com/) is already marked as a dependency, so it will be automatically installed by pip. Gym is a widely known and used Reinforcement Learning toolkit that provides a series of ready-to-use standardized environments. A few Gym sub packages don't come with the main package, and need to be installed separetly. That's the case with Gym Atari games. To see a quick installation guide for Gym Atari [click here](#gym-atari-games) 
 
 #### Starcraft II
+
+<img src="./docs/imgs/starcraft2.jpg" alt="starcraft2_img" width=600>
 
 PySC2 is already marked as a dependency, so it will be automatically installed by pip. However, you need to install StarCraft II and download some of its available maps (mini-game, testing and full-game maps) in order to use this environment in URNAI. To do this, you can head to PySC2's tutorial:
 
@@ -57,9 +62,13 @@ We would recommend you install atleast the Melee maps, as those are used in some
 
 #### VizDoom
 
+<img src="./docs/imgs/vizdoom.jpg" alt="vizdoom_img" width=350>
+
 Installation of VizDoom for Python is not as straight forward as some other packages, as you need a few dependencies, and installation process might vary depending on whether you're on Linux, MacOS or Windows. We recommend you check their [installation/building guide](https://github.com/mwydmuch/ViZDoom/blob/master/doc/Building.md) for a full explanation.
 
 #### DeepRTS 
+
+<img src="./docs/imgs/deeprts.jpg" alt="deeprts_img" width=350 height=300>
 
 URNAI supports a modified [DeepRTS](https://github.com/cair/deep-rts) version. To download it as a python package, run the following command:
 
@@ -218,4 +227,4 @@ Here you'll find all the things that we plan to do in this project. **Bold** ite
 ## Authors
 
 * **Francisco de Paiva Marques Netto** - *Initial work* - [pvnetto](https://github.com/pvnetto)
-* **Luiz Paulo de Carvalho Alves** - *Integration and experimentation with StarCraft II* - [lpdcalves](https://github.com/lpdcalves)
+* **Luiz Paulo de Carvalho Alves** - *Integration and experimentation with StarCraft II - Rollout of 1.0 Architecture* - [lpdcalves](https://github.com/lpdcalves)
