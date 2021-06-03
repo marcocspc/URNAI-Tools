@@ -30,7 +30,7 @@ If you have more knowledge on AI and Reinforcement Learning, you might want to s
 Adding new Models is fairly simple:
 
 ## Old Way
-If you want to do it with pre 1.0 architecture, just create a new class that inherits from [LearningModel](./base/abmodel.py) and code in there both your algorithm and the neural network and its calls to your prefered Machine Learning Library. I'll need to implement all necessary methods, such as learn, predict, save_extra, etc. An example of a pre 1.0 implementation can be seen in our [dqn_keras.py file](./dqn_keras.py).
+If you want to do it with pre 1.0 architecture, just create a new class that inherits from [LearningModel](./base/abmodel.py) and code in there both your algorithm and the neural network and its calls to your prefered Machine Learning Library. You will need to implement all necessary methods, such as learn, predict, save_extra, etc. An example of a pre 1.0 implementation can be seen in our [dqn_keras.py file](./dqn_keras.py).
 
 
 ## New Way
