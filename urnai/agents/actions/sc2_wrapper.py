@@ -1108,9 +1108,9 @@ class SimpleTerranWrapper(TerranWrapper):
             ACTION_HARVEST_GAS_FROM_MINERALS,
 
             ACTION_ATTACK_ENEMY_BASE,
-            ACTION_ATTACK_ENEMY_SECOND_BASE,
-            ACTION_ATTACK_MY_BASE,
-            ACTION_ATTACK_MY_SECOND_BASE,
+            #ACTION_ATTACK_ENEMY_SECOND_BASE,
+            #ACTION_ATTACK_MY_BASE,
+            #ACTION_ATTACK_MY_SECOND_BASE,
             ACTION_ATTACK_DISTRIBUTE_ARMY,
         ]
         self.action_indices = [idx for idx in range(len(self.named_actions))]

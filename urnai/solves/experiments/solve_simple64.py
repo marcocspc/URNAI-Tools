@@ -53,22 +53,22 @@ def declare_trainer():
     
     agent = SC2Agent(dq_network, KilledUnitsReward())
 
-    trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddql_rolling_avg",
-                    save_every=200, enable_save=True, relative_path=False, reset_epsilon=False,
-                    max_training_episodes=3000, max_steps_training=1200,
-                    max_test_episodes=100, max_steps_testing=1200, rolling_avg_window_size=50)
+    # trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddql_rolling_avg",
+    #                 save_every=200, enable_save=True, relative_path=False, reset_epsilon=False,
+    #                 max_training_episodes=3000, max_steps_training=1200,
+    #                 max_test_episodes=100, max_steps_testing=1200, rolling_avg_window_size=50)
 
-    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_rolling_avg2",
-    #                 save_every=5, enable_save=True, relative_path=True, reset_epsilon=False,
-    #                 max_training_episodes=20, max_steps_training=1200,
-    #                 max_test_episodes=3, max_steps_testing=200, rolling_avg_window_size=10)
+    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_rolling_avg2",
+                    save_every=5, enable_save=True, relative_path=True, reset_epsilon=False,
+                    max_training_episodes=20, max_steps_training=1200,
+                    max_test_episodes=3, max_steps_testing=200, rolling_avg_window_size=1)
     return trainer
 
 def main(unused_argv):
     try:
         trainer = declare_trainer()
         trainer.train()
-        trainer.play()
+        #trainer.play()
 
     except KeyboardInterrupt:
         pass

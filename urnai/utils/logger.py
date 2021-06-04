@@ -20,7 +20,11 @@ class Logger(Savable):
                  state_builder_name, reward_builder_name, env_name, 
                  is_episodic=True, render=True, generate_bar_graphs_every=100, log_actions=True,
                  episode_batch_avg_calculation=10, rolling_avg_window_size=20):
-        #Training information
+        super().__init__()
+        # Adding rolling avg size to pickle black list to allow us to regenerate graphs with different rolling window sizes
+        self.pickle_black_list.append("rolling_avg_window_size")
+        
+        # Training information
         self.agent_name = agent_name
         self.model_name = model_name
         self.model = model
@@ -290,10 +294,11 @@ class Logger(Savable):
 
     def plot_moving_avg_win_rate_graph(self):
         winrate_series = pd.Series(self.ep_victories)
-        winrate_rolling_avg = winrate_series.rolling(window=self.rolling_avg_window_size, min_periods=1).mean()
+        winrate_rolling_avg = winrate_series.rolling(window=self.rolling_avg_window_size, min_periods=1)
+        winrate_roll_mean = winrate_rolling_avg.mean()
 
-        return self.__plot_curve(range(self.ep_count), winrate_rolling_avg, 'Episode Count', 
-            'Rolling Avg. Win Rate'.format(self.rolling_avg_window_size), 'Rolling Average Win Rate (window size: {})'.format(self.rolling_avg_window_size))
+        return self.__plot_curve(range(self.ep_count), winrate_roll_mean, 'Episode Count', 
+            'Rolling Avg. Win Rate', 'Rolling Average Win Rate (window size: {})'.format(self.rolling_avg_window_size))
 
     def plot_win_rate_percentage_over_play_testing_graph(self):
         # Plotting win rate over play testing graph

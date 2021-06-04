@@ -33,7 +33,7 @@ class Trainer(Savable):
         self.setup(env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path, file_name, enable_save, save_every, relative_path, debug_level, reset_epsilon, tensorboard_logging, log_actions, episode_batch_avg_calculation=episode_batch_avg_calculation, do_reward_test=do_reward_test, reward_test_number_of_episodes=reward_test_number_of_episodes, rolling_avg_window_size=rolling_avg_window_size)
 
     def prepare_black_list(self):
-        self.pickle_black_list = ["save_path", "file_name", "full_save_path", "full_save_play_path", "agent", "max_training_episodes","max_test_episodes","max_steps_training","max_steps_testing","save_every"]
+        self.pickle_black_list = ["save_path", "file_name", "full_save_path", "full_save_play_path", "agent", "max_training_episodes","max_test_episodes","max_steps_training","max_steps_testing","save_every","rolling_avg_window_size"]
 
     def setup(self, env, agent, max_training_episodes, max_test_episodes, max_steps_training, max_steps_testing, save_path=os.path.expanduser("~") + os.path.sep + "urnai_saved_traingings", file_name=str(datetime.now()).replace(" ","_").replace(":","_").replace(".","_"), enable_save=True, save_every=10, relative_path=False, debug_level=0, reset_epsilon=False, tensorboard_logging=False, log_actions=True, episode_batch_avg_calculation=10, do_reward_test=False, reward_test_number_of_episodes=10, rolling_avg_window_size=20):
         self.versioner = Versioner() 
@@ -331,16 +331,18 @@ class Trainer(Savable):
 
     def training_loop(self, is_testing, reward_from_agent=True):
         start_time = time.time()
-        current_episodes = 0
+        #current_episodes = 0
 
         if is_testing:
             rp.report("\n\n> Playing")
             max_episodes = self.max_test_episodes
             max_steps = self.max_steps_testing
+            current_episodes = self.curr_playing_episodes
         else:
             rp.report("> Training")
             max_episodes = self.max_training_episodes
             max_steps = self.max_steps_training
+            current_episodes = self.curr_training_episodes
         
         if self.logger.ep_count == 0 or is_testing:
             self.logger = Logger(max_episodes, self.agent.__class__.__name__, self.agent.model.__class__.__name__, self.agent.model, self.agent.action_wrapper.__class__.__name__, self.agent.action_wrapper.get_action_space_dim(), self.agent.action_wrapper.get_named_actions(), self.agent.state_builder.__class__.__name__, self.agent.reward_builder.__class__.__name__, self.env.__class__.__name__, log_actions=self.log_actions, episode_batch_avg_calculation=self.episode_batch_avg_calculation, rolling_avg_window_size=self.rolling_avg_window_size) 
