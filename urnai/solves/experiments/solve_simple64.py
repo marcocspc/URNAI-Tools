@@ -1,5 +1,5 @@
-import os,sys
-sys.path.insert(0, os.getcwd())
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.parent.parent))
 
 from absl import app
 from pysc2.env import sc2_env
@@ -58,10 +58,10 @@ def declare_trainer():
     #                 max_training_episodes=3000, max_steps_training=1200,
     #                 max_test_episodes=100, max_steps_testing=1200, rolling_avg_window_size=50)
 
-    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_rolling_avg2",
+    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_rolling_avg3",
                     save_every=5, enable_save=True, relative_path=True, reset_epsilon=False,
                     max_training_episodes=20, max_steps_training=1200,
-                    max_test_episodes=3, max_steps_testing=200, rolling_avg_window_size=1)
+                    max_test_episodes=3, max_steps_testing=200, rolling_avg_window_size=6)
     return trainer
 
 def main(unused_argv):

@@ -1,5 +1,5 @@
-import os,sys
-sys.path.insert(0, os.getcwd())
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.parent.parent))
 
 from absl import app
 import gym
@@ -63,8 +63,8 @@ def declare_trainer():
     state_builder = GymState(env.env_instance.observation_space.shape)
 
     helper = ModelBuilder()
-    helper.add_convolutional_layer(filters=8, kernel_size=4, input_shape=env.env_instance.observation_space.shape, padding=(1,1))
-    helper.add_maxpooling_layer(padding=(1,1))
+    helper.add_convolutional_layer(filters=8, kernel_size=4, input_shape=env.env_instance.observation_space.shape)
+    helper.add_maxpooling_layer()
     helper.add_flatten_layer()
     helper.add_fullyconn_layer(10)
     helper.add_output_layer()

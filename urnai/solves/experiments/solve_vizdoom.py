@@ -2,8 +2,8 @@
 Outdated file
 """
 
-import os,sys
-sys.path.insert(0, os.getcwd())
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.parent.parent))
 
 from absl import app
 from urnai.envs.vizdoom import VizdoomEnv

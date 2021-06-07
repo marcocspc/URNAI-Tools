@@ -294,8 +294,8 @@ class Logger(Savable):
 
     def plot_moving_avg_win_rate_graph(self):
         winrate_series = pd.Series(self.ep_victories)
-        winrate_rolling_avg = winrate_series.rolling(window=self.rolling_avg_window_size, min_periods=1)
-        winrate_roll_mean = winrate_rolling_avg.mean()
+        winrate_rolling_avg = winrate_series.rolling(window=self.rolling_avg_window_size)
+        winrate_roll_mean = winrate_rolling_avg.mean().fillna(value=0)
 
         return self.__plot_curve(range(self.ep_count), winrate_roll_mean, 'Episode Count', 
             'Rolling Avg. Win Rate', 'Rolling Average Win Rate (window size: {})'.format(self.rolling_avg_window_size))
