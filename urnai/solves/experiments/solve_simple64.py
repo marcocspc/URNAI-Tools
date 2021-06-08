@@ -49,19 +49,20 @@ def declare_trainer():
     #                     gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=2000)  
     
     dq_network = DoubleDeepQLearning(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), use_memory=True,
-                        gamma=0.99, learning_rate=0.001, epsilon_decay=0.99999, epsilon_min=0.005, memory_maxlen=100000, min_memory_size=2000, lib="keras")
+                        gamma=0.99, learning_rate=0.001, memory_maxlen=100000, min_memory_size=2000, lib="keras",
+                        epsilon_decay=0.9994, epsilon_start=0.6, epsilon_min=0.005, epsilon_linear_decay=True, per_episode_epsilon_decay=True)
     
     agent = SC2Agent(dq_network, KilledUnitsReward())
 
-    # trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="terran_ddql_rolling_avg",
-    #                 save_every=200, enable_save=True, relative_path=False, reset_epsilon=False,
-    #                 max_training_episodes=3000, max_steps_training=1200,
-    #                 max_test_episodes=100, max_steps_testing=1200, rolling_avg_window_size=50)
+    trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="tvt_linearepsilon_t1",
+                    save_every=200, enable_save=True, relative_path=False, reset_epsilon=False,
+                    max_training_episodes=3000, max_steps_training=1200,
+                    max_test_episodes=100, max_steps_testing=1200, rolling_avg_window_size=50)
 
-    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_rolling_avg3",
-                    save_every=5, enable_save=True, relative_path=True, reset_epsilon=False,
-                    max_training_episodes=20, max_steps_training=1200,
-                    max_test_episodes=3, max_steps_testing=200, rolling_avg_window_size=6)
+    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_linearepsilonlr",
+    #                 save_every=15, enable_save=True, relative_path=True, reset_epsilon=False,
+    #                 max_training_episodes=60, max_steps_training=100,
+    #                 max_test_episodes=3, max_steps_testing=100, rolling_avg_window_size=10)
     return trainer
 
 def main(unused_argv):

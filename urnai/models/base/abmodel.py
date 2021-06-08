@@ -52,7 +52,7 @@ class LearningModel(Savable):
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, gamma, learning_rate, learning_rate_min, learning_rate_decay, 
                 epsilon_start, epsilon_min, epsilon_decay_rate, per_episode_epsilon_decay=False, learning_rate_decay_ep_cutoff=0, 
-                name=None, seed_value=None, cpu_only=False):
+                name=None, seed_value=None, cpu_only=False, epsilon_linear_decay=False, lr_linear_decay=False):
         super(LearningModel, self).__init__()
 
         self.seed_value = seed_value
@@ -63,6 +63,8 @@ class LearningModel(Savable):
         self.learning_rate_min = learning_rate_min
         self.learning_rate_decay = learning_rate_decay
         self.learning_rate_decay_ep_cutoff = learning_rate_decay_ep_cutoff
+        self.lr_linear_decay = lr_linear_decay
+
         self.name = name
         self.action_wrapper = action_wrapper
         self.state_builder = state_builder
@@ -75,6 +77,7 @@ class LearningModel(Savable):
         self.epsilon_min = epsilon_min
         self.epsilon_decay_rate = epsilon_decay_rate
         self.per_episode_epsilon_decay = per_episode_epsilon_decay
+        self.epsilon_linear_decay = epsilon_linear_decay
 
         #self.tensorboard_callback_logdir = ""
         self.tensorboard_callback = None
@@ -112,8 +115,12 @@ class LearningModel(Savable):
         epsilon greedy value by multiplying it by the epsilon_decay_rate 
         (the higher the value, the less it lowers the epsilon_decay).
         '''
-        if self.epsilon_greedy > self.epsilon_min:
-            self.epsilon_greedy *= self.epsilon_decay_rate
+        if self.epsilon_linear_decay:
+            if self.epsilon_greedy > self.epsilon_min:
+                self.epsilon_greedy -= (1 - self.epsilon_decay_rate)
+        else:
+            if self.epsilon_greedy > self.epsilon_min:
+                self.epsilon_greedy *= self.epsilon_decay_rate
 
     def decay_lr(self):
         '''
@@ -121,8 +128,12 @@ class LearningModel(Savable):
         This method works very similarly to decay_epsilon(), lowering the learning rate
         by multiplying it by the learnin_rate_decay.
         '''
-        if self.learning_rate > self.learning_rate_min:
-            self.learning_rate *= self.learning_rate_decay
+        if self.lr_linear_decay:
+            if self.learning_rate > self.learning_rate_min:
+                self.learning_rate -= (1 - self.learning_rate_decay)
+        else:
+            if self.learning_rate > self.learning_rate_min:
+                self.learning_rate *= self.learning_rate_decay
 
     def ep_reset(self, episode=0):
         '''
@@ -132,7 +143,7 @@ class LearningModel(Savable):
         if self.per_episode_epsilon_decay:
             self.decay_epsilon()
 
-        if episode > self.learning_rate_decay_ep_cutoff and self.learning_rate_decay_ep_cutoff != 0:
+        if episode > self.learning_rate_decay_ep_cutoff and self.learning_rate_decay != 1:
             self.decay_lr()
     
     def set_seeds(self, cpu_only):

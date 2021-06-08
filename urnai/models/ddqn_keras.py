@@ -20,13 +20,14 @@ class DDQNKeras(DQNKeras):
                     learning_rate=0.001, learning_rate_min=0.0001, learning_rate_decay=0.99995, learning_rate_decay_ep_cutoff = 0,
                     name='DDQN', epsilon_start=1.0, epsilon_min=0.01, epsilon_decay=0.99995, per_episode_epsilon_decay=False,
                     batch_size=64, use_memory=True, memory_maxlen=50000, min_memory_size=1000, build_model = ModelBuilder.DEFAULT_BUILD_MODEL, update_target_every=5, 
-                    seed_value=None, cpu_only=False):
+                    seed_value=None, cpu_only=False, epsilon_linear_decay=False, lr_linear_decay=False):
         super(DDQNKeras, self).__init__(action_wrapper, state_builder, gamma=gamma, use_memory=use_memory,  name=name,
                                         learning_rate=learning_rate, learning_rate_decay=learning_rate_decay, 
                                         learning_rate_min=learning_rate_min, learning_rate_decay_ep_cutoff= learning_rate_decay_ep_cutoff,
                                         epsilon_start=epsilon_start, epsilon_min=epsilon_min, 
                                         epsilon_decay=epsilon_decay, per_episode_epsilon_decay=per_episode_epsilon_decay,
-                                        seed_value=seed_value, cpu_only=cpu_only, build_model=build_model)
+                                        seed_value=seed_value, cpu_only=cpu_only, build_model=build_model, 
+                                        epsilon_linear_decay=epsilon_linear_decay, lr_linear_decay=lr_linear_decay)
 
         self.build_model = build_model
         self.loss = 0

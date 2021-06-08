@@ -89,16 +89,21 @@ class DoubleDeepQLearning(DeepQLearning):
             to override any of the default URNAI models. 
             If this parameter is left as None, __init__() will use the "lib" parameter to select 
             one of the standard URNAI model builders, depending on which library was chosen.
+        epsilon_linear_decay: Bool
+            Flag to decay epsilon linearly instead of exponentially.
+        lr_linear_decay: Bool
+            Flag to decay learning rate linearly instead of exponentially.
+
     """
 
     def __init__(self, action_wrapper: ActionWrapper, state_builder: StateBuilder, learning_rate=0.001, learning_rate_min=0.0001, learning_rate_decay=1, 
                 learning_rate_decay_ep_cutoff=0, gamma=0.99, name='DoubleDeepQLearning', build_model = None, epsilon_start=1.0, epsilon_min=0.005, epsilon_decay=0.99995, 
                 per_episode_epsilon_decay=False, use_memory=True, memory_maxlen=50000, batch_size=32, min_memory_size=2000, seed_value=None, cpu_only=False, 
-                update_target_every=5, lib='keras', neural_net_class=None):
+                update_target_every=5, lib='keras', neural_net_class=None, epsilon_linear_decay=False, lr_linear_decay=False):
         super().__init__(action_wrapper, state_builder, learning_rate, learning_rate_min, learning_rate_decay,
                         learning_rate_decay_ep_cutoff, gamma, name, build_model, epsilon_start, epsilon_min, 
                         epsilon_decay , per_episode_epsilon_decay, use_memory, memory_maxlen, batch_size,
-                        min_memory_size, seed_value, cpu_only, lib, neural_net_class)
+                        min_memory_size, seed_value, cpu_only, lib, neural_net_class, epsilon_linear_decay, lr_linear_decay)
         
         self.target_update_counter = 0
         self.update_target_every = update_target_every
