@@ -281,7 +281,7 @@ class Simple64GridState(StateBuilder):
     def __init__(self, grid_size=4):
 
         self.grid_size = grid_size
-        self._state_size = int(22 + 2*(self.grid_size**2))
+        self._state_size = int(19 + 2*(self.grid_size**2))
         self.player_race = 0
         self.base_top_left = None
 
@@ -305,7 +305,7 @@ class Simple64GridState(StateBuilder):
 
         new_state = []
         new_state.append(obs.player.minerals/6000)
-        new_state.append(obs.player.vespene/4000)
+        new_state.append(obs.player.vespene/6000)
         new_state.append(obs.player.food_cap/200)
         new_state.append(obs.player.food_used/200)
         new_state.append(obs.player.food_army/200)
@@ -318,15 +318,15 @@ class Simple64GridState(StateBuilder):
             new_state.append(get_units_amount(obs, units.Terran.CommandCenter)+
                             get_units_amount(obs, units.Terran.OrbitalCommand)+
                             get_units_amount(obs, units.Terran.PlanetaryFortress)/2)
-            new_state.append(get_units_amount(obs, units.Terran.SupplyDepot)/8)
+            new_state.append(get_units_amount(obs, units.Terran.SupplyDepot)/18)
             new_state.append(get_units_amount(obs, units.Terran.Refinery)/4)
             new_state.append(get_units_amount(obs, units.Terran.EngineeringBay))
             new_state.append(get_units_amount(obs, units.Terran.Armory))
-            new_state.append(get_units_amount(obs, units.Terran.MissileTurret)/8)
-            new_state.append(get_units_amount(obs, units.Terran.SensorTower)/3)
-            new_state.append(get_units_amount(obs, units.Terran.Bunker)/5)
+            new_state.append(get_units_amount(obs, units.Terran.MissileTurret)/4)
+            #new_state.append(get_units_amount(obs, units.Terran.SensorTower)/1)
+            #new_state.append(get_units_amount(obs, units.Terran.Bunker)/4)
             new_state.append(get_units_amount(obs, units.Terran.FusionCore))
-            new_state.append(get_units_amount(obs, units.Terran.GhostAcademy))
+            #new_state.append(get_units_amount(obs, units.Terran.GhostAcademy))
             new_state.append(get_units_amount(obs, units.Terran.Barracks)/3)
             new_state.append(get_units_amount(obs, units.Terran.Factory)/2)
             new_state.append(get_units_amount(obs, units.Terran.Starport)/2)
@@ -363,28 +363,6 @@ class Simple64GridState(StateBuilder):
 
         # Insteading of making a vector for all coordnates on the map, we'll discretize our enemy space
         # and use a 4x4 grid to store enemy positions by marking a square as 1 if there's any enemy on it.
-        # enemy_grid = np.zeros((4,4))
-        # player_grid = np.zeros((4,4))
-
-        # enemy_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.ENEMY]
-        # player_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.SELF]
-        
-        # for i in range(0, len(enemy_units)):
-        #     y = int(math.ceil((enemy_units[i].x + 1) / 16))
-        #     x = int(math.ceil((enemy_units[i].y + 1) / 16))
-        #     #enemy_grid[((y - 1) * 4) + (x - 1)] += 1
-        #     enemy_grid[x-1][y-1] += 1
-
-        # for i in range(0, len(player_units)):
-        #     y = int(math.ceil((player_units[i].x + 1) / 16))
-        #     x = int(math.ceil((player_units[i].y + 1) / 16))
-        #     #enemy_grid[((y - 1) * 4) + (x - 1)] += 1
-        #     player_grid[x-1][y-1] += 1
-
-        # if not self.base_top_left:
-        #     enemy_grid = np.rot90(enemy_grid, 2)
-        #     player_grid = np.rot90(player_grid, 2)
-        #     #enemy_grid = enemy_grid[::-1]
 
         enemy_grid = np.zeros((self.grid_size,self.grid_size))
         player_grid = np.zeros((self.grid_size,self.grid_size))
@@ -395,19 +373,16 @@ class Simple64GridState(StateBuilder):
         for i in range(0, len(enemy_units)):
             y = int(math.ceil((enemy_units[i].x + 1) / 64/self.grid_size))
             x = int(math.ceil((enemy_units[i].y + 1) / 64/self.grid_size))
-            #enemy_grid[((y - 1) * 4) + (x - 1)] += 1
             enemy_grid[x-1][y-1] += 1
 
         for i in range(0, len(player_units)):
             y = int(math.ceil((player_units[i].x + 1) / (64/self.grid_size)))
             x = int(math.ceil((player_units[i].y + 1) / (64/self.grid_size)))
-            #enemy_grid[((y - 1) * 4) + (x - 1)] += 1
             player_grid[x-1][y-1] += 1
 
         if not self.base_top_left:
             enemy_grid = np.rot90(enemy_grid, 2)
             player_grid = np.rot90(player_grid, 2)
-            #enemy_grid = enemy_grid[::-1]
 
         # Normalizing the values to always be between 0 and 1 (since the max amount of units in SC2 is 200)
         enemy_grid = enemy_grid/200

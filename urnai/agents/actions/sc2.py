@@ -144,46 +144,35 @@ def research_upgrade(obs, action_id, building_type):
     return _NO_OP()
 
 def effect_units(obs, action_id, units):
-    if units != _NO_UNITS:
-        unit = units[0]
-        units.pop(0)
-        if len(units) == 0:
-            units = _NO_UNITS
-        return action_id("now", unit.tag), units
+    if len(units) > 0:
+        unit_tags = [unit.tag for unit in units]
+        return action_id("now", unit_tags)
     return _NO_OP()
 
 def train_unit(obs, action_id, building_type):
     buildings = get_my_units_by_type(obs, building_type)
     if len(buildings) > 0:
-        for building in buildings:
-            if building.build_progress == 100 and building.order_progress_0 == 0:
-                if building.assigned_harvesters <= building.ideal_harvesters:
-                    return action_id("now", building.tag)
+        building_tags = [building.tag for building in buildings]
+        return action_id("now", building_tags)
     return _NO_OP()
 
 def attack_target_point(obs, player_race, target, base_top_left):
     if not base_top_left: target = (63-target[0]-5, 63-target[1]+5)
     army = select_army(obs, player_race)
     if army != _NO_UNITS:
-        if len(army) > 0:
-            distances = list(get_distances(obs, army, target))
         actions_queue = []
-        while len(army) != 0:
-            unit_index = np.argmax(distances)
-            actions_queue.append(actions.RAW_FUNCTIONS.Attack_pt("now", army[unit_index].tag, target))
-            army.pop(unit_index)
-            distances.pop(unit_index)
+        army_tags = [unit.tag for unit in army]
+        actions_queue.append(actions.RAW_FUNCTIONS.Attack_pt("now", army_tags, target))
         return actions_queue
     return [_NO_OP()]
 
 def attack_target_point_spatial(obs, player_race, target):
     army = select_army(obs, player_race)
-    if(army != _NO_UNITS):
-        army_tag = [unit.tag for unit in army]
-        if army != _NO_UNITS:
-            actions_queue = []
-            actions_queue.append(actions.RAW_FUNCTIONS.Attack_pt("now", army_tag, target))
-            return actions_queue
+    if army != _NO_UNITS:
+        army_tags = [unit.tag for unit in army]
+        actions_queue = []
+        actions_queue.append(actions.RAW_FUNCTIONS.Attack_pt("now", army_tags, target))
+        return actions_queue
     return [_NO_OP()]
 
 def attack_distribute_army(obs, player_race):
