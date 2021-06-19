@@ -1,5 +1,7 @@
 from os import name
 import random
+
+from numpy.lib.nanfunctions import _nanmedian_small
 from urnai.agents.actions.sc2 import research_upgrade
 import numpy as np
 from .base.abwrapper import ActionWrapper
@@ -509,129 +511,189 @@ class TerranWrapper(SC2Wrapper):
         return no_op()
     
     '''BUILD ACTIONS'''
-    def buildcommandcenter(self, obs):
-        targets = self.building_positions['command_center']
-        amount = self.building_amounts['command_center']
-        actions = build_structure_raw_pt(obs, units.Terran.CommandCenter, sc2._BUILD_COMMAND_CENTER, 
-                                            self.base_top_left, max_amount=amount, targets=targets)
-        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+    def buildcommandcenter(self, obs, x=None, y=None):
+        if x is None and y is None:
+            targets = self.building_positions['command_center']
+            amount = self.building_amounts['command_center']
+            actions = build_structure_raw_pt(obs, units.Terran.CommandCenter, sc2._BUILD_COMMAND_CENTER, 
+                                                self.base_top_left, max_amount=amount, targets=targets)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        else:
+            target = [x, y]
+            actions = build_structure_raw_pt_spatial(obs, units.Terran.CommandCenter, sc2._BUILD_COMMAND_CENTER, target)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildsupplydepot(self, obs):
-        targets = self.building_positions['supply_depot']
-        amount = self.building_amounts['supply_depot']
-        actions = build_structure_raw_pt(obs, units.Terran.SupplyDepot, sc2._BUILD_SUPPLY_DEPOT, 
-                                            self.base_top_left, max_amount=amount, targets=targets)
-        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+    def buildsupplydepot(self, obs, x=None, y=None):
+        if x is None and y is None:
+            targets = self.building_positions['supply_depot']
+            amount = self.building_amounts['supply_depot']
+            actions = build_structure_raw_pt(obs, units.Terran.SupplyDepot, sc2._BUILD_SUPPLY_DEPOT, 
+                                                self.base_top_left, max_amount=amount, targets=targets)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        else:
+            target = [x, y]
+            actions = build_structure_raw_pt_spatial(obs, units.Terran.SupplyDepot, sc2._BUILD_SUPPLY_DEPOT, target)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildrefinery(self, obs):
+    def buildrefinery(self, obs, x=None, y=None):
         actions = build_gas_structure_raw_unit(obs, units.Terran.Refinery, sc2._BUILD_REFINERY, sc2_env.Race.terran)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)     
         return action
 
-    def buildengineeringbay(self, obs):
-        targets = self.building_positions['engineering_bay']
-        amount = self.building_amounts['engineering_bay']
-        actions = build_structure_raw_pt(obs, units.Terran.EngineeringBay, sc2._BUILD_ENGINEERINGBAY,
-                                            self.base_top_left, max_amount=amount, targets=targets)
-        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+    def buildengineeringbay(self, obs, x=None, y=None):
+        if x is None and y is None:
+            targets = self.building_positions['engineering_bay']
+            amount = self.building_amounts['engineering_bay']
+            actions = build_structure_raw_pt(obs, units.Terran.EngineeringBay, sc2._BUILD_ENGINEERINGBAY,
+                                                self.base_top_left, max_amount=amount, targets=targets)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        else:
+            target = [x, y]
+            actions = build_structure_raw_pt_spatial(obs, units.Terran.EngineeringBay, sc2._BUILD_ENGINEERINGBAY, target)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildarmory(self, obs):
-        targets = self.building_positions['armory']
-        amount = self.building_amounts['armory']
-        actions = build_structure_raw_pt(obs, units.Terran.Armory, sc2._BUILD_ARMORY, 
-                                            self.base_top_left, max_amount=amount, targets=targets)
-        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+    def buildarmory(self, obs, x=None, y=None):
+        if x is None and y is None:
+            targets = self.building_positions['armory']
+            amount = self.building_amounts['armory']
+            actions = build_structure_raw_pt(obs, units.Terran.Armory, sc2._BUILD_ARMORY, 
+                                                self.base_top_left, max_amount=amount, targets=targets)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        else:
+            target = [x, y]
+            actions = build_structure_raw_pt_spatial(obs, units.Terran.Armory, sc2._BUILD_ARMORY, target)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildmissileturret(self, obs):
-        targets = self.building_positions['missile_turret']
-        amount = self.building_amounts['missile_turret']
-        actions = build_structure_raw_pt(obs, units.Terran.MissileTurret, sc2._BUILD_MISSILETURRET, 
-                                            self.base_top_left, max_amount=amount, targets=targets)
-        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+    def buildmissileturret(self, obs, x=None, y=None):
+        if x is None and y is None:
+            targets = self.building_positions['missile_turret']
+            amount = self.building_amounts['missile_turret']
+            actions = build_structure_raw_pt(obs, units.Terran.MissileTurret, sc2._BUILD_MISSILETURRET, 
+                                                self.base_top_left, max_amount=amount, targets=targets)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        else:
+            target = [x, y]
+            actions = build_structure_raw_pt_spatial(obs, units.Terran.MissileTurret, sc2._BUILD_MISSILETURRET, target)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildsensortower(self, obs):
-        amount = self.building_amounts['sensor_tower']
-        actions = build_structure_raw_pt(obs, units.Terran.SensorTower, sc2._BUILD_SENSORTOWER, self.base_top_left, max_amount=amount)
-        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+    def buildsensortower(self, obs, x=None, y=None):
+        if x is None and y is None:
+            amount = self.building_amounts['sensor_tower']
+            actions = build_structure_raw_pt(obs, units.Terran.SensorTower, sc2._BUILD_SENSORTOWER, self.base_top_left, max_amount=amount)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        else:
+            target = [x, y]
+            actions = build_structure_raw_pt_spatial(obs, units.Terran.SensorTower, sc2._BUILD_SENSORTOWER, target)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildbunker(self, obs):
-        amount = self.building_amounts['bunker']
-        actions = build_structure_raw_pt(obs, units.Terran.Bunker, sc2._BUILD_BUNKER, self.base_top_left, max_amount=amount)
-        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+    def buildbunker(self, obs, x=None, y=None):
+        if x is None and y is None:
+            amount = self.building_amounts['bunker']
+            actions = build_structure_raw_pt(obs, units.Terran.Bunker, sc2._BUILD_BUNKER, self.base_top_left, max_amount=amount)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        else:
+            target = [x, y]
+            actions = build_structure_raw_pt_spatial(obs, units.Terran.Bunker, sc2._BUILD_BUNKER, target)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildfusioncore(self, obs):
-        targets = self.building_positions['fusion_core']
-        amount = self.building_amounts['fusion_core']
-        actions = build_structure_raw_pt(obs, units.Terran.FusionCore, sc2._BUILD_FUSIONCORE, 
-                                            self.base_top_left, max_amount=amount, targets=targets)
-        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+    def buildfusioncore(self, obs, x=None, y=None):
+        if x is None and y is None:
+            targets = self.building_positions['fusion_core']
+            amount = self.building_amounts['fusion_core']
+            actions = build_structure_raw_pt(obs, units.Terran.FusionCore, sc2._BUILD_FUSIONCORE, 
+                                                self.base_top_left, max_amount=amount, targets=targets)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        else:
+            target = [x, y]
+            actions = build_structure_raw_pt_spatial(obs, units.Terran.FusionCore, sc2._BUILD_FUSIONCORE, target)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildghostacademy(self, obs):
-        targets = self.building_positions['ghost_academy']
-        amount = self.building_amounts['ghost_academy']
-        actions = build_structure_raw_pt(obs, units.Terran.GhostAcademy, sc2._BUILD_GHOSTACADEMY, 
-                                            self.base_top_left, max_amount=amount, targets=targets)
-        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+    def buildghostacademy(self, obs, x=None, y=None):
+        if x is None and y is None:
+            targets = self.building_positions['ghost_academy']
+            amount = self.building_amounts['ghost_academy']
+            actions = build_structure_raw_pt(obs, units.Terran.GhostAcademy, sc2._BUILD_GHOSTACADEMY, 
+                                                self.base_top_left, max_amount=amount, targets=targets)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        else:
+            target = [x, y]
+            actions = build_structure_raw_pt_spatial(obs, units.Terran.GhostAcademy, sc2._BUILD_GHOSTACADEMY, target)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildbarracks(self, obs):
-        targets = self.building_positions['barracks']
-        amount = self.building_amounts['barracks']
-        actions = build_structure_raw_pt(obs, units.Terran.Barracks, sc2._BUILD_BARRACKS,
-                                            self.base_top_left, max_amount=amount, targets=targets)
-        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+    def buildbarracks(self, obs, x=None, y=None):
+        if x is None and y is None:
+            targets = self.building_positions['barracks']
+            amount = self.building_amounts['barracks']
+            actions = build_structure_raw_pt(obs, units.Terran.Barracks, sc2._BUILD_BARRACKS,
+                                                self.base_top_left, max_amount=amount, targets=targets)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        else:
+            target = [x, y]
+            actions = build_structure_raw_pt_spatial(obs, units.Terran.Barracks, sc2._BUILD_BARRACKS, target)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildfactory(self, obs):
-        targets = self.building_positions['factory']
-        amount = self.building_amounts['factory']
-        actions = build_structure_raw_pt(obs, units.Terran.Factory, sc2._BUILD_FACTORY,
-                                            self.base_top_left, max_amount=amount, targets=targets)
-        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+    def buildfactory(self, obs, x=None, y=None):
+        if x is None and y is None:
+            targets = self.building_positions['factory']
+            amount = self.building_amounts['factory']
+            actions = build_structure_raw_pt(obs, units.Terran.Factory, sc2._BUILD_FACTORY,
+                                                self.base_top_left, max_amount=amount, targets=targets)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        else:
+            target = [x, y]
+            actions = build_structure_raw_pt_spatial(obs, units.Terran.Factory, sc2._BUILD_FACTORY, target)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildstarport(self, obs):
-        targets = self.building_positions['starport']
-        amount = self.building_amounts['starport']
-        actions = build_structure_raw_pt(obs, units.Terran.Starport, sc2._BUILD_STARPORT,
-                                            self.base_top_left, max_amount=amount, targets=targets)
-        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+    def buildstarport(self, obs, x=None, y=None):
+        if x is None and y is None:
+            targets = self.building_positions['starport']
+            amount = self.building_amounts['starport']
+            actions = build_structure_raw_pt(obs, units.Terran.Starport, sc2._BUILD_STARPORT,
+                                                self.base_top_left, max_amount=amount, targets=targets)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        else:
+            target = [x, y]
+            actions = build_structure_raw_pt_spatial(obs, units.Terran.Starport, sc2._BUILD_STARPORT, target)
+            action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildtechlabbarracks(self, obs):
+    def buildtechlabbarracks(self, obs, x=None, y=None):
         actions = build_structure_raw(obs, units.Terran.Barracks, sc2._BUILD_TECHLAB_BARRACKS)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
         
-    def buildtechlabfactory(self, obs):
+    def buildtechlabfactory(self, obs, x=None, y=None):
         actions = build_structure_raw(obs, units.Terran.Factory, sc2._BUILD_TECHLAB_FACTORY)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildtechlabstarport(self, obs):
+    def buildtechlabstarport(self, obs, x=None, y=None):
         actions = build_structure_raw(obs, units.Terran.Starport, sc2._BUILD_TECHLAB_STARPORT)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildreactorbarracks(self, obs):
+    def buildreactorbarracks(self, obs, x=None, y=None):
         actions = build_structure_raw(obs, units.Terran.Barracks, sc2._BUILD_REACTOR_BARRACKS)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildreactorfactory(self, obs):
+    def buildreactorfactory(self, obs, x=None, y=None):
         actions = build_structure_raw(obs, units.Terran.Factory, sc2._BUILD_REACTOR_FACTORY)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildreactorstarport(self, obs):
+    def buildreactorstarport(self, obs, x=None, y=None):
         actions = build_structure_raw(obs, units.Terran.Starport, sc2._BUILD_REACTOR_STARPORT)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
@@ -825,30 +887,43 @@ class TerranWrapper(SC2Wrapper):
         return action
 
     def get_action(self, action_idx, obs):
-        named_action = self.named_actions[action_idx]
-        #named_action, x, y = self.split_action(named_action)
-
+        
         if len(self.actions_queue) > 0:
-            return self.actions_queue.pop(0)
-
+            return self.actions_queue.pop(0) # returning the next action that's on queue without checking anything else
+        if obs.game_loop[0] < 80:
+            command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
+            self.base_top_left = (command_center.x < 32) # determining wether or not our base is in top left corner (simple64 map)
+        
         if self.units_to_attack != sc2._NO_UNITS:
             named_action = self.last_attack_action
-
         if self.units_to_effect != sc2._NO_UNITS:
             named_action = self.last_effect_action
 
-        if obs.game_loop[0] < 80:
-            command_center = get_my_units_by_type(obs, units.Terran.CommandCenter)[0]
-            self.base_top_left = (command_center.x < 32)
+        if type(action_idx) == list:                        # if type = list it means our action has the action itself and x, y position
+            action_id, x, y = action_idx                    # separating the action id from x,y pos
+            named_action = self.named_actions[action_id]    # getting the string that represents our action
 
-        # Calling our action methods using metaprogramming
-        if ACTION_ATTACK_POINT in named_action:
-            named_action, x, y = self.split_action(named_action)
-            atk_action_method = getattr(self.__class__, named_action)
-            return atk_action_method(self, obs, x, y)
-        else:
-            action_method = getattr(self.__class__, named_action)
-            return action_method(self, obs)
+            # Calling our action methods using metaprogramming
+            if ACTION_ATTACK_POINT in named_action or "build" in named_action:
+                spatial_action_method = getattr(self.__class__, named_action)
+                return spatial_action_method(self, obs, x, y)
+            else:
+                action_method = getattr(self.__class__, named_action)
+                return action_method(self, obs)
+        else:                                               # if type != list then we have an action without x, y
+            named_action = self.named_actions[action_idx]
+
+            # Calling our action methods using metaprogramming
+            if "_" in named_action:
+                named_action, x, y = self.split_action(named_action)
+                spatial_action_method = getattr(self.__class__, named_action)
+                return spatial_action_method(self, obs, x, y)
+            else:
+                action_method = getattr(self.__class__, named_action)
+                return action_method(self, obs)
+
+        
+        
 
 class SimpleTerranWrapper(TerranWrapper):
     def __init__(self, atk_grid_x=4, atk_grid_y=4):
