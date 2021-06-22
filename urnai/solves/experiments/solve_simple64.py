@@ -54,15 +54,15 @@ def declare_trainer():
     
     agent = SC2Agent(dq_network, KilledUnitsReward())
 
-    # trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="tvt_veasy_newactwrapper_t1",
-    #                 save_every=200, enable_save=True, relative_path=False, reset_epsilon=False,
-    #                 max_training_episodes=3000, max_steps_training=1500,
-    #                 max_test_episodes=100, max_steps_testing=1500, rolling_avg_window_size=50)
+    trainer = Trainer(env, agent, save_path='/home/lpdcalves/', file_name="tvt_veasy_newactwrapper_t1",
+                    save_every=200, enable_save=True, relative_path=False, reset_epsilon=False,
+                    max_training_episodes=3000, max_steps_training=1500,
+                    max_test_episodes=100, max_steps_testing=1500, rolling_avg_window_size=50)
 
-    trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_new_actionwrapper",
-                    save_every=6, enable_save=True, relative_path=True, reset_epsilon=False,
-                    max_training_episodes=6, max_steps_training=1500, 
-                    max_test_episodes=3, max_steps_testing=100, rolling_avg_window_size=5)
+    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_new_actionwrapper4",
+    #                 save_every=6, enable_save=True, relative_path=True, reset_epsilon=False,
+    #                 max_training_episodes=6, max_steps_training=1500, 
+    #                 max_test_episodes=3, max_steps_testing=100, rolling_avg_window_size=5)
     return trainer
 
 def main(unused_argv):

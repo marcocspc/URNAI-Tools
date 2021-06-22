@@ -1,5 +1,8 @@
 from os import name
 import random
+import ast
+from types import SimpleNamespace
+from inspect import ismethod
 
 from numpy.lib.nanfunctions import _nanmedian_small
 from urnai.agents.actions.sc2 import research_upgrade
@@ -334,6 +337,7 @@ class TerranWrapper(SC2Wrapper):
         freesupply = get_free_supply(obs)
 
         has_scv = building_exists(obs, units.Terran.SCV)
+        has_idle_scv = obs.player.idle_worker_count > 0
         has_army = select_army(obs, sc2_env.Race.terran) != sc2._NO_UNITS
         has_marinemarauder = building_exists(obs, units.Terran.Marine) or building_exists(obs, units.Terran.Marauder)
         has_supplydepot = building_exists(obs, units.Terran.SupplyDepot) or building_exists(obs, units.Terran.SupplyDepotLowered)
@@ -349,163 +353,293 @@ class TerranWrapper(SC2Wrapper):
         has_ccs = building_exists(obs, units.Terran.CommandCenter) or building_exists(obs, units.Terran.PlanetaryFortress) or building_exists(obs, units.Terran.OrbitalCommand)
         has_engineeringbay = building_exists(obs, units.Terran.EngineeringBay)
 
+        game_info = {
+            'minerals' : minerals,
+            'vespene' : vespene,
+            'freesupply' : freesupply,
+            'has_scv' : has_scv,
+            'has_idle_scv' : has_idle_scv,
+            'has_army' : has_army,
+            'has_marinemarauder' : has_marinemarauder,
+            'has_supplydepot' : has_supplydepot,
+            'has_barracks' : has_barracks,
+            'has_barracks_techlab' : has_barracks_techlab,
+            'has_ghostacademy' : has_ghostacademy,
+            'has_factory' : has_factory,
+            'has_factory_techlab' : has_factory_techlab,
+            'has_armory' : has_armory,
+            'has_starport' : has_starport,
+            'has_starport_techlab' : has_starport_techlab,
+            'has_fusioncore' : has_fusioncore,
+            'has_ccs' : has_ccs,
+            'has_engineeringbay' : has_engineeringbay
+        }
 
-        if not has_scv or obs.player.idle_worker_count == 0:
-            excluded_actions.append(ACTION_HARVEST_MINERALS_IDLE)     
+        game_info = SimpleNamespace(**game_info)
 
-        if not has_scv: 
-            excluded_actions.append(ACTION_HARVEST_MINERALS_FROM_GAS)
-            excluded_actions.append(ACTION_HARVEST_GAS_FROM_MINERALS)
-
-        if not has_scv or minerals < 400:
-            excluded_actions.append(ACTION_BUILD_COMMAND_CENTER)
-        if not has_scv or minerals < 100:
-            excluded_actions.append(ACTION_BUILD_SUPPLY_DEPOT)
-        if not has_scv or minerals < 75:
-            excluded_actions.append(ACTION_BUILD_REFINERY)
-
-        if not has_supplydepot or not has_scv or minerals < 150:            
-            excluded_actions.append(ACTION_BUILD_BARRACKS)          
-
-        '''ACTIONS DEPENDENT ON A BARRACKS'''
-        if not has_barracks or not has_scv or minerals < 100:
-            excluded_actions.append(ACTION_BUILD_BUNKER)
-        if not has_barracks or not has_scv or minerals < 150 or vespene < 100:
-            excluded_actions.append(ACTION_BUILD_FACTORY)
-        if not has_barracks or not has_scv or minerals < 150 or vespene < 50:
-            excluded_actions.append(ACTION_BUILD_GHOSTACADEMY)
-        if not has_barracks or not has_scv or minerals < 50 or vespene < 25:
-            excluded_actions.append(ACTION_BUILD_TECHLAB_BARRACKS)
-        if not has_barracks or not has_scv or minerals < 50 or vespene < 50:
-            excluded_actions.append(ACTION_BUILD_REACTOR_BARRACKS)
-
-        if not has_barracks or minerals < 50 or freesupply < 1:
-            excluded_actions.append(ACTION_TRAIN_MARINE)
-
-        if not has_barracks or not has_barracks_techlab or minerals < 100 or vespene < 25 or freesupply < 2:
-            excluded_actions.append(ACTION_TRAIN_MARAUDER)
-
-        if not has_barracks or minerals < 50 or vespene < 50 or freesupply < 1:
-            excluded_actions.append(ACTION_TRAIN_REAPER)
-
-        if not has_barracks or not has_barracks_techlab or not has_ghostacademy or minerals < 150 or vespene < 125 or freesupply < 2:
-            excluded_actions.append(ACTION_TRAIN_GHOST)
-
-        if not has_barracks or not has_barracks_techlab or minerals < 100 or vespene < 100:
-            excluded_actions.append(ACTION_RESEARCH_STIMPACK)
-            excluded_actions.append(ACTION_RESEARCH_COMBATSHIELD)
-        if not has_barracks or not has_barracks_techlab or minerals < 50 or vespene < 50:
-            excluded_actions.append(ACTION_RESEARCH_CONCUSSIVESHELL)
-
-        '''ACTIONS DEPENDENT ON A FACTORY'''
-        if not has_factory or not has_scv or minerals < 150 or vespene < 100:
-            excluded_actions.append(ACTION_BUILD_ARMORY)
-            excluded_actions.append(ACTION_BUILD_STARPORT)
-        if not has_factory or not has_scv or minerals < 50 or vespene < 25:
-            excluded_actions.append(ACTION_BUILD_TECHLAB_FACTORY)
-        if not has_factory or not has_scv or minerals < 50 or vespene < 50:
-            excluded_actions.append(ACTION_BUILD_REACTOR_FACTORY)
-
-        if not has_factory or minerals < 100 or freesupply < 2:
-            excluded_actions.append(ACTION_TRAIN_HELLION)
-
-        if not has_factory or not has_armory or minerals < 100 or freesupply < 2:
-            excluded_actions.append(ACTION_TRAIN_HELLBAT)
-
-        if not has_factory or not has_factory_techlab or minerals < 150 or vespene < 125 or freesupply < 3:
-            excluded_actions.append(ACTION_TRAIN_SIEGETANK)
-
-        if not has_factory or not has_factory_techlab or minerals < 150 or vespene < 100 or freesupply < 3:
-            excluded_actions.append(ACTION_TRAIN_CYCLONE)
-
-        if not has_factory or minerals < 75 or vespene < 25 or freesupply < 2:
-            excluded_actions.append(ACTION_TRAIN_WIDOWMINE)
-
-        if not has_factory or not has_factory_techlab or minerals < 300 or vespene < 200 or freesupply < 6:
-            excluded_actions.append(ACTION_TRAIN_THOR)
-
-        '''RESEARCH ACTIONS DEPENDENT ON A FACTORY TECHLAB'''
-        if not has_factory or not has_factory_techlab or minerals < 150 or vespene < 150:
-            excluded_actions.append(ACTION_RESEARCH_INFERNAL_PREIGNITER)
-        if not has_factory or not has_factory_techlab or minerals < 75 or vespene < 75:
-            excluded_actions.append(ACTION_RESEARCH_DRILLING_CLAWS)
-            excluded_actions.append(ACTION_RESEARCH_CYCLONE_RAPIDFIRE)
-        if not has_factory or not has_factory_techlab or minerals < 100 or vespene < 100:
-            excluded_actions.append(ACTION_RESEARCH_CYCLONE_LOCKONDMG)
-
-        '''ACTIONS DEPENDENT ON A STARPORT'''
-        if not has_starport or not has_scv or minerals < 150 and vespene < 150:
-            excluded_actions.append(ACTION_BUILD_FUSIONCORE)
-        if not has_starport or not has_scv or minerals < 50 and vespene < 25:
-            excluded_actions.append(ACTION_BUILD_TECHLAB_STARPORT)
-        if not has_starport or not has_scv or minerals < 50 and vespene < 50:
-            excluded_actions.append(ACTION_BUILD_REACTOR_STARPORT)
-
-        if not has_starport or minerals < 150 or vespene < 75 or freesupply < 2:
-            excluded_actions.append(ACTION_TRAIN_VIKING)
-
-        if not has_starport or minerals < 100 or vespene < 100 or freesupply < 2:
-            excluded_actions.append(ACTION_TRAIN_MEDIVAC)
-
-        if not has_starport or minerals < 150 or vespene < 150 or freesupply < 3:
-            excluded_actions.append(ACTION_TRAIN_LIBERATOR)
-
-        if not has_starport or not has_starport_techlab or minerals < 100 or vespene < 200 or freesupply < 2:
-            excluded_actions.append(ACTION_TRAIN_RAVEN)
-
-        if not has_starport or not has_starport_techlab or minerals < 150 or vespene < 100 or freesupply < 2:
-            excluded_actions.append(ACTION_TRAIN_BANSHEE)
-
-        if not has_starport or not has_starport_techlab or not has_fusioncore or minerals < 400 or vespene < 300 or freesupply < 6:
-            excluded_actions.append(ACTION_TRAIN_BATTLECRUISER)
-
-        if not has_starport or not has_starport_techlab or minerals < 100 or vespene < 100:
-            excluded_actions.append(ACTION_RESEARCH_HIGHCAPACITYFUEL)
-            excluded_actions.append(ACTION_RESEARCH_BANSHEECLOAK)
-        if not has_starport or not has_starport_techlab or minerals < 150 or vespene < 150:
-            excluded_actions.append(ACTION_RESEARCH_CORVIDREACTOR)
-            excluded_actions.append(ACTION_RESEARCH_BANSHEEHYPERFLIGHT)
-            excluded_actions.append(ACTION_RESEARCH_ADVANCEDBALLISTICS)
-
-        if not has_armory or minerals < 100 or vespene < 100:
-            excluded_actions.append(ACTION_RESEARCH_SHIPS_WEAPONS)
-            excluded_actions.append(ACTION_RESEARCH_VEHIC_WEAPONS)
-            excluded_actions.append(ACTION_RESEARCH_SHIPVEHIC_PLATES)
-        
-        if not has_ghostacademy or minerals < 150 or vespene < 150:
-            excluded_actions.append(ACTION_RESEARCH_GHOST_CLOAK)
-
-        if not has_fusioncore or minerals < 150 or vespene < 150:
-            excluded_actions.append(ACTION_RESEARCH_BATTLECRUISER_WEAPONREFIT)
-        
-        if not has_ccs:
-            excluded_actions.append(ACTION_TRAIN_SCV)
-
-        if not has_ccs or not has_scv or minerals < 125:
-            excluded_actions.append(ACTION_BUILD_ENGINEERINGBAY)
-
-        if not has_engineeringbay or not has_scv or minerals < 125:
-            excluded_actions.append(ACTION_BUILD_SENSORTOWER)
-            excluded_actions.append(ACTION_BUILD_MISSILETURRET)
-
-        if not has_engineeringbay or minerals < 100 or vespene < 100:
-            excluded_actions.append(ACTION_RESEARCH_INF_WEAPONS)
-            excluded_actions.append(ACTION_RESEARCH_INF_ARMOR)
-            excluded_actions.append(ACTION_RESEARCH_HISEC_AUTOTRACKING)
-            excluded_actions.append(ACTION_RESEARCH_NEOSTEEL_FRAME)
-        if not has_engineeringbay or minerals < 150 or vespene < 150:
-            excluded_actions.append(ACTION_RESEARCH_STRUCTURE_ARMOR)
-
-        if not has_marinemarauder:
-            excluded_actions.append(ACTION_EFFECT_STIMPACK)
+        for action in self.named_actions:
+            if action+"_exclude" in dir(self):
+                check_method = getattr(self.__class__, action+"_exclude")
+                check_method(excluded_actions, game_info)
 
         id_excluded_actions = []
 
         for item in excluded_actions:
-            if item in self.named_actions:
-                id_excluded_actions.append(self.named_actions.index(item))
+            id_excluded_actions.append(self.named_actions.index(item))
 
         return id_excluded_actions
+
+
+    '''LIST OF METHODS USED TO EXCLUDE ACTIONS FROM named_actions'''
+    def buildcommandcenter_exclude(excluded_actions, gi):
+        if not gi.has_scv or gi.minerals < 400:
+            excluded_actions.append(ACTION_BUILD_COMMAND_CENTER)
+
+    def buildsupplydepot_exclude(excluded_actions, gi):
+        if not gi.has_scv or gi.minerals < 100:
+            excluded_actions.append(ACTION_BUILD_SUPPLY_DEPOT)
+
+    def buildrefinery_exclude(excluded_actions, gi):
+        if not gi.has_scv or gi.minerals < 75:
+            excluded_actions.append(ACTION_BUILD_REFINERY)
+
+    def buildengineeringbay_exclude(excluded_actions, gi):
+        if not gi.has_ccs or not gi.has_scv or gi.minerals < 125:
+            excluded_actions.append(ACTION_BUILD_ENGINEERINGBAY)
+
+    def buildarmory_exclude(excluded_actions, gi):
+        if not gi.has_factory or not gi.has_scv or gi.minerals < 150 or gi.vespene < 100:
+            excluded_actions.append(ACTION_BUILD_ARMORY)
+
+    def buildmissileturret_exclude(excluded_actions, gi):
+        if not gi.has_engineeringbay or not gi.has_scv or gi.minerals < 125:
+            excluded_actions.append(ACTION_BUILD_MISSILETURRET)
+
+    def buildsensortower_exclude(excluded_actions, gi):
+        if not gi.has_engineeringbay or not gi.has_scv or gi.minerals < 125:
+            excluded_actions.append(ACTION_BUILD_SENSORTOWER)
+
+    def buildbunker_exclude(excluded_actions, gi):
+        if not gi.has_barracks or not gi.has_scv or gi.minerals < 100:
+            excluded_actions.append(ACTION_BUILD_BUNKER)
+
+    def buildfusioncore_exclude(excluded_actions, gi):
+        if not gi.has_starport or not gi.has_scv or gi.minerals < 150 and gi.vespene < 150:
+            excluded_actions.append(ACTION_BUILD_FUSIONCORE)
+
+    def buildghostacademy_exclude(excluded_actions, gi):
+        if not gi.has_barracks or not gi.has_scv or gi.minerals < 150 or gi.vespene < 50:
+            excluded_actions.append(ACTION_BUILD_GHOSTACADEMY)
+
+    def buildbarracks_exclude(excluded_actions, gi):
+        if not gi.has_supplydepot or not gi.has_scv or gi.minerals < 150:            
+            excluded_actions.append(ACTION_BUILD_BARRACKS)
+
+    def buildfactory_exclude(excluded_actions, gi):
+        if not gi.has_barracks or not gi.has_scv or gi.minerals < 150 or gi.vespene < 100:
+            excluded_actions.append(ACTION_BUILD_FACTORY)
+
+    def buildstarport_exclude(excluded_actions, gi):
+        if not gi.has_factory or not gi.has_scv or gi.minerals < 150 or gi.vespene < 100:
+            excluded_actions.append(ACTION_BUILD_STARPORT)
+
+    def buildtechlabbarracks_exclude(excluded_actions, gi):
+        if not gi.has_barracks or not gi.has_scv or gi.minerals < 50 or gi.vespene < 25:
+            excluded_actions.append(ACTION_BUILD_TECHLAB_BARRACKS)
+        
+    def buildtechlabfactory_exclude(excluded_actions, gi):
+        if not gi.has_factory or not gi.has_scv or gi.minerals < 50 or gi.vespene < 25:
+            excluded_actions.append(ACTION_BUILD_TECHLAB_FACTORY)
+
+    def buildtechlabstarport_exclude(excluded_actions, gi):
+        if not gi.has_starport or not gi.has_scv or gi.minerals < 50 and gi.vespene < 25:
+            excluded_actions.append(ACTION_BUILD_TECHLAB_STARPORT)
+
+    def buildreactorbarracks_exclude(excluded_actions, gi):
+        if not gi.has_barracks or not gi.has_scv or gi.minerals < 50 or gi.vespene < 50:
+            excluded_actions.append(ACTION_BUILD_REACTOR_BARRACKS)
+
+    def buildreactorfactory_exclude(excluded_actions, gi):
+        if not gi.has_factory or not gi.has_scv or gi.minerals < 50 or gi.vespene < 50:
+            excluded_actions.append(ACTION_BUILD_REACTOR_FACTORY)
+
+    def buildreactorstarport_exclude(excluded_actions, gi):
+        if not gi.has_starport or not gi.has_scv or gi.minerals < 50 and gi.vespene < 50:
+            excluded_actions.append(ACTION_BUILD_REACTOR_STARPORT)
+
+    def researchinfantryweapons_exclude(excluded_actions, gi):
+        if not gi.has_engineeringbay or gi.minerals < 100 or gi.vespene < 100:
+            excluded_actions.append(ACTION_RESEARCH_INF_WEAPONS)
+    def researchinfantryarmor_exclude(excluded_actions, gi):
+        if not gi.has_engineeringbay or gi.minerals < 100 or gi.vespene < 100:
+            excluded_actions.append(ACTION_RESEARCH_INF_ARMOR)
+
+    def researchhisecautotracking_exclude(excluded_actions, gi):
+        if not gi.has_engineeringbay or gi.minerals < 100 or gi.vespene < 100:
+            excluded_actions.append(ACTION_RESEARCH_HISEC_AUTOTRACKING)
+
+    def researchneosteelframe_exclude(excluded_actions, gi):
+        if not gi.has_engineeringbay or gi.minerals < 100 or gi.vespene < 100:
+            excluded_actions.append(ACTION_RESEARCH_NEOSTEEL_FRAME)
+
+    def researchstructurearmor_exclude(excluded_actions, gi):
+        if not gi.has_engineeringbay or gi.minerals < 150 or gi.vespene < 150:
+            excluded_actions.append(ACTION_RESEARCH_STRUCTURE_ARMOR)
+
+    def researchshipsweapons_exclude(excluded_actions, gi):
+        if not gi.has_armory or gi.minerals < 100 or gi.vespene < 100:
+            excluded_actions.append(ACTION_RESEARCH_SHIPS_WEAPONS)
+
+    def researchvehicweapons_exclude(excluded_actions, gi):
+        if not gi.has_armory or gi.minerals < 100 or gi.vespene < 100:
+            excluded_actions.append(ACTION_RESEARCH_VEHIC_WEAPONS)
+
+    def researchshipvehicplates_exclude(excluded_actions, gi):
+        if not gi.has_armory or gi.minerals < 100 or gi.vespene < 100:
+            excluded_actions.append(ACTION_RESEARCH_SHIPVEHIC_PLATES)
+
+    def researchghostcloak_exclude(excluded_actions, gi):
+        if not gi.has_ghostacademy or gi.minerals < 150 or gi.vespene < 150:
+            excluded_actions.append(ACTION_RESEARCH_GHOST_CLOAK)
+
+    def researchstimpack_exclude(excluded_actions, gi):
+        if not gi.has_barracks or not gi.has_barracks_techlab or gi.minerals < 100 or gi.vespene < 100:
+            excluded_actions.append(ACTION_RESEARCH_STIMPACK)
+
+    def researchcombatshield_exclude(excluded_actions, gi):
+        if not gi.has_barracks or not gi.has_barracks_techlab or gi.minerals < 100 or gi.vespene < 100:
+            excluded_actions.append(ACTION_RESEARCH_COMBATSHIELD)
+
+    def researchconcussiveshell_exclude(excluded_actions, gi):
+        if not gi.has_barracks or not gi.has_barracks_techlab or gi.minerals < 50 or gi.vespene < 50:
+            excluded_actions.append(ACTION_RESEARCH_CONCUSSIVESHELL)
+
+    def researchinfernalpreigniter_exclude(excluded_actions, gi):
+        if not gi.has_factory or not gi.has_factory_techlab or gi.minerals < 150 or gi.vespene < 150:
+            excluded_actions.append(ACTION_RESEARCH_INFERNAL_PREIGNITER)
+
+    def researchdrillingclaws_exclude(excluded_actions, gi):
+        if not gi.has_factory or not gi.has_factory_techlab or gi.minerals < 75 or gi.vespene < 75:
+            excluded_actions.append(ACTION_RESEARCH_DRILLING_CLAWS)
+    
+    def researchcyclonelockondmg_exclude(excluded_actions, gi):
+        if not gi.has_factory or not gi.has_factory_techlab or gi.minerals < 100 or gi.vespene < 100:
+            excluded_actions.append(ACTION_RESEARCH_CYCLONE_LOCKONDMG)
+
+    def researchcyclonerapidfire_exclude(excluded_actions, gi):
+        if not gi.has_factory or not gi.has_factory_techlab or gi.minerals < 75 or gi.vespene < 75:
+            excluded_actions.append(ACTION_RESEARCH_CYCLONE_RAPIDFIRE)
+
+    def researchhighcapacityfuel_exclude(excluded_actions, gi):
+        if not gi.has_starport or not gi.has_starport_techlab or gi.minerals < 100 or gi.vespene < 100:
+            excluded_actions.append(ACTION_RESEARCH_HIGHCAPACITYFUEL)
+    
+    def researchcorvidreactor_exclude(excluded_actions, gi):
+        if not gi.has_starport or not gi.has_starport_techlab or gi.minerals < 150 or gi.vespene < 150:
+            excluded_actions.append(ACTION_RESEARCH_CORVIDREACTOR)
+
+    def researchbansheecloak_exclude(excluded_actions, gi):
+        if not gi.has_starport or not gi.has_starport_techlab or gi.minerals < 100 or gi.vespene < 100:
+            excluded_actions.append(ACTION_RESEARCH_BANSHEECLOAK)
+
+    def researchbansheehyperflight_exclude(excluded_actions, gi):
+        if not gi.has_starport or not gi.has_starport_techlab or gi.minerals < 150 or gi.vespene < 150:
+            excluded_actions.append(ACTION_RESEARCH_BANSHEEHYPERFLIGHT)
+
+    def researchadvancedballistics_exclude(excluded_actions, gi):
+        if not gi.has_starport or not gi.has_starport_techlab or gi.minerals < 150 or gi.vespene < 150:
+            excluded_actions.append(ACTION_RESEARCH_ADVANCEDBALLISTICS)
+
+    def researchbattlecruiserweaponrefit_exclude(excluded_actions, gi):
+        if not gi.has_fusioncore or gi.minerals < 150 or gi.vespene < 150:
+            excluded_actions.append(ACTION_RESEARCH_BATTLECRUISER_WEAPONREFIT)
+
+    def effectstimpack_exclude(excluded_actions, gi):
+        if not gi.has_marinemarauder:
+            excluded_actions.append(ACTION_EFFECT_STIMPACK)
+
+    def trainscv_exclude(excluded_actions, gi):
+        if not gi.has_ccs or gi.minerals < 50:
+            excluded_actions.append(ACTION_TRAIN_SCV)
+
+    def trainmarine_exclude(excluded_actions, gi):
+        if not gi.has_barracks or gi.minerals < 50 or gi.freesupply < 1:
+            excluded_actions.append(ACTION_TRAIN_MARINE)
+
+    def trainmarauder_exclude(excluded_actions, gi):
+        if not gi.has_barracks or not gi.has_barracks_techlab or gi.minerals < 100 or gi.vespene < 25 or gi.freesupply < 2:
+            excluded_actions.append(ACTION_TRAIN_MARAUDER)
+
+    def trainreaper_exclude(excluded_actions, gi):
+        if not gi.has_barracks or gi.minerals < 50 or gi.vespene < 50 or gi.freesupply < 1:
+            excluded_actions.append(ACTION_TRAIN_REAPER)
+
+    def trainghost_exclude(excluded_actions, gi):
+        if not gi.has_barracks or not gi.has_barracks_techlab or not gi.has_ghostacademy or gi.minerals < 150 or gi.vespene < 125 or gi.freesupply < 2:
+            excluded_actions.append(ACTION_TRAIN_GHOST)
+    
+    def trainhellion_exclude(excluded_actions, gi):
+        if not gi.has_factory or gi.minerals < 100 or gi.freesupply < 2:
+            excluded_actions.append(ACTION_TRAIN_HELLION)
+
+    def trainhellbat_exclude(excluded_actions, gi):
+        if not gi.has_factory or not gi.has_armory or gi.minerals < 100 or gi.freesupply < 2:
+            excluded_actions.append(ACTION_TRAIN_HELLBAT)
+
+    def trainsiegetank_exclude(excluded_actions, gi):
+        if not gi.has_factory or not gi.has_factory_techlab or gi.minerals < 150 or gi.vespene < 125 or gi.freesupply < 3:
+            excluded_actions.append(ACTION_TRAIN_SIEGETANK)
+
+    def traincyclone_exclude(excluded_actions, gi):
+        if not gi.has_factory or not gi.has_factory_techlab or gi.minerals < 150 or gi.vespene < 100 or gi.freesupply < 3:
+            excluded_actions.append(ACTION_TRAIN_CYCLONE)
+
+    def trainwidowmine_exclude(excluded_actions, gi):
+        if not gi.has_factory or gi.minerals < 75 or gi.vespene < 25 or gi.freesupply < 2:
+            excluded_actions.append(ACTION_TRAIN_WIDOWMINE)
+    
+    def trainthor_exclude(excluded_actions, gi):
+        if not gi.has_factory or not gi.has_factory_techlab or gi.minerals < 300 or gi.vespene < 200 or gi.freesupply < 6:
+            excluded_actions.append(ACTION_TRAIN_THOR)
+
+    def trainviking_exclude(excluded_actions, gi):
+        if not gi.has_starport or gi.minerals < 150 or gi.vespene < 75 or gi.freesupply < 2:
+            excluded_actions.append(ACTION_TRAIN_VIKING)
+
+    def trainmedivac_exclude(excluded_actions, gi):
+        if not gi.has_starport or gi.minerals < 100 or gi.vespene < 100 or gi.freesupply < 2:
+            excluded_actions.append(ACTION_TRAIN_MEDIVAC)
+    
+    def trainliberator_exclude(excluded_actions, gi):
+        if not gi.has_starport or gi.minerals < 150 or gi.vespene < 150 or gi.freesupply < 3:
+            excluded_actions.append(ACTION_TRAIN_LIBERATOR)
+
+    def trainraven_exclude(excluded_actions, gi):
+        if not gi.has_starport or not gi.has_starport_techlab or gi.minerals < 100 or gi.vespene < 200 or gi.freesupply < 2:
+            excluded_actions.append(ACTION_TRAIN_RAVEN)
+
+    def trainbanshee_exclude(excluded_actions, gi):
+        if not gi.has_starport or not gi.has_starport_techlab or gi.minerals < 150 or gi.vespene < 100 or gi.freesupply < 2:
+            excluded_actions.append(ACTION_TRAIN_BANSHEE)
+
+    def trainbattlecruiser_exclude(excluded_actions, gi): 
+        if not gi.has_starport or not gi.has_starport_techlab or not gi.has_fusioncore or gi.minerals < 400 or gi.vespene < 300 or gi.freesupply < 6:
+            excluded_actions.append(ACTION_TRAIN_BATTLECRUISER)
+
+    def harvestmineralsidle_exclude(excluded_actions, gi):
+        if gi.has_idle_scv:
+            excluded_actions.append(ACTION_HARVEST_MINERALS_IDLE)
+
+    def harvestmineralsfromgas_exclude(excluded_actions, gi):
+        if not gi.has_scv:
+            excluded_actions.append(ACTION_HARVEST_MINERALS_FROM_GAS)
+
+    def harvestgasfromminerals_exclude(excluded_actions, gi):
+        if not gi.has_scv:
+            excluded_actions.append(ACTION_HARVEST_GAS_FROM_MINERALS)
+
+
+    '''=====LIST OF ACTIONS====='''
 
     def donothing(self, obs):
         return no_op()
@@ -775,7 +909,6 @@ class TerranWrapper(SC2Wrapper):
     def effectstimpack(self, obs):
         army = get_my_units_by_type(obs, units.Terran.Marine)
         army.extend(get_my_units_by_type(obs, units.Terran.Marauder))
-
         action = effect_units(obs, sc2._EFFECT_STIMPACK, army)
         return action
 
@@ -899,7 +1032,8 @@ class TerranWrapper(SC2Wrapper):
         if self.units_to_effect != sc2._NO_UNITS:
             named_action = self.last_effect_action
 
-        if type(action_idx) == list:                        # if type = list it means our action has the action itself and x, y position
+        # if type = list it means our action has the action itself and x, y position
+        if type(action_idx) == list:
             action_id, x, y = action_idx                    # separating the action id from x,y pos
             named_action = self.named_actions[action_id]    # getting the string that represents our action
 
@@ -910,7 +1044,8 @@ class TerranWrapper(SC2Wrapper):
             else:
                 action_method = getattr(self.__class__, named_action)
                 return action_method(self, obs)
-        else:                                               # if type != list then we have an action without x, y
+        # if type != list then we have an action without x, y
+        else:                                               
             named_action = self.named_actions[action_idx]
 
             # Calling our action methods using metaprogramming
@@ -923,8 +1058,6 @@ class TerranWrapper(SC2Wrapper):
                 return action_method(self, obs)
 
         
-        
-
 class SimpleTerranWrapper(TerranWrapper):
     def __init__(self, atk_grid_x=4, atk_grid_y=4):
         SC2Wrapper.__init__(self)       # Imports self variables from SC2Wrapper
@@ -1113,6 +1246,7 @@ class ProtossWrapper(SC2Wrapper):
         
 
         return no_op()
+
 
 class ZergWrapper(SC2Wrapper):
     # BUILD ACTIONS
