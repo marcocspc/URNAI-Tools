@@ -7,7 +7,7 @@ from urnai.envs.sc2 import SC2Env
 from urnai.trainers.trainer import Trainer
 from urnai.agents.sc2_agent import SC2Agent
 from urnai.agents.actions.sc2_wrapper import SimpleTerranWrapper
-from urnai.agents.actions.mo_spatial_terran_wrapper import MOspatialTerranWrapper
+from urnai.agents.actions.mo_spatial_terran_wrapper import MOspatialTerranWrapper, SimpleMOTerranWrapper
 from urnai.agents.rewards.sc2 import KilledUnitsReward
 from urnai.agents.states.sc2 import Simple64GridState, Simple64GridState_SimpleTerran
 from urnai.models.ddqn_keras import DDQNKeras
@@ -27,7 +27,8 @@ def declare_trainer():
     ## Initializing our StarCraft 2 environment
     env = SC2Env(map_name="Simple64", render=False, step_mul=16, player_race="terran", enemy_race="random", difficulty="very_easy")
     
-    action_wrapper = MOspatialTerranWrapper(10, 10, env.env_instance._interface_formats[0]._raw_resolution)
+    #action_wrapper = MOspatialTerranWrapper(10, 10, env.env_instance._interface_formats[0]._raw_resolution)
+    action_wrapper = SimpleMOTerranWrapper(10, 10, env.env_instance._interface_formats[0]._raw_resolution)
     state_builder = Simple64GridState_SimpleTerran(grid_size=7) # This state_builder with grid_size=7 will end upt with a total size of 110 ( (7*7)*2 + 12 )
     
     helper = ModelBuilder()
@@ -47,17 +48,17 @@ def declare_trainer():
                     max_training_episodes=3000, max_steps_training=1200,
                     max_test_episodes=100, max_steps_testing=1200, log_actions=False)
 
-    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_test_mo",
+    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddqn_mo_newwrapper5",
     #                 save_every=20, enable_save=True, relative_path=True, reset_epsilon=False,
-    #                 max_training_episodes=1, max_steps_training=1200,
-    #                 max_test_episodes=1, max_steps_testing=1200, log_actions=False)
+    #                 max_training_episodes=6, max_steps_training=1200,
+    #                 max_test_episodes=2, max_steps_testing=1200)
     return trainer
 
 def main(unused_argv):
     try:
         trainer = declare_trainer()
         trainer.train()
-        trainer.play()
+        #trainer.play()
 
     except KeyboardInterrupt:
         pass

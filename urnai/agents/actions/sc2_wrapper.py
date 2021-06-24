@@ -2,7 +2,7 @@ from os import name
 import random
 import ast
 from types import SimpleNamespace
-from inspect import ismethod
+from inspect import ismethod, signature
 
 from numpy.lib.nanfunctions import _nanmedian_small
 from urnai.agents.actions.sc2 import research_upgrade
@@ -671,7 +671,7 @@ class TerranWrapper(SC2Wrapper):
             action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildrefinery(self, obs, x=None, y=None):
+    def buildrefinery(self, obs):
         actions = build_gas_structure_raw_unit(obs, units.Terran.Refinery, sc2._BUILD_REFINERY, sc2_env.Race.terran)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)     
         return action
@@ -802,32 +802,32 @@ class TerranWrapper(SC2Wrapper):
             action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildtechlabbarracks(self, obs, x=None, y=None):
+    def buildtechlabbarracks(self, obs):
         actions = build_structure_raw(obs, units.Terran.Barracks, sc2._BUILD_TECHLAB_BARRACKS)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
         
-    def buildtechlabfactory(self, obs, x=None, y=None):
+    def buildtechlabfactory(self, obs):
         actions = build_structure_raw(obs, units.Terran.Factory, sc2._BUILD_TECHLAB_FACTORY)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildtechlabstarport(self, obs, x=None, y=None):
+    def buildtechlabstarport(self, obs):
         actions = build_structure_raw(obs, units.Terran.Starport, sc2._BUILD_TECHLAB_STARPORT)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildreactorbarracks(self, obs, x=None, y=None):
+    def buildreactorbarracks(self, obs):
         actions = build_structure_raw(obs, units.Terran.Barracks, sc2._BUILD_REACTOR_BARRACKS)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildreactorfactory(self, obs, x=None, y=None):
+    def buildreactorfactory(self, obs):
         actions = build_structure_raw(obs, units.Terran.Factory, sc2._BUILD_REACTOR_FACTORY)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
-    def buildreactorstarport(self, obs, x=None, y=None):
+    def buildreactorstarport(self, obs):
         actions = build_structure_raw(obs, units.Terran.Starport, sc2._BUILD_REACTOR_STARPORT)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
@@ -993,6 +993,13 @@ class TerranWrapper(SC2Wrapper):
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
+    def movetroopspoint(self, obs, x, y):
+        troops = select_army(obs, sc2_env.Race.terran)
+        target = [x, y]
+        actions = move_target_point_spatial(troops, target)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        return action
+
     def attackdistributearmy(self, obs):
         actions = attack_distribute_army(obs, sc2_env.Race.terran)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
@@ -1036,15 +1043,16 @@ class TerranWrapper(SC2Wrapper):
         if type(action_idx) == list:
             action_id, x, y = action_idx                    # separating the action id from x,y pos
             named_action = self.named_actions[action_id]    # getting the string that represents our action
+            
+            action_method = getattr(self.__class__, named_action)       # getting our class method with the same name as named_action
+            method_params = signature(action_method).parameters         # get a dict of the parameter names that our method receives
 
             # Calling our action methods using metaprogramming
-            if ACTION_ATTACK_POINT in named_action or "build" in named_action:
-                spatial_action_method = getattr(self.__class__, named_action)
-                return spatial_action_method(self, obs, x, y)
+            if "x" in method_params and "y" in method_params:
+                return action_method(self, obs, x, y)
             else:
-                action_method = getattr(self.__class__, named_action)
                 return action_method(self, obs)
-        # if type != list then we have an action without x, y
+        # if type != list then we have an action without that either has x,y baked in the name (attakpoint_10_10) or doesn't have x,y
         else:                                               
             named_action = self.named_actions[action_idx]
 

@@ -175,6 +175,14 @@ def attack_target_point_spatial(obs, player_race, target):
         return actions_queue
     return [_NO_OP()]
 
+def move_target_point_spatial(units, target):
+    if units != _NO_UNITS:
+        unit_tags = [unit.tag for unit in units]
+        actions_queue = []
+        actions_queue.append(actions.RAW_FUNCTIONS.Move_pt("now", unit_tags, target))
+        return actions_queue
+    return [_NO_OP()]
+
 def attack_distribute_army(obs, player_race):
     army = select_army(obs, player_race)
     if army != _NO_UNITS:

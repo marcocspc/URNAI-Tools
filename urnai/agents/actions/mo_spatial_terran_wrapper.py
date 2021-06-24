@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from agents.actions.sc2_wrapper import SC2Wrapper
+from agents.actions.sc2_wrapper import SC2Wrapper, TerranWrapper
 import agents.actions.sc2_wrapper as sc2_wrapper
 from agents.actions.sc2 import *
 import agents.actions.sc2 as sc2     # importing our action set file so that we can use its constants
@@ -521,4 +521,142 @@ class MOspatialTerranWrapper(SC2Wrapper):
         #     return action
 
         return no_op()
-        
+
+
+class SimpleMOTerranWrapper(TerranWrapper):
+    def __init__(self, x_gridsize, y_gridsize, map_size):
+        SC2Wrapper.__init__(self)
+
+        self.x_gridsize = x_gridsize
+        self.y_gridsize = y_gridsize
+        self.map_size = map_size
+
+        self.named_actions = [
+            sc2_wrapper.ACTION_DO_NOTHING,
+
+            sc2_wrapper.ACTION_BUILD_COMMAND_CENTER,
+            sc2_wrapper.ACTION_BUILD_SUPPLY_DEPOT,
+            sc2_wrapper.ACTION_BUILD_REFINERY,
+            sc2_wrapper.ACTION_BUILD_ENGINEERINGBAY,
+            sc2_wrapper.ACTION_BUILD_ARMORY,
+            sc2_wrapper.ACTION_BUILD_MISSILETURRET,
+            # sc2_wrapper.ACTION_BUILD_SENSORTOWER,
+            # sc2_wrapper.ACTION_BUILD_BUNKER,
+            sc2_wrapper.ACTION_BUILD_FUSIONCORE,
+            # sc2_wrapper.ACTION_BUILD_GHOSTACADEMY,
+            sc2_wrapper.ACTION_BUILD_BARRACKS,
+            sc2_wrapper.ACTION_BUILD_FACTORY,
+            sc2_wrapper.ACTION_BUILD_STARPORT,
+            
+            sc2_wrapper.ACTION_BUILD_TECHLAB_BARRACKS,
+            sc2_wrapper.ACTION_BUILD_TECHLAB_FACTORY,
+            sc2_wrapper.ACTION_BUILD_TECHLAB_STARPORT,
+            sc2_wrapper.ACTION_BUILD_REACTOR_BARRACKS,
+            sc2_wrapper.ACTION_BUILD_REACTOR_FACTORY,
+            sc2_wrapper.ACTION_BUILD_REACTOR_STARPORT,
+
+            # # ENGINEERING BAY RESEARCH
+            # sc2_wrapper.ACTION_RESEARCH_INF_WEAPONS,
+            # sc2_wrapper.ACTION_RESEARCH_INF_ARMOR,
+            # sc2_wrapper.ACTION_RESEARCH_HISEC_AUTOTRACKING,
+            # sc2_wrapper.ACTION_RESEARCH_NEOSTEEL_FRAME,
+            # sc2_wrapper.ACTION_RESEARCH_STRUCTURE_ARMOR,
+            
+            # # ARMORY RESEARCH
+            # sc2_wrapper.ACTION_RESEARCH_SHIPS_WEAPONS,
+            # sc2_wrapper.ACTION_RESEARCH_VEHIC_WEAPONS,
+            # sc2_wrapper.ACTION_RESEARCH_SHIPVEHIC_PLATES,
+
+            # # GHOST ACADEMY RESEARCH
+            # sc2_wrapper.ACTION_RESEARCH_GHOST_CLOAK,
+
+            # # BARRACKS RESEARCH
+            sc2_wrapper.ACTION_RESEARCH_STIMPACK,
+            # sc2_wrapper.ACTION_RESEARCH_COMBATSHIELD,
+            # sc2_wrapper.ACTION_RESEARCH_CONCUSSIVESHELL,
+
+            # # FACTORY RESEARCH
+            # sc2_wrapper.ACTION_RESEARCH_INFERNAL_PREIGNITER,
+            # sc2_wrapper.ACTION_RESEARCH_DRILLING_CLAWS,
+            # sc2_wrapper.ACTION_RESEARCH_CYCLONE_LOCKONDMG,
+            # sc2_wrapper.ACTION_RESEARCH_CYCLONE_RAPIDFIRE,
+
+            # # STARPORT RESEARCH
+            # sc2_wrapper.ACTION_RESEARCH_HIGHCAPACITYFUEL,
+            # sc2_wrapper.ACTION_RESEARCH_CORVIDREACTOR,
+            # sc2_wrapper.ACTION_RESEARCH_BANSHEECLOAK,
+            # sc2_wrapper.ACTION_RESEARCH_BANSHEEHYPERFLIGHT,
+            # sc2_wrapper.ACTION_RESEARCH_ADVANCEDBALLISTICS,
+
+            # # FUSION CORE RESEARCH
+            # sc2_wrapper.ACTION_RESEARCH_BATTLECRUISER_WEAPONREFIT,
+
+            sc2_wrapper.ACTION_EFFECT_STIMPACK,
+
+            sc2_wrapper.ACTION_TRAIN_SCV,
+
+            sc2_wrapper.ACTION_TRAIN_MARINE,
+            sc2_wrapper.ACTION_TRAIN_MARAUDER,
+            sc2_wrapper.ACTION_TRAIN_REAPER,
+            #sc2_wrapper.ACTION_TRAIN_GHOST,
+
+            sc2_wrapper.ACTION_TRAIN_HELLION,
+            sc2_wrapper.ACTION_TRAIN_HELLBAT,
+            sc2_wrapper.ACTION_TRAIN_SIEGETANK,
+            sc2_wrapper.ACTION_TRAIN_CYCLONE,
+            sc2_wrapper.ACTION_TRAIN_WIDOWMINE,
+            sc2_wrapper.ACTION_TRAIN_THOR,
+
+            sc2_wrapper.ACTION_TRAIN_VIKING,
+            sc2_wrapper.ACTION_TRAIN_MEDIVAC,
+            sc2_wrapper.ACTION_TRAIN_LIBERATOR,
+            sc2_wrapper.ACTION_TRAIN_RAVEN,
+            sc2_wrapper.ACTION_TRAIN_BANSHEE,
+            sc2_wrapper.ACTION_TRAIN_BATTLECRUISER,
+
+            sc2_wrapper.ACTION_HARVEST_MINERALS_IDLE,
+            sc2_wrapper.ACTION_HARVEST_MINERALS_FROM_GAS,
+            sc2_wrapper.ACTION_HARVEST_GAS_FROM_MINERALS,
+
+            sc2_wrapper.ACTION_ATTACK_POINT,
+            sc2_wrapper.ACTION_MOVE_TROOPS_POINT
+        ]
+
+        self.n_actions_len = len(self.named_actions)
+
+        self.multi_output_ranges = [0, self.n_actions_len, self.n_actions_len+self.x_gridsize, self.n_actions_len+self.x_gridsize+self.y_gridsize]
+
+        self.action_indices = [idx for idx in range(len(self.named_actions))]
+
+    def get_actions(self):
+        x_grid_actions = np.arange(self.multi_output_ranges[1], self.multi_output_ranges[1] + self.x_gridsize)
+        y_grid_actions = np.arange(self.multi_output_ranges[2], self.multi_output_ranges[2] + self.y_gridsize)
+        total_actions = []
+        total_actions.extend(self.action_indices)
+        total_actions.extend(x_grid_actions)
+        total_actions.extend(y_grid_actions)
+        return total_actions
+
+    def get_action(self, action_idx, obs):
+        action_id, x, y = action_idx
+
+        adjusted_x = x - self.multi_output_ranges[1]
+        adjusted_y = y - self.multi_output_ranges[2]
+
+        gridwidth = self.map_size.x/self.x_gridsize
+        gridheight = self.map_size.y/self.y_gridsize
+
+        xtarget = int((adjusted_x*gridwidth) + random.uniform(0, gridwidth))
+        ytarget = int(adjusted_y*gridheight + random.uniform(0, gridheight))
+
+        action_idx = [action_id, xtarget, ytarget]
+        action = super().get_action(action_idx, obs)
+        return action
+
+    def attackpoint(self, obs, x, y):
+        target = [x, y]
+        actions = attack_target_point_spatial(obs, sc2_env.Race.terran, target)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        return action
+
+    
