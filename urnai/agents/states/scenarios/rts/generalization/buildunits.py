@@ -18,9 +18,9 @@ class BuildUnitsGeneralizedStatebuilder(DefeatEnemiesGeneralizedStatebuilder):
 
     def build_non_spatial_sc2_state(self, obs):
         self.non_spatial_state[0] = obs.player.minerals
-        self.non_spatial_state[1] = sc2aux.get_units_amount(obs, sc2units.Terran.SupplyDepot) 
-        self.non_spatial_state[2] = sc2aux.get_units_amount(obs, sc2units.Terran.Barracks) 
-        self.non_spatial_state[3] = sc2aux.get_units_amount(obs, sc2units.Terran.Marine) 
+        self.non_spatial_state[1] = sc2aux.get_my_units_amount(obs, sc2units.Terran.SupplyDepot) 
+        self.non_spatial_state[2] = sc2aux.get_my_units_amount(obs, sc2units.Terran.Barracks) 
+        self.non_spatial_state[3] = sc2aux.get_my_units_amount(obs, sc2units.Terran.Marine) 
         self.normalize_non_spatial_list() 
         return self.non_spatial_state
 

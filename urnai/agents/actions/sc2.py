@@ -311,7 +311,7 @@ def build_structure_raw(obs, building_type, building_action, max_amount = 999):
 
     player_race = get_unit_race(building_type)
 
-    if get_units_amount(obs, building_type) < max_amount:
+    if get_my_units_amount(obs, building_type) < max_amount:
         buildings = get_my_units_by_type(obs, building_type)
         if len(buildings) > 0:
             target = random.choice(buildings)
@@ -328,7 +328,7 @@ def build_structure_raw_pt(obs, building_type, building_action, base_top_left, m
 
     player_race = get_unit_race(building_type)
 
-    building_amount = get_units_amount(obs, building_type)
+    building_amount = get_my_units_amount(obs, building_type)
     if len(targets) == 0 or building_amount >= len(targets):
         target = [random.randint(0,63), random.randint(ybrange, ytrange)]
     else:
@@ -356,7 +356,7 @@ def build_structure_raw_pt_spatial(obs, building_type, building_action, target):
 
 def build_gas_structure_raw_unit(obs, building_type, building_action, player_race, max_amount = 999):  
     player_race = get_unit_race(building_type)
-    if get_units_amount(obs, building_type) < max_amount:
+    if get_my_units_amount(obs, building_type) < max_amount:
         chosen_geyser = get_exploitable_geyser(obs, player_race)
         action_one, last_worker = build_structure_by_type(obs, building_action, player_race, chosen_geyser)
         action_two = harvest_gather_minerals_quick(obs, last_worker, player_race)
@@ -425,10 +425,20 @@ def get_closest_unit(obs, target_xy, unit_type = _NO_UNITS, units_list = _NO_UNI
             return unit
     return _NO_UNITS
 
+def get_units_by_type_and_player(obs, unit_type, player):
+    return [unit for unit in obs.raw_units 
+            if unit.unit_type == unit_type
+            and unit.alliance == player]
+
 def get_my_units_by_type(obs, unit_type):
     return [unit for unit in obs.raw_units 
             if unit.unit_type == unit_type
             and unit.alliance == features.PlayerRelative.SELF]
+
+def get_enemy_units_by_type(obs, unit_type):
+    return [unit for unit in obs.raw_units 
+            if unit.unit_type == unit_type
+            and unit.alliance == features.PlayerRelative.ENEMY]
 
 def get_units_by_type(obs, unit_type):
     return [unit for unit in obs.raw_units 
@@ -446,11 +456,17 @@ def get_all_neutral_units(obs):
 def get_free_supply(obs):
     return obs.player.food_cap - obs.player.food_used
 
-def get_units_amount(obs, unit_type):
+def get_unit_amount(obs, unit_type, player):
+    return len(get_units_by_type_and_player(obs, unit_type, player))
+
+def get_my_units_amount(obs, unit_type):
     return len(get_my_units_by_type(obs, unit_type))
 
+def get_enemy_units_amount(obs, unit_type):
+    return len(get_enemy_units_by_type(obs, unit_type))
+
 def building_exists(obs, unit_type):
-    if get_units_amount(obs, unit_type) > 0:
+    if get_my_units_amount(obs, unit_type) > 0:
         return True
     return False
 

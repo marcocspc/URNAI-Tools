@@ -7,9 +7,9 @@ from matplotlib import colors
 from matplotlib import pyplot as plt
 from .abstate import StateBuilder
 from pysc2.lib import actions, features, units
-from agents.actions.sc2 import *
+from urnai.agents.actions.sc2 import *
 from pysc2.env import sc2_env
-from utils.image import *
+from urnai.utils.image import *
 
 
 class Simple64State(StateBuilder):
@@ -50,51 +50,51 @@ class Simple64State(StateBuilder):
         new_state.append(obs.player.idle_worker_count/200)
 
         if self.player_race == sc2_env.Race.terran:
-            new_state.append(get_units_amount(obs, units.Terran.CommandCenter)+
-                            get_units_amount(obs, units.Terran.OrbitalCommand)+
-                            get_units_amount(obs, units.Terran.PlanetaryFortress)/2)
-            new_state.append(get_units_amount(obs, units.Terran.SupplyDepot)/8)
-            new_state.append(get_units_amount(obs, units.Terran.Refinery)/4)
-            new_state.append(get_units_amount(obs, units.Terran.EngineeringBay))
-            new_state.append(get_units_amount(obs, units.Terran.Armory))
-            new_state.append(get_units_amount(obs, units.Terran.MissileTurret)/8)
-            new_state.append(get_units_amount(obs, units.Terran.SensorTower)/3)
-            new_state.append(get_units_amount(obs, units.Terran.Bunker)/5)
-            new_state.append(get_units_amount(obs, units.Terran.FusionCore))
-            new_state.append(get_units_amount(obs, units.Terran.GhostAcademy))
-            new_state.append(get_units_amount(obs, units.Terran.Barracks)/3)
-            new_state.append(get_units_amount(obs, units.Terran.Factory)/2)
-            new_state.append(get_units_amount(obs, units.Terran.Starport)/2)
+            new_state.append(get_my_units_amount(obs, units.Terran.CommandCenter)+
+                            get_my_units_amount(obs, units.Terran.OrbitalCommand)+
+                            get_my_units_amount(obs, units.Terran.PlanetaryFortress)/2)
+            new_state.append(get_my_units_amount(obs, units.Terran.SupplyDepot)/8)
+            new_state.append(get_my_units_amount(obs, units.Terran.Refinery)/4)
+            new_state.append(get_my_units_amount(obs, units.Terran.EngineeringBay))
+            new_state.append(get_my_units_amount(obs, units.Terran.Armory))
+            new_state.append(get_my_units_amount(obs, units.Terran.MissileTurret)/8)
+            new_state.append(get_my_units_amount(obs, units.Terran.SensorTower)/3)
+            new_state.append(get_my_units_amount(obs, units.Terran.Bunker)/5)
+            new_state.append(get_my_units_amount(obs, units.Terran.FusionCore))
+            new_state.append(get_my_units_amount(obs, units.Terran.GhostAcademy))
+            new_state.append(get_my_units_amount(obs, units.Terran.Barracks)/3)
+            new_state.append(get_my_units_amount(obs, units.Terran.Factory)/2)
+            new_state.append(get_my_units_amount(obs, units.Terran.Starport)/2)
 
         elif self.player_race == sc2_env.Race.protoss:
-            new_state.append(get_units_amount(obs, units.Protoss.Nexus))
-            new_state.append(get_units_amount(obs, units.Protoss.Pylon))
-            new_state.append(get_units_amount(obs, units.Protoss.Assimilator))
-            new_state.append(get_units_amount(obs, units.Protoss.Forge))
-            new_state.append(get_units_amount(obs, units.Protoss.Gateway))
-            new_state.append(get_units_amount(obs, units.Protoss.CyberneticsCore))
-            new_state.append(get_units_amount(obs, units.Protoss.PhotonCannon))
-            new_state.append(get_units_amount(obs, units.Protoss.RoboticsFacility))
-            new_state.append(get_units_amount(obs, units.Protoss.Stargate))
-            new_state.append(get_units_amount(obs, units.Protoss.TwilightCouncil))
-            new_state.append(get_units_amount(obs, units.Protoss.RoboticsBay))
-            new_state.append(get_units_amount(obs, units.Protoss.TemplarArchive))
-            new_state.append(get_units_amount(obs, units.Protoss.DarkShrine))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Nexus))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Pylon))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Assimilator))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Forge))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Gateway))
+            new_state.append(get_my_units_amount(obs, units.Protoss.CyberneticsCore))
+            new_state.append(get_my_units_amount(obs, units.Protoss.PhotonCannon))
+            new_state.append(get_my_units_amount(obs, units.Protoss.RoboticsFacility))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Stargate))
+            new_state.append(get_my_units_amount(obs, units.Protoss.TwilightCouncil))
+            new_state.append(get_my_units_amount(obs, units.Protoss.RoboticsBay))
+            new_state.append(get_my_units_amount(obs, units.Protoss.TemplarArchive))
+            new_state.append(get_my_units_amount(obs, units.Protoss.DarkShrine))
             
         elif self.player_race == sc2_env.Race.zerg:
-            new_state.append(get_units_amount(obs, units.Zerg.BanelingNest))
-            new_state.append(get_units_amount(obs, units.Zerg.EvolutionChamber))
-            new_state.append(get_units_amount(obs, units.Zerg.Extractor))
-            new_state.append(get_units_amount(obs, units.Zerg.Hatchery))
-            new_state.append(get_units_amount(obs, units.Zerg.HydraliskDen))
-            new_state.append(get_units_amount(obs, units.Zerg.InfestationPit))
-            new_state.append(get_units_amount(obs, units.Zerg.LurkerDen))
-            new_state.append(get_units_amount(obs, units.Zerg.NydusNetwork))
-            new_state.append(get_units_amount(obs, units.Zerg.RoachWarren))
-            new_state.append(get_units_amount(obs, units.Zerg.SpawningPool))
-            new_state.append(get_units_amount(obs, units.Zerg.SpineCrawler))
-            new_state.append(get_units_amount(obs, units.Zerg.Spire))
-            new_state.append(get_units_amount(obs, units.Zerg.SporeCrawler))
+            new_state.append(get_my_units_amount(obs, units.Zerg.BanelingNest))
+            new_state.append(get_my_units_amount(obs, units.Zerg.EvolutionChamber))
+            new_state.append(get_my_units_amount(obs, units.Zerg.Extractor))
+            new_state.append(get_my_units_amount(obs, units.Zerg.Hatchery))
+            new_state.append(get_my_units_amount(obs, units.Zerg.HydraliskDen))
+            new_state.append(get_my_units_amount(obs, units.Zerg.InfestationPit))
+            new_state.append(get_my_units_amount(obs, units.Zerg.LurkerDen))
+            new_state.append(get_my_units_amount(obs, units.Zerg.NydusNetwork))
+            new_state.append(get_my_units_amount(obs, units.Zerg.RoachWarren))
+            new_state.append(get_my_units_amount(obs, units.Zerg.SpawningPool))
+            new_state.append(get_my_units_amount(obs, units.Zerg.SpineCrawler))
+            new_state.append(get_my_units_amount(obs, units.Zerg.Spire))
+            new_state.append(get_my_units_amount(obs, units.Zerg.SporeCrawler))
 
 
         m0 = obs.feature_minimap[0]     # Feature layer of the map's terrain (elevation and shape)
@@ -185,51 +185,51 @@ class Simple64StateFullRes(StateBuilder):
         new_state.append(obs.player.idle_worker_count/200)
 
         if self.player_race == sc2_env.Race.terran:
-            new_state.append(get_units_amount(obs, units.Terran.CommandCenter)+
-                            get_units_amount(obs, units.Terran.OrbitalCommand)+
-                            get_units_amount(obs, units.Terran.PlanetaryFortress)/2)
-            new_state.append(get_units_amount(obs, units.Terran.SupplyDepot)/8)
-            new_state.append(get_units_amount(obs, units.Terran.Refinery)/4)
-            new_state.append(get_units_amount(obs, units.Terran.EngineeringBay))
-            new_state.append(get_units_amount(obs, units.Terran.Armory))
-            new_state.append(get_units_amount(obs, units.Terran.MissileTurret)/8)
-            new_state.append(get_units_amount(obs, units.Terran.SensorTower)/3)
-            new_state.append(get_units_amount(obs, units.Terran.Bunker)/5)
-            new_state.append(get_units_amount(obs, units.Terran.FusionCore))
-            new_state.append(get_units_amount(obs, units.Terran.GhostAcademy))
-            new_state.append(get_units_amount(obs, units.Terran.Barracks)/3)
-            new_state.append(get_units_amount(obs, units.Terran.Factory)/2)
-            new_state.append(get_units_amount(obs, units.Terran.Starport)/2)
+            new_state.append(get_my_units_amount(obs, units.Terran.CommandCenter)+
+                            get_my_units_amount(obs, units.Terran.OrbitalCommand)+
+                            get_my_units_amount(obs, units.Terran.PlanetaryFortress)/2)
+            new_state.append(get_my_units_amount(obs, units.Terran.SupplyDepot)/8)
+            new_state.append(get_my_units_amount(obs, units.Terran.Refinery)/4)
+            new_state.append(get_my_units_amount(obs, units.Terran.EngineeringBay))
+            new_state.append(get_my_units_amount(obs, units.Terran.Armory))
+            new_state.append(get_my_units_amount(obs, units.Terran.MissileTurret)/8)
+            new_state.append(get_my_units_amount(obs, units.Terran.SensorTower)/3)
+            new_state.append(get_my_units_amount(obs, units.Terran.Bunker)/5)
+            new_state.append(get_my_units_amount(obs, units.Terran.FusionCore))
+            new_state.append(get_my_units_amount(obs, units.Terran.GhostAcademy))
+            new_state.append(get_my_units_amount(obs, units.Terran.Barracks)/3)
+            new_state.append(get_my_units_amount(obs, units.Terran.Factory)/2)
+            new_state.append(get_my_units_amount(obs, units.Terran.Starport)/2)
 
         elif self.player_race == sc2_env.Race.protoss:
-            new_state.append(get_units_amount(obs, units.Protoss.Nexus))
-            new_state.append(get_units_amount(obs, units.Protoss.Pylon))
-            new_state.append(get_units_amount(obs, units.Protoss.Assimilator))
-            new_state.append(get_units_amount(obs, units.Protoss.Forge))
-            new_state.append(get_units_amount(obs, units.Protoss.Gateway))
-            new_state.append(get_units_amount(obs, units.Protoss.CyberneticsCore))
-            new_state.append(get_units_amount(obs, units.Protoss.PhotonCannon))
-            new_state.append(get_units_amount(obs, units.Protoss.RoboticsFacility))
-            new_state.append(get_units_amount(obs, units.Protoss.Stargate))
-            new_state.append(get_units_amount(obs, units.Protoss.TwilightCouncil))
-            new_state.append(get_units_amount(obs, units.Protoss.RoboticsBay))
-            new_state.append(get_units_amount(obs, units.Protoss.TemplarArchive))
-            new_state.append(get_units_amount(obs, units.Protoss.DarkShrine))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Nexus))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Pylon))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Assimilator))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Forge))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Gateway))
+            new_state.append(get_my_units_amount(obs, units.Protoss.CyberneticsCore))
+            new_state.append(get_my_units_amount(obs, units.Protoss.PhotonCannon))
+            new_state.append(get_my_units_amount(obs, units.Protoss.RoboticsFacility))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Stargate))
+            new_state.append(get_my_units_amount(obs, units.Protoss.TwilightCouncil))
+            new_state.append(get_my_units_amount(obs, units.Protoss.RoboticsBay))
+            new_state.append(get_my_units_amount(obs, units.Protoss.TemplarArchive))
+            new_state.append(get_my_units_amount(obs, units.Protoss.DarkShrine))
             
         elif self.player_race == sc2_env.Race.zerg:
-            new_state.append(get_units_amount(obs, units.Zerg.BanelingNest))
-            new_state.append(get_units_amount(obs, units.Zerg.EvolutionChamber))
-            new_state.append(get_units_amount(obs, units.Zerg.Extractor))
-            new_state.append(get_units_amount(obs, units.Zerg.Hatchery))
-            new_state.append(get_units_amount(obs, units.Zerg.HydraliskDen))
-            new_state.append(get_units_amount(obs, units.Zerg.InfestationPit))
-            new_state.append(get_units_amount(obs, units.Zerg.LurkerDen))
-            new_state.append(get_units_amount(obs, units.Zerg.NydusNetwork))
-            new_state.append(get_units_amount(obs, units.Zerg.RoachWarren))
-            new_state.append(get_units_amount(obs, units.Zerg.SpawningPool))
-            new_state.append(get_units_amount(obs, units.Zerg.SpineCrawler))
-            new_state.append(get_units_amount(obs, units.Zerg.Spire))
-            new_state.append(get_units_amount(obs, units.Zerg.SporeCrawler))
+            new_state.append(get_my_units_amount(obs, units.Zerg.BanelingNest))
+            new_state.append(get_my_units_amount(obs, units.Zerg.EvolutionChamber))
+            new_state.append(get_my_units_amount(obs, units.Zerg.Extractor))
+            new_state.append(get_my_units_amount(obs, units.Zerg.Hatchery))
+            new_state.append(get_my_units_amount(obs, units.Zerg.HydraliskDen))
+            new_state.append(get_my_units_amount(obs, units.Zerg.InfestationPit))
+            new_state.append(get_my_units_amount(obs, units.Zerg.LurkerDen))
+            new_state.append(get_my_units_amount(obs, units.Zerg.NydusNetwork))
+            new_state.append(get_my_units_amount(obs, units.Zerg.RoachWarren))
+            new_state.append(get_my_units_amount(obs, units.Zerg.SpawningPool))
+            new_state.append(get_my_units_amount(obs, units.Zerg.SpineCrawler))
+            new_state.append(get_my_units_amount(obs, units.Zerg.Spire))
+            new_state.append(get_my_units_amount(obs, units.Zerg.SporeCrawler))
 
 
         m0 = obs.feature_minimap[0]     # Feature layer of the map's terrain (elevation and shape)
@@ -317,51 +317,51 @@ class Simple64GridState(StateBuilder):
         new_state.append(obs.player.idle_worker_count/200)
 
         if self.player_race == sc2_env.Race.terran:
-            new_state.append(get_units_amount(obs, units.Terran.CommandCenter)+
-                            get_units_amount(obs, units.Terran.OrbitalCommand)+
-                            get_units_amount(obs, units.Terran.PlanetaryFortress)/2)
-            new_state.append(get_units_amount(obs, units.Terran.SupplyDepot)/18)
-            new_state.append(get_units_amount(obs, units.Terran.Refinery)/4)
-            new_state.append(get_units_amount(obs, units.Terran.EngineeringBay))
-            new_state.append(get_units_amount(obs, units.Terran.Armory))
-            new_state.append(get_units_amount(obs, units.Terran.MissileTurret)/4)
-            #new_state.append(get_units_amount(obs, units.Terran.SensorTower)/1)
-            #new_state.append(get_units_amount(obs, units.Terran.Bunker)/4)
-            new_state.append(get_units_amount(obs, units.Terran.FusionCore))
-            #new_state.append(get_units_amount(obs, units.Terran.GhostAcademy))
-            new_state.append(get_units_amount(obs, units.Terran.Barracks)/3)
-            new_state.append(get_units_amount(obs, units.Terran.Factory)/2)
-            new_state.append(get_units_amount(obs, units.Terran.Starport)/2)
+            new_state.append(get_my_units_amount(obs, units.Terran.CommandCenter)+
+                            get_my_units_amount(obs, units.Terran.OrbitalCommand)+
+                            get_my_units_amount(obs, units.Terran.PlanetaryFortress)/2)
+            new_state.append(get_my_units_amount(obs, units.Terran.SupplyDepot)/18)
+            new_state.append(get_my_units_amount(obs, units.Terran.Refinery)/4)
+            new_state.append(get_my_units_amount(obs, units.Terran.EngineeringBay))
+            new_state.append(get_my_units_amount(obs, units.Terran.Armory))
+            new_state.append(get_my_units_amount(obs, units.Terran.MissileTurret)/4)
+            #new_state.append(get_my_units_amount(obs, units.Terran.SensorTower)/1)
+            #new_state.append(get_my_units_amount(obs, units.Terran.Bunker)/4)
+            new_state.append(get_my_units_amount(obs, units.Terran.FusionCore))
+            #new_state.append(get_my_units_amount(obs, units.Terran.GhostAcademy))
+            new_state.append(get_my_units_amount(obs, units.Terran.Barracks)/3)
+            new_state.append(get_my_units_amount(obs, units.Terran.Factory)/2)
+            new_state.append(get_my_units_amount(obs, units.Terran.Starport)/2)
 
         elif self.player_race == sc2_env.Race.protoss:
-            new_state.append(get_units_amount(obs, units.Protoss.Nexus))
-            new_state.append(get_units_amount(obs, units.Protoss.Pylon))
-            new_state.append(get_units_amount(obs, units.Protoss.Assimilator))
-            new_state.append(get_units_amount(obs, units.Protoss.Forge))
-            new_state.append(get_units_amount(obs, units.Protoss.Gateway))
-            new_state.append(get_units_amount(obs, units.Protoss.CyberneticsCore))
-            new_state.append(get_units_amount(obs, units.Protoss.PhotonCannon))
-            new_state.append(get_units_amount(obs, units.Protoss.RoboticsFacility))
-            new_state.append(get_units_amount(obs, units.Protoss.Stargate))
-            new_state.append(get_units_amount(obs, units.Protoss.TwilightCouncil))
-            new_state.append(get_units_amount(obs, units.Protoss.RoboticsBay))
-            new_state.append(get_units_amount(obs, units.Protoss.TemplarArchive))
-            new_state.append(get_units_amount(obs, units.Protoss.DarkShrine))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Nexus))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Pylon))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Assimilator))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Forge))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Gateway))
+            new_state.append(get_my_units_amount(obs, units.Protoss.CyberneticsCore))
+            new_state.append(get_my_units_amount(obs, units.Protoss.PhotonCannon))
+            new_state.append(get_my_units_amount(obs, units.Protoss.RoboticsFacility))
+            new_state.append(get_my_units_amount(obs, units.Protoss.Stargate))
+            new_state.append(get_my_units_amount(obs, units.Protoss.TwilightCouncil))
+            new_state.append(get_my_units_amount(obs, units.Protoss.RoboticsBay))
+            new_state.append(get_my_units_amount(obs, units.Protoss.TemplarArchive))
+            new_state.append(get_my_units_amount(obs, units.Protoss.DarkShrine))
             
         elif self.player_race == sc2_env.Race.zerg:
-            new_state.append(get_units_amount(obs, units.Zerg.BanelingNest))
-            new_state.append(get_units_amount(obs, units.Zerg.EvolutionChamber))
-            new_state.append(get_units_amount(obs, units.Zerg.Extractor))
-            new_state.append(get_units_amount(obs, units.Zerg.Hatchery))
-            new_state.append(get_units_amount(obs, units.Zerg.HydraliskDen))
-            new_state.append(get_units_amount(obs, units.Zerg.InfestationPit))
-            new_state.append(get_units_amount(obs, units.Zerg.LurkerDen))
-            new_state.append(get_units_amount(obs, units.Zerg.NydusNetwork))
-            new_state.append(get_units_amount(obs, units.Zerg.RoachWarren))
-            new_state.append(get_units_amount(obs, units.Zerg.SpawningPool))
-            new_state.append(get_units_amount(obs, units.Zerg.SpineCrawler))
-            new_state.append(get_units_amount(obs, units.Zerg.Spire))
-            new_state.append(get_units_amount(obs, units.Zerg.SporeCrawler))     
+            new_state.append(get_my_units_amount(obs, units.Zerg.BanelingNest))
+            new_state.append(get_my_units_amount(obs, units.Zerg.EvolutionChamber))
+            new_state.append(get_my_units_amount(obs, units.Zerg.Extractor))
+            new_state.append(get_my_units_amount(obs, units.Zerg.Hatchery))
+            new_state.append(get_my_units_amount(obs, units.Zerg.HydraliskDen))
+            new_state.append(get_my_units_amount(obs, units.Zerg.InfestationPit))
+            new_state.append(get_my_units_amount(obs, units.Zerg.LurkerDen))
+            new_state.append(get_my_units_amount(obs, units.Zerg.NydusNetwork))
+            new_state.append(get_my_units_amount(obs, units.Zerg.RoachWarren))
+            new_state.append(get_my_units_amount(obs, units.Zerg.SpawningPool))
+            new_state.append(get_my_units_amount(obs, units.Zerg.SpineCrawler))
+            new_state.append(get_my_units_amount(obs, units.Zerg.Spire))
+            new_state.append(get_my_units_amount(obs, units.Zerg.SporeCrawler))     
 
         # Insteading of making a vector for all coordnates on the map, we'll discretize our enemy space
         # and use a 4x4 grid to store enemy positions by marking a square as 1 if there's any enemy on it.
@@ -415,14 +415,14 @@ class Simple64GridState_SimpleTerran(StateBuilder):
         new_state.append(obs.player.food_army/200)
         new_state.append(obs.player.idle_worker_count/200)
 
-        new_state.append(get_units_amount(obs, units.Terran.CommandCenter)+
-                        get_units_amount(obs, units.Terran.OrbitalCommand)+
-                        get_units_amount(obs, units.Terran.PlanetaryFortress)/10)
-        new_state.append(get_units_amount(obs, units.Terran.SupplyDepot)/10)
-        new_state.append(get_units_amount(obs, units.Terran.Refinery)/10)
-        new_state.append(get_units_amount(obs, units.Terran.Barracks)/10)
-        new_state.append(get_units_amount(obs, units.Terran.Factory)/10)
-        new_state.append(get_units_amount(obs, units.Terran.Starport)/10)  
+        new_state.append(get_my_units_amount(obs, units.Terran.CommandCenter)+
+                        get_my_units_amount(obs, units.Terran.OrbitalCommand)+
+                        get_my_units_amount(obs, units.Terran.PlanetaryFortress)/10)
+        new_state.append(get_my_units_amount(obs, units.Terran.SupplyDepot)/10)
+        new_state.append(get_my_units_amount(obs, units.Terran.Refinery)/10)
+        new_state.append(get_my_units_amount(obs, units.Terran.Barracks)/10)
+        new_state.append(get_my_units_amount(obs, units.Terran.Factory)/10)
+        new_state.append(get_my_units_amount(obs, units.Terran.Starport)/10)  
 
 
         enemy_grid = np.zeros((self.grid_size,self.grid_size))
@@ -477,112 +477,70 @@ class SimpleCroppedGridState(StateBuilder):
         return self._state_size
 
 
-class UnitStackingStateTVT(StateBuilder):
+class UnitStackingState(StateBuilder):
     """
-    This state builder creates an input matrix with dimensions (6,?), where the first two lines of the input matrix are
+    This state builder creates an input matrix with dimensions (?,4), where the first few lines of the input matrix are
     non-spatial features (minerals, vespene, idle worker count, game alerts, max supply etc) and the remaining lines are
-    two sets of unit features for a group of units, one set for the player and another the enemy. 
+    divided into two groups of unit features: one group for the player, and another for the enemy.
+
+    The two groups of unit features are further divided into two groups: the group of units we only want to know the amount of, 
+    and the group of units we want to know the amount, avg health ratio and avg position. The first group is called "amount_unit_types"
+    while the second is called "spatial_unit_types". "amount_unit_types" is defined as a list of PySC2 unit types, while
+    "spatial_unit_types" is defined as a list of lists of PySC2 unit types, both defined in the __init__() method. 
     
-    For example, the next 32 lines after the 2 lines of non-spatial features will have 6 unit features (unit type, alliance, 
-    amount, health, x pos, y pos), for 32 groups of player units (supply depots, SCVs, marines, barracks, etc). For groups 
-    of units, health, and x,y pos will be calculated as an average. After those 32 lines, another 32 lines with the same 
-    information will be created, but now for enemy units. Here, 32 is used as an example, the actual number is defined by 
-    the size of the "unit_types" array in the build_state() method.
+    "spatial_unit_types"is defined as a list of lists so that we can group certain types of units together and treat them like one type. 
+    For example, we could group units based on their traversal medium (separate ground from air units), or we could group them based on 
+    their attacking capabilities (all air-attacking units together, etc), or we could group them using both criteria (all ground units 
+    with ground and air attacking capabilities together, etc). There is really no end to combinations here, and each developer can 
+    choose how to implement their version of this class to achieve their desired observation grouping.
+
+    After both the player and enemy units are grouped, and their propeties calculated, we flatten out the output, so that a
+    dense neural network layer can use this state matrix as input.
     """
     def __init__(self):
-        self.unit_types = [
-            units.Terran.Armory,
-            units.Terran.AutoTurret,
-            units.Terran.Banshee,
-            units.Terran.Barracks,
-            units.Terran.BarracksReactor,
-            units.Terran.BarracksTechLab,
-            units.Terran.Battlecruiser,
-            units.Terran.CommandCenter,
-            units.Terran.Cyclone,
-            units.Terran.EngineeringBay,
-            units.Terran.Factory,
-            units.Terran.FactoryReactor,
-            units.Terran.FactoryTechLab,
-            units.Terran.FusionCore,
-            units.Terran.Hellion,
-            units.Terran.Hellbat,
-            units.Terran.Liberator,
-            #units.Terran.MULE,
-            units.Terran.Marauder,
-            units.Terran.Marine,
-            units.Terran.Medivac,
-            units.Terran.MissileTurret,
-            units.Terran.Raven,
-            units.Terran.Reaper,
-            units.Terran.Refinery,
-            units.Terran.SCV,
-            units.Terran.SiegeTank,
-            #units.Terran.SiegeTankSieged,
-            units.Terran.Starport,
-            units.Terran.StarportReactor,
-            units.Terran.StarportTechLab,
-            units.Terran.SupplyDepot,
-            #units.Terran.SupplyDepotLowered,
-            units.Terran.Thor,
-            units.Terran.VikingFighter,
-            units.Terran.WidowMine,
-            #units.Terran.WidowMineBurrowed,
-        ]
-        self._state_size = [6*(2+2*(len(self.unit_types)))]
+        self.amount_unit_types = []
+        self.spatial_unit_types = []
+        self._state_size = []
 
     def build_state(self, obs):
+        '''
+        state shape is defined as follows (3,4) for non-spatial features, like minerals, gas, supply, etc,
+        
+        then (a,4) for amount_unit_types, where "a" is the size of amount_unit_types divided by 4,
+        so if amount_unit_types has 12 unit types, "a" will be 3.
+        
+        and then (b,4), where b is the size of spatial_unit_types.
 
-        # state shape is defined as follows (6,2) for non-spatial features,
-        # then (6,32) for the player's observations (32 terran units in unit_types)
-        # and another (6,32) for the enemy units
-        state = np.zeros((2, 6))
+        at the end state is flattened to be used by dense input layers.
+        '''
+        state = np.zeros((3, 4))
 
         state[0][0] = obs.player.minerals/10000
         state[0][1] = obs.player.vespene/10000
         state[0][2] = obs.player.food_cap/200
         state[0][3] = obs.player.food_used/200
-        state[0][4] = obs.player.food_army/200
-        state[0][5] = obs.player.food_workers/200
+        
+        state[1][0] = obs.player.food_army/200
+        state[1][1] = obs.player.food_workers/200
+        state[1][2] = obs.player.idle_worker_count/20
+        state[1][3] = obs.player.army_count/200
 
-        state[1][0] = obs.player.idle_worker_count/20
-        state[1][1] = obs.player.army_count/200
-        state[1][2] = obs.alerts[0] if len(obs.alerts)>0 else 0
-        state[1][3] = obs.action_result[0] if len(obs.action_result)>0 else 0
-        state[1][4] = (obs.game_loop[-1]/obs.step_mul)/2000                     #find a way of getting max_steps_training here?
-        state[1][5] = 0                                                         # find another non-spatial feature
+        state[2][0] = obs.alerts[0] if len(obs.alerts)>0 else 0
+        state[2][1] = obs.action_result[0] if len(obs.action_result)>0 else 0
+        state[2][2] = (obs.game_loop[-1]/obs.step_mul)/2000                     #find a way of getting max_steps_training here?
+        state[2][3] = 0                                                         # find another non-spatial feature
+
+        # addind amount of each unit in amount_unit_types for the player to state
+        state = build_unit_amount_matrix(obs, features.PlayerRelative.SELF, state, self.amount_unit_types, 4, 20)
 
         # creating matrix of spatial features for the player's unit groups
-        for unit_type in self.unit_types:
-            units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.SELF and unit.unit_type == unit_type]
-            unit_amount = len(units)
+        state = build_unit_feature_matrix(obs, features.PlayerRelative.SELF, state, self.spatial_unit_types, 200)
 
-            if unit_amount > 0:
-                health_ratio = sum([unit.health_ratio for unit in units]) / unit_amount
-                x_avg = (sum([unit.x for unit in units]) / unit_amount) / obs.map_size.x
-                y_avg = (sum([unit.y for unit in units]) / unit_amount) / obs.map_size.y
-            
-                new_line = [[unit_type, features.PlayerRelative.SELF, unit_amount, health_ratio, x_avg, y_avg]]
-            else:
-                new_line = [[unit_type, features.PlayerRelative.SELF, unit_amount, 0, 0, 0]]
-            
-            state = np.append(state, new_line, axis=0)
+        # addind amount of each unit in amount_unit_types for the enemy to state
+        state = build_unit_amount_matrix(obs, features.PlayerRelative.ENEMY, state, self.amount_unit_types, 4, 20)
 
         # creating matrix of spatial features for the enemy's unit groups
-        for unit_type in self.unit_types:
-            units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.ENEMY and unit.unit_type == unit_type]
-            unit_amount = len(units)
-
-            if unit_amount > 0:
-                health_ratio = sum([unit.health_ratio for unit in units]) / unit_amount
-                x_avg = (sum([unit.x for unit in units]) / unit_amount) / obs.map_size.x
-                y_avg = (sum([unit.y for unit in units]) / unit_amount) / obs.map_size.y
-            
-                new_line = [[unit_type, features.PlayerRelative.ENEMY, unit_amount, health_ratio, x_avg, y_avg]]
-            else:
-                new_line = [[unit_type, features.PlayerRelative.ENEMY, unit_amount, 0, 0, 0]]
-            
-            state = np.append(state, new_line, axis=0)
+        state = build_unit_feature_matrix(obs, features.PlayerRelative.ENEMY, state, self.spatial_unit_types, 200)
 
         flat_state = state.flatten()
         final_state = np.expand_dims(flat_state, axis=0)
@@ -590,6 +548,93 @@ class UnitStackingStateTVT(StateBuilder):
 
     def get_state_dim(self):
         return self._state_size
+
+class TVTUnitStackingState(UnitStackingState):
+    """
+    A version of the generic unit stacking state designed for Terran vs Terran gameplay
+    """
+    def __init__(self):
+        self.amount_unit_types = [
+            units.Terran.Barracks,
+            units.Terran.BarracksTechLab,
+            units.Terran.CommandCenter,
+            units.Terran.EngineeringBay,
+            units.Terran.Factory,
+            units.Terran.FactoryTechLab,
+            units.Terran.Refinery,
+            units.Terran.Starport,
+            units.Terran.StarportTechLab,
+            units.Terran.SupplyDepot,
+            units.Terran.Armory,
+            units.Terran.FusionCore,
+        ]
+        self.spatial_unit_types = [
+            # Ground -> Ground/Air
+            [units.Terran.Marine, units.Terran.Cyclone, units.Terran.WidowMine],
+
+            # Ground -> Ground
+            [units.Terran.Reaper, units.Terran.Marauder, units.Terran.SiegeTank, units.Terran.Hellion, units.Terran.Hellbat],
+
+            # Air -> Ground/Air
+            [units.Terran.VikingFighter],
+
+            # Air -> Ground
+            [units.Terran.Banshee, units.Terran.LiberatorAG],
+            
+            # Air -> Air
+            [units.Terran.Liberator],
+
+            # Medivac
+            [units.Terran.Medivac],
+
+            # Thor
+            [units.Terran.Thor],
+
+            # Raven
+            [units.Terran.Raven],
+
+            # Battlecruiser
+            [units.Terran.Battlecruiser],
+
+            #SCVs
+            [units.Terran.SCV],
+        ]
+        self._state_size = [4 * (3 + 2 * (  math.ceil(len(self.amount_unit_types)/4) + len(self.spatial_unit_types)) )]
+
+def build_unit_amount_matrix(obs, player, state, amount_unit_types, n_columns, normalize_value):
+    new_line = []
+    for i, unit_type in enumerate(amount_unit_types):
+        new_line.append(get_unit_amount(obs, unit_type, player)/normalize_value)
+        if (i+1) % n_columns == 0:
+            state = np.append(state, [new_line], axis=0)
+            new_line = []
+    return state
+
+def build_unit_feature_matrix(obs, player, state, spatial_unit_types, normalize_value):
+    for unit_groups in spatial_unit_types:
+            unit_amount=0
+            health_ratio=0
+            x_avg=0
+            y_avg=0
+            len_unit_groups = len(unit_groups)
+
+            for unit_type in unit_groups:
+                units = [unit for unit in obs.raw_units if unit.alliance == player and unit.unit_type == unit_type]
+                unit_amount += len(units)
+
+                if unit_amount > 0:
+                    health_ratio += sum([unit.health_ratio for unit in units]) / unit_amount
+                    x_avg += (sum([unit.x for unit in units]) / unit_amount) / obs.map_size.x
+                    y_avg += (sum([unit.y for unit in units]) / unit_amount) / obs.map_size.y
+
+            unit_amount = (unit_amount/len_unit_groups)/normalize_value #divide by 200 to normalize
+            health_ratio = health_ratio/len_unit_groups
+            x_avg = x_avg/len_unit_groups
+            y_avg = y_avg/len_unit_groups
+
+            new_line = [[unit_amount, health_ratio, x_avg, y_avg]]
+            state = np.append(state, new_line, axis=0)
+    return state
 
 def trim_feature_minimap(feature_minimap):
     feature_minimap = np.delete(feature_minimap, np.s_[0:12:1], 0)
