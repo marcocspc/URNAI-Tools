@@ -96,6 +96,10 @@ class SC2Env(Env):
         '''
         ts = timestep[0]
         obs, reward, done = ts.observation, ts.reward, ts.step_type == StepType.LAST
+        # add step_mul to obs
+
+        setattr(obs, 'step_mul', self.step_mul)
+        setattr(obs, 'map_size', self.env_instance._interface_formats[0]._raw_resolution)
 
         return obs, reward, done
         

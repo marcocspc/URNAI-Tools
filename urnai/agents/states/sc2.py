@@ -1,5 +1,7 @@
 import math
 import numpy as np
+import pysc2
+from s2clientprotocol.common_pb2 import Terran
 import scipy.misc
 from matplotlib import colors
 from matplotlib import pyplot as plt
@@ -390,7 +392,6 @@ class Simple64GridState(StateBuilder):
         
         new_state.extend(enemy_grid.flatten())
         new_state.extend(player_grid.flatten())
-        final_state = np.array(new_state)
         final_state = np.expand_dims(new_state, axis=0)
         return final_state
 
@@ -471,6 +472,121 @@ class SimpleCroppedGridState(StateBuilder):
     def build_state(self, obs):
         state = build_cropped_gridstate(obs, self.grid_size, self.x1, self.y1, self.x2, self.y2, self.r_enemy, self.r_player, self.r_neutral)
         return state
+
+    def get_state_dim(self):
+        return self._state_size
+
+
+class UnitStackingStateTVT(StateBuilder):
+    """
+    This state builder creates an input matrix with dimensions (6,?), where the first two lines of the input matrix are
+    non-spatial features (minerals, vespene, idle worker count, game alerts, max supply etc) and the remaining lines are
+    two sets of unit features for a group of units, one set for the player and another the enemy. 
+    
+    For example, the next 32 lines after the 2 lines of non-spatial features will have 6 unit features (unit type, alliance, 
+    amount, health, x pos, y pos), for 32 groups of player units (supply depots, SCVs, marines, barracks, etc). For groups 
+    of units, health, and x,y pos will be calculated as an average. After those 32 lines, another 32 lines with the same 
+    information will be created, but now for enemy units. Here, 32 is used as an example, the actual number is defined by 
+    the size of the "unit_types" array in the build_state() method.
+    """
+    def __init__(self):
+        self.unit_types = [
+            units.Terran.Armory,
+            units.Terran.AutoTurret,
+            units.Terran.Banshee,
+            units.Terran.Barracks,
+            units.Terran.BarracksReactor,
+            units.Terran.BarracksTechLab,
+            units.Terran.Battlecruiser,
+            units.Terran.CommandCenter,
+            units.Terran.Cyclone,
+            units.Terran.EngineeringBay,
+            units.Terran.Factory,
+            units.Terran.FactoryReactor,
+            units.Terran.FactoryTechLab,
+            units.Terran.FusionCore,
+            units.Terran.Hellion,
+            units.Terran.Hellbat,
+            units.Terran.Liberator,
+            #units.Terran.MULE,
+            units.Terran.Marauder,
+            units.Terran.Marine,
+            units.Terran.Medivac,
+            units.Terran.MissileTurret,
+            units.Terran.Raven,
+            units.Terran.Reaper,
+            units.Terran.Refinery,
+            units.Terran.SCV,
+            units.Terran.SiegeTank,
+            #units.Terran.SiegeTankSieged,
+            units.Terran.Starport,
+            units.Terran.StarportReactor,
+            units.Terran.StarportTechLab,
+            units.Terran.SupplyDepot,
+            #units.Terran.SupplyDepotLowered,
+            units.Terran.Thor,
+            units.Terran.VikingFighter,
+            units.Terran.WidowMine,
+            #units.Terran.WidowMineBurrowed,
+        ]
+        self._state_size = [6*(2+2*(len(self.unit_types)))]
+
+    def build_state(self, obs):
+
+        # state shape is defined as follows (6,2) for non-spatial features,
+        # then (6,32) for the player's observations (32 terran units in unit_types)
+        # and another (6,32) for the enemy units
+        state = np.zeros((2, 6))
+
+        state[0][0] = obs.player.minerals/10000
+        state[0][1] = obs.player.vespene/10000
+        state[0][2] = obs.player.food_cap/200
+        state[0][3] = obs.player.food_used/200
+        state[0][4] = obs.player.food_army/200
+        state[0][5] = obs.player.food_workers/200
+
+        state[1][0] = obs.player.idle_worker_count/20
+        state[1][1] = obs.player.army_count/200
+        state[1][2] = obs.alerts[0] if len(obs.alerts)>0 else 0
+        state[1][3] = obs.action_result[0] if len(obs.action_result)>0 else 0
+        state[1][4] = (obs.game_loop[-1]/obs.step_mul)/2000                     #find a way of getting max_steps_training here?
+        state[1][5] = 0                                                         # find another non-spatial feature
+
+        # creating matrix of spatial features for the player's unit groups
+        for unit_type in self.unit_types:
+            units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.SELF and unit.unit_type == unit_type]
+            unit_amount = len(units)
+
+            if unit_amount > 0:
+                health_ratio = sum([unit.health_ratio for unit in units]) / unit_amount
+                x_avg = (sum([unit.x for unit in units]) / unit_amount) / obs.map_size.x
+                y_avg = (sum([unit.y for unit in units]) / unit_amount) / obs.map_size.y
+            
+                new_line = [[unit_type, features.PlayerRelative.SELF, unit_amount, health_ratio, x_avg, y_avg]]
+            else:
+                new_line = [[unit_type, features.PlayerRelative.SELF, unit_amount, 0, 0, 0]]
+            
+            state = np.append(state, new_line, axis=0)
+
+        # creating matrix of spatial features for the enemy's unit groups
+        for unit_type in self.unit_types:
+            units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.ENEMY and unit.unit_type == unit_type]
+            unit_amount = len(units)
+
+            if unit_amount > 0:
+                health_ratio = sum([unit.health_ratio for unit in units]) / unit_amount
+                x_avg = (sum([unit.x for unit in units]) / unit_amount) / obs.map_size.x
+                y_avg = (sum([unit.y for unit in units]) / unit_amount) / obs.map_size.y
+            
+                new_line = [[unit_type, features.PlayerRelative.ENEMY, unit_amount, health_ratio, x_avg, y_avg]]
+            else:
+                new_line = [[unit_type, features.PlayerRelative.ENEMY, unit_amount, 0, 0, 0]]
+            
+            state = np.append(state, new_line, axis=0)
+
+        flat_state = state.flatten()
+        final_state = np.expand_dims(flat_state, axis=0)
+        return final_state
 
     def get_state_dim(self):
         return self._state_size

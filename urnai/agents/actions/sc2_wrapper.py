@@ -389,7 +389,7 @@ class TerranWrapper(SC2Wrapper):
 
         return id_excluded_actions
 
-
+    #region LIST OF EXCLUDE ACTIONS
     '''LIST OF METHODS USED TO EXCLUDE ACTIONS FROM named_actions'''
     def buildcommandcenter_exclude(excluded_actions, gi):
         if not gi.has_scv or gi.minerals < 400:
@@ -637,14 +637,14 @@ class TerranWrapper(SC2Wrapper):
     def harvestgasfromminerals_exclude(excluded_actions, gi):
         if not gi.has_scv:
             excluded_actions.append(ACTION_HARVEST_GAS_FROM_MINERALS)
+    #endregion
 
-
-    '''=====LIST OF ACTIONS====='''
-
+    #region LIST OF ACTIONS
+    
     def donothing(self, obs):
         return no_op()
-    
-    '''BUILD ACTIONS'''
+
+    #region BUILD ACTIONS
     def buildcommandcenter(self, obs, x=None, y=None):
         if x is None and y is None:
             targets = self.building_positions['command_center']
@@ -831,8 +831,9 @@ class TerranWrapper(SC2Wrapper):
         actions = build_structure_raw(obs, units.Terran.Starport, sc2._BUILD_REACTOR_STARPORT)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
+    #endregion
 
-    '''ENGINEERING BAY RESEARCH'''
+    #region ENGINEERING BAY RESEARCH
     def researchinfantryweapons(self, obs):
         return research_upgrade(obs, sc2._RESEARCH_TERRAN_INF_WEAPONS, units.Terran.EngineeringBay)
 
@@ -847,8 +848,9 @@ class TerranWrapper(SC2Wrapper):
 
     def researchstructurearmor(self, obs):
         return research_upgrade(obs, sc2._RESEARCH_TERRAN_STRUCTURE_ARMOR, units.Terran.EngineeringBay)
+    #endregion
 
-    '''ARMORY RESEARCH'''
+    #region ARMORY RESEARCH
     def researchshipsweapons(self, obs):
         return research_upgrade(obs, sc2._RESEARCH_TERRAN_SHIPS_WEAPONS, units.Terran.Armory)
 
@@ -857,12 +859,14 @@ class TerranWrapper(SC2Wrapper):
 
     def researchshipvehicplates(self, obs):
         return research_upgrade(obs, sc2._RESEARCH_TERRAN_SHIPVEHIC_PLATES, units.Terran.Armory)
+    #endregion
 
-    '''GHOST ACADEMY RESEARCH'''
+    #region GHOST ACADEMY RESEARCH
     def researchghostcloak(self, obs):
         return research_upgrade(obs, sc2._RESEARCH_TERRAN_GHOST_CLOAK, units.Terran.GhostAcademy)
+    #endregion
 
-    '''BARRACK RESEARCH'''
+    #region BARRACK RESEARCH
     def researchstimpack(self, obs):
         return research_upgrade(obs, sc2._RESEARCH_TERRAN_STIMPACK, units.Terran.BarracksTechLab)
 
@@ -871,8 +875,9 @@ class TerranWrapper(SC2Wrapper):
 
     def researchconcussiveshell(self, obs):
         return research_upgrade(obs, sc2._RESEARCH_TERRAN_CONCUSSIVESHELL, units.Terran.BarracksTechLab)
+    #endregion
 
-    '''FACTORY RESEARCH'''
+    #region FACTORY RESEARCH
     def researchinfernalpreigniter(self, obs):
         return research_upgrade(obs, sc2._RESEARCH_TERRAN_INFERNAL_PREIGNITER, units.Terran.FactoryTechLab)
 
@@ -884,8 +889,9 @@ class TerranWrapper(SC2Wrapper):
 
     def researchcyclonerapidfire(self, obs):
         return research_upgrade(obs, sc2._RESEARCH_TERRAN_CYCLONE_RAPIDFIRE, units.Terran.FactoryTechLab)
+    #endregion
 
-    '''STARPORT RESEARCH'''
+    #region STARPORT RESEARCH
     def researchhighcapacityfuel(self, obs):
         return research_upgrade(obs, sc2._RESEARCH_TERRAN_HIGHCAPACITYFUEL, units.Terran.StarportTechLab)
     
@@ -900,19 +906,22 @@ class TerranWrapper(SC2Wrapper):
 
     def researchadvancedballistics(self, obs):
         return research_upgrade(obs, sc2._RESEARCH_TERRAN_ADVANCEDBALLISTICS, units.Terran.StarportTechLab)
-
-    '''FUSION CORE RESEARCH'''
+    #endregion
+    
+    #region FUSION CORE RESEARCH
     def researchbattlecruiserweaponrefit(self, obs):
         return research_upgrade(obs, sc2._RESEARCH_TERRAN_BATTLECRUISER_WEAPONREFIT, units.Terran.FusionCore)
+    #endregion
     
-    '''EFFECT ACTIONS'''
+    #region EFFECT ACTIONS
     def effectstimpack(self, obs):
         army = get_my_units_by_type(obs, units.Terran.Marine)
         army.extend(get_my_units_by_type(obs, units.Terran.Marauder))
         action = effect_units(obs, sc2._EFFECT_STIMPACK, army)
         return action
+    #endregion
 
-    '''UNIT TRAINING ACTIONS'''
+    #region UNIT TRAINING ACTIONS
     def trainscv(self, obs):
         return train_unit(obs, sc2._TRAIN_SCV, units.Terran.CommandCenter)
 
@@ -968,8 +977,9 @@ class TerranWrapper(SC2Wrapper):
 
     def trainbattlecruiser(self, obs):
         return train_unit(obs, sc2._TRAIN_BATTLECRUISER, units.Terran.Starport)      
+    #endregion
 
-    '''HARVEST ACTIONS'''
+    #region HARVEST ACTIONS
     def harvestmineralsidle(self, obs):
         idle_workers = get_all_idle_workers(obs, sc2_env.Race.terran)
         if idle_workers != sc2._NO_UNITS:
@@ -985,8 +995,9 @@ class TerranWrapper(SC2Wrapper):
         if building_exists(obs, units.Terran.Refinery):
             return harvest_gather_gas(obs, sc2_env.Race.terran)
         return no_op()
+    #endregion
 
-    '''ATTACK ACTIONS'''
+    #region ATTACK ACTIONS
     def attackpoint(self, obs, x, y):
         target = [float(x) + random.randint(-4,4), float(y) + random.randint(-4,4)]
         actions = attack_target_point_spatial(obs, sc2_env.Race.terran, target)
@@ -1025,6 +1036,8 @@ class TerranWrapper(SC2Wrapper):
         actions = attack_target_point(obs, sc2_env.Race.terran, target, self.base_top_left)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
+    #endregion
+    #endregion
 
     def get_action(self, action_idx, obs):
         

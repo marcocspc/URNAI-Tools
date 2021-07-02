@@ -1,6 +1,6 @@
 from .abneuralnetwork import ABNeuralNetwork 
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activation
+from keras.layers import Dense, Conv2D, Flatten, MaxPooling2D, Dropout, Activation, Input
 from keras.optimizers import Adam
 from keras import backend as K
 
@@ -43,7 +43,8 @@ class KerasDeepNeuralNetwork(ABNeuralNetwork):
 
 
     def add_input_layer(self, idx):
-        self.model.add(Dense(self.build_model[idx]['nodes'], input_dim=self.build_model[idx]['shape'][1], activation='relu'))
+        self.model.add(Input(shape=self.build_model[idx]['shape']))
+        #self.model.add(Dense(self.build_model[idx]['nodes'], input_dim=self.build_model[idx]['shape'], activation='relu'))
 
     def add_output_layer(self, idx):
         self.model.add(Dense(self.build_model[idx]['length'], activation='linear'))

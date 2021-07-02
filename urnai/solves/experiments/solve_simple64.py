@@ -9,7 +9,7 @@ from urnai.agents.sc2_agent import SC2Agent
 from urnai.agents.actions.sc2_wrapper import SimpleTerranWrapper
 from urnai.agents.actions.mo_spatial_terran_wrapper import MOspatialTerranWrapper
 from urnai.agents.rewards.sc2 import KilledUnitsReward
-from urnai.agents.states.sc2 import Simple64GridState, SimpleCroppedGridState
+from urnai.agents.states.sc2 import Simple64GridState, SimpleCroppedGridState, UnitStackingStateTVT
 from urnai.models.ddqn_keras import DDQNKeras
 from urnai.models.ddqn_keras_mo import DDQNKerasMO
 from urnai.models.algorithms.dql import DeepQLearning
@@ -38,11 +38,13 @@ def declare_trainer():
     env = SC2Env(map_name="Simple64", render=False, step_mul=16, player_race="terran", enemy_race="terran", difficulty="very_easy")
     
     action_wrapper = SimpleTerranWrapper(atk_grid_x=4, atk_grid_y=4)
-    state_builder = Simple64GridState(grid_size=4)
+    #state_builder = Simple64GridState(grid_size=4)
+    state_builder = UnitStackingStateTVT()
     #state_builder = SimpleCroppedGridState(grid_size=4, x1=10, y1=10, x2=50, y2=50, r_enemy=True, r_player=True, r_neutral=False)
     
     helper = ModelBuilder()
-    helper.add_input_layer(nodes=50)
+    helper.add_input_layer()
+    helper.add_fullyconn_layer(nodes=50)
     helper.add_output_layer()
 
     # dq_network = DDQNKeras(action_wrapper=action_wrapper, state_builder=state_builder, build_model=helper.get_model_layout(), per_episode_epsilon_decay=False,
@@ -59,10 +61,10 @@ def declare_trainer():
                     max_training_episodes=3000, max_steps_training=1500,
                     max_test_episodes=100, max_steps_testing=1500, rolling_avg_window_size=50)
 
-    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_new_actionwrapper4",
+    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_new_state17",
     #                 save_every=6, enable_save=True, relative_path=True, reset_epsilon=False,
-    #                 max_training_episodes=6, max_steps_training=1500, 
-    #                 max_test_episodes=3, max_steps_testing=100, rolling_avg_window_size=5)
+    #                 max_training_episodes=2, max_steps_training=1000,
+    #                 max_test_episodes=2, max_steps_testing=100, rolling_avg_window_size=5)
     return trainer
 
 def main(unused_argv):
