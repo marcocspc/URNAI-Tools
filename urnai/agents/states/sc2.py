@@ -506,12 +506,12 @@ class UnitStackingState(StateBuilder):
         '''
         state shape is defined as follows (3,4) for non-spatial features, like minerals, gas, supply, etc,
         
-        then (a,4) for amount_unit_types, where "a" is the size of amount_unit_types divided by 4,
-        so if amount_unit_types has 12 unit types, "a" will be 3.
+        then (a,4) for amount_unit_types, where "a" is the size of amount_unit_types divided by 4.
+        If amount_unit_types has 12 unit types, we need 3 matrix lines to store them, so "a" will be 3.
         
         and then (b,4), where b is the size of spatial_unit_types.
 
-        at the end state is flattened to be used by dense input layers.
+        at the end "state" is flattened to be used by dense input layers.
         '''
         state = np.zeros((3, 4))
 
@@ -601,6 +601,116 @@ class TVTUnitStackingState(UnitStackingState):
         ]
         self._state_size = [4 * (3 + 2 * (  math.ceil(len(self.amount_unit_types)/4) + len(self.spatial_unit_types)) )]
 
+
+class MultipleUnitGridState(StateBuilder):
+    def __init__(self, grid_size=4):
+        self.grid_size = grid_size
+        self.list_unit_types = [
+            # SCVs
+            # [units.Terran.SCV],
+
+            # Unit Prod
+            # [units.Terran.Barracks, units.Terran.Factory, units.Terran.Starport, units.Terran.CommandCenter],
+            
+            # Ground units
+            [units.Terran.Marine, units.Terran.Cyclone, units.Terran.WidowMine, units.Terran.Reaper,
+             units.Terran.Marauder, units.Terran.SiegeTank, units.Terran.Hellion, units.Terran.Hellbat, 
+             units.Terran.Thor],
+
+            # Air units
+            [units.Terran.VikingFighter, units.Terran.Banshee, units.Terran.Liberator, 
+            units.Terran.Medivac,  units.Terran.Raven, units.Terran.Battlecruiser],
+
+            # Any unit or construction that is not contemplated by the lists above will be grouped together in a final list
+            # automatically. So, supply depots, refineries, engineering bays etc will all be grouped together.
+        ]
+        self._state_size = [ 20 + (self.grid_size * self.grid_size * 2) * (len(self.list_unit_types) + 1) ]
+
+    def build_state(self, obs):
+        state = np.zeros((0))
+
+        # non-spatial features
+        state = np.append(state, obs.player.minerals/10000 )
+        state = np.append(state, obs.player.vespene/10000 )
+        state = np.append(state, obs.player.food_cap/200 )
+        state = np.append(state, obs.player.food_used/200 )
+
+        state = np.append(state, obs.player.food_army/200 )
+        state = np.append(state, obs.player.food_workers/200 )
+        state = np.append(state, obs.player.idle_worker_count/20 )
+        state = np.append(state, obs.player.army_count/200 )
+
+        state = np.append(state, obs.alerts[0] if len(obs.alerts)>0 else 0 )
+        state = np.append(state, obs.action_result[0] if len(obs.action_result)>0 else 0 )
+        state = np.append(state, (obs.game_loop[-1]/obs.step_mul)/2000 )          #find a way of getting max_steps_training here?
+        state = np.append(state, 0 )                                              # find another non-spatial feature
+
+        # amount of buildings
+        state = np.append(state, get_my_units_amount(obs, units.Terran.CommandCenter)/2 )
+        state = np.append(state, get_my_units_amount(obs, units.Terran.SupplyDepot)/18 )
+        state = np.append(state, get_my_units_amount(obs, units.Terran.Armory) )
+        state = np.append(state, get_my_units_amount(obs, units.Terran.FusionCore) )
+        
+        state = np.append(state, get_my_units_amount(obs, units.Terran.Barracks)/3 )
+        state = np.append(state, get_my_units_amount(obs, units.Terran.Factory)/2 )
+        state = np.append(state, get_my_units_amount(obs, units.Terran.Starport)/2 )
+        state = np.append(state, get_my_units_amount(obs, units.Terran.EngineeringBay) )
+
+        # creating grids of spatial features (position of buildings and troops)
+        # if grid_size = 4 and len(list_unit_types) = 2, player_grid will be of shape (4,4,3)
+        player_grid = np.zeros( (self.grid_size, self.grid_size, len(self.list_unit_types)+1) )
+        build_multiple_unit_grid(obs, features.PlayerRelative.SELF, player_grid, self.grid_size, self.list_unit_types)
+
+        enemy_grid = np.zeros( (self.grid_size, self.grid_size, len(self.list_unit_types)+1) )
+        build_multiple_unit_grid(obs, features.PlayerRelative.ENEMY, enemy_grid, self.grid_size, self.list_unit_types)
+
+        # dividing by 100 so player_grid has values from 0 to 1 as long as we don't have
+        # more than 100 units from a unit group in self.list_unit_types (unlikely scenario)
+        player_grid = player_grid/100
+        enemy_grid = enemy_grid/100
+
+        state = np.append(state, player_grid.flatten(), axis=0)
+        state = np.append(state, enemy_grid.flatten(), axis=0)
+        final_state = np.expand_dims(state, axis=0)
+        return final_state
+
+    def get_state_dim(self):
+        return self._state_size
+
+
+def build_multiple_unit_grid(obs, player, grid, grid_size, unit_groups):
+    for group_i, unit_group in enumerate(unit_groups):
+        
+        # getting all units which type matches one type in unit_group
+        group_units = [unit for unit in obs.raw_units if unit.alliance == player and unit.unit_type in unit_group]
+
+        # adding each unit to the proper square in the grid using group_i as the proper depth
+        for i in range(0, len(group_units)):
+            y = int(math.ceil((group_units[i].x + 1) / (obs.map_size.x/grid_size)))
+            x = int(math.ceil((group_units[i].y + 1) / (obs.map_size.y/grid_size)))
+            grid[x-1][y-1][group_i] += 1
+
+    # after adding all units from the types in unit_groups we need to add the remaining units whose types are not in unit_groups
+    # we begin by collecting all units
+    overall_units = [unit for unit in obs.raw_units if unit.alliance == player]
+    overall_i = len(unit_groups)
+
+    # then we add all of them to the proper square in the grid (note that this adds units that have already been added by the first
+    # for, since we don't filter out overall_units by unit type)
+    for i in range(0, len(overall_units)):
+            y = int(math.ceil((overall_units[i].x + 1) / (obs.map_size.x/grid_size)))
+            x = int(math.ceil((overall_units[i].y + 1) / (obs.map_size.y/grid_size)))
+            grid[x-1][y-1][overall_i] += 1
+
+    # now we are going to do a very simple filter to subtract from the overall amount:
+    # we basically go trough each depth in our 3D grid and subtract that from our overall_i depth.
+    # so, if in grid 0,0 there are 8 units, but those 8 units are all from types already calculated 
+    # by the first for, in the end we want grid 0,0 for the overall_i depth to be 8-8 = 0.
+    for i in range(0, grid_size):
+        for j in range(0, grid_size):
+            for k in range(0, overall_i):
+                grid[i][j][overall_i] -= grid[i][j][k]
+
 def build_unit_amount_matrix(obs, player, state, amount_unit_types, n_columns, normalize_value):
     new_line = []
     for i, unit_type in enumerate(amount_unit_types):
@@ -611,14 +721,14 @@ def build_unit_amount_matrix(obs, player, state, amount_unit_types, n_columns, n
     return state
 
 def build_unit_feature_matrix(obs, player, state, spatial_unit_types, normalize_value):
-    for unit_groups in spatial_unit_types:
+    for unit_group in spatial_unit_types:
             unit_amount=0
             health_ratio=0
             x_avg=0
             y_avg=0
-            len_unit_groups = len(unit_groups)
+            len_unit_group = len(unit_group)
 
-            for unit_type in unit_groups:
+            for unit_type in unit_group:
                 units = [unit for unit in obs.raw_units if unit.alliance == player and unit.unit_type == unit_type]
                 unit_amount += len(units)
 
@@ -627,10 +737,10 @@ def build_unit_feature_matrix(obs, player, state, spatial_unit_types, normalize_
                     x_avg += (sum([unit.x for unit in units]) / unit_amount) / obs.map_size.x
                     y_avg += (sum([unit.y for unit in units]) / unit_amount) / obs.map_size.y
 
-            unit_amount = (unit_amount/len_unit_groups)/normalize_value #divide by 200 to normalize
-            health_ratio = health_ratio/len_unit_groups
-            x_avg = x_avg/len_unit_groups
-            y_avg = y_avg/len_unit_groups
+            unit_amount = (unit_amount/len_unit_group)/normalize_value #divide by 200 to normalize
+            health_ratio = health_ratio/len_unit_group
+            x_avg = x_avg/len_unit_group
+            y_avg = y_avg/len_unit_group
 
             new_line = [[unit_amount, health_ratio, x_avg, y_avg]]
             state = np.append(state, new_line, axis=0)

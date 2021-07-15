@@ -9,7 +9,7 @@ from urnai.agents.sc2_agent import SC2Agent
 from urnai.agents.actions.sc2_wrapper import SimpleTerranWrapper
 from urnai.agents.actions.mo_spatial_terran_wrapper import MOspatialTerranWrapper
 from urnai.agents.rewards.sc2 import KilledUnitsReward
-from urnai.agents.states.sc2 import Simple64GridState, SimpleCroppedGridState, TVTUnitStackingState
+from urnai.agents.states.sc2 import Simple64GridState, SimpleCroppedGridState, TVTUnitStackingState, MultipleUnitGridState
 from urnai.models.ddqn_keras import DDQNKeras
 from urnai.models.ddqn_keras_mo import DDQNKerasMO
 from urnai.models.algorithms.dql import DeepQLearning
@@ -36,7 +36,7 @@ def declare_trainer():
     env = SC2Env(map_name="Simple64", render=False, step_mul=16, player_race="terran", enemy_race="terran", difficulty="very_easy")
     
     action_wrapper = SimpleTerranWrapper(atk_grid_x=4, atk_grid_y=4)
-    state_builder = TVTUnitStackingState()
+    state_builder = MultipleUnitGridState(4)
     
     helper = ModelBuilder()
     helper.add_input_layer()
@@ -54,7 +54,7 @@ def declare_trainer():
                     max_training_episodes=3000, max_steps_training=1500,
                     max_test_episodes=100, max_steps_testing=1500, rolling_avg_window_size=50)
 
-    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_new_state22",
+    # trainer = Trainer(env, agent, save_path='urnai/models/saved', file_name="terran_ddql_newgridstate4",
     #                 save_every=6, enable_save=True, relative_path=True, reset_epsilon=False,
     #                 max_training_episodes=2, max_steps_training=1000,
     #                 max_test_episodes=2, max_steps_testing=100, rolling_avg_window_size=5)
