@@ -23,10 +23,7 @@ class ABNeuralNetwork(ABMemoryRepresentation):
         self.model = self.create_base_model()
 
         if self.build_model[0]['type'] == ModelBuilder.LAYER_INPUT and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
-            if type(self.state_input_shape) == list:
-                self.build_model[0]['shape'] = self.state_input_shape
-            elif type(self.state_input_shape) == int:
-                self.build_model[0]['shape'] = [self.state_input_shape]
+            self.build_model[0]['shape'] = self.state_input_shape
         elif self.build_model[0]['type'] == ModelBuilder.LAYER_CONVOLUTIONAL and self.build_model[-1]['type'] == ModelBuilder.LAYER_OUTPUT:
             self.build_model[0]['input_shape'] = self.state_input_shape
         else:

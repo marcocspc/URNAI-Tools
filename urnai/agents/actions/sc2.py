@@ -166,17 +166,16 @@ def attack_target_point(obs, player_race, target, base_top_left):
         return actions_queue
     return [_NO_OP()]
 
-def attack_target_point_spatial(obs, player_race, target):
-    army = select_army(obs, player_race)
-    if army != _NO_UNITS:
-        army_tags = [unit.tag for unit in army]
+def attack_target_point_spatial(units, target):
+    if len(units) > 0:
+        unit_tags = [unit.tag for unit in units]
         actions_queue = []
-        actions_queue.append(actions.RAW_FUNCTIONS.Attack_pt("now", army_tags, target))
+        actions_queue.append(actions.RAW_FUNCTIONS.Attack_pt("now", unit_tags, target))
         return actions_queue
     return [_NO_OP()]
 
 def move_target_point_spatial(units, target):
-    if units != _NO_UNITS:
+    if len(units) > 0:
         unit_tags = [unit.tag for unit in units]
         actions_queue = []
         actions_queue.append(actions.RAW_FUNCTIONS.Move_pt("now", unit_tags, target))
@@ -698,8 +697,6 @@ def select_all_race_units(obs, player_race):
         army.extend(get_units_by_type(obs, units.Zerg.Viper))
         army.extend(get_units_by_type(obs, units.Zerg.Zergling))
         army.extend(get_units_by_type(obs, units.Zerg.ZerglingBurrowed))
-    if len(army) == 0:
-        army = _NO_UNITS
     return army
 
 def select_army(obs, player_race):
@@ -787,8 +784,6 @@ def select_army(obs, player_race):
         army.extend(get_my_units_by_type(obs, units.Zerg.Viper))
         army.extend(get_my_units_by_type(obs, units.Zerg.Zergling))
         army.extend(get_my_units_by_type(obs, units.Zerg.ZerglingBurrowed))
-    if len(army) == 0:
-        army = _NO_UNITS
     return army   
 
 def get_unit_race(unit_type):

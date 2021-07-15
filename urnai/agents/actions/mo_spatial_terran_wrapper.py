@@ -8,6 +8,9 @@ import agents.actions.sc2 as sc2     # importing our action set file so that we 
 from pysc2.lib import features, units
 from pysc2.env import sc2_env
 
+ACTION_GROUP_ATTACK_POINT = 'groupattackpoint'
+ACTION_GROUP_MOVE_POINT = 'groupmovepoint'
+
 class MOspatialTerranWrapper(SC2Wrapper):
     def __init__(self, x_gridsize, y_gridsize, map_size):
         SC2Wrapper.__init__(self)
@@ -478,7 +481,8 @@ class MOspatialTerranWrapper(SC2Wrapper):
 
         # ATTACK ACTION
         if named_action == sc2_wrapper.ACTION_ATTACK_POINT:
-            actions = attack_target_point_spatial(obs, sc2_env.Race.terran, target)
+            army = select_army(obs, sc2_env.Race.terran)
+            actions = attack_target_point_spatial(army, target)
             action, self.actions_queue = organize_queue(actions, self.actions_queue)
             return action
 
@@ -486,39 +490,6 @@ class MOspatialTerranWrapper(SC2Wrapper):
         if named_action == sc2_wrapper.ACTION_MOVE_TROOPS_POINT:
             return no_op()
 
-        # ATTACK MY BASE
-        # if named_action == ACTION_ATTACK_MY_BASE:
-        #     target=self.my_base_xy
-        #     actions = attack_target_point(obs, sc2_env.Race.terran, target, self.base_top_left)
-        #     action, self.actions_queue = organize_queue(actions, self.actions_queue)
-        #     return action
-
-        # # ATTACK MY SECOND BASE
-        # if named_action == ACTION_ATTACK_MY_SECOND_BASE:
-        #     target=self.my_second_base_xy
-        #     actions = attack_target_point(obs, sc2_env.Race.terran, target, self.base_top_left)
-        #     action, self.actions_queue = organize_queue(actions, self.actions_queue)
-        #     return action
-
-        # # # ATTACK ENEMY BASE
-        # if named_action == ACTION_ATTACK_ENEMY_BASE:
-        #     target=self.enemy_base_xy
-        #     actions = attack_target_point(obs, sc2_env.Race.terran, target, self.base_top_left)
-        #     action, self.actions_queue = organize_queue(actions, self.actions_queue)
-        #     return action
-
-        # # # ATTACK ENEMY SECOND BASE
-        # if named_action == ACTION_ATTACK_ENEMY_SECOND_BASE:
-        #     target=self.enemy_second_base_xy
-        #     actions = attack_target_point(obs, sc2_env.Race.terran, target, self.base_top_left)
-        #     action, self.actions_queue = organize_queue(actions, self.actions_queue)
-        #     return action
-
-        # # ATTACK DISTRIBUTE ARMY
-        # if named_action == ACTION_ATTACK_DISTRIBUTE_ARMY:
-        #     actions = attack_distribute_army(obs, sc2_env.Race.terran)
-        #     action, self.actions_queue = organize_queue(actions, self.actions_queue)
-        #     return action
 
         return no_op()
 
@@ -556,27 +527,27 @@ class SimpleMOTerranWrapper(TerranWrapper):
             sc2_wrapper.ACTION_BUILD_REACTOR_STARPORT,
 
             # # ENGINEERING BAY RESEARCH
-            # sc2_wrapper.ACTION_RESEARCH_INF_WEAPONS,
-            # sc2_wrapper.ACTION_RESEARCH_INF_ARMOR,
+            sc2_wrapper.ACTION_RESEARCH_INF_WEAPONS,
+            sc2_wrapper.ACTION_RESEARCH_INF_ARMOR,
             # sc2_wrapper.ACTION_RESEARCH_HISEC_AUTOTRACKING,
             # sc2_wrapper.ACTION_RESEARCH_NEOSTEEL_FRAME,
             # sc2_wrapper.ACTION_RESEARCH_STRUCTURE_ARMOR,
             
             # # ARMORY RESEARCH
-            # sc2_wrapper.ACTION_RESEARCH_SHIPS_WEAPONS,
-            # sc2_wrapper.ACTION_RESEARCH_VEHIC_WEAPONS,
-            # sc2_wrapper.ACTION_RESEARCH_SHIPVEHIC_PLATES,
+            sc2_wrapper.ACTION_RESEARCH_SHIPS_WEAPONS,
+            sc2_wrapper.ACTION_RESEARCH_VEHIC_WEAPONS,
+            sc2_wrapper.ACTION_RESEARCH_SHIPVEHIC_PLATES,
 
             # # GHOST ACADEMY RESEARCH
             # sc2_wrapper.ACTION_RESEARCH_GHOST_CLOAK,
 
             # # BARRACKS RESEARCH
-            sc2_wrapper.ACTION_RESEARCH_STIMPACK,
-            # sc2_wrapper.ACTION_RESEARCH_COMBATSHIELD,
-            # sc2_wrapper.ACTION_RESEARCH_CONCUSSIVESHELL,
+            # sc2_wrapper.ACTION_RESEARCH_STIMPACK,
+            sc2_wrapper.ACTION_RESEARCH_COMBATSHIELD,
+            sc2_wrapper.ACTION_RESEARCH_CONCUSSIVESHELL,
 
             # # FACTORY RESEARCH
-            # sc2_wrapper.ACTION_RESEARCH_INFERNAL_PREIGNITER,
+            sc2_wrapper.ACTION_RESEARCH_INFERNAL_PREIGNITER,
             # sc2_wrapper.ACTION_RESEARCH_DRILLING_CLAWS,
             # sc2_wrapper.ACTION_RESEARCH_CYCLONE_LOCKONDMG,
             # sc2_wrapper.ACTION_RESEARCH_CYCLONE_RAPIDFIRE,
@@ -591,7 +562,7 @@ class SimpleMOTerranWrapper(TerranWrapper):
             # # FUSION CORE RESEARCH
             # sc2_wrapper.ACTION_RESEARCH_BATTLECRUISER_WEAPONREFIT,
 
-            sc2_wrapper.ACTION_EFFECT_STIMPACK,
+            # sc2_wrapper.ACTION_EFFECT_STIMPACK,
 
             sc2_wrapper.ACTION_TRAIN_SCV,
 
@@ -604,7 +575,7 @@ class SimpleMOTerranWrapper(TerranWrapper):
             sc2_wrapper.ACTION_TRAIN_HELLBAT,
             sc2_wrapper.ACTION_TRAIN_SIEGETANK,
             sc2_wrapper.ACTION_TRAIN_CYCLONE,
-            sc2_wrapper.ACTION_TRAIN_WIDOWMINE,
+            #sc2_wrapper.ACTION_TRAIN_WIDOWMINE,
             sc2_wrapper.ACTION_TRAIN_THOR,
 
             sc2_wrapper.ACTION_TRAIN_VIKING,
@@ -621,6 +592,69 @@ class SimpleMOTerranWrapper(TerranWrapper):
             sc2_wrapper.ACTION_ATTACK_POINT,
             sc2_wrapper.ACTION_MOVE_TROOPS_POINT
         ]
+
+        self.attack_groups = [
+            # Core army
+            [units.Terran.Marine, units.Terran.Marauder, units.Terran.Hellion],
+
+            # Fast harass
+            [units.Terran.Reaper, units.Terran.Cyclone],
+
+            # Mech ground
+            [units.Terran.SiegeTank, units.Terran.Hellbat],
+
+            # Air Units
+            [units.Terran.VikingFighter, units.Terran.Liberator, units.Terran.Banshee, units.Terran.LiberatorAG, units.Terran.Raven],
+
+            # Medivac
+            [units.Terran.Medivac],
+
+            # Thor
+            [units.Terran.Thor],
+
+            # Battlecruiser
+            [units.Terran.Battlecruiser],
+        ]
+
+        for i in range (len(self.attack_groups)):
+            self.named_actions.append(ACTION_GROUP_ATTACK_POINT + "_" + str(i))
+
+        for i in range (len(self.attack_groups)):
+            self.named_actions.append(ACTION_GROUP_MOVE_POINT + "_" + str(i))
+
+        self.building_positions = {
+            'command_center' : [[19, 23], [41, 21]],
+            'supply_depot' : [[16,27], [18,27], [20,27], [22,27], [16,29], [18,29], [20,29]],
+            'barracks' : [[25, 18], [24, 20], [30, 24]],
+            'factory' : [[25, 25], [26, 27]],
+            'starport' : [[35, 15], [37, 19]],
+
+            'engineering_bay' : [[37,25]],
+            'armory' : [[22,23]],
+            'fusion_core' : [[14, 18]],
+            'ghost_academy' : [[47, 16]],
+            
+            'missile_turret' : [[17,17], [12,20], [48,19], [42,14]],
+            'sensor_tower' : 1,
+            'bunker' : 4,
+        }
+
+        self.building_amounts = {
+            'command_center' : 2,
+            'supply_depot' : 18,
+            'barracks' : 3,
+            'factory' : 2,
+            'starport' : 2,
+
+            'engineering_bay' : 1,
+            'armory' : 1,
+            'fusion_core' : 1,
+            'ghost_academy' : 1,
+
+            'missile_turret' : 4,
+            'sensor_tower' : 1,
+            'bunker' : 4,
+        }
 
         self.n_actions_len = len(self.named_actions)
 
@@ -653,10 +687,139 @@ class SimpleMOTerranWrapper(TerranWrapper):
         action = super().get_action(action_idx, obs)
         return action
 
+    #region BUILD ACTIONS
+    def buildcommandcenter(self, obs):
+        targets = self.building_positions['command_center']
+        amount = self.building_amounts['command_center']
+        actions = build_structure_raw_pt(obs, units.Terran.CommandCenter, sc2._BUILD_COMMAND_CENTER, 
+                                            self.base_top_left, max_amount=amount, targets=targets)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+
+        return action
+
+    def buildsupplydepot(self, obs):
+        targets = self.building_positions['supply_depot']
+        amount = self.building_amounts['supply_depot']
+        actions = build_structure_raw_pt(obs, units.Terran.SupplyDepot, sc2._BUILD_SUPPLY_DEPOT, 
+                                            self.base_top_left, max_amount=amount, targets=targets)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+
+        return action
+
+    def buildengineeringbay(self, obs):
+        targets = self.building_positions['engineering_bay']
+        amount = self.building_amounts['engineering_bay']
+        actions = build_structure_raw_pt(obs, units.Terran.EngineeringBay, sc2._BUILD_ENGINEERINGBAY,
+                                            self.base_top_left, max_amount=amount, targets=targets)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+
+        return action
+
+    def buildarmory(self, obs):
+        targets = self.building_positions['armory']
+        amount = self.building_amounts['armory']
+        actions = build_structure_raw_pt(obs, units.Terran.Armory, sc2._BUILD_ARMORY, 
+                                            self.base_top_left, max_amount=amount, targets=targets)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+
+        return action
+
+    def buildmissileturret(self, obs):
+        targets = self.building_positions['missile_turret']
+        amount = self.building_amounts['missile_turret']
+        actions = build_structure_raw_pt(obs, units.Terran.MissileTurret, sc2._BUILD_MISSILETURRET, 
+                                            self.base_top_left, max_amount=amount, targets=targets)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+
+        return action
+
+    def buildsensortower(self, obs):
+        amount = self.building_amounts['sensor_tower']
+        actions = build_structure_raw_pt(obs, units.Terran.SensorTower, sc2._BUILD_SENSORTOWER, self.base_top_left, max_amount=amount)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+
+        return action
+
+    def buildbunker(self, obs):
+        amount = self.building_amounts['bunker']
+        actions = build_structure_raw_pt(obs, units.Terran.Bunker, sc2._BUILD_BUNKER, self.base_top_left, max_amount=amount)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+
+        return action
+
+    def buildfusioncore(self, obs):
+        targets = self.building_positions['fusion_core']
+        amount = self.building_amounts['fusion_core']
+        actions = build_structure_raw_pt(obs, units.Terran.FusionCore, sc2._BUILD_FUSIONCORE, 
+                                            self.base_top_left, max_amount=amount, targets=targets)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+
+        return action
+
+    def buildghostacademy(self, obs):
+        targets = self.building_positions['ghost_academy']
+        amount = self.building_amounts['ghost_academy']
+        actions = build_structure_raw_pt(obs, units.Terran.GhostAcademy, sc2._BUILD_GHOSTACADEMY, 
+                                            self.base_top_left, max_amount=amount, targets=targets)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+
+        return action
+
+    def buildbarracks(self, obs):
+        targets = self.building_positions['barracks']
+        amount = self.building_amounts['barracks']
+        actions = build_structure_raw_pt(obs, units.Terran.Barracks, sc2._BUILD_BARRACKS,
+                                            self.base_top_left, max_amount=amount, targets=targets)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+  
+        return action
+
+    def buildfactory(self, obs):
+        targets = self.building_positions['factory']
+        amount = self.building_amounts['factory']
+        actions = build_structure_raw_pt(obs, units.Terran.Factory, sc2._BUILD_FACTORY,
+                                            self.base_top_left, max_amount=amount, targets=targets)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+
+        return action
+
+    def buildstarport(self, obs):
+        targets = self.building_positions['starport']
+        amount = self.building_amounts['starport']
+        actions = build_structure_raw_pt(obs, units.Terran.Starport, sc2._BUILD_STARPORT,
+                                            self.base_top_left, max_amount=amount, targets=targets)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+
+        return action
+    #endregion
+
     def attackpoint(self, obs, x, y):
         target = [x, y]
-        actions = attack_target_point_spatial(obs, sc2_env.Race.terran, target)
+        army = select_army(obs, sc2_env.Race.terran)
+        actions = attack_target_point_spatial(army, target)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
+    def groupattackpoint(self, obs, x, y, group_i):
+        unit_types = self.attack_groups[group_i]
+        unit_group = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.SELF and unit.unit_type in unit_types]
+        target = [x, y]
+        actions = attack_target_point_spatial(unit_group, target)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        return action
+
+    def movetroopspoint(self, obs, x, y):
+        target = [x, y]
+        army = select_army(obs, sc2_env.Race.terran)
+        actions = move_target_point_spatial(army, target)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        return action
+    
+    def groupmovepoint(self, obs, x, y, group_i):
+        unit_types = self.attack_groups[group_i]
+        unit_group = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.SELF and unit.unit_type in unit_types]
+        target = [x, y]
+        actions = attack_target_point_spatial(unit_group, target)
+        action, self.actions_queue = organize_queue(actions, self.actions_queue)
+        return action
     

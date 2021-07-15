@@ -1000,7 +1000,8 @@ class TerranWrapper(SC2Wrapper):
     #region ATTACK ACTIONS
     def attackpoint(self, obs, x, y):
         target = [float(x) + random.randint(-4,4), float(y) + random.randint(-4,4)]
-        actions = attack_target_point_spatial(obs, sc2_env.Race.terran, target)
+        army = select_army(obs, sc2_env.Race.terran)
+        actions = attack_target_point_spatial(army, target)
         action, self.actions_queue = organize_queue(actions, self.actions_queue)
         return action
 
@@ -1057,6 +1058,11 @@ class TerranWrapper(SC2Wrapper):
             action_id, x, y = action_idx                    # separating the action id from x,y pos
             named_action = self.named_actions[action_id]    # getting the string that represents our action
             
+            if "_" in named_action:
+                named_action, group_i = named_action.split('_')
+                action_method = getattr(self.__class__, named_action)
+                return action_method(self, obs, x, y, int(group_i))
+
             action_method = getattr(self.__class__, named_action)       # getting our class method with the same name as named_action
             method_params = signature(action_method).parameters         # get a dict of the parameter names that our method receives
 

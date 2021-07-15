@@ -500,7 +500,7 @@ class UnitStackingState(StateBuilder):
     def __init__(self):
         self.amount_unit_types = []
         self.spatial_unit_types = []
-        self._state_size = []
+        self._state_size = 0
 
     def build_state(self, obs):
         '''
@@ -599,7 +599,67 @@ class TVTUnitStackingState(UnitStackingState):
             #SCVs
             [units.Terran.SCV],
         ]
-        self._state_size = [4 * (3 + 2 * (  math.ceil(len(self.amount_unit_types)/4) + len(self.spatial_unit_types)) )]
+        self._state_size = 4 * (3 + 2 * (  math.ceil(len(self.amount_unit_types)/4) + len(self.spatial_unit_types)) )
+
+class TVTUnitStackingEnemyGridState(UnitStackingState):
+    """
+    A version of the generic unit stacking state designed for SimpleMOTerranWrapper
+    In this class we also use a grid for enemy units (to help the agent locate enemy buildings on map)
+    """
+    def __init__(self, grid_size=4):
+        self.grid_size = grid_size
+        self.amount_unit_types = [
+            units.Terran.Barracks,
+            units.Terran.CommandCenter,
+            units.Terran.EngineeringBay,
+            units.Terran.Factory,
+            units.Terran.Refinery,
+            units.Terran.Starport,
+            units.Terran.Armory,
+            units.Terran.FusionCore,
+        ]
+        self.spatial_unit_types = [
+            # Ground -> Ground/Air
+            [units.Terran.Marine, units.Terran.Cyclone],
+
+            # Ground -> Ground
+            [units.Terran.Reaper, units.Terran.Marauder, units.Terran.SiegeTank, units.Terran.Hellion, units.Terran.Hellbat],
+
+            # Air Units
+            [units.Terran.VikingFighter, units.Terran.Liberator, units.Terran.Banshee, units.Terran.LiberatorAG, units.Terran.Raven],
+
+            # Medivac
+            [units.Terran.Medivac],
+
+            # Thor
+            [units.Terran.Thor],
+
+            # Battlecruiser
+            [units.Terran.Battlecruiser],
+        ]
+        # with current grid_size, amount_unit_types and spatial_unit_types, _state_size should be 92
+        self._state_size = 4 * (3 + 2 * (  math.ceil(len(self.amount_unit_types)/4) + len(self.spatial_unit_types)) ) + self.grid_size*self.grid_size
+
+    def build_state(self, obs):
+        state = super().build_state(obs)
+
+        enemy_grid = np.zeros( (self.grid_size, self.grid_size) )
+
+        enemy_units = [unit for unit in obs.raw_units if unit.alliance == features.PlayerRelative.ENEMY]
+
+        # then we add all of them to the proper square in the grid (note that this adds units that have already been added by the first
+        # for, since we don't filter out overall_units by unit type)
+        for i in range(0, len(enemy_units)):
+                y = int(math.ceil((enemy_units[i].x + 1) / (obs.map_size.x/self.grid_size)))
+                x = int(math.ceil((enemy_units[i].y + 1) / (obs.map_size.y/self.grid_size)))
+                enemy_grid[x-1][y-1] += 1
+
+        enemy_grid = enemy_grid/100
+
+        state = np.squeeze(state)
+        state = np.append(state, enemy_grid.flatten(), axis=0)
+        final_state = np.expand_dims(state, axis=0)
+        return final_state
 
 
 class MultipleUnitGridState(StateBuilder):
@@ -624,7 +684,7 @@ class MultipleUnitGridState(StateBuilder):
             # Any unit or construction that is not contemplated by the lists above will be grouped together in a final list
             # automatically. So, supply depots, refineries, engineering bays etc will all be grouped together.
         ]
-        self._state_size = [ 20 + (self.grid_size * self.grid_size * 2) * (len(self.list_unit_types) + 1) ]
+        self._state_size = 20 + (self.grid_size * self.grid_size * 2) * (len(self.list_unit_types) + 1)
 
     def build_state(self, obs):
         state = np.zeros((0))
