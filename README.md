@@ -1,6 +1,6 @@
 # This repository was moved
 
-This code is deprecated, a newer version can be found [here] (https://github.com/UFRN-URNAI/urnai-tools).
+This code is deprecated, a newer version can be found [here](https://github.com/UFRN-URNAI/urnai-tools).
 
 # URNAI-Tools
 URNAI Tools is a modular Deep Reinforcement Learning (DRL) toolkit that supports multiple environments, such as [PySC2](https://github.com/deepmind/pysc2), [OpenAI Gym](https://github.com/openai/gym), [ViZDoom](https://github.com/mwydmuch/ViZDoom) and [DeepRTS](https://github.com/cair/deep-rts). The main goal of URNAI Tools is to provide an easy-to-use modular platform for the development of DRL agents. Each part of a typical Reinforcement Learning scenario, such as the environment, the learning algorithm, the action space and so on, is considered a module in URNAI and can be easily swaped. Beyond that, it supplies a series of out-of-the-box DRL algorithms, environment wrappers, action wrappers, reward functions and state representations, allowing developers to easily assemble different learning configurations and quickly iterate through them.
